@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "502374392525",
+    "project_id": "safelight-4ca77",
+    "storage_bucket": "safelight-4ca77.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502374392525:android:b424ad07af7f8afaa2ff84",
+        "android_client_info": {
+          "package_name": "com.wcl.safelight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502374392525-v6nnar0f8tfunt3b4tl4hfk1iq50ehqt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB3aeeUTqk4zr2UmT-QGNsVi8U-Z5USIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502374392525-v6nnar0f8tfunt3b4tl4hfk1iq50ehqt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "502374392525-vfgjfklma43u0v06t2a63ioi94h6budk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wcl.safelight"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

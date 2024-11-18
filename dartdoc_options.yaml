@@ -1,0 +1,17 @@
+dartdoc:
+  categories:
+    "First Category":
+      markdown: doc/First.md
+      name: Awesome
+    "test":
+      markdown: doc/test.md
+      name: testdd
+  categoryOrder: ["First Category", "test"]
+  nodoc: ['lib/firebase_options.dart']
+  showUndocumentedCategories: true
+  ignore:
+    - ambiguous-doc-reference
+  errors:
+    - unresolved-doc-reference
+  warnings:
+    - tool-error
