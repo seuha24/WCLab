@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 /// [FlatCard]는 title을 가지는 위젯이다.
 ///
@@ -186,8 +186,11 @@ class FlatCard extends StatelessWidget {
   ///   titleOnly: true,
   ///   bottomTitle: false, ...),
   ///   ```
+  ///
+  final ShapeBorder? shapeBorder;
+
   const FlatCard({
-    Key? key,
+    super.key,
     this.backgroundColor,
     this.subTitle,
     this.subLabel,
@@ -199,7 +202,8 @@ class FlatCard extends StatelessWidget {
     this.subTitleColor,
     this.titleOnly = false,
     this.trailing,
-  }) : super(key: key);
+    this.shapeBorder,
+  });
 
   Widget _subTitleBuilder(BuildContext context) {
     return ConstrainedBox(
@@ -240,7 +244,7 @@ class FlatCard extends StatelessWidget {
         vertical: SizeTheme.w_sm,
         horizontal: SizeTheme.h_lg,
       ),
-      shape: RoundedRectangleBorder(
+      shape: shapeBorder ?? RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           SizeTheme.r_sm,
         ),

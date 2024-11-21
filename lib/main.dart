@@ -72,6 +72,9 @@ class SafeLight extends StatelessWidget {
               BlocProvider(
                 create: (_) => DI.get<LocationPermissionCubit>(),
               ),
+              BlocProvider(
+                create: (context) => SearchBloc(),
+              ),
             ],
             child: MaterialApp(
               // showSemanticsDebugger: true, // 접근성 테스트할 때 사용

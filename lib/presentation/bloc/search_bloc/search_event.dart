@@ -5,6 +5,18 @@ abstract class SearchEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class SearchStartLocationRequested extends SearchEvent {}
+class SearchStartLocationRequested extends SearchEvent {
+  final String searchLocation;
 
-class SearchDestinationRequested extends SearchEvent {}
+  SearchStartLocationRequested({
+    required this.searchLocation,
+  });
+}
+
+class SearchDestinationRequested extends SearchEvent {
+  final String searchDestination;
+
+  SearchDestinationRequested({
+    required this.searchDestination,
+  });
+}

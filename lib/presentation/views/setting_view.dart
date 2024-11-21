@@ -266,6 +266,12 @@ class _SettingViewState extends State<SettingView> {
                                       title: '시스템모드',
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      backgroundColor: mode == 'system' ? Colors.indigoAccent : null,
+                                      shapeBorder: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          4.sp,
+                                        ),
+                                      ),
                                       onTap: () async {
                                         Navigator.pop(context);
 
@@ -297,6 +303,12 @@ class _SettingViewState extends State<SettingView> {
                                       title: '다크모드',
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      backgroundColor: mode == 'dark' ? Colors.indigoAccent : null,
+                                      shapeBorder: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          4.sp,
+                                        ),
+                                      ),
                                       onTap: () async {
                                         Navigator.pop(context);
 
@@ -328,6 +340,12 @@ class _SettingViewState extends State<SettingView> {
                                       title: '라이트모드',
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      shapeBorder: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          4.sp,
+                                        ),
+                                      ),
+                                      backgroundColor: mode == 'light' ? Colors.indigoAccent : null,
                                       onTap: () async {
                                         Navigator.pop(context);
 
@@ -426,6 +444,12 @@ class _SettingViewState extends State<SettingView> {
                                       title: '항상 켜기 모드',
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      shapeBorder: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          4.sp,
+                                        ),
+                                      ),
+                                      backgroundColor: lightmode == 'alwayson' ? Colors.indigoAccent : null,
                                       onTap: () async {
                                         Navigator.pop(context);
 
@@ -461,6 +485,12 @@ class _SettingViewState extends State<SettingView> {
                                       title: '주변 환경에 따라 켜기 모드',
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      shapeBorder: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          4.sp,
+                                        ),
+                                      ),
+                                      backgroundColor: lightmode == 'weathers' ? Colors.indigoAccent : null,
                                       onTap: () async {
                                         Navigator.pop(context);
 
@@ -496,6 +526,12 @@ class _SettingViewState extends State<SettingView> {
                                       title: '항상 끄기 모드',
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      shapeBorder: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          4.sp,
+                                        ),
+                                      ),
+                                      backgroundColor: lightmode == 'alwaysoff' ? Colors.indigoAccent : null,
                                       onTap: () async {
                                         Navigator.pop(context);
 

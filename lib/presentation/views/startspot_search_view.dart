@@ -1,14 +1,17 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 class StartSearch extends StatefulWidget {
-  const StartSearch({super.key});
-
+  const StartSearch({
+    super.key,
+    required this.searchValue,
+  });
+  final String searchValue;
   @override
   State<StartSearch> createState() => _StartSearchState();
 }
 
 class _StartSearchState extends State<StartSearch> {
-  final TextEditingController _searchController = new TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
   final FlutterTts tts = FlutterTts();
@@ -18,6 +21,9 @@ class _StartSearchState extends State<StartSearch> {
   @override
   void initState() {
     super.initState();
+    if(widget.searchValue.isNotEmpty){
+      _searchController.text = widget.searchValue;
+    }
     _searchController.addListener(_onSearchChanged);
     _focusNode.requestFocus();
     _initTTS();
@@ -123,6 +129,7 @@ class _StartSearchState extends State<StartSearch> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -171,21 +178,19 @@ class _StartSearchState extends State<StartSearch> {
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         suffixIcon: _searchController.text.isNotEmpty
-                            ? Container(
-                                child: IconButton(
-                                  alignment: Alignment.centerRight,
-                                  icon: Icon(
-                                    Icons.close,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    _searchResults.clear();
-                                    setState(() {});
-                                  },
-                                ),
-                              )
+                            ? IconButton(
+                              alignment: Alignment.centerRight,
+                              icon: Icon(
+                                Icons.close,
+                                color:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                _searchResults.clear();
+                                setState(() {});
+                              },
+                            )
                             : null,
                       ),
                     ),
@@ -231,6 +236,7 @@ class _StartSearchState extends State<StartSearch> {
                         // 확인 버튼이 눌렸을 때의 작업
                         _speakText('${result.name}를 출발지로 선택하셨습니다.');
                         Navigator.pop(context, result.geometry.location);
+                        context.read<SearchBloc>().add(SearchStartLocationRequested(searchLocation: result.name));
                       } else {
                         _speakText('취소');
                       }

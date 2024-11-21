@@ -1217,6 +1217,8 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   @override
   Widget build(BuildContext context) {
+    final searchLocation = context.watch<SearchBloc>().startLocation;
+    final destinationLocation = context.watch<SearchBloc>().destinationLocation;
     return Scaffold(
       body: isLoading
           ? Center(
@@ -1275,7 +1277,7 @@ class _NaverMapViewState extends State<NaverMapView> {
                           PageRouteBuilder(
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
-                                    StartSearch(),
+                                    StartSearch(searchValue: searchLocation,),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
                               const begin = 0.0;
@@ -1323,10 +1325,15 @@ class _NaverMapViewState extends State<NaverMapView> {
                         ),
                         child: Row(
                           children: [
+                            searchLocation.isEmpty ?
                             Text(
                               '출발지를 입력하세요.',
                               style:
                                   TextStyle(fontSize: 17, color: Colors.grey),
+                            ) :
+                            Text(
+                              searchLocation,
+                              style: TextStyle(fontSize: 17, color: Colors.black),
                             ),
                             Spacer(),
                             Icon(Icons.search),
@@ -1352,7 +1359,7 @@ class _NaverMapViewState extends State<NaverMapView> {
                           PageRouteBuilder(
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
-                                    DesSearch(),
+                                    DesSearch(destinationValue: destinationLocation,),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
                               const begin = 0.0;
@@ -1541,10 +1548,15 @@ class _NaverMapViewState extends State<NaverMapView> {
                         ),
                         child: Row(
                           children: [
+                            destinationLocation.isEmpty ?
                             Text(
                               '목적지를 입력하세요.',
+                              style:TextStyle(fontSize: 17, color: Colors.grey),
+                            )
+                                : Text(
+                              destinationLocation,
                               style:
-                                  TextStyle(fontSize: 17, color: Colors.grey),
+                                  TextStyle(fontSize: 17),
                             ),
                             Spacer(),
                             Icon(Icons.search),

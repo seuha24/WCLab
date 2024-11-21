@@ -1,7 +1,12 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 class DesSearch extends StatefulWidget {
-  const DesSearch({super.key});
+  const DesSearch({
+    super.key,
+    required this.destinationValue,
+  });
+
+  final String destinationValue;
 
   @override
   State<DesSearch> createState() => _DesSearchState();
@@ -18,6 +23,9 @@ class _DesSearchState extends State<DesSearch> {
   @override
   void initState() {
     super.initState();
+    if(widget.destinationValue.isNotEmpty){
+      _searchController.text = widget.destinationValue;
+    }
     _searchController.addListener(_onSearchChanged);
     _focusNode.requestFocus();
     _initTTS();
@@ -191,10 +199,6 @@ class _DesSearchState extends State<DesSearch> {
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.mic),
-                ),
               ],
             ),
           ),
@@ -231,6 +235,7 @@ class _DesSearchState extends State<DesSearch> {
                         // 확인 버튼이 눌렸을 때의 작업
                         _speakText('${result.name}으로 안내합니다.');
                         Navigator.pop(context, result.geometry.location);
+                        context.read<SearchBloc>().add(SearchDestinationRequested(searchDestination: result.name));
                       } else {
                         _speakText('취소');
                       }
