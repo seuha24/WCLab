@@ -4,8 +4,10 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/framework/core.dart';

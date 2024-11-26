@@ -60,12 +60,7 @@ Future<void> init() async {
   );
 
   DI.registerLazySingleton(
-    () => AuthBloc(
-      signInAnonymously: DI(instanceName: USECASE_SIGN_IN_ANONYMOUSLY),
-      signOutAnonymously: DI(instanceName: USECASE_SIGN_OUT_ANONYMOUSLY),
-      signInWithGoogle: DI(instanceName: USECASE_SIGN_IN_WITH_GOOGLE),
-      signOutWithGoogle: DI(instanceName: USECASE_SIGN_OUT_WITH_GOOGLE),
-    ),
+    () => AuthBloc(),
   );
 
   DI.registerFactory(

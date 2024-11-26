@@ -1,20 +1,37 @@
-part of controller;
+part of '../../../framework/controller.dart';
 
-@immutable
-abstract class AuthState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+class AuthState extends Equatable {
+  final Status googleSignInStatus;
+  final Status googleSignOutStatus;
+  final Status guestSignInStatus;
+  final Status guestSignOutStatus;
 
-class AuthDone extends AuthState {}
-
-class AuthLoading extends AuthState {}
-
-class AuthError extends AuthState {
-  final String message;
-
-  AuthError({required this.message});
+  const AuthState({
+    this.googleSignInStatus = Status.initial,
+    this.googleSignOutStatus = Status.initial,
+    this.guestSignInStatus = Status.initial,
+    this.guestSignOutStatus = Status.initial,
+  });
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [
+        googleSignInStatus,
+        googleSignOutStatus,
+        guestSignInStatus,
+        guestSignOutStatus,
+      ];
+
+  AuthState copyWith({
+    Status? googleSignInStatus,
+    Status? googleSignOutStatus,
+    Status? guestSignInStatus,
+    Status? guestSignOutStatus,
+  }) {
+    return AuthState(
+      googleSignInStatus: googleSignInStatus ?? this.googleSignInStatus,
+      googleSignOutStatus: googleSignOutStatus ?? this.googleSignOutStatus,
+      guestSignInStatus: guestSignInStatus ?? this.guestSignInStatus,
+      guestSignOutStatus: guestSignOutStatus ?? this.guestSignOutStatus,
+    );
+  }
 }

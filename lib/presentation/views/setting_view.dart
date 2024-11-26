@@ -51,11 +51,7 @@ class _SettingViewState extends State<SettingView> {
           ),
           child: BlocBuilder<AuthBloc, AuthState>(
             builder: (_, state) {
-              if (state is AuthError) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(state.message),
-                ));
-              }
+
               return Semantics.fromProperties(
                 properties: const SemanticsProperties(
                   button: true,
@@ -85,9 +81,7 @@ class _SettingViewState extends State<SettingView> {
                       semanticsLabel: '',
                     ),
                   ),
-                  trailing: (state is AuthLoading)
-                      ? const CircularProgressIndicator()
-                      : Icon(
+                  trailing: Icon(
                           Icons.logout,
                           color: Theme.of(context).colorScheme.onBackground,
                         ),
@@ -652,7 +646,7 @@ class _SettingViewState extends State<SettingView> {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -64,7 +64,7 @@ class _StartSearchState extends State<StartSearch> {
     final response = await http.get(Uri.parse(apiUrl), headers: headers);
 
     if (response.statusCode == 200) {
-      print('장소검색 api 통신성공');
+      debugPrint('장소검색 api 통신성공');
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> documents = jsonResponse['documents'];
 

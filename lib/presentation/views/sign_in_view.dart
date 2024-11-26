@@ -4,7 +4,7 @@ part of '../../framework/ui.dart';
 
 /// 로그인 화면
 class SignInView extends StatefulWidget {
-  const SignInView({Key? key}) : super(key: key);
+  const SignInView({super.key});
 
   @override
   State<SignInView> createState() => _SignInViewState();
@@ -15,141 +15,159 @@ class _SignInViewState extends State<SignInView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.secondary,
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('로그인 화면'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            MediaQuery.of(context).platformBrightness == Brightness.light
-                ? Semantics(
-                    label: '로그인 화면 배경',
-                    child: Lottie.asset(
-                      Gif.LOTTIE_ENTER_BACKGROUND_LIGHT,
-                      fit: BoxFit.fill,
-                      repeat: false,
+    return BlocListener<AuthBloc,AuthState>(
+      listener: (context, state) {
+        if (state.guestSignInStatus == Status.success
+            || state.googleSignInStatus == Status.success
+        ) {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainView()));
+        } else if (state.guestSignInStatus == Status.failure) {
+          showToast(
+            message: "Login Failed",
+            backgroundColor: Colors.red,
+          );
+        }else if (state.googleSignInStatus == Status.failure) {
+          showToast(
+            message: "Login Failed",
+            backgroundColor: Colors.red,
+          );
+        }
+      },
+      listenWhen: (previous, current) =>
+      previous.guestSignInStatus != current.guestSignInStatus
+          || previous.googleSignOutStatus != current.googleSignOutStatus,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text('로그인 화면'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              MediaQuery.of(context).platformBrightness == Brightness.light
+                  ? Semantics(
+                      label: '로그인 화면 배경',
+                      child: Lottie.asset(
+                        Gif.LOTTIE_ENTER_BACKGROUND_LIGHT,
+                        fit: BoxFit.fill,
+                        repeat: false,
+                      ),
+                    )
+                  : Semantics(
+                      label: '로그인 화면 배경',
+                      child: Lottie.asset(
+                        Gif.LOTTIE_ENTER_BACKGROUND_DARK,
+                        fit: BoxFit.fill,
+                        repeat: false,
+                      ),
                     ),
-                  )
-                : Semantics(
-                    label: '로그인 화면 배경',
-                    child: Lottie.asset(
-                      Gif.LOTTIE_ENTER_BACKGROUND_DARK,
-                      fit: BoxFit.fill,
-                      repeat: false,
+              Column(
+                children: [
+                  Divider(),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DutorialView(),
+                      ),
+                    ),
+                    child: Text(
+                      '처음 사용하시나요?',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge!
+                          .apply(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
-            Column(
-              children: [
-                Divider(),
-                TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DutorialView(),
-                    ),
-                  ),
-                  child: Text(
-                    '처음 사용하시나요?',
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge!
-                        .apply(color: Theme.of(context).colorScheme.primary),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                      onTap: (){
-                        // context.read<AuthBloc>().add(SignInWithAppleEvent());
-                        print("애플로그인하기");                      },
-                      child: Container(
-                        padding: EdgeInsets.all(10.sp),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(23),
-                          border: Border.all(width: 1),
-                          color: Colors.black,
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                        Platform.isIOS ? InkWell(
+                        onTap: (){
+                          // context.read<AuthBloc>().add(SignInWithAppleEvent());
+                          debugPrint("애플로그인하기");                      },
+                        child: Container(
+                          padding: EdgeInsets.all(10.sp),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(23),
+                            border: Border.all(width: 1),
+                            color: Colors.black,
+                          ),
+                          child: Image(
+                            width: 22.w,
+                            height: 22.w,
+                            image: AssetImage(
+                              Images.AppleLogo,
+                            ),
+                          ),
                         ),
-                        child: Image(
-                          width: 22.w,
-                          height: 22.w,
-                          image: AssetImage(
-                            Images.AppleLogo,
+                      ) : SizedBox.shrink(),
+                      Gap(),
+                      InkWell(
+                        onTap: (){
+                          context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(10.sp),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(23),
+                            border: Border.all(width: 1)
+                          ),
+                          child: Image(
+                            width: 22.w,
+                            height: 22.w,
+                            image: AssetImage(
+                              Images.GoogleLogo,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Gap(),
-                    InkWell(
-                      onTap: (){
-                        context.read<AuthBloc>().add(SignInWithGoogleEvent());
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(10.sp),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(23),
-                          border: Border.all(width: 1)
-                        ),
-                        child: Image(
-                          width: 22.w,
-                          height: 22.w,
-                          image: AssetImage(
-                            Images.GoogleLogo,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Gap(),
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    if (state is AuthError) {
-                      Future.delayed(Duration.zero, () {
-                        message.snackbar(context, text: state.message);
-                      });
-                    }
-                    return Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding:
-                          EdgeInsets.symmetric(horizontal: SizeTheme.h_lg),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, 60.h),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(6.r),
+                    ],
+                  ),
+                  Gap(),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      return Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding:
+                            EdgeInsets.symmetric(horizontal: SizeTheme.h_lg),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size(double.infinity, 60.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(6.r),
+                                  ),
                                 ),
                               ),
+                              onPressed: () {
+                                context
+                                    .read<AuthBloc>()
+                                    .add(SignInAnonymouslyEvent());
+                              },
+                              child: (state.guestSignInStatus == Status.inProgress)
+                                  ? CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color:
+                                Theme.of(context).colorScheme.onPrimary,
+                              )
+                                  : const Text('로그인 없이 이용하기'),
                             ),
-                            onPressed: () {
-                              context
-                                  .read<AuthBloc>()
-                                  .add(SignInAnonymouslyEvent());
-                            },
-                            child: (state is AuthLoading)
-                                ? CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color:
-                              Theme.of(context).colorScheme.onPrimary,
-                            )
-                                : const Text('로그인 없이 이용하기'),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

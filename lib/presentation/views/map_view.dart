@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 class BranchInfo {
   LatLng point; // 모든 경로값
@@ -122,7 +122,10 @@ class _NaverMapViewState extends State<NaverMapView> {
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
-
+  LocationSettings locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.medium, // Adjust based on use case
+    distanceFilter: 10, // Update only when the user moves 10 meters
+  );
   Timer? _locationUpdateTimer;
   NMarker? _currentLocationMarker;
   NMarker? _testMarker;
@@ -366,6 +369,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   @override
   void dispose() {
     _locationUpdateTimer?.cancel();
+    stopCollectingSensorData();
     super.dispose();
   }
 
@@ -409,7 +413,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     try {
       Position position = await Geolocator.getCurrentPosition(
         // geolocator 패키지 설치 후 객체 생성
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: LocationAccuracy.medium,
       );
       if (position.accuracy >= 15) {
         isGps = false;
@@ -699,15 +703,16 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
     subscribeToSensor<UserAccelerometerEvent>(
       sensorStream: userAccelerometerEventStream(
-          samplingPeriod: Duration(milliseconds: 20)),
+
+          samplingPeriod: SensorInterval.normalInterval),
       onEvent: (event) {
         final now = DateTime.now();
-        positionUpdate(event, Duration(milliseconds: 20));
+        positionUpdate(event, Duration(seconds: 1));
         _userAccelerometerEvent = event;
         if (_userAccelerometerUpdateTime  != null) {
           final interval = now.difference(_userAccelerometerUpdateTime!);
           if (interval > _ignoreDuration) {
-            _userAccelerometerLastInterval = interval.inMilliseconds;
+            _userAccelerometerLastInterval = interval.inSeconds;
           }
         }
         _userAccelerometerUpdateTime = now;
@@ -718,15 +723,15 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
     subscribeToSensor<GyroscopeEvent>(
       sensorStream:
-          gyroscopeEventStream(samplingPeriod: Duration(milliseconds: 20)),
+          gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
       onEvent: (GyroscopeEvent event) {
         final now = DateTime.now();
-        yawRateupdate(event, Duration(milliseconds: 20));
+        yawRateupdate(event, Duration(seconds: 1));
         _gyroscopeEvent = event;
         if (_gyroscopeUpdateTime != null) {
           final interval = now.difference(_gyroscopeUpdateTime!);
           if (interval > _ignoreDuration) {
-            _gyroscopeLastInterval = interval.inMilliseconds;
+            _gyroscopeLastInterval = interval.inSeconds;
           }
         }
         _gyroscopeUpdateTime = now;

@@ -1,17 +1,12 @@
 part of '../../../framework/controller.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final SignIn signInAnonymously;
-  final SignOut signOutAnonymously;
-  final SignIn signInWithGoogle;
-  final SignOut signOutWithGoogle;
-
-  AuthBloc({
-    required this.signInAnonymously,
-    required this.signOutAnonymously,
-    required this.signInWithGoogle,
-    required this.signOutWithGoogle,
-  }) : super(AuthDone()) {
+  final FirebaseAuth _auth;
+  final GoogleSignIn _googleSignIn;
+  AuthBloc()
+      : _auth = FirebaseAuth.instance,
+        _googleSignIn = GoogleSignIn(),
+        super(AuthState()) {
     on<SignInAnonymouslyEvent>(_signInAnonymouslyEvent);
     on<SignOutAnonymouslyEvent>(_signOutAnonymouslyEvent);
     on<SignInWithGoogleEvent>(_signInWithGoogleEvent);
@@ -23,21 +18,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(AuthLoading());
-
-      final result = await signInAnonymously(null);
-      result.fold(
-        (failure) {
-          if (failure is ServerFailure) {
-            emit(AuthError(message: '인터넷 연결 안됨'));
-          }
-        },
-        (success) {
-          emit(AuthDone());
-        },
-      );
+      emit(state.copyWith(guestSignInStatus: Status.inProgress));
+      UserCredential userCredential = await _auth.signInAnonymously();
+      emit(state.copyWith(guestSignInStatus: Status.success));
     } catch (e) {
-      emit(AuthError(message: '로그인 실패, 다시 시도해주세요.'));
+      emit(state.copyWith(guestSignInStatus: Status.failure));
     }
   }
 
@@ -46,21 +31,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(AuthLoading());
-
-      final result = await signOutAnonymously(NoParams());
-      result.fold(
-        (failure) {
-          if (failure is ServerFailure) {
-            emit(AuthError(message: '인터넷 연결 안됨'));
-          }
-        },
-        (success) {
-          emit(AuthDone());
-        },
-      );
+      emit(state.copyWith(guestSignOutStatus: Status.inProgress));
+      await _auth.signOut();
+      emit(state.copyWith(guestSignOutStatus: Status.success));
     } catch (e) {
-      emit(AuthError(message: '로그아웃 실패, 다시 시도해주세요.'));
+      emit(state.copyWith(guestSignOutStatus: Status.failure));
     }
   }
 
@@ -69,21 +44,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(AuthLoading());
+      emit(state.copyWith(googleSignInStatus: Status.inProgress));
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        emit(state.copyWith(googleSignInStatus: Status.failure));
+        return;
+      }
 
-      final result = await signInWithGoogle(null);
-      result.fold(
-        (failure) {
-          if (failure is ServerFailure) {
-            emit(AuthError(message: '인터넷 연결 안됨'));
-          }
-        },
-        (success) {
-          emit(AuthDone());
-        },
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+
+      emit(state.copyWith(googleSignInStatus: Status.success));
     } catch (e) {
-      emit(AuthError(message: '로그인 실패, 다시 시도해주세요.'));
+      emit(state.copyWith(googleSignInStatus: Status.failure));
     }
   }
 
@@ -92,21 +70,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(AuthLoading());
-
-      final result = await signOutWithGoogle(NoParams());
-      result.fold(
-        (failure) {
-          if (failure is ServerFailure) {
-            emit(AuthError(message: '인터넷 연결 안됨'));
-          }
-        },
-        (success) {
-          emit(AuthDone());
-        },
-      );
+      emit(state.copyWith(googleSignOutStatus: Status.inProgress));
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+      emit(state.copyWith(googleSignOutStatus: Status.success));
     } catch (e) {
-      emit(AuthError(message: '로그아웃 실패, 다시 시도해주세요.'));
+      emit(state.copyWith(googleSignOutStatus: Status.failure));
     }
   }
 }
