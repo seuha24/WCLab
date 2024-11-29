@@ -15,11 +15,10 @@ class _SignInViewState extends State<SignInView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc,AuthState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state.guestSignInStatus == Status.success
-            || state.googleSignInStatus == Status.success
-        ) {
+        if (state.guestSignInStatus == Status.success ||
+            state.googleSignInStatus == Status.success) {
           Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const MainView()));
         } else if (state.guestSignInStatus == Status.failure) {
@@ -27,7 +26,7 @@ class _SignInViewState extends State<SignInView> {
             message: "Login Failed",
             backgroundColor: Colors.red,
           );
-        }else if (state.googleSignInStatus == Status.failure) {
+        } else if (state.googleSignInStatus == Status.failure) {
           showToast(
             message: "Login Failed",
             backgroundColor: Colors.red,
@@ -35,13 +34,16 @@ class _SignInViewState extends State<SignInView> {
         }
       },
       listenWhen: (previous, current) =>
-      previous.guestSignInStatus != current.guestSignInStatus
-          || previous.googleSignOutStatus != current.googleSignOutStatus,
+          previous.guestSignInStatus != current.guestSignInStatus ||
+          previous.googleSignOutStatus != current.googleSignOutStatus,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         appBar: AppBar(
           centerTitle: true,
-          title: const Text('로그인 화면'),
+          title: const Text(
+            '로그인',
+            style: TextStyle(fontSize: 20),
+          ),
         ),
         body: Center(
           child: Column(
@@ -66,7 +68,6 @@ class _SignInViewState extends State<SignInView> {
                     ),
               Column(
                 children: [
-                  Divider(),
                   TextButton(
                     onPressed: () => Navigator.push(
                       context,
@@ -78,48 +79,40 @@ class _SignInViewState extends State<SignInView> {
                       '처음 사용하시나요?',
                       style: Theme.of(context)
                           .textTheme
-                          .labelLarge!
+                          .titleLarge!
                           .apply(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                        Platform.isIOS ? InkWell(
-                        onTap: (){
+                      InkWell(
+                        onTap: () {
                           // context.read<AuthBloc>().add(SignInWithAppleEvent());
-                          debugPrint("애플로그인하기");                      },
+                          debugPrint("애플로그인하기");
+                        },
                         child: Container(
-                          padding: EdgeInsets.all(10.sp),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(23),
-                            border: Border.all(width: 1),
-                            color: Colors.black,
-                          ),
+                          padding: EdgeInsets.all(2.sp),
                           child: Image(
-                            width: 22.w,
-                            height: 22.w,
+                            width: 60.w,
+                            height: 60.w,
                             image: AssetImage(
                               Images.AppleLogo,
                             ),
                           ),
                         ),
-                      ) : SizedBox.shrink(),
+                      ),
                       Gap(),
                       InkWell(
-                        onTap: (){
+                        onTap: () {
                           context.read<AuthBloc>().add(SignInWithGoogleEvent());
                         },
                         child: Container(
-                          padding: EdgeInsets.all(10.sp),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(23),
-                            border: Border.all(width: 1)
-                          ),
+                          padding: EdgeInsets.all(2.sp),
                           child: Image(
-                            width: 22.w,
-                            height: 22.w,
+                            width: 60.w,
+                            height: 60.w,
                             image: AssetImage(
                               Images.GoogleLogo,
                             ),
@@ -133,10 +126,10 @@ class _SignInViewState extends State<SignInView> {
                     builder: (context, state) {
                       return Column(
                         children: [
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 14),
                           Padding(
-                            padding:
-                            EdgeInsets.symmetric(horizontal: SizeTheme.h_lg),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: SizeTheme.h_lg),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: Size(double.infinity, 60.h),
@@ -151,13 +144,18 @@ class _SignInViewState extends State<SignInView> {
                                     .read<AuthBloc>()
                                     .add(SignInAnonymouslyEvent());
                               },
-                              child: (state.guestSignInStatus == Status.inProgress)
-                                  ? CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color:
-                                Theme.of(context).colorScheme.onPrimary,
-                              )
-                                  : const Text('로그인 없이 이용하기'),
+                              child:
+                                  (state.guestSignInStatus == Status.inProgress)
+                                      ? CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                        )
+                                      : const Text(
+                                          '로그인 없이 이용하기',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                             ),
                           ),
                         ],

@@ -140,6 +140,16 @@ class SystemTheme implements Themes {
           fontWeight: FontWeight.normal,
           color: scheme.onSecondary,
         ),
+        displayLarge: TextStyle(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.bold,
+          color: scheme.onSecondary,
+        ),
+        displayMedium: TextStyle(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.normal,
+          color: scheme.onSecondary,
+        ),
         labelLarge: TextStyle(
           fontSize: 14.sp,
           fontWeight: FontWeight.bold,
@@ -195,6 +205,6 @@ class ColorTheme implements Themes {
     onSecondary: Color(0xffF1F2F6),
     background: Colors.black,
     onBackground: Color(0xffEAEAEA),
-    surface: Colors.grey,
+    surface: Color(0xff121215),
   );
 }

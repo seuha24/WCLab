@@ -176,6 +176,7 @@ class FlatCard extends StatelessWidget {
   /// FlatCard(..., trailing : Icon(...),)
   /// ```
   final Widget? trailing;
+  final bool isSelected;
 
   /// 각 인스턴스에 값을 할당하는 [FlatCard]의 생성자이다.
   ///
@@ -203,6 +204,7 @@ class FlatCard extends StatelessWidget {
     this.titleOnly = false,
     this.trailing,
     this.shapeBorder,
+    this.isSelected = false,
   });
 
   Widget _subTitleBuilder(BuildContext context) {
@@ -230,9 +232,16 @@ class FlatCard extends StatelessWidget {
   }
 
   Widget _titleBuilder(BuildContext context) {
+    // Determine color based on selection
+    Color color = isSelected
+        ? Theme.of(context).colorScheme.onPrimary
+        : Theme.of(context).colorScheme.onBackground;
+
     return AutoSizeText(
       title,
-      style: Theme.of(context).textTheme.headlineLarge,
+      style: Theme.of(context).textTheme.labelLarge!.apply(
+            color: color,
+          ),
     );
   }
 
@@ -241,14 +250,28 @@ class FlatCard extends StatelessWidget {
     return ListTile(
       tileColor: backgroundColor,
       contentPadding: EdgeInsets.symmetric(
-        vertical: SizeTheme.w_sm,
+        vertical: 4.sp,
         horizontal: SizeTheme.h_lg,
       ),
-      shape: shapeBorder ?? RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          SizeTheme.r_sm,
-        ),
-      ),
+      shape: isSelected
+          ? OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                4.sp,
+              ),
+              borderSide: BorderSide(
+                width: 0, // Default border width
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
+          : OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                4.sp,
+              ),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2.0, // Default border width
+              ),
+            ),
       onTap: onTap,
       leading: leading,
       subtitle: titleOnly

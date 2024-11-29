@@ -21,7 +21,7 @@ class _StartSearchState extends State<StartSearch> {
   @override
   void initState() {
     super.initState();
-    if(widget.searchValue.isNotEmpty){
+    if (widget.searchValue.isNotEmpty) {
       _searchController.text = widget.searchValue;
     }
     _searchController.addListener(_onSearchChanged);
@@ -179,18 +179,17 @@ class _StartSearchState extends State<StartSearch> {
                         enabledBorder: InputBorder.none,
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
-                              alignment: Alignment.centerRight,
-                              icon: Icon(
-                                Icons.close,
-                                color:
-                                    Theme.of(context).colorScheme.primary,
-                              ),
-                              onPressed: () {
-                                _searchController.clear();
-                                _searchResults.clear();
-                                setState(() {});
-                              },
-                            )
+                                alignment: Alignment.centerRight,
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _searchResults.clear();
+                                  setState(() {});
+                                },
+                              )
                             : null,
                       ),
                     ),
@@ -236,7 +235,9 @@ class _StartSearchState extends State<StartSearch> {
                         // 확인 버튼이 눌렸을 때의 작업
                         _speakText('${result.name}를 출발지로 선택하셨습니다.');
                         Navigator.pop(context, result.geometry.location);
-                        context.read<SearchBloc>().add(SearchStartLocationRequested(searchLocation: result.name));
+                        context.read<SearchBloc>().add(
+                            SearchStartLocationRequested(
+                                searchLocation: result.name));
                       } else {
                         _speakText('취소');
                       }

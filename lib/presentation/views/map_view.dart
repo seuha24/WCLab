@@ -168,8 +168,8 @@ class _NaverMapViewState extends State<NaverMapView> {
   double nearestDistance = 0.0;
   //
 
-   double initialLatitude = 35.9078;
-   double initialLongitude = 127.7669;
+  double initialLatitude = 35.9078;
+  double initialLongitude = 127.7669;
 
   late double beforeLatitude;
   late double beforeLongitude;
@@ -703,13 +703,12 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
     subscribeToSensor<UserAccelerometerEvent>(
       sensorStream: userAccelerometerEventStream(
-
           samplingPeriod: SensorInterval.normalInterval),
       onEvent: (event) {
         final now = DateTime.now();
         positionUpdate(event, Duration(seconds: 1));
         _userAccelerometerEvent = event;
-        if (_userAccelerometerUpdateTime  != null) {
+        if (_userAccelerometerUpdateTime != null) {
           final interval = now.difference(_userAccelerometerUpdateTime!);
           if (interval > _ignoreDuration) {
             _userAccelerometerLastInterval = interval.inSeconds;
@@ -1282,7 +1281,9 @@ class _NaverMapViewState extends State<NaverMapView> {
                           PageRouteBuilder(
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
-                                    StartSearch(searchValue: searchLocation,),
+                                    StartSearch(
+                              searchValue: searchLocation,
+                            ),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
                               const begin = 0.0;
@@ -1330,16 +1331,17 @@ class _NaverMapViewState extends State<NaverMapView> {
                         ),
                         child: Row(
                           children: [
-                            searchLocation.isEmpty ?
-                            Text(
-                              '출발지를 입력하세요.',
-                              style:
-                                  TextStyle(fontSize: 17, color: Colors.grey),
-                            ) :
-                            Text(
-                              searchLocation,
-                              style: TextStyle(fontSize: 17, color: Colors.black),
-                            ),
+                            searchLocation.isEmpty
+                                ? Text(
+                                    '출발지를 입력하세요.',
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.grey),
+                                  )
+                                : Text(
+                                    searchLocation,
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.black),
+                                  ),
                             Spacer(),
                             Icon(Icons.search),
                           ],
@@ -1349,7 +1351,7 @@ class _NaverMapViewState extends State<NaverMapView> {
                   ),
                 ),
                 Positioned(
-                  top: 118.0,
+                  top: 122.0,
                   left: 20.0,
                   right: 20.0,
                   child: Container(
@@ -1364,7 +1366,9 @@ class _NaverMapViewState extends State<NaverMapView> {
                           PageRouteBuilder(
                             pageBuilder:
                                 (context, animation, secondaryAnimation) =>
-                                    DesSearch(destinationValue: destinationLocation,),
+                                    DesSearch(
+                              destinationValue: destinationLocation,
+                            ),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
                               const begin = 0.0;
@@ -1553,16 +1557,16 @@ class _NaverMapViewState extends State<NaverMapView> {
                         ),
                         child: Row(
                           children: [
-                            destinationLocation.isEmpty ?
-                            Text(
-                              '목적지를 입력하세요.',
-                              style:TextStyle(fontSize: 17, color: Colors.grey),
-                            )
+                            destinationLocation.isEmpty
+                                ? Text(
+                                    '목적지를 입력하세요.',
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.grey),
+                                  )
                                 : Text(
-                              destinationLocation,
-                              style:
-                                  TextStyle(fontSize: 17),
-                            ),
+                                    destinationLocation,
+                                    style: TextStyle(fontSize: 17),
+                                  ),
                             Spacer(),
                             Icon(Icons.search),
                           ],

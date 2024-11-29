@@ -14,13 +14,14 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/firebase_options.dart';
+import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
+
 // import 'package:location_plugin/location_plugin.dart';
 
 import 'framework/controller.dart';
 import 'framework/core.dart';
 import 'framework/ui.dart';
-import 'package:safelight/injection.dart' as injection;
 
 part 'initializer.dart';
 
@@ -79,7 +80,7 @@ class SafeLight extends StatelessWidget {
             child: MaterialApp(
               // showSemanticsDebugger: true, // 접근성 테스트할 때 사용
               debugShowCheckedModeBanner: false,
-              darkTheme: SystemTheme.systemMode(ColorTheme.dark),
+              darkTheme: SystemTheme.systemMode(ColorTheme.light),
               themeMode: ThemeMode.values.byName(mode ?? ThemeMode.system.name),
               theme: SystemTheme.systemMode(ColorTheme.light),
               home: StreamBuilder(

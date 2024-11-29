@@ -16,6 +16,24 @@ class _SettingViewState extends State<SettingView> {
   late Box box;
   late Box flashbox;
 
+  final List<Map<String, dynamic>> modes = [
+    {
+      'title': '항상 켜기 모드',
+      'flashMode': FlashMode.ALWAYS,
+      'lightModeValue': 'alwayson',
+    },
+    {
+      'title': '주변 환경에 따라 켜기 모드',
+      'flashMode': FlashMode.WITH_WEATHER,
+      'lightModeValue': 'weathers',
+    },
+    {
+      'title': '항상 끄기 모드',
+      'flashMode': FlashMode.NEVER_IN_USE,
+      'lightModeValue': 'alwaysoff',
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +69,6 @@ class _SettingViewState extends State<SettingView> {
           ),
           child: BlocBuilder<AuthBloc, AuthState>(
             builder: (_, state) {
-
               return Semantics.fromProperties(
                 properties: const SemanticsProperties(
                   button: true,
@@ -68,7 +85,7 @@ class _SettingViewState extends State<SettingView> {
                   leading: SingleChildRoundedCard(
                     child: Icon(
                       Icons.person,
-                      size: 40.w,
+                      size: 30.w,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
@@ -77,26 +94,29 @@ class _SettingViewState extends State<SettingView> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '익명 사용자',
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.displayLarge,
                       semanticsLabel: '',
                     ),
                   ),
                   trailing: Icon(
-                          Icons.logout,
-                          color: Theme.of(context).colorScheme.onBackground,
-                        ),
+                    Icons.logout,
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
                 ),
               );
             },
           ),
         ),
-        toolbarHeight: 120.h,
+        toolbarHeight: 100.h,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Board(
               title: '앱 내 권한',
+              titleStyle: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).colorScheme.onBackground),
               body: Column(
                 children: [
                   BlocBuilder<BluetoothPermissionCubit, bool>(
@@ -121,7 +141,7 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '블루투스 권한',
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: Theme.of(context).textTheme.displayLarge,
                           ),
                           trailing: CupertinoSwitch(
                             value: state,
@@ -166,7 +186,7 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '사용자 위치 정보 권한',
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: Theme.of(context).textTheme.displayLarge,
                           ),
                           trailing: CupertinoSwitch(
                             value: state,
@@ -194,6 +214,9 @@ class _SettingViewState extends State<SettingView> {
             ),
             Board(
               title: '기타',
+              titleStyle: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).colorScheme.onBackground),
               body: Column(
                 children: [
                   Semantics.fromProperties(
@@ -205,7 +228,7 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '시스템 모드 설정',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.displayLarge,
                       ),
                       subtitle: Text(
                         mode == 'system'
@@ -215,7 +238,7 @@ class _SettingViewState extends State<SettingView> {
                                 : '다크모드 적용중',
                         style: Theme.of(context)
                             .textTheme
-                            .labelLarge!
+                            .displayMedium!
                             .apply(color: ColorTheme.highlight2),
                         semanticsLabel: '',
                       ),
@@ -238,29 +261,39 @@ class _SettingViewState extends State<SettingView> {
                             child: Board(
                               title: '시스템 모드 설정',
                               headerPadding: EdgeInsets.only(
-                                bottom: SizeTheme.h_sm,
-                              ),
-                              padding: EdgeInsets.all(SizeTheme.w_md),
+                                  bottom: SizeTheme.h_sm, left: 2),
+                              padding: EdgeInsets.all(SizeTheme.h_sm),
                               titleStyle:
-                                  Theme.of(context).textTheme.titleLarge,
+                                  Theme.of(context).textTheme.displayLarge,
                               trailing: TextButton(
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(maxWidth: 50.w),
-                                  child: const FittedBox(child: Text('닫기')),
+                                  child: FittedBox(
+                                      child: Text('닫기',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium!)),
                                 ),
                                 onPressed: () => Navigator.pop(context),
                               ),
                               body: Column(
-                                children: [
-                                  Padding(
+                                children: List<Widget>.generate(3, (index) {
+                                  final modes = ['system', 'dark', 'light'];
+                                  final titles = ['시스템모드', '다크모드', '라이트모드'];
+                                  final selectedMode = modes[index];
+
+                                  return Padding(
                                     padding: EdgeInsets.only(
                                       bottom: SizeTheme.h_md,
                                     ),
                                     child: FlatCard(
-                                      title: '시스템모드',
+                                      title: titles[index],
                                       titleOnly: true,
                                       bottomTitle: false,
-                                      backgroundColor: mode == 'system' ? Colors.indigoAccent : null,
+                                      isSelected: mode == selectedMode,
+                                      backgroundColor: mode == selectedMode
+                                          ? Colors.indigoAccent
+                                          : null,
                                       shapeBorder: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
                                           4.sp,
@@ -269,101 +302,32 @@ class _SettingViewState extends State<SettingView> {
                                       onTap: () async {
                                         Navigator.pop(context);
 
-                                        await box.put(SystemTheme.mode,
-                                            ThemeMode.system.name);
+                                        await box.put(
+                                            SystemTheme.mode,
+                                            selectedMode == 'system'
+                                                ? ThemeMode.system.name
+                                                : selectedMode == 'dark'
+                                                    ? ThemeMode.dark.name
+                                                    : ThemeMode.light.name);
                                         setState(() {
                                           mode = box.get(SystemTheme.mode);
                                         });
                                       },
-                                      trailing: mode == 'system'
+                                      trailing: mode == selectedMode
                                           ? Text(
                                               '적용중',
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .labelLarge!
                                                   .apply(
-                                                    color:
-                                                        ColorTheme.highlight1,
+                                                    color: ColorTheme
+                                                        .light.onPrimary,
                                                   ),
                                             )
                                           : null,
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: SizeTheme.h_md,
-                                    ),
-                                    child: FlatCard(
-                                      title: '다크모드',
-                                      titleOnly: true,
-                                      bottomTitle: false,
-                                      backgroundColor: mode == 'dark' ? Colors.indigoAccent : null,
-                                      shapeBorder: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          4.sp,
-                                        ),
-                                      ),
-                                      onTap: () async {
-                                        Navigator.pop(context);
-
-                                        await box.put(SystemTheme.mode,
-                                            ThemeMode.dark.name);
-                                        setState(() {
-                                          mode = box.get(SystemTheme.mode);
-                                        });
-                                      },
-                                      trailing: mode == 'dark'
-                                          ? Text(
-                                              '적용중',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge!
-                                                  .apply(
-                                                    color:
-                                                        ColorTheme.highlight1,
-                                                  ),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: SizeTheme.h_md,
-                                    ),
-                                    child: FlatCard(
-                                      title: '라이트모드',
-                                      titleOnly: true,
-                                      bottomTitle: false,
-                                      shapeBorder: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          4.sp,
-                                        ),
-                                      ),
-                                      backgroundColor: mode == 'light' ? Colors.indigoAccent : null,
-                                      onTap: () async {
-                                        Navigator.pop(context);
-
-                                        await box.put(SystemTheme.mode,
-                                            ThemeMode.light.name);
-                                        setState(() {
-                                          mode = box.get(SystemTheme.mode);
-                                        });
-                                      },
-                                      trailing: mode == 'light'
-                                          ? Text(
-                                              '적용중',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge!
-                                                  .apply(
-                                                    color:
-                                                        ColorTheme.highlight1,
-                                                  ),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                ],
+                                  );
+                                }),
                               ),
                             ),
                           );
@@ -383,7 +347,7 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '경광등 설정',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.displayLarge,
                       ),
                       subtitle: Text(
                         lightmode == 'alwayson'
@@ -393,7 +357,7 @@ class _SettingViewState extends State<SettingView> {
                                 : '항상 끄기 모드 적용중',
                         style: Theme.of(context)
                             .textTheme
-                            .labelLarge!
+                            .displayMedium!
                             .apply(color: ColorTheme.highlight2),
                         semanticsLabel: '',
                       ),
@@ -420,140 +384,65 @@ class _SettingViewState extends State<SettingView> {
                               ),
                               padding: EdgeInsets.all(SizeTheme.w_md),
                               titleStyle:
-                                  Theme.of(context).textTheme.titleLarge,
+                                  Theme.of(context).textTheme.displayLarge,
                               trailing: TextButton(
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(maxWidth: 50.w),
-                                  child: const FittedBox(child: Text('닫기')),
+                                  child: FittedBox(
+                                      child: Text('닫기',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium!)),
                                 ),
                                 onPressed: () => Navigator.pop(context),
                               ),
                               body: Column(
-                                children: [
-                                  Padding(
+                                children: modes.map((mode) {
+                                  final bool isSelected =
+                                      lightmode == mode['lightModeValue'];
+                                  return Padding(
                                     padding: EdgeInsets.only(
                                       bottom: SizeTheme.h_md,
                                     ),
                                     child: FlatCard(
-                                      title: '항상 켜기 모드',
+                                      title: mode['title'],
                                       titleOnly: true,
                                       bottomTitle: false,
+                                      isSelected: isSelected,
                                       shapeBorder: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          4.sp,
-                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(4.sp),
                                       ),
-                                      backgroundColor: lightmode == 'alwayson' ? Colors.indigoAccent : null,
+                                      backgroundColor: isSelected
+                                          ? Colors.indigoAccent
+                                          : null,
                                       onTap: () async {
                                         Navigator.pop(context);
 
                                         await flashbox.clear();
                                         setState(() {
-                                          flashbox.add(FlashMode.ALWAYS);
-                                          if (flashbox.values.toList()[0] ==
-                                              FlashMode.ALWAYS) {
-                                            lightmode = 'alwayson';
+                                          flashbox.add(mode['flashMode']);
+                                          if (flashbox.values.toList().first ==
+                                              mode['flashMode']) {
+                                            lightmode = mode['lightModeValue'];
                                           }
-                                          // print(lightmode);
                                         });
                                       },
-                                      trailing: lightmode == 'alwayson'
+                                      trailing: isSelected
                                           ? Text(
                                               '적용중',
                                               style: Theme.of(context)
                                                   .textTheme
-                                                  .labelLarge!
+                                                  .labelMedium!
                                                   .apply(
-                                                    color:
-                                                        ColorTheme.highlight1,
+                                                    color: ColorTheme
+                                                        .light.onPrimary,
                                                   ),
                                             )
                                           : null,
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: SizeTheme.h_md,
-                                    ),
-                                    child: FlatCard(
-                                      title: '주변 환경에 따라 켜기 모드',
-                                      titleOnly: true,
-                                      bottomTitle: false,
-                                      shapeBorder: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          4.sp,
-                                        ),
-                                      ),
-                                      backgroundColor: lightmode == 'weathers' ? Colors.indigoAccent : null,
-                                      onTap: () async {
-                                        Navigator.pop(context);
-
-                                        await flashbox.clear();
-                                        setState(() {
-                                          flashbox.add(FlashMode.WITH_WEATHER);
-                                          if (flashbox.values.toList()[0] ==
-                                              FlashMode.WITH_WEATHER) {
-                                            lightmode = 'weathers';
-                                          }
-                                          // print(lightmode);
-                                        });
-                                      },
-                                      trailing: lightmode == 'weathers'
-                                          ? Text(
-                                              '적용중',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge!
-                                                  .apply(
-                                                    color:
-                                                        ColorTheme.highlight1,
-                                                  ),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: SizeTheme.h_md,
-                                    ),
-                                    child: FlatCard(
-                                      title: '항상 끄기 모드',
-                                      titleOnly: true,
-                                      bottomTitle: false,
-                                      shapeBorder: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          4.sp,
-                                        ),
-                                      ),
-                                      backgroundColor: lightmode == 'alwaysoff' ? Colors.indigoAccent : null,
-                                      onTap: () async {
-                                        Navigator.pop(context);
-
-                                        await flashbox.clear();
-                                        setState(() {
-                                          flashbox.add(FlashMode.NEVER_IN_USE);
-                                          if (flashbox.values.toList()[0] ==
-                                              FlashMode.NEVER_IN_USE) {
-                                            lightmode = 'alwaysoff';
-                                          }
-                                          // print(lightmode);
-                                        });
-                                      },
-                                      trailing: lightmode == 'alwaysoff'
-                                          ? Text(
-                                              '적용중',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge!
-                                                  .apply(
-                                                    color:
-                                                        ColorTheme.highlight1,
-                                                  ),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                ],
+                                  );
+                                }).toList(),
                               ),
                             ),
                           );
@@ -581,7 +470,7 @@ class _SettingViewState extends State<SettingView> {
                           },
                           title: Text(
                             '음성 보조 설정',
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: Theme.of(context).textTheme.displayLarge,
                           ),
                           trailing: CupertinoSwitch(
                             value: TTS.enable,
@@ -620,7 +509,7 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '외부 라이센스',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.displayLarge,
                       ),
                     ),
                   ),
@@ -640,7 +529,7 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '도움말',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.displayLarge,
                       ),
                     ),
                   ),

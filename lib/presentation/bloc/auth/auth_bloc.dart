@@ -1,11 +1,17 @@
 part of '../../../framework/controller.dart';
 
+// #docregion Initialize
+const List<String> scopes = <String>[
+  'email',
+  'https://www.googleapis.com/auth/contacts.readonly',
+];
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
   AuthBloc()
       : _auth = FirebaseAuth.instance,
-        _googleSignIn = GoogleSignIn(),
+        _googleSignIn = GoogleSignIn(scopes: scopes),
         super(AuthState()) {
     on<SignInAnonymouslyEvent>(_signInAnonymouslyEvent);
     on<SignOutAnonymouslyEvent>(_signOutAnonymouslyEvent);
@@ -51,13 +57,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
 
       emit(state.copyWith(googleSignInStatus: Status.success));
     } catch (e) {

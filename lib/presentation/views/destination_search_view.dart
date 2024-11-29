@@ -23,7 +23,7 @@ class _DesSearchState extends State<DesSearch> {
   @override
   void initState() {
     super.initState();
-    if(widget.destinationValue.isNotEmpty){
+    if (widget.destinationValue.isNotEmpty) {
       _searchController.text = widget.destinationValue;
     }
     _searchController.addListener(_onSearchChanged);
@@ -235,7 +235,9 @@ class _DesSearchState extends State<DesSearch> {
                         // 확인 버튼이 눌렸을 때의 작업
                         _speakText('${result.name}으로 안내합니다.');
                         Navigator.pop(context, result.geometry.location);
-                        context.read<SearchBloc>().add(SearchDestinationRequested(searchDestination: result.name));
+                        context.read<SearchBloc>().add(
+                            SearchDestinationRequested(
+                                searchDestination: result.name));
                       } else {
                         _speakText('취소');
                       }
