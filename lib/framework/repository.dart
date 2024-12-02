@@ -1,8 +1,11 @@
 library repository;
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:safelight/data/models/auth_data_model.dart';
+import 'package:safelight/domain/entities/auth.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/object.dart';

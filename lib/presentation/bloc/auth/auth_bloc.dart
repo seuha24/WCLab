@@ -1,5 +1,10 @@
 part of '../../../framework/controller.dart';
 
+enum OAuthType {
+  google,
+  apple,
+}
+
 // #docregion Initialize
 const List<String> scopes = <String>[
   'email',
@@ -9,9 +14,12 @@ const List<String> scopes = <String>[
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
-  AuthBloc()
+  final AuthRepository _repository;
+
+  AuthBloc({required AuthRepository repository})
       : _auth = FirebaseAuth.instance,
         _googleSignIn = GoogleSignIn(scopes: scopes),
+        _repository = repository,
         super(AuthState()) {
     on<SignInAnonymouslyEvent>(_signInAnonymouslyEvent);
     on<SignOutAnonymouslyEvent>(_signOutAnonymouslyEvent);
@@ -59,16 +67,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      final String? accessToken = googleAuth.accessToken;
 
-      emit(state.copyWith(googleSignInStatus: Status.success));
+      if (accessToken != null) {
+        await _sendOAuthTokenToServer(accessToken, OAuthType.google);
+        emit(state.copyWith(googleSignInStatus: Status.success));
+      } else {
+        emit(state.copyWith(googleSignInStatus: Status.failure));
+      }
     } catch (e) {
+      log('Google Sign-In Error: $e');
       emit(state.copyWith(googleSignInStatus: Status.failure));
     }
   }
@@ -84,6 +93,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(googleSignOutStatus: Status.success));
     } catch (e) {
       emit(state.copyWith(googleSignOutStatus: Status.failure));
+    }
+  }
+
+  Future<void> _sendOAuthTokenToServer(
+      String accessToken, OAuthType oauthType) async {
+    try {
+      final response = oauthType == OAuthType.google
+          ? await _repository.sendGoogleOAuthTokenToServer(accessToken)
+          : await _repository.sendAppleOAuthTokenToServer(accessToken);
+
+      debugPrint('response :::: $response');
+
+      // if (response.response.statusCode == 201) {
+      //   final AuthDataModel authData = response.data.data;
+      //
+      //   // AccessToken 및 RefreshToken 저장
+      //   await _service.saveTokens(authData.accessToken, authData.refreshToken);
+      //
+      //   log('Token 저장 완료');
+      // } else {
+      //   log('Server Error: ${response.response.statusCode}');
+      // }
+    } catch (e) {
+      log('Error sending OAuth Token to Server: $e');
     }
   }
 }

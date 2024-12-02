@@ -2,6 +2,7 @@
 library injection;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -60,7 +61,7 @@ Future<void> init() async {
   );
 
   DI.registerLazySingleton(
-    () => AuthBloc(),
+    () => AuthBloc(repository: DI.get<AuthRepository>()),
   );
 
   DI.registerFactory(
@@ -184,6 +185,7 @@ Future<void> init() async {
   DI.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(
       auth: DI(),
+      dio: Dio(),
     ),
   );
   DI.registerLazySingleton<FlashNativeDataSource>(

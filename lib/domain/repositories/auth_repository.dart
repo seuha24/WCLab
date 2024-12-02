@@ -75,4 +75,10 @@ abstract class AuthRepository {
   /// {@macro repository_part3}
   Future<Either<Failure, Void>> signOutAnonymously();
   Future<Either<Failure, Void>> signOutWithGoogle();
+
+  /// 구글 또는 애플 로그인 이후 획득한 OAuth Access Token을 서버로 전송하기 위한 메서드
+  /// OAuth Access Token으로 서버에서 각 구글 또는 애플 서버로 인증 검사를 수행한다.
+  /// 수행이 정상적으로 종료되면 response로 앱에서 사용가능한 Access Token 을 획득한다.
+  Future<Either<Failure, AuthDataModel>> sendGoogleOAuthTokenToServer(String token);
+  Future<Either<Failure, AuthDataModel>> sendAppleOAuthTokenToServer(String token);
 }

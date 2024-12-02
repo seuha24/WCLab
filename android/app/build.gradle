@@ -28,11 +28,13 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-//def keystoreProperties = new Properties()
-//def keystorePropertiesFile = rootProject.file('key.properties')
-//if (keystorePropertiesFile.exists()) {
-//    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-//}
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('./key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
 
 android {
     compileSdkVersion 34
@@ -63,6 +65,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled true
             shrinkResources true
@@ -70,19 +75,20 @@ android {
         }
     }
     // key 설정이 선행되어야 함
-//    signingConfigs {
-//        release {
-//            keyAlias keystoreProperties['keyAlias']
-//            keyPassword keystoreProperties['keyPassword']
-//            storeFile file(keystoreProperties['storeFile'])
-//            storePassword keystoreProperties['storePassword']
-//        }
-//    }
-//    buildTypes {
-//        release {
-//            signingConfig signingConfigs.release
-//        }
-//    }
+    signingConfigs {
+        debug {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
 }
 
 flutter {

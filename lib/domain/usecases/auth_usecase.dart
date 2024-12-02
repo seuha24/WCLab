@@ -269,6 +269,7 @@ class SignOutAnonymously implements SignOut {
 
 class SignInWithGoogle implements SignIn {
   AuthRepository repository;
+
   SignInWithGoogle({required this.repository});
 
   @override
@@ -279,10 +280,32 @@ class SignInWithGoogle implements SignIn {
 
 class SignOutWithGoogle implements SignOut {
   AuthRepository repository;
+
   SignOutWithGoogle({required this.repository});
 
   @override
   Future<Either<Failure, Void>> call(NoParams params) async {
     return await repository.signOutWithGoogle();
+  }
+}
+
+class SendGoogleOAuthTokenToServer {
+  final AuthRepository repository;
+
+  SendGoogleOAuthTokenToServer(this.repository);
+
+  Future<Either<Failure, AuthDataModel>> call(String token) async {
+    return await repository.sendGoogleOAuthTokenToServer(token);
+  }
+}
+
+
+class SendAppleOAuthTokenToServer {
+  final AuthRepository repository;
+
+  SendAppleOAuthTokenToServer(this.repository);
+
+  Future<Either<Failure, AuthDataModel>> call(String token) async {
+    return await repository.sendAppleOAuthTokenToServer(token);
   }
 }

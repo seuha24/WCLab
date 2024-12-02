@@ -1,6 +1,7 @@
 library controller;
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io' show Platform;
 
 import 'package:equatable/equatable.dart';
@@ -10,9 +11,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/status_enum.dart';
+import 'package:safelight/data/models/auth_data_model.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/object.dart';
+import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/injection.dart';
 
