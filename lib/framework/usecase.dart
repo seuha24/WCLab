@@ -2,6 +2,7 @@ library usecase;
 
 import 'package:dartz/dartz.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:safelight/data/models/auth_data_model.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:safelight/framework/repository.dart';

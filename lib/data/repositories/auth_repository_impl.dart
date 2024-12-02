@@ -81,4 +81,41 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, AuthDataModel>> sendGoogleOAuthTokenToServer(String token) async {
+    try {
+      final response = await authDataSource.sendGoogleOAuthTokenToServer(token);
+      final responseData = response.data ?? {};
+
+      if (responseData['success'] == true) {
+        final AuthDataModel authData = AuthDataModel.fromMap(responseData['data']);
+          return Right(authData);
+      } else {
+        debugPrint('Response data is NULL');
+        return Left(ServerFailure());
+      }
+    } catch (e) {
+      debugPrint('Error on sendGoogleOAuthTokenToServer() : $e');
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthDataModel>> sendAppleOAuthTokenToServer(String token) async {
+    try {
+      final response = await authDataSource.sendAppleOAuthTokenToServer(token);
+      // debugPrint('response.data : ${response.data}');
+      return Left(ServerFailure());
+      // if (response.data. == 201) {
+      //   final AuthDataModel authData = AuthDataModel.fromMap(response.data!);
+      //
+      //   return Right(authData);
+      // } else {
+      //   return Left(ServerFailure());
+      // }
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
 }

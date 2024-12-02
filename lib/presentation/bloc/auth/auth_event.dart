@@ -12,3 +12,9 @@ class SignOutAnonymouslyEvent extends AuthEvent {}
 class SignInWithGoogleEvent extends AuthEvent {}
 
 class SignOutWithGoogleEvent extends AuthEvent {}
+
+class SignInWithAppleEvent extends AuthEvent {}
+
+class SignOutWithAppleEvent extends AuthEvent {}
+
+

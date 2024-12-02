@@ -2,6 +2,7 @@
 library injection;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -13,6 +14,7 @@ import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
+import 'package:safelight/infrastructure/services/auth_service.dart';
 
 final DI = GetIt.instance;
 
@@ -60,7 +62,7 @@ Future<void> init() async {
   );
 
   DI.registerLazySingleton(
-    () => AuthBloc(),
+    () => AuthBloc(repository: DI.get<AuthRepository>()),
   );
 
   DI.registerFactory(
@@ -118,6 +120,7 @@ Future<void> init() async {
     instanceName: USECASE_SIGN_OUT_WITH_GOOGLE,
   );
 
+
   DI.registerLazySingleton<ConnectCrosswalk>(
     () => SendAcousticSignal(repository: DI()),
     instanceName: USECASE_SEND_ACOUSTIC_SIGNAL,
@@ -156,6 +159,9 @@ Future<void> init() async {
   DI.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authDataSource: DI()),
   );
+
+  DI.registerLazySingleton(() => AuthService());
+
   DI.registerLazySingleton<FlashRepository>(
     () => FlashRepositoryImpl(
       flashDataSource: DI(),
@@ -184,6 +190,7 @@ Future<void> init() async {
   DI.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(
       auth: DI(),
+      dio: Dio(),
     ),
   );
   DI.registerLazySingleton<FlashNativeDataSource>(

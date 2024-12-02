@@ -2,8 +2,9 @@ library data_source;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
+import 'dart:io' show HttpResponse, Platform;
 
+import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:safelight/data/models/auth_data_model.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:torch_light/torch_light.dart';
