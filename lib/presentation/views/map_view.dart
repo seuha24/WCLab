@@ -123,7 +123,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
   LocationSettings locationSettings = LocationSettings(
-    accuracy: LocationAccuracy.medium, // Adjust based on use case
+    accuracy: LocationAccuracy.bestForNavigation, // Adjust based on use case
     distanceFilter: 10, // Update only when the user moves 10 meters
   );
   Timer? _locationUpdateTimer;
@@ -194,13 +194,9 @@ class _NaverMapViewState extends State<NaverMapView> {
   //추가
   double searchNewPathBoundary = 30;
   int searchNewPathTime = 0;
-  //
-
-  //사용안하는 코드
-  double distanceToNextCheckpoint = double.maxFinite;
 
   // imu, gps 전환 플래그
-  bool isGps = true;
+  bool isGps = false;
 
   String checkBoudaryCondition = "";
 
@@ -218,7 +214,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   void initState() {
     super.initState();
     _initTTS();
-    _getLocation();
+    _initLocation();
     startCollectingSensorData();
     LocationPlugin.locationStream.listen((locationData) {
       setState(() {
@@ -323,47 +319,32 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   // 함수 정의
-  Map<String, double> calLatLng(
-      double startLat, double startLng, double bearing, double distanceKm) {
+  Map<String, double> calLatLng(double startLat, double startLng, double bearing, double distanceKm) {
+
     const double earthRadiusKm = 6371.0;
-
+    // 도를 라디안으로 변환하는 함수
+    double degreesToRadians(double degrees) {
+      return degrees * math.pi / 180;
+    }
+    // 라디안을 도로 변환하는 함수
+    double radiansToDegrees(double radians) {
+      return radians * 180 / math.pi;
+    }
     // 위도, 경도를 라디안으로 변환
-    double startLatRad = _degreesToRadians(startLat);
-    double startLngRad = _degreesToRadians(startLng);
-    double bearingRad = _degreesToRadians(bearing);
-
+    double startLatRad = degreesToRadians(startLat);
+    double startLngRad = degreesToRadians(startLng);
+    double bearingRad = degreesToRadians(bearing);
     // 이동 거리를 라디안으로 변환
     double distanceRad = distanceKm / earthRadiusKm;
-
     // 새로운 위도 계산
-    double newLatRad = math.asin(math.sin(startLatRad) * math.cos(distanceRad) +
-        math.cos(startLatRad) * math.sin(distanceRad) * math.cos(bearingRad));
-
+    double newLatRad = math.asin(math.sin(startLatRad) * math.cos(distanceRad) + math.cos(startLatRad) * math.sin(distanceRad) * math.cos(bearingRad));
     // 새로운 경도 계산
-    double newLngRad = startLngRad +
-        math.atan2(
-            math.sin(bearingRad) *
-                math.sin(distanceRad) *
-                math.cos(startLatRad),
-            math.cos(distanceRad) -
-                math.sin(startLatRad) * math.sin(newLatRad));
-
+    double newLngRad = startLngRad + math.atan2(math.sin(bearingRad) * math.sin(distanceRad) * math.cos(startLatRad), math.cos(distanceRad) - math.sin(startLatRad) * math.sin(newLatRad));
     // 라디안을 다시 도로 변환
-    double newLat = _radiansToDegrees(newLatRad);
-    double newLng = _radiansToDegrees(newLngRad);
-
+    double newLat = radiansToDegrees(newLatRad);
+    double newLng = radiansToDegrees(newLngRad);
     // 결과 반환
     return {'latitude': newLat, 'longitude': newLng};
-  }
-
-  // 도를 라디안으로 변환하는 함수
-  double _degreesToRadians(double degrees) {
-    return degrees * math.pi / 180;
-  }
-
-  // 라디안을 도로 변환하는 함수
-  double _radiansToDegrees(double radians) {
-    return radians * 180 / math.pi;
   }
 
   @override
@@ -382,73 +363,124 @@ class _NaverMapViewState extends State<NaverMapView> {
     await tts.speak(text);
   }
 
+  double? _lastDirection; // 마지막 방향 값
+  final double _threshold = 1.0; // 방향 변화 임계값 (단위: 도)
+  late StreamSubscription<Position> positionStream;
+
   // imu랑 gps 조건
   Future<void> _initLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-      // geolocator 패키지 설치 후 객체 생성
-      desiredAccuracy: LocationAccuracy.high,
+    final LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5,
     );
-
+    Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
     current_latitude = position.latitude;
     current_longitude = position.longitude;
-
-    // current_latitude = 37.55195;
-    // current_longitude = 127.14409;
     initialLatitude = current_latitude;
     initialLongitude = current_longitude;
-
     beforeLatitude = current_latitude;
     beforeLongitude = current_longitude;
-
     yawRate = compassValue * angleToRadian;
 
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      s_accuracy = position.accuracy; //확인하기
-      _getLocation();
+    debugPrint('$current_latitude, $current_longitude');
+    setState(() {
+      isLoading = false;
     });
+
+    // 나침반계에서 이벤트 올 때만 지도 방향 리프레시 하도록 변경
+    // 추후 Geolocator의 getHeadingStream()으로 변경해봐도 좋음
+    FlutterCompass.events?.listen((event) {
+      double? newDirection = event.heading;
+      if (newDirection != null) {
+        if (_lastDirection == null ||
+            (newDirection - _lastDirection!).abs() >= _threshold) {
+          _lastDirection = newDirection; // 마지막 방향 업데이트
+          _updateMapPosition(current_latitude, current_longitude, compassValue);
+          yawRate = compassValue * angleToRadian;
+        }
+      }
+    });
+
+    // GPS 값 변화가 있을 때
+    positionStream = Geolocator.getPositionStream(locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5
+      )
+    ).listen((Position position) {
+      s_accuracy = position.accuracy;
+      isLoading = false;
+      current_latitude = position.latitude;
+      current_longitude = position.longitude;
+      initialLatitude = current_latitude;
+      initialLongitude = current_longitude;
+      resetSpeedUtilsValue();
+      if(position.accuracy < accuracyNumber) {
+        isGps = true;
+        _updateCurrentLocationMarker(current_latitude, current_longitude);
+        _updateMapPosition(current_latitude, current_longitude, compassValue);
+      } 
+    });
+
+    _getLocation();
   }
 
+  int accuracyNumber = 15; //GPS 감도 조절
+
   Future<void> _getLocation() async {
-    // 현위치 수집 함수 (비동기)
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        // geolocator 패키지 설치 후 객체 생성
-        desiredAccuracy: LocationAccuracy.bestForNavigation,
-      );
-      if (position.accuracy >= 15) {
+    _updateMapPosition(current_latitude, current_longitude, compassValue);
+    _updateCurrentLocationMarker(current_latitude, current_longitude);
+
+
+    Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+    current_latitude = position.latitude;
+    current_longitude = position.longitude;
+    initialLatitude = current_latitude;
+    initialLongitude = current_longitude;
+    resetSpeedUtilsValue();
+    if(position.accuracy < accuracyNumber) {
+      isGps = true;
+      _updateCurrentLocationMarker(current_latitude, current_longitude);
+      _updateMapPosition(current_latitude, current_longitude, compassValue);
+    } 
+    s_accuracy = position.accuracy;
+
+    subscribeToSensor<UserAccelerometerEvent>(
+      sensorStream: userAccelerometerEventStream(
+        samplingPeriod: SensorInterval.normalInterval),
+      onEvent: (event) {
+        final now = DateTime.now();
+        positionUpdate(event, Duration(seconds: 1));
+        _userAccelerometerEvent = event;
+        if (_userAccelerometerUpdateTime != null) {
+          final interval = now.difference(_userAccelerometerUpdateTime!);
+          if (interval > _ignoreDuration) {
+            _userAccelerometerLastInterval = interval.inSeconds;
+          }
+        }
+        _userAccelerometerUpdateTime = now;
+      },
+      onError: (e) {
+        showErrorDialog("userAccerometer Sensor");
+      },
+    );
+
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if(position.accuracy >= accuracyNumber) {
         isGps = false;
         velocityX = _filteringX.calculateWeightedAverage(); //필터링된 x속도
         velocityY = _filteringY.calculateWeightedAverage(); //필터링된 y속도
-
+  
         current_latitude = newlatitude;
         current_longitude = newlongitude;
-        isLoading = false;
-      } else if (position.accuracy < 15) {
+        if(beforeLatitude != current_latitude || beforeLongitude != current_longitude) {
+          _updateMapPosition(current_latitude, current_longitude, compassValue);
+          _updateCurrentLocationMarker(current_latitude, current_longitude);
+
+        }
+      } else {
         isGps = true;
-        current_latitude = position.latitude;
-        current_longitude = position.longitude;
-
-        initialLatitude = current_latitude;
-        initialLongitude = current_longitude;
-        resetSpeedUtilsValue();
-        isLoading = false;
       }
-
-      if(beforeLatitude != current_latitude || beforeLongitude != current_longitude)
-      {
-      // _updateCurrentLocationMarker(current_latitude, current_longitude);
-        _updateMapPosition(current_latitude, current_longitude, compassValue);
-        _updateCurrentLocationMarker(current_latitude, current_longitude);
-
-      }
-
-      // });
-    } catch (e) {
-      print("현위치 수신에러 $e"); // 현위치를 제대로 받아오지 못했을 경우 안내문구 출력
-      setState(() {
-        isLoading = false; // 데이터 로딩이 실패했으므로 로딩 상태를 false로 설정합니다.
-      });
-    }
+    });
   }
 
   // t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
@@ -706,7 +738,6 @@ class _NaverMapViewState extends State<NaverMapView> {
           samplingPeriod: SensorInterval.normalInterval),
       onEvent: (event) {
         final now = DateTime.now();
-        positionUpdate(event, Duration(seconds: 1));
         _userAccelerometerEvent = event;
         if (_userAccelerometerUpdateTime != null) {
           final interval = now.difference(_userAccelerometerUpdateTime!);
@@ -720,25 +751,24 @@ class _NaverMapViewState extends State<NaverMapView> {
         showErrorDialog("userAccerometer Sensor");
       },
     );
-    subscribeToSensor<GyroscopeEvent>(
-      sensorStream:
-          gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
-      onEvent: (GyroscopeEvent event) {
-        final now = DateTime.now();
-        yawRateupdate(event, Duration(seconds: 1));
-        _gyroscopeEvent = event;
-        if (_gyroscopeUpdateTime != null) {
-          final interval = now.difference(_gyroscopeUpdateTime!);
-          if (interval > _ignoreDuration) {
-            _gyroscopeLastInterval = interval.inSeconds;
-          }
-        }
-        _gyroscopeUpdateTime = now;
-      },
-      onError: (e) {
-        showErrorDialog("Gyroscope Sensor");
-      },
-    );
+    // subscribeToSensor<GyroscopeEvent>(
+    //   sensorStream:
+    //       gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
+    //   onEvent: (GyroscopeEvent event) {
+    //     final now = DateTime.now();
+    //     _gyroscopeEvent = event;
+    //     if (_gyroscopeUpdateTime != null) {
+    //       final interval = now.difference(_gyroscopeUpdateTime!);
+    //       if (interval > _ignoreDuration) {
+    //         _gyroscopeLastInterval = interval.inSeconds;
+    //       }
+    //     }
+    //     _gyroscopeUpdateTime = now;
+    //   },
+    //   onError: (e) {
+    //     showErrorDialog("Gyroscope Sensor");
+    //   },
+    // );
   }
 
   // 센서 데이터 수집을 중지하는 메소드
@@ -1147,21 +1177,12 @@ class _NaverMapViewState extends State<NaverMapView> {
   void _updateCurrentLocationMarker(current_latitude, current_longitude) async {
     // 기존 마커를 제거하고 새 마커를 추가
     if (_currentLocationMarker != null) {
-      try {
-        // print("마커가 존재합니다. 삭제 시도 중...");
-        mapController.deleteOverlay(
-          NOverlayInfo(type: NOverlayType.marker, id: 'current_location'),
-        );
-      } catch (e) {
-        print("오버레이 삭제 중 에러 발생: $e");
-      }
-    } else {
-      print("삭제할 마커가 없습니다.");
+      mapController.deleteOverlay(
+        NOverlayInfo(type: NOverlayType.marker, id: 'current_location'),
+      );
     }
-
     // GPS에 따라 마커 색상 설정
     final Color markerColor = isGps ? Colors.blue : Colors.red;
-
     final iconImage = await NOverlayImage.fromWidget(
         widget: Icon(
           Icons.circle,
@@ -1176,8 +1197,6 @@ class _NaverMapViewState extends State<NaverMapView> {
         id: 'current_location',
         position: NLatLng(current_latitude, current_longitude),
         icon: iconImage);
-
-    // 마커를 지도에 추가
     mapController.addOverlay(_currentLocationMarker!);
   }
 
