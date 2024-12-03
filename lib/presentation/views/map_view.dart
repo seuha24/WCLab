@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 class BranchInfo {
   LatLng point; // 모든 경로값
@@ -122,7 +122,10 @@ class _NaverMapViewState extends State<NaverMapView> {
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
-
+  LocationSettings locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.medium, // Adjust based on use case
+    distanceFilter: 10, // Update only when the user moves 10 meters
+  );
   Timer? _locationUpdateTimer;
   NMarker? _currentLocationMarker;
   NMarker? _testMarker;
@@ -207,9 +210,9 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   //가중이동평균필터 인스턴스 생성
   final WeightedAverageFilter _filteringX =
-  WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
+      WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
   final WeightedAverageFilter _filteringY =
-  WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
+      WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
 
   @override
   void initState() {
@@ -314,7 +317,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     double distanceKm = math.sqrt(px * px + py * py) / 1000.0;
     double bearing = math.atan2(py, px) * radianToAngle; // 방향 이 부분 수정
     Map<String, double> latLng =
-    calLatLng(initialLatitude, initialLongitude, bearing, distanceKm);
+        calLatLng(initialLatitude, initialLongitude, bearing, distanceKm);
     newlatitude = latLng['latitude']!;
     newlongitude = latLng['longitude']!;
   }
@@ -366,6 +369,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   @override
   void dispose() {
     _locationUpdateTimer?.cancel();
+    stopCollectingSensorData();
     super.dispose();
   }
 
@@ -409,7 +413,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     try {
       Position position = await Geolocator.getCurrentPosition(
         // geolocator 패키지 설치 후 객체 생성
-        desiredAccuracy: LocationAccuracy.high,
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
       );
       if (position.accuracy >= 15) {
         isGps = false;
@@ -430,13 +434,13 @@ class _NaverMapViewState extends State<NaverMapView> {
         isLoading = false;
       }
 
-      // if(beforeLatitude != current_latitude || beforeLongitude != current_longitude)
-      // {
+      if(beforeLatitude != current_latitude || beforeLongitude != current_longitude)
+      {
       // _updateCurrentLocationMarker(current_latitude, current_longitude);
-      _updateMapPosition(current_latitude, current_longitude, compassValue);
-      _updateCurrentLocationMarker(current_latitude, current_longitude);
+        _updateMapPosition(current_latitude, current_longitude, compassValue);
+        _updateCurrentLocationMarker(current_latitude, current_longitude);
 
-      // }
+      }
 
       // });
     } catch (e) {
@@ -699,15 +703,15 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
     subscribeToSensor<UserAccelerometerEvent>(
       sensorStream: userAccelerometerEventStream(
-          samplingPeriod: Duration(milliseconds: 20)),
+          samplingPeriod: SensorInterval.normalInterval),
       onEvent: (event) {
         final now = DateTime.now();
-        positionUpdate(event, Duration(milliseconds: 20));
+        positionUpdate(event, Duration(seconds: 1));
         _userAccelerometerEvent = event;
-        if (_userAccelerometerUpdateTime  != null) {
+        if (_userAccelerometerUpdateTime != null) {
           final interval = now.difference(_userAccelerometerUpdateTime!);
           if (interval > _ignoreDuration) {
-            _userAccelerometerLastInterval = interval.inMilliseconds;
+            _userAccelerometerLastInterval = interval.inSeconds;
           }
         }
         _userAccelerometerUpdateTime = now;
@@ -718,15 +722,15 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
     subscribeToSensor<GyroscopeEvent>(
       sensorStream:
-      gyroscopeEventStream(samplingPeriod: Duration(milliseconds: 20)),
+          gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
       onEvent: (GyroscopeEvent event) {
         final now = DateTime.now();
-        yawRateupdate(event, Duration(milliseconds: 20));
+        yawRateupdate(event, Duration(seconds: 1));
         _gyroscopeEvent = event;
         if (_gyroscopeUpdateTime != null) {
           final interval = now.difference(_gyroscopeUpdateTime!);
           if (interval > _ignoreDuration) {
-            _gyroscopeLastInterval = interval.inMilliseconds;
+            _gyroscopeLastInterval = interval.inSeconds;
           }
         }
         _gyroscopeUpdateTime = now;
@@ -809,7 +813,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   void indexUpdate() {
     List<BranchInfo> currentWindow =
-    getCurrentWindow(branchinfo, currentIndex, 5);
+        getCurrentWindow(branchinfo, currentIndex, 5);
     int nearestIndex = moveIndex(currentWindow);
 
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
@@ -846,9 +850,9 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   double turnUpdate2(
-      double bearingToPoint,
-      double compassValue,
-      ) {
+    double bearingToPoint,
+    double compassValue,
+  ) {
     double compassTurn = compassValue - bearingToPoint;
 
     return compassTurn;
@@ -906,13 +910,13 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   Map<String, double> breakPoint(
-      double currentIndexLongitude,
-      double currentIndexLatitude,
-      double targetIndexLongitude,
-      double targetIndexLatitude,
-      double current_latitude,
-      double current_longitude,
-      ) {
+    double currentIndexLongitude,
+    double currentIndexLatitude,
+    double targetIndexLongitude,
+    double targetIndexLatitude,
+    double current_latitude,
+    double current_longitude,
+  ) {
     // 주어진 위경도를 라디안으로 변환
 
     //현재 인덱스
@@ -1062,7 +1066,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   //branch일 경우의 branchinfo[currentIndex]를 전부 currentWindowValue로 바꿈
   void checkBoundary() {
     List<BranchInfo> currentWindow =
-    getCurrentWindow(branchinfo, currentIndex, 5);
+        getCurrentWindow(branchinfo, currentIndex, 5);
     double beforeMinDistanceToPath = double.maxFinite;
     //점과 직선 최소거리
     for (int i = 0; i < currentWindow.length - 1; i++) {
@@ -1073,10 +1077,10 @@ class _NaverMapViewState extends State<NaverMapView> {
 
       if (currentWindowValue.branch == true) {
         circularDistance = calculateDistance(
-            currentWindowValue.point.latitude,
-            currentWindowValue.point.longitude,
-            current_latitude,
-            current_longitude) *
+                currentWindowValue.point.latitude,
+                currentWindowValue.point.longitude,
+                current_latitude,
+                current_longitude) *
             1000;
 
         checkBoudaryCondition = "정방향, 브랜치";
@@ -1222,352 +1226,357 @@ class _NaverMapViewState extends State<NaverMapView> {
     return Scaffold(
       body: isLoading
           ? Center(
-        // 데이터를 로딩하는 동안 로딩 표시기를 표시합니다.
-        child: CircularProgressIndicator(),
-      )
+              // 데이터를 로딩하는 동안 로딩 표시기를 표시합니다.
+              child: CircularProgressIndicator(),
+            )
           : Stack(
-        children: [
-          NaverMap(
-            options: NaverMapViewOptions(
-              indoorEnable: true,
+              children: [
+                NaverMap(
+                  options: NaverMapViewOptions(
+                    indoorEnable: true,
 
-              initialCameraPosition: NCameraPosition(
-                target: NLatLng(current_latitude, current_longitude),
-                zoom: 18.5, // 지도의 확대 정도
-                bearing: compassValue, // 지도의 방향
-                tilt: 0, // 지도의 입체감 정도
-              ),
-              mapType: NMapType.basic,
-              activeLayerGroups: [
-                NLayerGroup.building,
-                NLayerGroup.transit,
+                    initialCameraPosition: NCameraPosition(
+                      target: NLatLng(current_latitude, current_longitude),
+                      zoom: 18.5, // 지도의 확대 정도
+                      bearing: compassValue, // 지도의 방향
+                      tilt: 0, // 지도의 입체감 정도
+                    ),
+                    mapType: NMapType.basic,
+                    activeLayerGroups: [
+                      NLayerGroup.building,
+                      NLayerGroup.transit,
+                    ],
+                    locationButtonEnable: false, // 현위치 표시 버튼..
+                  ),
+                  onMapReady: (controller) {
+                    print('네이버 맵 로딩됨');
+                    mapController = controller;
+                    _updateMapPosition(
+                        current_latitude, current_longitude, compassValue);
+                  },
+                  // 지도를 클릭했을 때 실행할 이벤트를 추가하는 곳
+                  onMapTapped: (NPoint point, NLatLng latLng) {
+                    // 지도를 클릭했을 때 tts로 남은 거리 알려주기
+                    int meters = (remain_distance * 1000).round();
+                    _speakText('다음 안내까지 ${meters}미터 남았습니다.');
+
+                    s_latitude = _currentLocation!['latitude'];
+                    s_longitude = _currentLocation!['longitude'];
+                  },
+                ),
+                Positioned(
+                  top: 65.0,
+                  left: 20.0,
+                  right: 20.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 190, 164, 164),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: GestureDetector(
+                      onTap: () async {
+                        GeoLocation? newstartSelectedLocation =
+                            await Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    StartSearch(
+                              searchValue: searchLocation,
+                            ),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              const begin = 0.0;
+
+                              const end = 1.0;
+
+                              const curve = Curves.easeInOutQuart;
+
+                              var tween = Tween(begin: begin, end: end)
+                                  .chain(CurveTween(curve: curve));
+
+                              var fadeAnimation = animation.drive(tween);
+
+                              return FadeTransition(
+                                opacity: fadeAnimation,
+                                child: child,
+                              );
+                            },
+                          ),
+                        );
+
+                        // Navigator.push가 완료된 후에만 setState()를 호출
+
+                        if (newstartSelectedLocation != null) {
+                          setState(() {
+                            startSelectedLocation = newstartSelectedLocation;
+
+                            isStart = true;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.6),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            searchLocation.isEmpty
+                                ? Text(
+                                    '출발지를 입력하세요.',
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.grey),
+                                  )
+                                : Text(
+                                    searchLocation,
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.black),
+                                  ),
+                            Spacer(),
+                            Icon(Icons.search),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 122.0,
+                  left: 20.0,
+                  right: 20.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 190, 164, 164),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: GestureDetector(
+                      onTap: () async {
+                        GeoLocation? newSelectedLocation = await Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    DesSearch(
+                              destinationValue: destinationLocation,
+                            ),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              const begin = 0.0;
+                              const end = 1.0;
+                              const curve = Curves.easeInOutQuart;
+
+                              var tween = Tween(begin: begin, end: end)
+                                  .chain(CurveTween(curve: curve));
+
+                              var fadeAnimation = animation.drive(tween);
+
+                              return FadeTransition(
+                                opacity: fadeAnimation,
+                                child: child,
+                              );
+                            },
+                          ),
+                        );
+                        if (newSelectedLocation != null) {
+                          setState(() {
+                            selectedLocation = newSelectedLocation;
+                          });
+                          if (isStart == true) {
+                            await _getGeometry(startSelectedLocation!.lat,
+                                startSelectedLocation!.lng); // 새로운 목적지로 지도 업데이트
+                          } else if (isStart == false) {
+                            await _getGeometry(current_latitude,
+                                current_longitude); // 새로운 목적지로 지도 업데이트
+                          }
+
+                          // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
+                          // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
+                          for (int i = 0; i < branchinfo.length - 1; i++) {
+                            // 변경할 값으로 갱신합니다.
+                            double newBearingValue = calculateBearing(
+                                branchinfo[i].point.latitude,
+                                branchinfo[i].point.longitude,
+                                branchinfo[i + 1].point.latitude,
+                                branchinfo[i + 1].point.longitude);
+                            // bearingTobranch 값을 변경합니다.
+                            branchinfo[i].bearingToPoint = newBearingValue;
+                          }
+
+                          yawRate2 = turnUpdate2(
+                                  branchinfo[targetIndex].bearingToPoint,
+                                  compassValue) *
+                              angleToRadian;
+                          // print("compassValue: $compassValue");
+                          // print("yawRateTurn2: $yawRateTurn2");
+                          // print("각도 초기화");
+
+                          // 주기적으로 거리계산, 경로이탈 탐지를 위한 계산을 하는 곳.
+
+                          Timer.periodic(Duration(seconds: 2), (timer) async {
+                            // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remain_distance 변수에 삽입
+                            checkBoundary(); //경계이탈, 인덱스
+                            indexUpdate();
+
+                            remain_startpoint = calculateDistance(
+                                current_latitude,
+                                current_longitude,
+                                branchinfo[0].point.latitude,
+                                branchinfo[0].point.longitude);
+
+                            // print("yawRateTurn2 : $yawRateTurn2");
+                            // print("current_latitude : $current_latitude");
+                            // print("current_longitude : $current_longitude");
+
+                            if (remain_startpoint < 0.015) {
+                              isStart = false;
+                            }
+                            if (isStart == false) {
+                              if (branchinfo.isNotEmpty &&
+                                  targetIndex < branchinfo.length) {
+                                branchTargetIndex = targetIndex;
+
+                                while (branchTargetIndex < branchinfo.length &&
+                                    !branchinfo[branchTargetIndex].branch) {
+                                  branchTargetIndex++;
+                                }
+                                if (branchinfo[branchTargetIndex].branch) {
+                                  remain_distance = calculateDistance(
+                                      current_latitude,
+                                      current_longitude,
+                                      branchinfo[branchTargetIndex]
+                                          .point
+                                          .latitude,
+                                      branchinfo[branchTargetIndex]
+                                          .point
+                                          .longitude);
+                                  clock = getGuidanceDirection(
+                                      branchinfo[currentIndex].point.longitude,
+                                      branchinfo[currentIndex].point.latitude,
+                                      branchinfo[targetIndex].point.longitude,
+                                      branchinfo[targetIndex].point.latitude,
+                                      current_latitude,
+                                      current_longitude,
+                                      yawRateTurn2,
+                                      branchinfo[currentIndex].bearingToPoint);
+                                }
+
+                                // 추가적인 로직
+                              } else {
+                                // branchinfo가 비어 있거나 targetIndex가 유효하지 않을 때의 처리 로직
+                                print(
+                                    "branchinfo 리스트가 비어 있거나 targetIndex가 유효하지 않습니다.");
+                              }
+
+                              // 목표지점까지의 남은 거리가 15m 이내라면
+                              //반복되어서 안내문이 나오는 이유
+                              if (remain_distance < 0.015) {
+                                // 만약 그 목표 지점이 횡단보도라면
+                                if (branchinfo[currentIndex].crosswalk ==
+                                    true) {
+                                  // 경광등을 켜라.
+                                  final result =
+                                      await flashOnWithWeather(NoParams());
+                                  if (result.isLeft()) {
+                                    print('안전 경광등을 사용할 수 없습니다.');
+                                  } else {
+                                    print('안전 경광등이 켜졌습니다.');
+                                  }
+                                  _speakText('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
+                                }
+
+                                if (branchinfo[targetIndex].branch == true) {
+                                  _speakText(
+                                      '${branchinfo[targetIndex].description}하세요.');
+                                }
+                              }
+                              if (currentIndex > 0 &&
+                                      (branchinfo[currentIndex].bearingToPoint -
+                                                  compassValue)
+                                              .abs() <=
+                                          18 ||
+                                  (branchinfo[currentIndex].bearingToPoint -
+                                              compassValue)
+                                          .abs() >=
+                                      342) {
+                                Vibration.vibrate(duration: 200);
+                                print(
+                                    "경로내 진동 베어링 값 ${(branchinfo[currentIndex].bearingToPoint - compassValue)}");
+                              }
+                              //임시 주석
+                              // 경로 이탈 시 경로이탈 안내
+                              if (outOfBound) {
+                                Vibration.vibrate(duration: 100);
+                                // _speakText("경계이탈");
+                                print('경계이탈');
+                                print(searchNewPath);
+                                _speakText(clock);
+                                // 경로 재검색 로직 추가
+                                if (searchNewPath) {
+                                  searchNewPathTime++;
+                                  if (searchNewPathTime >= 5) {
+                                    await _getGeometry(current_latitude,
+                                        current_longitude); // 새로운 목적지로 지도 업데이트
+
+                                    _speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
+                                    searchNewPathTime = 0;
+                                  }
+                                } else {
+                                  searchNewPathTime = 0;
+                                }
+                              } else {}
+                            } else if (isStart == true) {
+                              _speakText("출발지로 이동하세요.");
+                            }
+                          });
+                        }
+                      },
+                      child: Container(
+                        // 버튼 모양의 컨테이너
+                        padding: EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.6), // 그림자 색상
+                              spreadRadius: 2, // 그림자 확산 정도
+                              blurRadius: 5, // 그림자 흐림 정도
+                              offset: Offset(0, 2), // 그림자의 위치 (가로, 세로)
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            destinationLocation.isEmpty
+                                ? Text(
+                                    '목적지를 입력하세요.',
+                                    style: TextStyle(
+                                        fontSize: 17, color: Colors.grey),
+                                  )
+                                : Text(
+                                    destinationLocation,
+                                    style: TextStyle(fontSize: 17),
+                                  ),
+                            Spacer(),
+                            Icon(Icons.search),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
-              locationButtonEnable: false, // 현위치 표시 버튼..
             ),
-            onMapReady: (controller) {
-              print('네이버 맵 로딩됨');
-              mapController = controller;
-              _updateMapPosition(
-                  current_latitude, current_longitude, compassValue);
-            },
-            // 지도를 클릭했을 때 실행할 이벤트를 추가하는 곳
-            onMapTapped: (NPoint point, NLatLng latLng) {
-              // 지도를 클릭했을 때 tts로 남은 거리 알려주기
-              int meters = (remain_distance * 1000).round();
-              _speakText('다음 안내까지 ${meters}미터 남았습니다.');
-
-              s_latitude = _currentLocation!['latitude'];
-              s_longitude = _currentLocation!['longitude'];
-            },
-          ),
-          Positioned(
-            top: 65.0,
-            left: 20.0,
-            right: 20.0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 190, 164, 164),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: GestureDetector(
-                onTap: () async {
-                  GeoLocation? newstartSelectedLocation =
-                  await Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder:
-                          (context, animation, secondaryAnimation) =>
-                          StartSearch(searchValue: searchLocation,),
-                      transitionsBuilder: (context, animation,
-                          secondaryAnimation, child) {
-                        const begin = 0.0;
-
-                        const end = 1.0;
-
-                        const curve = Curves.easeInOutQuart;
-
-                        var tween = Tween(begin: begin, end: end)
-                            .chain(CurveTween(curve: curve));
-
-                        var fadeAnimation = animation.drive(tween);
-
-                        return FadeTransition(
-                          opacity: fadeAnimation,
-                          child: child,
-                        );
-                      },
-                    ),
-                  );
-
-                  // Navigator.push가 완료된 후에만 setState()를 호출
-
-                  if (newstartSelectedLocation != null) {
-                    setState(() {
-                      startSelectedLocation = newstartSelectedLocation;
-
-                      isStart = true;
-                    });
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.6),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      searchLocation.isEmpty ?
-                      Text(
-                        '출발지를 입력하세요.',
-                        style:
-                        TextStyle(fontSize: 17, color: Colors.grey),
-                      ) :
-                      Text(
-                        searchLocation,
-                        style: TextStyle(fontSize: 17, color: Colors.black),
-                      ),
-                      Spacer(),
-                      Icon(Icons.search),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 118.0,
-            left: 20.0,
-            right: 20.0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 190, 164, 164),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: GestureDetector(
-                onTap: () async {
-                  GeoLocation? newSelectedLocation = await Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder:
-                          (context, animation, secondaryAnimation) =>
-                          DesSearch(destinationValue: destinationLocation,),
-                      transitionsBuilder: (context, animation,
-                          secondaryAnimation, child) {
-                        const begin = 0.0;
-                        const end = 1.0;
-                        const curve = Curves.easeInOutQuart;
-
-                        var tween = Tween(begin: begin, end: end)
-                            .chain(CurveTween(curve: curve));
-
-                        var fadeAnimation = animation.drive(tween);
-
-                        return FadeTransition(
-                          opacity: fadeAnimation,
-                          child: child,
-                        );
-                      },
-                    ),
-                  );
-                  if (newSelectedLocation != null) {
-                    setState(() {
-                      selectedLocation = newSelectedLocation;
-                    });
-                    if (isStart == true) {
-                      await _getGeometry(startSelectedLocation!.lat,
-                          startSelectedLocation!.lng); // 새로운 목적지로 지도 업데이트
-                    } else if (isStart == false) {
-                      await _getGeometry(current_latitude,
-                          current_longitude); // 새로운 목적지로 지도 업데이트
-                    }
-
-                    // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
-                    // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
-                    for (int i = 0; i < branchinfo.length - 1; i++) {
-                      // 변경할 값으로 갱신합니다.
-                      double newBearingValue = calculateBearing(
-                          branchinfo[i].point.latitude,
-                          branchinfo[i].point.longitude,
-                          branchinfo[i + 1].point.latitude,
-                          branchinfo[i + 1].point.longitude);
-                      // bearingTobranch 값을 변경합니다.
-                      branchinfo[i].bearingToPoint = newBearingValue;
-                    }
-
-                    yawRate2 = turnUpdate2(
-                        branchinfo[targetIndex].bearingToPoint,
-                        compassValue) *
-                        angleToRadian;
-                    // print("compassValue: $compassValue");
-                    // print("yawRateTurn2: $yawRateTurn2");
-                    // print("각도 초기화");
-
-                    // 주기적으로 거리계산, 경로이탈 탐지를 위한 계산을 하는 곳.
-
-                    Timer.periodic(Duration(seconds: 2), (timer) async {
-                      // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remain_distance 변수에 삽입
-                      checkBoundary(); //경계이탈, 인덱스
-                      indexUpdate();
-
-                      remain_startpoint = calculateDistance(
-                          current_latitude,
-                          current_longitude,
-                          branchinfo[0].point.latitude,
-                          branchinfo[0].point.longitude);
-
-                      // print("yawRateTurn2 : $yawRateTurn2");
-                      // print("current_latitude : $current_latitude");
-                      // print("current_longitude : $current_longitude");
-
-                      if (remain_startpoint < 0.015) {
-                        isStart = false;
-                      }
-                      if (isStart == false) {
-                        if (branchinfo.isNotEmpty &&
-                            targetIndex < branchinfo.length) {
-                          branchTargetIndex = targetIndex;
-
-                          while (branchTargetIndex < branchinfo.length &&
-                              !branchinfo[branchTargetIndex].branch) {
-                            branchTargetIndex++;
-                          }
-                          if (branchinfo[branchTargetIndex].branch) {
-                            remain_distance = calculateDistance(
-                                current_latitude,
-                                current_longitude,
-                                branchinfo[branchTargetIndex]
-                                    .point
-                                    .latitude,
-                                branchinfo[branchTargetIndex]
-                                    .point
-                                    .longitude);
-                            clock = getGuidanceDirection(
-                                branchinfo[currentIndex].point.longitude,
-                                branchinfo[currentIndex].point.latitude,
-                                branchinfo[targetIndex].point.longitude,
-                                branchinfo[targetIndex].point.latitude,
-                                current_latitude,
-                                current_longitude,
-                                yawRateTurn2,
-                                branchinfo[currentIndex].bearingToPoint);
-                          }
-
-                          // 추가적인 로직
-                        } else {
-                          // branchinfo가 비어 있거나 targetIndex가 유효하지 않을 때의 처리 로직
-                          print(
-                              "branchinfo 리스트가 비어 있거나 targetIndex가 유효하지 않습니다.");
-                        }
-
-                        // 목표지점까지의 남은 거리가 15m 이내라면
-                        //반복되어서 안내문이 나오는 이유
-                        if (remain_distance < 0.015) {
-                          // 만약 그 목표 지점이 횡단보도라면
-                          if (branchinfo[currentIndex].crosswalk ==
-                              true) {
-                            // 경광등을 켜라.
-                            final result =
-                            await flashOnWithWeather(NoParams());
-                            if (result.isLeft()) {
-                              print('안전 경광등을 사용할 수 없습니다.');
-                            } else {
-                              print('안전 경광등이 켜졌습니다.');
-                            }
-                            _speakText('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
-                          }
-
-                          if (branchinfo[targetIndex].branch == true) {
-                            _speakText(
-                                '${branchinfo[targetIndex].description}하세요.');
-                          }
-                        }
-                        if (currentIndex > 0 &&
-                            (branchinfo[currentIndex].bearingToPoint -
-                                compassValue)
-                                .abs() <=
-                                18 ||
-                            (branchinfo[currentIndex].bearingToPoint -
-                                compassValue)
-                                .abs() >=
-                                342) {
-                          Vibration.vibrate(duration: 200);
-                          print(
-                              "경로내 진동 베어링 값 ${(branchinfo[currentIndex].bearingToPoint - compassValue)}");
-                        }
-                        //임시 주석
-                        // 경로 이탈 시 경로이탈 안내
-                        if (outOfBound) {
-                          Vibration.vibrate(duration: 100);
-                          // _speakText("경계이탈");
-                          print('경계이탈');
-                          print(searchNewPath);
-                          _speakText(clock);
-                          // 경로 재검색 로직 추가
-                          if (searchNewPath) {
-                            searchNewPathTime++;
-                            if (searchNewPathTime >= 5) {
-                              await _getGeometry(current_latitude,
-                                  current_longitude); // 새로운 목적지로 지도 업데이트
-
-                              _speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
-                              searchNewPathTime = 0;
-                            }
-                          } else {
-                            searchNewPathTime = 0;
-                          }
-                        } else {}
-                      } else if (isStart == true) {
-                        _speakText("출발지로 이동하세요.");
-                      }
-                    });
-                  }
-                },
-                child: Container(
-                  // 버튼 모양의 컨테이너
-                  padding: EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.6), // 그림자 색상
-                        spreadRadius: 2, // 그림자 확산 정도
-                        blurRadius: 5, // 그림자 흐림 정도
-                        offset: Offset(0, 2), // 그림자의 위치 (가로, 세로)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      destinationLocation.isEmpty ?
-                      Text(
-                        '목적지를 입력하세요.',
-                        style:TextStyle(fontSize: 17, color: Colors.grey),
-                      )
-                          : Text(
-                        destinationLocation,
-                        style:
-                        TextStyle(fontSize: 17),
-                      ),
-                      Spacer(),
-                      Icon(Icons.search),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
