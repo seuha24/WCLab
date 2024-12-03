@@ -28,7 +28,7 @@ part 'initializer.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NaverMapSdk.instance.initialize(
-    clientId: 'pzijwnqrpi',
+    clientId: '5eprka27uz',
     onAuthFailed: (ex) {
       print("********* 네이버맵 인증오류 : $ex *********");
     },
