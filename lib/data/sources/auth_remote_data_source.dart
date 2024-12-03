@@ -203,7 +203,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token) async {
     try {
       final response = await dio.post<Map<String, dynamic>>(
-        'https://backend.catholicuniv.pillowstudio.kr/auth/apple/login',
+        'https://backend.catholicuniv.pillowstudio.kr/auth/apple/token',
         data: {
           'token': token,
         },

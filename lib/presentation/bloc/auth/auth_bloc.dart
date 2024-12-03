@@ -63,6 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEvent event,
     Emitter<AuthState> emit,
   ) async {
+    debugPrint('Call _signInWithGoogleEvent()');
     try {
       emit(state.copyWith(googleSignInStatus: Status.inProgress));
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -113,12 +114,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       final appleProvider = AppleAuthProvider();
       final UserCredential userCredential;
-
-      userCredential =
-          await FirebaseAuth.instance.signInWithProvider(appleProvider);
+      // Firebase Sign-In
+      userCredential = await FirebaseAuth.instance.signInWithProvider(appleProvider);
 
       // Apple accessToken 가져오기
       final accessToken = userCredential.credential?.accessToken;
+
+      debugPrint('accessToken : $accessToken');
 
       if (accessToken != null) {
         // 서버로 OAuth 토큰 전송
@@ -139,18 +141,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(appleSignInStatus: Status.failure));
     } catch (e) {
       log('Unhandled error during Apple Sign-In: $e');
-      emit(state.copyWith(appleSignInStatus: Status.failure));
+      // emit(state.copyWith(appleSignInStatus: Status.failure));
     }
   }
 
   Future<void> _sendOAuthTokenToServer(
       String accessToken, OAuthType oauthType) async {
+
+    debugPrint('Call _sendOAuthTokenToServer()');
     try {
       final response = oauthType == OAuthType.google
           ? await _repository.sendGoogleOAuthTokenToServer(accessToken)
           : await _repository.sendAppleOAuthTokenToServer(accessToken);
-
-      log('response :::: $response');
 
       response.fold(
         (failure) {
@@ -167,9 +169,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
 
           // log('::::저장된 토큰::::');
-          // final loadedAuthData = await authService.loadAuthData();
-          // log('accessToken : ${loadedAuthData['accessToken']}');
-          // log('refreshToken : ${loadedAuthData['refreshToken']}');
+          final loadedAuthData = await _authService.loadAuthData();
+          log('accessToken : ${loadedAuthData['accessToken']}');
+          log('refreshToken : ${loadedAuthData['refreshToken']}');
           // log('userName : ${loadedAuthData['userName']}');
         },
       );

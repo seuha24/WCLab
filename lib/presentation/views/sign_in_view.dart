@@ -87,9 +87,9 @@ class _SignInViewState extends State<SignInView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      InkWell(
+                      GestureDetector(
                         onTap: () {
-                          // context.read<AuthBloc>().add(SignInWithAppleEvent());
+                          context.read<AuthBloc>().add(SignInWithAppleEvent());
                           debugPrint("애플로그인하기");
                         },
                         child: Container(
@@ -104,7 +104,7 @@ class _SignInViewState extends State<SignInView> {
                         ),
                       ),
                       Gap(),
-                      InkWell(
+                      GestureDetector(
                         onTap: () {
                           context.read<AuthBloc>().add(SignInWithGoogleEvent());
                         },

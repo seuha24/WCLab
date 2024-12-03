@@ -105,16 +105,17 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AuthDataModel>> sendAppleOAuthTokenToServer(String token) async {
     try {
       final response = await authDataSource.sendAppleOAuthTokenToServer(token);
-      // debugPrint('response.data : ${response.data}');
-      return Left(ServerFailure());
-      // if (response.data. == 201) {
-      //   final AuthDataModel authData = AuthDataModel.fromMap(response.data!);
-      //
-      //   return Right(authData);
-      // } else {
-      //   return Left(ServerFailure());
-      // }
+      final responseData = response.data ?? {};
+
+      if (responseData['success'] == true) {
+        final AuthDataModel authData = AuthDataModel.fromMap(responseData['data']);
+        return Right(authData);
+      } else {
+        debugPrint('Response data is NULL');
+        return Left(ServerFailure());
+      }
     } catch (e) {
+      debugPrint('Error on sendAppleOAuthTokenToServer() : $e');
       return Left(ServerFailure());
     }
   }
