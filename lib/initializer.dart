@@ -34,20 +34,35 @@ Future<void> init() async {
     [IosTextToSpeechAudioCategoryOptions.duckOthers],
   );
 
-  await [
-    Permission.location,
-    Permission.locationAlways,
-    Permission.locationWhenInUse,
+  await requestPermissions();
+}
+
+Future<void> requestPermissions() async {
+  // Step 1: Location 권한 요청 (When in Use → Always)
+  final locationWhenInUseStatus = await Permission.locationWhenInUse.request();
+
+  if (locationWhenInUseStatus.isGranted) {
+    final locationAlwaysStatus = await Permission.locationAlways.request();
+
+    if (!locationAlwaysStatus.isGranted) {
+      debugPrint('Location Always permission denied');
+    }
+  } else {
+    debugPrint('Location When in Use permission denied');
+  }
+
+  // Step 2: Bluetooth 권한 요청
+  final bluetoothPermissions = await [
     Permission.bluetooth,
     Permission.bluetoothAdvertise,
     Permission.bluetoothConnect,
-    Permission.bluetoothScan
+    Permission.bluetoothScan,
   ].request();
 
-  await [
-    Permission.bluetooth,
-    Permission.bluetoothAdvertise,
-    Permission.bluetoothConnect,
-    Permission.bluetoothScan
-  ].request();
+  // Bluetooth 권한 상태 확인
+  if (bluetoothPermissions.values.every((status) => status.isGranted)) {
+    debugPrint('All Bluetooth permissions granted');
+  } else {
+    debugPrint('One or more Bluetooth permissions denied');
+  }
 }
