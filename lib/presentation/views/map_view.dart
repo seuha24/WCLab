@@ -413,7 +413,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     try {
       Position position = await Geolocator.getCurrentPosition(
         // geolocator 패키지 설치 후 객체 생성
-        desiredAccuracy: LocationAccuracy.medium,
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
       );
       if (position.accuracy >= 15) {
         isGps = false;
@@ -434,13 +434,13 @@ class _NaverMapViewState extends State<NaverMapView> {
         isLoading = false;
       }
 
-      // if(beforeLatitude != current_latitude || beforeLongitude != current_longitude)
-      // {
+      if(beforeLatitude != current_latitude || beforeLongitude != current_longitude)
+      {
       // _updateCurrentLocationMarker(current_latitude, current_longitude);
-      _updateMapPosition(current_latitude, current_longitude, compassValue);
-      _updateCurrentLocationMarker(current_latitude, current_longitude);
+        _updateMapPosition(current_latitude, current_longitude, compassValue);
+        _updateCurrentLocationMarker(current_latitude, current_longitude);
 
-      // }
+      }
 
       // });
     } catch (e) {
