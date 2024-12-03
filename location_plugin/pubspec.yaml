@@ -35,7 +35,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.wcl.safelight.location_plugin
+        package: kr.wcl.safelight.location_plugin
         pluginClass: LocationPlugin
       ios:
         pluginClass: LocationPlugin

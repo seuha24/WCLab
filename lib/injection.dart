@@ -14,6 +14,7 @@ import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
+import 'package:safelight/infrastructure/services/auth_service.dart';
 
 final DI = GetIt.instance;
 
@@ -119,6 +120,7 @@ Future<void> init() async {
     instanceName: USECASE_SIGN_OUT_WITH_GOOGLE,
   );
 
+
   DI.registerLazySingleton<ConnectCrosswalk>(
     () => SendAcousticSignal(repository: DI()),
     instanceName: USECASE_SEND_ACOUSTIC_SIGNAL,
@@ -157,6 +159,9 @@ Future<void> init() async {
   DI.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authDataSource: DI()),
   );
+
+  DI.registerLazySingleton(() => AuthService());
+
   DI.registerLazySingleton<FlashRepository>(
     () => FlashRepositoryImpl(
       flashDataSource: DI(),

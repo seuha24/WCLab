@@ -1,5 +1,7 @@
 library repository;
 
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';

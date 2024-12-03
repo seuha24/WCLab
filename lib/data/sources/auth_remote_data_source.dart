@@ -87,8 +87,8 @@ abstract class AuthRemoteDataSource {
   Future<void> signInWithGoogle();
   Future<void> signOutWithGoogle();
 
-  Future<Response> sendGoogleOAuthTokenToServer(String token);
-  Future<Response> sendAppleOAuthTokenToServer(String token);
+  Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(String token);
+  Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token);
 }
 
 /// Auth 데이터 처리를 위한 [AuthRemoteDataSource]의 구현부이다.
@@ -184,18 +184,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
 
   @override
-  Future<Response> sendGoogleOAuthTokenToServer(String token) async {
+  Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(String token) async {
     try {
-      final response = await dio.post(
+      final response = await dio.post<Map<String, dynamic>>(
         'https://backend.catholicuniv.pillowstudio.kr/auth/google/token',
         data: {
           'token': token,
         },
       );
-
-      if (response.statusCode != 201) {
-        throw ServerException();
-      }
 
       return response;
     } catch (e) {
@@ -204,18 +200,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Response> sendAppleOAuthTokenToServer(String token) async {
+  Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token) async {
     try {
-      final response = await dio.post(
-        '/auth/apple/login',
+      final response = await dio.post<Map<String, dynamic>>(
+        'https://backend.catholicuniv.pillowstudio.kr/auth/apple/token',
         data: {
           'token': token,
         },
       );
 
-      if (response.statusCode != 201) {
-        throw ServerException();
-      }
       return response;
     } catch (e) {
       throw ServerException(); // 실패 시 예외 처리

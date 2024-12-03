@@ -1,4 +1,4 @@
-package com.wcl.safelight.location_plugin_example
+package kr.wcl.safelight.location_plugin_example
 
 import io.flutter.embedding.android.FlutterActivity
 

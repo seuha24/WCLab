@@ -1,1 +1,30 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"safelight-4ca77","appId":"1:502374392525:android:565c1deda6ccb3f9a2ff84","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"safelight-4ca77","appId":"1:502374392525:ios:2a941ab9e561b68ba2ff84","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"safelight-4ca77","configurations":{"android":"1:502374392525:android:565c1deda6ccb3f9a2ff84","ios":"1:502374392525:ios:2a941ab9e561b68ba2ff84"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "safelight-kr",
+          "appId": "1:474768302969:android:7281dbf9e4cba4c0b4c5a8",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "safelight-kr",
+          "appId": "1:474768302969:ios:c126f18c1c867604b4c5a8",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "safelight-kr",
+          "configurations": {
+            "android": "1:474768302969:android:7281dbf9e4cba4c0b4c5a8",
+            "ios": "1:474768302969:ios:c126f18c1c867604b4c5a8"
+          }
+        }
+      }
+    }
+  }
+}
