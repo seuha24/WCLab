@@ -7,20 +7,116 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:502374392525:android:80d6f743f46f565da2ff84",
+        "android_client_info": {
+          "package_name": "com.example.flutter_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502374392525-2f9cjnlsc7hav6867jnf857sgah4tcmo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB3aeeUTqk4zr2UmT-QGNsVi8U-Z5USIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502374392525-2f9cjnlsc7hav6867jnf857sgah4tcmo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "502374392525-b72oi8bljqkf1mm7hit71h0elgsmffl4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterFirebase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502374392525:android:b424ad07af7f8afaa2ff84",
+        "android_client_info": {
+          "package_name": "com.wcl.safelight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502374392525-8jdari7ht81ht2dgf10nu640bq5p2ad2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wcl.safelight",
+            "certificate_hash": "8a8088a6a6945e577ca46544bdf827fe653946c0"
+          }
+        },
+        {
+          "client_id": "502374392525-c1v1ped42na5ee290ljej896truiq72j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wcl.safelight",
+            "certificate_hash": "eaa6b57cbd2b7b2d1dc4041b6e23d1ec74f95e7c"
+          }
+        },
+        {
+          "client_id": "502374392525-jah47ie5nf954210t6sahabpmet6nea7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wcl.safelight",
+            "certificate_hash": "57cf54e689d523b74cafc68a5b1d29805d6f97bf"
+          }
+        },
+        {
+          "client_id": "502374392525-s61kpsbrb0b6ue4fg0k1uclq5msj4p9o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wcl.safelight",
+            "certificate_hash": "217c0eabd3fd91a0c4b94864191a426ad015490d"
+          }
+        },
+        {
+          "client_id": "502374392525-2f9cjnlsc7hav6867jnf857sgah4tcmo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB3aeeUTqk4zr2UmT-QGNsVi8U-Z5USIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502374392525-2f9cjnlsc7hav6867jnf857sgah4tcmo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "502374392525-b72oi8bljqkf1mm7hit71h0elgsmffl4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterFirebase"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:502374392525:android:565c1deda6ccb3f9a2ff84",
         "android_client_info": {
           "package_name": "kr.wcl.safelight"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "502374392525-evb0c88bus866kcdr3okqrt3r80eunvd.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "kr.wcl.safelight",
-            "certificate_hash": "69e3206f69986503dc2ee2158fd888494b5eca21"
-          }
-        },
         {
           "client_id": "502374392525-2f9cjnlsc7hav6867jnf857sgah4tcmo.apps.googleusercontent.com",
           "client_type": 3

@@ -1,4 +1,4 @@
-package com.wcl.safelight.location_plugin
+package kr.wcl.safelight.location_plugin
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
