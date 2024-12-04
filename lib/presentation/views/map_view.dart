@@ -485,23 +485,6 @@ class _NaverMapViewState extends State<NaverMapView> {
     _updateCurrentLocationMarker(initialLatitude, initialLongitude);
     s_accuracy = position.accuracy;
 
-    // Timer.periodic(Duration(seconds: 1), (timer) {
-    //   if(position.accuracy >= accuracyNumber) {
-    //     isGps = false;
-    //     velocityX = _filteringX.calculateWeightedAverage(); //필터링된 x속도
-    //     velocityY = _filteringY.calculateWeightedAverage(); //필터링된 y속도
-
-    //     currentLatitude = ImuLatitude;
-    //     currentLongitude = ImuLongitude;
-    //     if(beforeLatitude != currentLatitude || beforeLongitude != currentLongitude) {
-    //       _updateMapPosition(currentLatitude, currentLongitude, compassValue);
-    //       _updateCurrentLocationMarker(currentLatitude, currentLongitude);
-
-    //     }
-    //   } else {
-    //     isGps = true;
-    //   }
-    // });
   }
 
   // t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
