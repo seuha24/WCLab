@@ -18,15 +18,14 @@ class _SignInViewState extends State<SignInView> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state.guestSignInStatus == Status.success ||
-            state.googleSignInStatus == Status.success) {
+            state.googleSignInStatus == Status.success ||
+            state.appleSignInStatus == Status.success) {
+          debugPrint('state.appleSignInStatus : ${state.appleSignInStatus}');
           Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const MainView()));
-        } else if (state.guestSignInStatus == Status.failure) {
-          showToast(
-            message: "Login Failed",
-            backgroundColor: Colors.red,
-          );
-        } else if (state.googleSignInStatus == Status.failure) {
+        } else if (state.guestSignInStatus == Status.failure ||
+            state.googleSignInStatus == Status.failure ||
+            state.appleSignInStatus == Status.failure) {
           showToast(
             message: "Login Failed",
             backgroundColor: Colors.red,
