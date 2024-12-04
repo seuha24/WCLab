@@ -363,7 +363,6 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   Future<void> _initLocation() async {
     int gpsAccuracy = 15;
-    final now = DateTime.now();
     Position position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 5
@@ -444,9 +443,12 @@ class _NaverMapViewState extends State<NaverMapView> {
         currentLongitude = ImuLongitude;
         moveDot();
       }
-      final interval = now.difference(_userAccelerometerUpdateTime!);
-      if (interval > Duration(milliseconds: 20)) {
-        _userAccelerometerLastInterval = interval.inSeconds;
+      final now = DateTime.now();
+      if(_userAccelerometerUpdateTime != null) {
+        final interval = now.difference(_userAccelerometerUpdateTime!);
+        if (interval > Duration(seconds: 1)) {
+          _userAccelerometerLastInterval = interval.inSeconds;
+        }
       }
       _userAccelerometerUpdateTime = now;
     }
