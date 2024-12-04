@@ -144,7 +144,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   double currentSpeed = 0.0;
 
   // 방향
-  double? heading = 0.0;
+  double heading = 0.0;
   double? adjustment;
   double yawRate = 0.0;
   double yawRate2 = 0.0;
@@ -217,7 +217,6 @@ class _NaverMapViewState extends State<NaverMapView> {
     super.initState();
     _initTTS();
     _initLocation();
-    startCollectingSensorData();
     LocationPlugin.locationStream.listen((locationData) {
       setState(() {
         _currentLocation = locationData;
@@ -370,7 +369,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   final double _threshold = 1.0; // 방향 변화 임계값 (단위: 도)
   late StreamSubscription<Position> positionStream;
 
-  int gpsAccuracy = 10;
+  int gpsAccuracy = 15;
 
   Future<void> _initLocation() async {
     Position position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
@@ -391,19 +390,28 @@ class _NaverMapViewState extends State<NaverMapView> {
     });
 
     // 나침반계에서 이벤트 올 때만 지도 방향 리프레시 하도록 변경
-    // 추후 Geolocator의 getHeadingStream()으로 변경해봐도 좋음
-    FlutterCompass.events?.listen((event) {
-      double? newDirection = event.heading;
-      if (newDirection != null) {
-        if (_lastDirection == null ||
-            (newDirection - _lastDirection!).abs() >= _threshold) {
-          _lastDirection = newDirection; // 마지막 방향 업데이트
-          _updateMapPosition(currentLatitude, currentLongitude, compassValue);
-          yawRate = compassValue * angleToRadian;
+    subscribeToSensor<CompassEvent>(
+      sensorStream: FlutterCompass.events!,
+      onEvent: (event) {
+        heading = event.heading ?? 0.0;
+        compassValue = heading;
+        if (!compassReady.isCompleted) {
+          compassReady.complete();
         }
-      }
-      s_accuracy = position.accuracy;
-    });
+        if (heading != null) {
+          if (_lastDirection == null ||
+              (heading - _lastDirection!).abs() >= _threshold) {
+            _lastDirection = heading; // 마지막 방향 업데이트
+            _updateMapPosition(currentLatitude, currentLongitude, compassValue);
+            yawRate = compassValue * angleToRadian;
+          }
+        }
+        s_accuracy = position.accuracy;
+      },
+      onError: (e) {
+        showErrorDialog("Flutter_Compass");
+      },
+    );
 
     // GPS 값 변화가 있을 때
     positionStream = Geolocator.getPositionStream(
@@ -416,7 +424,6 @@ class _NaverMapViewState extends State<NaverMapView> {
       });
       currentLatitude = position.latitude;
       currentLongitude = position.longitude;
-      resetSpeedUtilsValue();
       _updateCurrentLocationMarker(currentLatitude, currentLongitude);
       _updateMapPosition(currentLatitude, currentLongitude, compassValue);
       s_accuracy = position.accuracy;
@@ -429,12 +436,7 @@ class _NaverMapViewState extends State<NaverMapView> {
       onEvent: (event) {
         resetSpeedUtilsValue();
         final now = DateTime.now();
-        _userAccelerometerEvent = event;
-        const double accelerationThreshold = 1.5; // 원하는 기준값 설정 (단위: m/s²)
-        final double accelerationMagnitude = math
-            .sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-        if (accelerationMagnitude > accelerationThreshold &&
-            position.accuracy > gpsAccuracy) {
+        if (math.sqrt(event.x * event.x + event.y * event.y + event.z * event.z) > 1.5 && position.accuracy > gpsAccuracy) {
           isGps = false;
           velocityX = _filteringX.calculateWeightedAverage(); //필터링된 x속도
           velocityY = _filteringY.calculateWeightedAverage(); //필터링된 y속도
@@ -447,13 +449,6 @@ class _NaverMapViewState extends State<NaverMapView> {
             _updateMapPosition(currentLatitude, currentLongitude, compassValue);
           }
         }
-        if (_userAccelerometerUpdateTime != null) {
-          final interval = now.difference(_userAccelerometerUpdateTime!);
-          if (interval > _ignoreDuration) {
-            _userAccelerometerLastInterval = interval.inSeconds;
-          }
-        }
-        _userAccelerometerUpdateTime = now;
       },
       onError: (e) {
         showErrorDialog(e);
@@ -484,7 +479,6 @@ class _NaverMapViewState extends State<NaverMapView> {
     _updateMapPosition(initialLatitude, initialLongitude, compassValue);
     _updateCurrentLocationMarker(initialLatitude, initialLongitude);
     s_accuracy = position.accuracy;
-
   }
 
   // t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
@@ -683,16 +677,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     return distance;
   }
 
-  static const Duration _ignoreDuration = Duration(milliseconds: 20);
-
-  UserAccelerometerEvent? _userAccelerometerEvent;
-  GyroscopeEvent? _gyroscopeEvent;
-
-  int? _userAccelerometerLastInterval;
-  int? _gyroscopeLastInterval;
-
-  DateTime? _userAccelerometerUpdateTime;
-  DateTime? _gyroscopeUpdateTime;
+  // DateTime? _userAccelerometerUpdateTime;
 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
 
@@ -721,58 +706,6 @@ class _NaverMapViewState extends State<NaverMapView> {
         );
       },
     );
-  }
-
-  void startCollectingSensorData() {
-    subscribeToSensor<CompassEvent>(
-      sensorStream: FlutterCompass.events!,
-      onEvent: (event) {
-        heading = event.heading ?? 0.0;
-        compassValue = heading!;
-        if (!compassReady.isCompleted) {
-          compassReady.complete();
-        }
-      },
-      onError: (e) {
-        showErrorDialog("Flutter_Compass");
-      },
-    );
-    subscribeToSensor<UserAccelerometerEvent>(
-      sensorStream: userAccelerometerEventStream(
-          samplingPeriod: SensorInterval.normalInterval),
-      onEvent: (event) {
-        final now = DateTime.now();
-        _userAccelerometerEvent = event;
-        if (_userAccelerometerUpdateTime != null) {
-          final interval = now.difference(_userAccelerometerUpdateTime!);
-          if (interval > _ignoreDuration) {
-            _userAccelerometerLastInterval = interval.inSeconds;
-          }
-        }
-        _userAccelerometerUpdateTime = now;
-      },
-      onError: (e) {
-        showErrorDialog("userAccerometer Sensor");
-      },
-    );
-    // subscribeToSensor<GyroscopeEvent>(
-    //   sensorStream:
-    //       gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
-    //   onEvent: (GyroscopeEvent event) {
-    //     final now = DateTime.now();
-    //     _gyroscopeEvent = event;
-    //     if (_gyroscopeUpdateTime != null) {
-    //       final interval = now.difference(_gyroscopeUpdateTime!);
-    //       if (interval > _ignoreDuration) {
-    //         _gyroscopeLastInterval = interval.inSeconds;
-    //       }
-    //     }
-    //     _gyroscopeUpdateTime = now;
-    //   },
-    //   onError: (e) {
-    //     showErrorDialog("Gyroscope Sensor");
-    //   },
-    // );
   }
 
   // 센서 데이터 수집을 중지하는 메소드
@@ -835,12 +768,6 @@ class _NaverMapViewState extends State<NaverMapView> {
             branchinfo.indexOf(branchInfo); // 가장 가까운 체크포인트의 인덱스를 찾습니다.
       }
     }
-    // for (BranchInfo info in currentWindow) {
-    //   print(info);
-    // }
-
-    // print("currentIndex: $currentIndex");
-    // print("targetIndex: $targetIndex");
 
     return nearestIndex;
   }
