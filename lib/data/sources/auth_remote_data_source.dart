@@ -89,6 +89,11 @@ abstract class AuthRemoteDataSource {
 
   Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(String token);
   Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token);
+
+  Future<Response<Map<String, dynamic>>> patchUserInfo(String userName);
+  Future<Response<Map<String, dynamic>>> getUserInfo();
+
+
 }
 
 /// Auth 데이터 처리를 위한 [AuthRemoteDataSource]의 구현부이다.
@@ -195,7 +200,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return response;
     } catch (e) {
-      throw ServerException(); // 실패 시 예외 처리
+      throw ServerException();
     }
   }
 
@@ -211,7 +216,59 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return response;
     } catch (e) {
-      throw ServerException(); // 실패 시 예외 처리
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> patchUserInfo(String userName) async {
+    debugPrint('Call patchUserInfo()');
+    final authService = DI<AuthService>();
+    final authData = await authService.loadAuthData();
+    final accessToken = authData['accessToken'];
+
+    debugPrint('Authorization : Bearer $accessToken');
+
+    try {
+      final response = await dio.patch<Map<String, dynamic>>(
+        'https://backend.catholicuniv.pillowstudio.kr/user/info',
+        data: {
+          'userName': userName,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken', // 인증 헤더 추가
+          },
+        ),
+      );
+      return response;
+    } catch (e) {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> getUserInfo() async {
+    debugPrint('Call getUserInfo()');
+    final authService = DI<AuthService>();
+    final authData = await authService.loadAuthData();
+    final accessToken = authData['accessToken'];
+
+    debugPrint('Authorization : Bearer $accessToken');
+
+    try {
+      final response = await dio.get<Map<String, dynamic>>(
+        'https://backend.catholicuniv.pillowstudio.kr/user/me',
+        options: Options(
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken'
+            }
+        ),
+      );
+      return response;
+    } catch (e) {
+      throw ServerException();
     }
   }
 }

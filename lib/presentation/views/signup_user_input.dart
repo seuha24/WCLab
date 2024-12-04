@@ -22,32 +22,26 @@ class SignupUserInput extends StatefulWidget {
 
 class _SignupUserInputState extends State<SignupUserInput> {
   final message = DI.get<Message>();
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _userNameTextController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state.guestSignInStatus == Status.success ||
-            state.googleSignInStatus == Status.success) {
+        if (state.patchUserInfoStatus == Status.success ||
+            state.patchUserInfoStatus == Status.success) {
           Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const MainView()));
-        } else if (state.guestSignInStatus == Status.failure) {
+        } else if (state.patchUserInfoStatus == Status.failure) {
           showToast(
-            message: "Login Failed",
-            backgroundColor: Colors.red,
-          );
-        } else if (state.googleSignInStatus == Status.failure) {
-          showToast(
-            message: "Login Failed",
+            message: "User Name Set Failed",
             backgroundColor: Colors.red,
           );
         }
       },
       listenWhen: (previous, current) =>
-          previous.guestSignInStatus != current.guestSignInStatus ||
-          previous.googleSignOutStatus != current.googleSignOutStatus,
+          previous.patchUserInfoStatus != current.patchUserInfoStatus,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         appBar: AppBar(
@@ -80,11 +74,12 @@ class _SignupUserInputState extends State<SignupUserInput> {
                               ),
                             ),
                             onPressed: () {
+                              final userName = _userNameTextController.text;
                               context
                                   .read<AuthBloc>()
-                                  .add(SignInAnonymouslyEvent());
+                                  .add(PatchUserInfoEvent(userName));
                             },
-                            child: (state.guestSignInStatus ==
+                            child: (state.patchUserInfoStatus ==
                                     Status.inProgress)
                                 ? CircularProgressIndicator(
                                     strokeWidth: 2,
@@ -92,7 +87,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
                                         Theme.of(context).colorScheme.onPrimary,
                                   )
                                 : const Text(
-                                    '회원가입 완료하기',
+                                    '닉네임 변경하기',
                                     style: TextStyle(fontSize: 16),
                                   ),
                           ),
@@ -140,7 +135,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
                 ),
                 Gap(),
                 TextField(
-                  controller: _searchController,
+                  controller: _userNameTextController,
                   focusNode: _focusNode,
                   style: TextStyle(color: Colors.black),
                   onChanged: (query) {},

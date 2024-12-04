@@ -81,4 +81,13 @@ abstract class AuthRepository {
   /// 수행이 정상적으로 종료되면 response로 앱에서 사용가능한 Access Token 을 획득한다.
   Future<Either<Failure, AuthDataModel>> sendGoogleOAuthTokenToServer(String token);
   Future<Either<Failure, AuthDataModel>> sendAppleOAuthTokenToServer(String token);
+
+
+  /// 회원 가입 이후 닉네임을 지정하기 위한 메서드
+  /// signup_user_inpu.dart 의 TextField 밸류를 전달
+  Future<Either<Failure, Void>> patchUserInfo(String userName);
+
+  /// 유저 정보를 받아오기 위한 메서드
+  /// setting_view.dart 의 이름에 표시
+  Future<Either<Failure, String>> getUserInfo();
 }

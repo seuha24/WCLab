@@ -17,4 +17,11 @@ class SignInWithAppleEvent extends AuthEvent {}
 
 class SignOutWithAppleEvent extends AuthEvent {}
 
+class PatchUserInfoEvent extends AuthEvent {
+  final String userName;
+  PatchUserInfoEvent(this.userName);
+}
+
+class GetUserInfoEvent extends AuthEvent {}
+
 

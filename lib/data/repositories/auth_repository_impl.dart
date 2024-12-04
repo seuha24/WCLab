@@ -119,4 +119,44 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, Void>> patchUserInfo(String userName) async {
+    try {
+      final response = await authDataSource.patchUserInfo(userName);
+      debugPrint('response::::::$response');
+      final responseData = response.data ?? {};
+      debugPrint('responseData::::::$responseData');
+
+      if (responseData['success'] == true) {
+        return Right(Void());
+      } else {
+        debugPrint('Response data is NULL');
+        return Left(ServerFailure());
+      }
+    } catch (e) {
+      debugPrint('Error on patchUserInfo() : $e');
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> getUserInfo() async {
+    try {
+      final response = await authDataSource.getUserInfo();
+      final responseData = response.data ?? {};
+
+      if (responseData['success'] == true) {
+        final String userName = responseData['data'];
+        return Right(userName);
+      } else {
+        debugPrint('Response data is NULL');
+        return Left(ServerFailure());
+      }
+    } catch (e) {
+      debugPrint('Error on sendAppleOAuthTokenToServer() : $e');
+      return Left(ServerFailure());
+    }
+  }
+
 }

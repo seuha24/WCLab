@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io' show HttpResponse, Platform;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/data/models/auth_data_model.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
+import 'package:safelight/infrastructure/services/auth_service.dart';
 import 'package:torch_light/torch_light.dart';
 
 import 'package:camera/camera.dart' as cam;

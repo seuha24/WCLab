@@ -1,47 +1,38 @@
 part of '../../../framework/controller.dart';
 
 class AuthState extends Equatable {
-  final Status googleSignInStatus;
-  final Status googleSignOutStatus;
-  final Status appleSignInStatus;
-  final Status appleSignOutStatus;
-  final Status guestSignInStatus;
-  final Status guestSignOutStatus;
+  final Status signInStatus;
+  final Status signOutStatus;
+  final Status patchUserInfoStatus;
+  final Status getUserInfoStatus;
 
   const AuthState({
-    this.googleSignInStatus = Status.initial,
-    this.googleSignOutStatus = Status.initial,
-    this.appleSignInStatus = Status.initial,
-    this.appleSignOutStatus = Status.initial,
-    this.guestSignInStatus = Status.initial,
-    this.guestSignOutStatus = Status.initial,
+    this.signInStatus = Status.initial,
+    this.signOutStatus = Status.initial,
+    this.patchUserInfoStatus = Status.initial,
+    this.getUserInfoStatus = Status.initial,
   });
 
   @override
-  List<Object?> get props => [
-        googleSignInStatus,
-        googleSignOutStatus,
-        appleSignInStatus,
-        appleSignOutStatus,
-        guestSignInStatus,
-        guestSignOutStatus,
+  List<Object?> get props =>
+      [
+        signInStatus,
+        signOutStatus,
+        patchUserInfoStatus,
+        getUserInfoStatus
       ];
 
   AuthState copyWith({
-    Status? googleSignInStatus,
-    Status? googleSignOutStatus,
-    Status? appleSignInStatus,
-    Status? appleSignOutStatus,
-    Status? guestSignInStatus,
-    Status? guestSignOutStatus,
+    Status? signInStatus,
+    Status? signOutStatus,
+    Status? patchUserInfoStatus,
+    Status? getUserInfoStatus,
   }) {
     return AuthState(
-      googleSignInStatus: googleSignInStatus ?? this.googleSignInStatus,
-      googleSignOutStatus: googleSignOutStatus ?? this.googleSignOutStatus,
-      appleSignInStatus: appleSignInStatus ?? this.appleSignInStatus,
-      appleSignOutStatus: appleSignOutStatus ?? this.appleSignOutStatus,
-      guestSignInStatus: guestSignInStatus ?? this.guestSignInStatus,
-      guestSignOutStatus: guestSignOutStatus ?? this.guestSignOutStatus,
+      signInStatus: signInStatus ?? this.signInStatus,
+      signOutStatus: signOutStatus ?? this.signOutStatus,
+      patchUserInfoStatus: patchUserInfoStatus ?? this.patchUserInfoStatus,
+      getUserInfoStatus: getUserInfoStatus ?? this.getUserInfoStatus,
     );
   }
 }
