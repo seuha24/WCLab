@@ -26,14 +26,11 @@ class WeightedAverageFilter {
   int _front = 0;
   int _rear = 0;
   int _size = 0;
-
   WeightedAverageFilter(int capacity, List<double> weights)
       : _queue = List<double?>.filled(capacity, null),
         _weights = List<double>.from(weights);
-
   bool get isEmpty => _size == 0;
   bool get isFull => _size == _queue.length;
-
   //새로운 데이터 추가
   void enqueue(double element) {
     if (isFull) {
@@ -43,7 +40,6 @@ class WeightedAverageFilter {
     _rear = (_rear + 1) % _queue.length;
     _size++;
   }
-
   //제일 오래된 데이터 삭제
   double? dequeue() {
     if (isEmpty) {
@@ -63,14 +59,12 @@ class WeightedAverageFilter {
     }
     return _queue[_front];
   }
-
   //queue를 초기화
   void clear() {
     while (!isEmpty) {
       dequeue();
     }
   }
-
   //queue내의 요소의 평균을 계산
   double calculateWeightedAverage() {
     if (isEmpty) {
@@ -91,7 +85,6 @@ class WeightedAverageFilter {
 
 class NaverMapView extends StatefulWidget {
   const NaverMapView({super.key});
-
   @override
   State<NaverMapView> createState() => _NaverMapViewState();
 }
@@ -101,8 +94,9 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   late double currentLatitude; // 현재 위치의 위도
   late double currentLongitude; // 현재 위치의 경도
-  double remainDistance = double.infinity; // 다음 분기까지의 남은거리 (초기값: 무한대)
+  // Map<String, dynamic>? _currentLocation;
 
+  double remainDistance = double.infinity; // 다음 분기까지의 남은거리 (초기값: 무한대)
   GeoLocation? startSelectedLocation; // 시작 위치의 좌표값 객체
   bool isStart = false; // 출발지가 선택됐을 경우 true, 아닐경우 false
   late double remainStartpoint;
@@ -111,11 +105,10 @@ class _NaverMapViewState extends State<NaverMapView> {
   bool isLoading = true; // 로딩을 위한 T/F
 
   GeoLocation? selectedLocation; // 검색된 위치의 좌표값 객체
-  NaverMapController? mapController;
+  late NaverMapController mapController;
   List<LatLng> paths = []; // 모든 경로의 좌표값을 담는 배열
   List<BranchInfo> branchinfo = []; // 분기의 객체 배열
 
-  Map<String, dynamic>? _currentLocation;
   late double s_latitude; // 네이티브 위도 확인용
   late double s_longitude; // 네이티브 경도 확인용
   late double s_accuracy; // 네이티브 위치정확도 확인용
@@ -134,6 +127,13 @@ class _NaverMapViewState extends State<NaverMapView> {
   // 가속도
   double preAccX = 0.0;
   double preAccY = 0.0;
+  double currentpreAccX = 0.0;
+  double currentpreAccY = 0.0;
+
+  // 속도
+  double velocityX = 0.0;
+  double velocityY = 0.0;
+  double currentSpeed = 0.0;
 
   // 방향
   double? heading = 0.0;
@@ -156,11 +156,10 @@ class _NaverMapViewState extends State<NaverMapView> {
   double circularDistance = 0.0;
   double lineDistance = 0.0;
 
-  //추가
+  // 추가
   double nearestDistance = 0.0;
 
-  //
-
+  // 
   double initialLatitude = 35.9078;
   double initialLongitude = 127.7669;
 
@@ -168,6 +167,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   late double beforeLongitude;
 
   // 상수
+  double accFilteringValue = 0.06;
   double radianToAngle = (180 / math.pi);
   double angleToRadian = (math.pi / 180);
 
@@ -184,7 +184,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   double boundary = 5; // 안전경계 범위
   bool searchNewPath = false;
 
-  //추가
+  // 추가
   double searchNewPathBoundary = 30;
   int searchNewPathTime = 0;
 
@@ -193,13 +193,15 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   String checkBoudaryCondition = "";
 
-  //imu로 계산된 위경도 변수
-  double imuLatitude = 0.0;
-  double imuLongitude = 0.0;
+  // imu로 계산된 위경도 변수
+  double ImuLatitude = 0.0;
+  double ImuLongitude = 0.0;
 
   //가중이동평균필터 인스턴스 생성
-  final WeightedAverageFilter _filteringX = WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
-  final WeightedAverageFilter _filteringY = WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
+  final WeightedAverageFilter _filteringX =
+      WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
+  final WeightedAverageFilter _filteringY =
+      WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
 
   @override
   void initState() {
@@ -213,32 +215,37 @@ class _NaverMapViewState extends State<NaverMapView> {
     });
   }
 
-  @override
-  void dispose() {
-    _locationUpdateTimer?.cancel();
-    super.dispose();
+  // yawRate(z축회전 속도) 노이즈 조정
+  double addYawRateNoise(double addValue) {
+    return addValue;
   }
 
   // yawRate 계산 - 자이로스코프 회전속도계산
   void yawRateupdate(GyroscopeEvent event, Duration sensorInterval) {
     double dt = sensorInterval.inMilliseconds / 1000.0;
+
     // 설정한 임계값(0.3) 초과 시 회전 속도 계산 - 잡음 필터링
     if (event.z > yawRateAccFilteringValue * angleToRadian ||
         event.z < -yawRateAccFilteringValue * angleToRadian) {
       yawRatePerDt = (event.z * dt); // 회전 각도 계산
     }
+
     // addYawRateNoise - 휴대기기 필터링 적용(보정)
-    yawRate += -(yawRatePerDt + 0);
+    yawRate += -(yawRatePerDt + addYawRateNoise(0));
+
     // 360도가 넘으면 yawRate를 0으로 초기화(0도~360도 값 유지)
     if (yawRate >= 2 * math.pi || yawRate <= -2 * math.pi) {
       yawRate = 0;
     }
+
     // addYawRateNoise - 휴대기기 필터링 적용(보정)
-    yawRate2 += -(yawRatePerDt + 0);
+    yawRate2 += -(yawRatePerDt + addYawRateNoise(0));
+
     // 360도가 넘으면 yawRate를 0으로 초기화(0도~360도 값 유지)
     if (yawRate2 >= 2 * math.pi || yawRate2 <= -2 * math.pi) {
       yawRate2 = 0;
     }
+
     // turn 변수에 회전각도 변수 저장
     yawRateTurn2 = yawRate2 * radianToAngle;
   }
@@ -254,67 +261,45 @@ class _NaverMapViewState extends State<NaverMapView> {
     py = 0.0;
   }
 
-  // 기준 위치 설정, 현재 가속도 측정, 기준 중력값
-  double basePositionX = 0.0, basePositionY = 0.0, basePositionZ = 0.0;
-  double accX = 0.0, accY = 0.0, accZ = 0.0;
-  double velocityX = 0.0, velocityY = 0.0, velocityZ = 0.0;
-  final gravityX = 0.0, gravityY = 0.0, gravityZ = 9.81;
-  double gyroX = 0.0, gyroY = 0.0, gyroZ = 0.0;
-  double rotationX = 0.0, rotationY = 0.0, rotationZ = 0.0;
-
   // 이동경로 계산, 가속도 -> 속도계산
   void positionUpdate(UserAccelerometerEvent event, Duration sensorInterval) {
-    // 적분용 시간 측정
-    final currentTime = DateTime.now().millisecondsSinceEpoch.toDouble();
-    var lastTime = DateTime.now().millisecondsSinceEpoch.toDouble();
-    final deltaTime = (currentTime - lastTime) / 1000.0; // 초 단위 시간 간격
-
-    // 칼만필터 초기화
-    final kalmanX = SimpleKalman(errorMeasure: 256, errorEstimate: 150, q: 0.9);
-    final kalmanY = SimpleKalman(errorMeasure: 256, errorEstimate: 150, q: 0.9);
-    final kalmanZ = SimpleKalman(errorMeasure: 256, errorEstimate: 150, q: 0.9);
-
-    // 가속도 측정, 중력 예측(저주파 필터)
-    accX = event.x; accY = event.y; accZ = event.z;
-
-    // 가속도 중력 필터링
-    accX = accX - gravityX;
-    accY = accY - gravityY;
-    accZ = accZ - gravityZ;
-
-    // 가속도 칼만필터 통과
-    accX = kalmanX.filtered(accX);
-    accY = kalmanY.filtered(accY);
-    accZ = kalmanZ.filtered(accZ);
-
-    // 속도 오일러 적분
-    velocityX += accX * deltaTime;
-    velocityY += accY * deltaTime;
-    velocityZ += accZ * deltaTime;
-
-    // 위치 오일러 적분
-    basePositionX += velocityX * deltaTime;
-    basePositionY += velocityY * deltaTime;
-    basePositionZ += velocityZ * deltaTime;
-
-    // 현재 위치 좌표점 계산 - 속력 * 방향 = 위치
-    px += basePositionX;
-    py += basePositionY;
-
-    lastTime = currentTime;
-
+    double dt = sensorInterval.inMilliseconds / 1000.0;
+    // 현재 방향과 목표 방향 사이의 각도 차이 알려주며 목표방향으로 얼마나 회전해야 하는지 결정
+    // 가속도 x, y 값을 변수에 저장
+    currentpreAccX = event.x;
+    currentpreAccY = event.y;
+    // Velocity(속도) 계산 -> 벡터(크기, 방향)
+    // X 속도: 특정 임계값(0.06) 초과하면 속도 계산(필터링) - 가속도 * dt(적분)
+    if (currentpreAccX > accFilteringValue ||
+        currentpreAccX < -accFilteringValue) {
+      velocityX += (currentpreAccX - preAccX) * dt;
+      preAccX = currentpreAccX;
+    } else {
+      velocityX = 0;
+    }
+    // Y 속도: 특정 임계값(0.06) 초과하면 속도 계산(필터링) - 가속도 * dt(적분)
+    if (currentpreAccY > accFilteringValue ||
+        currentpreAccY < -accFilteringValue) {
+      velocityY += (currentpreAccY - preAccY) * dt;
+      preAccY = currentpreAccY;
+    } else {
+      velocityY = 0;
+    }
+    //velocity 값을 wma필터에 넣음
+    _filteringX.enqueue(velocityX);
+    _filteringY.enqueue(velocityY);
     // 속력: 벡터의 크기 계산 -> 스칼라(크기)
-    // currentSpeed = math.sqrt(accX * accX + accY * accY);
+    currentSpeed = math.sqrt(velocityX * velocityX + velocityY * velocityY);
     // 현재 위치 좌표점 계산 - 속력 * 방향 = 위치
-    // px += (currentSpeed * math.cos(yawRate));
-    // py += (currentSpeed * math.sin(yawRate));
+    px += (currentSpeed * math.cos(yawRate));
+    py += (currentSpeed * math.sin(yawRate));
     // px와 py를 사용하여 거리를 계산
     double distanceKm = math.sqrt(px * px + py * py) / 1000.0;
     double bearing = math.atan2(py, px) * radianToAngle; // 방향 이 부분 수정
     Map<String, double> latLng =
         calLatLng(initialLatitude, initialLongitude, bearing, distanceKm);
-    imuLatitude = latLng['latitude']!;
-    imuLongitude = latLng['longitude']!;
+    ImuLatitude = latLng['latitude']!;
+    ImuLongitude = latLng['longitude']!;
   }
 
   // 함수 정의
@@ -369,7 +354,8 @@ class _NaverMapViewState extends State<NaverMapView> {
   late StreamSubscription<Position> positionStream;
 
   Future<void> _initLocation() async {
-    int gpsAccuracy = 1;
+    int gpsAccuracy = 15;
+    final now = DateTime.now();
     Position position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 5
@@ -437,43 +423,25 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
 
     Future<void> moveByImu(event) async {
-      final now = DateTime.now();
-      if(_userAccelerometerUpdateTime != null) {
-        final interval = now.difference(_userAccelerometerUpdateTime!);
-        if (interval < Duration(milliseconds: 20)) {
-          setState(() {
-            isGps = false;
-          });
-          final double accelerationMagnitude = math.sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-          if (accelerationMagnitude > 1.5) { // 원하는 기준값 설정 (단위: m/s²)
-            accX = _filteringX.calculateWeightedAverage(); //필터링된 x속도
-            accY = _filteringY.calculateWeightedAverage(); //필터링된 y속도
-            positionUpdate(event, SensorInterval.normalInterval);
-            currentLatitude = imuLatitude;
-            currentLongitude = imuLongitude;
-            moveDot();
-          }
-        }
+      setState(() {
+        isGps = false;
+      });
+      _userAccelerometerEvent = event;
+      final double accelerationMagnitude = math.sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+      if (accelerationMagnitude > 1.5) { // 원하는 기준값 설정 (단위: m/s²)
+        velocityX = _filteringX.calculateWeightedAverage(); //필터링된 x속도
+        velocityY = _filteringY.calculateWeightedAverage(); //필터링된 y속도
+        positionUpdate(event, Duration(seconds: 1));
+        currentLatitude = ImuLatitude;
+        currentLongitude = ImuLongitude;
+        moveDot();
+      }
+      final interval = now.difference(_userAccelerometerUpdateTime!);
+      if (interval > Duration(milliseconds: 20)) {
+        _userAccelerometerLastInterval = interval.inSeconds;
       }
       _userAccelerometerUpdateTime = now;
     }
-
-    // 자이로스코프에서 각속도 직접 측정
-    subscribeToSensor<GyroscopeEvent>(
-      sensorStream: gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
-      onEvent: (GyroscopeEvent event) {
-        final now = DateTime.now();
-        final currentTime = DateTime.now().millisecondsSinceEpoch.toDouble();
-        var lastTime = DateTime.now().millisecondsSinceEpoch.toDouble();
-        final deltaTime = (currentTime - lastTime) / 1000.0; // 초 단위 시간 간격
-        rotationX += event.x * deltaTime;
-        rotationY += event.y * deltaTime;
-        rotationZ += event.z * deltaTime;
-      },
-      onError: (e) {
-        debugPrint(e);
-      },
-    );
 
     // 나침반계에서 이벤트 올 때만 지도 방향 리프레시 하도록 변경
     // 추후 Geolocator의 getHeadingStream()으로 변경해봐도 좋음
@@ -510,7 +478,8 @@ class _NaverMapViewState extends State<NaverMapView> {
 
     // 가속도계가 작동할 때
     subscribeToSensor<UserAccelerometerEvent>(
-      sensorStream: userAccelerometerEventStream(samplingPeriod: SensorInterval.normalInterval),
+      sensorStream: userAccelerometerEventStream(
+          samplingPeriod: SensorInterval.normalInterval),
       onEvent: (event) async {
         position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -614,11 +583,6 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   // 네이버맵에 경로를 포함한 overlays를 띄우기 위한 함수
   void addOverlays(List<LatLng> paths) {
-    if (mapController == null) {
-      debugPrint('addOverlays() mapController is not initialized yet.');
-      return;
-    }
-
     Set<NAddableOverlay> overlays = {
       NMultipartPathOverlay(
         id: "path",
@@ -633,7 +597,7 @@ class _NaverMapViewState extends State<NaverMapView> {
         outlineWidth: 3, // 경로표시 선의 두께 지정 (3->9)
       ),
     };
-    mapController!.addOverlayAll(overlays);
+    mapController.addOverlayAll(overlays);
   }
 
   // 두 위경도 사이의 거리를 계산하는 함수.
@@ -717,6 +681,13 @@ class _NaverMapViewState extends State<NaverMapView> {
 
     return distance;
   }
+
+  static const Duration _ignoreDuration = Duration(milliseconds: 20);
+
+  UserAccelerometerEvent? _userAccelerometerEvent;
+
+  int? _userAccelerometerLastInterval;
+  int? _gyroscopeLastInterval;
 
   DateTime? _userAccelerometerUpdateTime;
   DateTime? _gyroscopeUpdateTime;
@@ -1103,11 +1074,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   void _updateMapPosition(currentLatitude, currentLongitude, compassValue) {
-    if (mapController == null) {
-      debugPrint('_updateMapPosition() mapController is not initialized yet.');
-      return;
-    }
-
     // 원하는 줌 레벨을 설정합니다. 예를 들어, 줌 레벨을 15로 설정
     final zoomLevel = 18.5;
     // 현재 위치를 기준으로 카메라 위치를 설정
@@ -1118,15 +1084,10 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
 
     // 카메라 업데이트 적용
-    mapController!.updateCamera(cameraUpdate);
+    mapController.updateCamera(cameraUpdate);
   }
 
   void _updateCurrentLocationMarker(currentLatitude, currentLongitude) async {
-    if (mapController == null) {
-      debugPrint('_updateCurrentLocationMarker() mapController is not initialized yet.');
-      return;
-    }
-
     // GPS에 따라 마커 색상 설정
     final Color markerColor = isGps ? Colors.blue : Colors.red;
     final iconImage = await NOverlayImage.fromWidget(
@@ -1144,15 +1105,10 @@ class _NaverMapViewState extends State<NaverMapView> {
           position: NLatLng(currentLatitude, currentLongitude),
           icon: iconImage);
     });
-    mapController!.addOverlay(_currentLocationMarker!);
+    mapController.addOverlay(_currentLocationMarker!);
   }
 
   void addBranchMarkers() async {
-    if (mapController == null) {
-      debugPrint('addBranchMarkers() mapController is not initialized yet.');
-      return;
-    }
-
     Set<NAddableOverlay> markers = {}; // 마커들을 담을 Set
 
     final iconImage = await NOverlayImage.fromWidget(
@@ -1175,7 +1131,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
 
     // 맵에 마커 추가
-    mapController!.addOverlayAll(markers);
+    mapController.addOverlayAll(markers);
   }
 
   @override
@@ -1374,10 +1330,13 @@ class _NaverMapViewState extends State<NaverMapView> {
                                   branchinfo[targetIndex].bearingToPoint,
                                   compassValue) *
                               angleToRadian;
+                          // print("compassValue: $compassValue");
+                          // print("yawRateTurn2: $yawRateTurn2");
+                          // print("각도 초기화");
 
                           // 주기적으로 거리계산, 경로이탈 탐지를 위한 계산을 하는 곳.
 
-                          _locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
+                          Timer.periodic(Duration(seconds: 2), (timer) async {
                             // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remainDistance 변수에 삽입
                             checkBoundary(); //경계이탈, 인덱스
                             indexUpdate();
@@ -1387,6 +1346,10 @@ class _NaverMapViewState extends State<NaverMapView> {
                                 currentLongitude,
                                 branchinfo[0].point.latitude,
                                 branchinfo[0].point.longitude);
+
+                            // print("yawRateTurn2 : $yawRateTurn2");
+                            // print("currentLatitude : $currentLatitude");
+                            // print("currentLongitude : $currentLongitude");
 
                             if (remainStartpoint < 0.015) {
                               isStart = false;
