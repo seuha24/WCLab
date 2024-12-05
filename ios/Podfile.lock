@@ -1539,7 +1539,7 @@ SPEC CHECKSUMS:
   flutter_naver_map: d31b1884517151e7b3121e3b24c18733ef4e4387
   flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
   fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
-  geolocator_apple: 6cbaf322953988e009e5ecb481f07efece75c450
+  geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
   google_sign_in_ios: 07375bfbf2620bc93a602c0e27160d6afc6ead38
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d

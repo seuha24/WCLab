@@ -9,6 +9,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/repository.dart';
@@ -190,7 +191,7 @@ Future<void> init() async {
   DI.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(
       auth: DI(),
-      dio: Dio(),
+      dio: DioClient().dio,
     ),
   );
   DI.registerLazySingleton<FlashNativeDataSource>(

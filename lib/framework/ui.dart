@@ -18,6 +18,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:safelight/core/utils/status_enum.dart';
+import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/presentation/views/signup_user_input.dart';
 import 'package:safelight/presentation/widgets/custom_toast.dart';
 import 'package:safelight/presentation/widgets/gap.dart';
 import 'package:sensors_plus/sensors_plus.dart';

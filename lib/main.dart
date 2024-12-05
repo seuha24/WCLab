@@ -40,6 +40,8 @@ Future<void> main() async {
   runApp(SafeLight(auth: DI.get<FirebaseAuth>()));
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class SafeLight extends StatelessWidget {
   final FirebaseAuth auth;
 
@@ -78,6 +80,7 @@ class SafeLight extends StatelessWidget {
               ),
             ],
             child: MaterialApp(
+              navigatorKey: navigatorKey,
               // showSemanticsDebugger: true, // 접근성 테스트할 때 사용
               debugShowCheckedModeBanner: false,
               darkTheme: SystemTheme.systemMode(ColorTheme.light),
