@@ -38,6 +38,7 @@ import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/injection.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:simple_kalman/simple_kalman.dart';
 
 part '../presentation/views/blue_off_view.dart';
 part '../presentation/views/dutorial_view.dart';
