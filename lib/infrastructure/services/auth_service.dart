@@ -68,10 +68,4 @@ class AuthService {
     debugPrint('prefs.getString(_authTypeTokenKey) : ${prefs.getString(_authTypeTokenKey)}');
     return AuthTypeExtension.getType(prefs.getString(_authTypeTokenKey));
   }
-
-  // /// 로그인 타입 삭제
-  // Future<void> clearAuthType() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove(_authTypeTokenKey);
-  // }
 }

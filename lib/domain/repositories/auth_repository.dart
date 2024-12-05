@@ -89,5 +89,5 @@ abstract class AuthRepository {
 
   /// 유저 정보를 받아오기 위한 메서드
   /// setting_view.dart 의 이름에 표시
-  Future<Either<Failure, String>> getUserInfo();
+  Future<Either<Failure, Map<String, dynamic>>> getUserInfo();
 }

@@ -54,6 +54,8 @@ class _SettingViewState extends State<SettingView> {
     } else if (flashbox.values.toList()[0] == FlashMode.WITH_WEATHER) {
       lightmode = 'weathers';
     }
+
+    context.read<AuthBloc>().add(GetUserInfoEvent());
   }
 
   @override
@@ -69,7 +71,8 @@ class _SettingViewState extends State<SettingView> {
             right: SizeTheme.w_md,
           ),
           child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (_, state) {
+            builder: (context, state) {
+              final username = state.userName ?? '익명 사용자';
               return Semantics.fromProperties(
                 properties: const SemanticsProperties(
                   button: true,
@@ -118,7 +121,7 @@ class _SettingViewState extends State<SettingView> {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '익명 사용자',
+                      username,
                       style: Theme.of(context).textTheme.displayLarge,
                       semanticsLabel: '',
                     ),
@@ -361,7 +364,7 @@ class _SettingViewState extends State<SettingView> {
                     ),
                   ),
 
-// 경광등
+    // 경광등
                   Semantics.fromProperties(
                     properties: SemanticsProperties(
                       button: true,

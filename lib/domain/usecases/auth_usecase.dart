@@ -325,7 +325,7 @@ class GetUserInfo {
 
   GetUserInfo(this.repository);
 
-  Future<Either<Failure, String>> call() async {
+  Future<Either<Failure, Map<String, dynamic>>> call() async {
     return await repository.getUserInfo();
   }
 }

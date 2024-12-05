@@ -15,6 +15,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/data/models/auth_data_model.dart';
+import 'package:safelight/data/network/api_endpoints.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:safelight/infrastructure/services/auth_service.dart';

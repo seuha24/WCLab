@@ -72,9 +72,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
+      emit(state.copyWith(userName: null));
       emit(state.copyWith(signInStatus: Status.inProgress));
+      emit(state.copyWith(signOutStatus: Status.initial));
       await _auth.signInAnonymously();
       _authService.saveAuthType(authType: AuthType.anonymous);
+      emit(state.copyWith(userName: '익명 사용자'));
       emit(state.copyWith(signInStatus: Status.success));
     } catch (e) {
       emit(state.copyWith(signInStatus: Status.failure));
@@ -105,38 +108,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       emit(state.copyWith(signInStatus: Status.inProgress));
-      // final GoogleSignIn googleSignIn = GoogleSignIn(
-      //   clientId: Platform.isIOS
-      //       ? firebaseOptions.iosClientId
-      //       : firebaseOptions.androidClientId,
-      // );
+      emit(state.copyWith(signOutStatus: Status.initial));
+      emit(state.copyWith(userName: null));
 
       GoogleSignInAccount? googleUser;
       googleUser = await _googleSignIn.signIn();
-
-      debugPrint('googleUser : $googleUser');
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser!.authentication;
 
       final googleToken = googleAuth.accessToken;
 
-      // final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      // debugPrint('googleUser : $googleUser');
-      // if (googleUser == null) {
-      //   emit(state.copyWith(googleSignInStatus: Status.failure));
-      //   return;
-      // }
-      //
-      // final GoogleSignInAuthentication googleAuth =
-      // await googleUser.authentication;
-      //
-      // final String? googleToken = googleAuth.accessToken;
-
       debugPrint('googleToken :::::: $googleToken');
       if (googleToken != null) {
         final getAccessToken =
-            await _sendOAuthTokenToServer(googleToken, AuthType.google);
+            await _sendOAuthTokenToServer(googleToken, AuthType.google, emit);
 
         if (getAccessToken) {
           await _authService.saveAuthType(authType: AuthType.google);
@@ -164,6 +150,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _googleSignIn.signOut();
       await _auth.signOut();
       await _authService.clearAuthData();
+      emit(state.copyWith(userName: null));
       emit(state.copyWith(signOutStatus: Status.success));
     } catch (e) {
       emit(state.copyWith(signOutStatus: Status.failure));
@@ -179,6 +166,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       emit(state.copyWith(signInStatus: Status.inProgress));
+      emit(state.copyWith(signOutStatus: Status.initial));
+      emit(state.copyWith(userName: null));
 
       final appleProvider = AppleAuthProvider();
       final UserCredential userCredential;
@@ -186,42 +175,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await FirebaseAuth.instance.signOut();
       userCredential = await _auth.signInWithProvider(appleProvider);
 
-      // final appleToken = userCredential.credential.providerId;
-      // debugPrint('ID Token: $appleToken');
-
-      // debugPrint('userCredential : $userCredential');
-
-      // debugPrint('userCredential.credential : ${userCredential.credential}');
-
       final user = userCredential.user;
-      debugPrint('user: $user');
       final idToken = await user?.getIdToken();
-      debugPrint('idToken: $idToken');
       final appleAccessToken = Platform.isIOS
           ? userCredential.credential?.accessToken
           : await user?.getIdToken();
 
-      debugPrint('userCredential.credential : ${userCredential.credential}');
-
-      // Apple accessToken 가져오기
-      // final appleAccessToken = userCredential.credential?.accessToken;
-
-      debugPrint('idToken : $idToken');
-      debugPrint('appleAccessToken : $appleAccessToken');
+      debugPrint('Apple AccessToken :::::: $appleAccessToken');
 
       if (appleAccessToken != null) {
         // 서버로 OAuth 토큰 전송
         final getAccessToken =
-            await _sendOAuthTokenToServer(appleAccessToken!, AuthType.apple);
+            await _sendOAuthTokenToServer(appleAccessToken, AuthType.apple, emit);
 
-        debugPrint('getAccessToken : $getAccessToken');
 
         if (getAccessToken) {
           await _authService.saveAuthType(authType: AuthType.apple);
-          // debugPrint('authType : ${await _authService.loadAuthType()}');
-
           emit(state.copyWith(signInStatus: Status.success));
-          debugPrint('state::::::${state.signInStatus}');
         } else {
           emit(state.copyWith(signInStatus: Status.failure));
         }
@@ -244,6 +214,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(signOutStatus: Status.inProgress));
       await _auth.signOut();
       await _authService.clearAuthData();
+      emit(state.copyWith(userName: null));
       emit(state.copyWith(signOutStatus: Status.success));
     } catch (e) {
       emit(state.copyWith(signOutStatus: Status.failure));
@@ -251,7 +222,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<bool> _sendOAuthTokenToServer(
-      String accessToken, AuthType oauthType) async {
+    String accessToken,
+    AuthType oauthType,
+    Emitter<AuthState> emit,
+  ) async {
     debugPrint('Call _sendOAuthTokenToServer()');
     try {
       final response = oauthType == AuthType.google
@@ -279,6 +253,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           debugPrint('refreshToken : ${loadedAuthData['refreshToken']}');
           debugPrint('userName : ${loadedAuthData['userName']}');
 
+          emit(state.copyWith(userName: authData.userName));
+
           return true;
         },
       );
@@ -296,8 +272,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       emit(state.copyWith(patchUserInfoStatus: Status.inProgress));
       final response = await _repository.patchUserInfo(event.userName);
-
-      debugPrint('response : $response');
 
       response.fold(
         (failure) {
@@ -320,6 +294,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthEvent event,
     Emitter<AuthState> emit,
   ) async {
+    debugPrint('Call _getUserInfoEvent()');
     try {
       emit(state.copyWith(getUserInfoStatus: Status.inProgress));
       final response = await _repository.getUserInfo();
@@ -331,7 +306,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         },
         (result) {
           // 성공 처리
+          debugPrint('_getUserInfoEvent username : ${result.toString()}');
           emit(state.copyWith(patchUserInfoStatus: Status.success));
+          return result.toString();
         },
       );
       emit(state.copyWith(getUserInfoStatus: Status.success));

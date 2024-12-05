@@ -192,7 +192,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(String token) async {
     try {
       final response = await dio.post<Map<String, dynamic>>(
-        'https://backend.catholicuniv.pillowstudio.kr/auth/google/token',
+        ApiEndpoints.googleAuthToken,
         data: {
           'token': token,
         },
@@ -208,7 +208,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token) async {
     try {
       final response = await dio.post<Map<String, dynamic>>(
-        'https://backend.catholicuniv.pillowstudio.kr/auth/apple/token',
+        ApiEndpoints.appleAuthToken,
         data: {
           'token': token,
         },
@@ -231,7 +231,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     try {
       final response = await dio.patch<Map<String, dynamic>>(
-        'https://backend.catholicuniv.pillowstudio.kr/user/info',
+        ApiEndpoints.patchUserInfo,
         data: {
           'userName': userName,
         },
@@ -258,7 +258,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     try {
       final response = await dio.get<Map<String, dynamic>>(
-        'https://backend.catholicuniv.pillowstudio.kr/user/me',
+        ApiEndpoints.getUserInfo,
         options: Options(
             headers: {
               'Content-Type': 'application/json',

@@ -141,14 +141,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> getUserInfo() async {
+  Future<Either<Failure, Map<String, dynamic>>> getUserInfo() async {
     try {
       final response = await authDataSource.getUserInfo();
       final responseData = response.data ?? {};
 
       if (responseData['success'] == true) {
-        final String userName = responseData['data'];
-        return Right(userName);
+        final Map<String, dynamic> data = responseData['data'];
+        return Right(data);
       } else {
         debugPrint('Response data is NULL');
         return Left(ServerFailure());

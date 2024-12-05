@@ -19,11 +19,16 @@ class _SignInViewState extends State<SignInView> {
       listener: (context, state) {
         debugPrint('state ::::: $state');
         if (state.signInStatus == Status.success) {
-          debugPrint('state.signInStatus : ${state.signInStatus}');
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const SignupUserInput()));
-          // Navigator.of(context).pushReplacement(
-          //     MaterialPageRoute(builder: (context) => const MainView()));
+          debugPrint('state username : ${state.userName}');
+          if (state.userName == null) {
+            // 유저 닉네임이 미등록된 상태일 때
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const SignupUserInput()));
+          } else {
+            // 유저 닉네임이 등록된 상태일 때
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const MainView()));
+          }
         } else if (state.signInStatus == Status.failure) {
           showToast(
             message: "Login Failed",
@@ -32,10 +37,12 @@ class _SignInViewState extends State<SignInView> {
         }
       },
       listenWhen: (previous, current) {
-        debugPrint('state previous : $previous');
-        debugPrint('state current : $current');
-        debugPrint('previous.signInStatus : ${previous.signInStatus}');
-        debugPrint('current.signInStatus : ${current.signInStatus}');
+        // debugPrint('state previous : $previous');
+        // debugPrint('state current : $current');
+        // debugPrint('previous.signInStatus : ${previous.signInStatus}');
+        // debugPrint('current.signInStatus : ${current.signInStatus}');
+        // debugPrint('previous.userName : ${current.userName}');
+        // debugPrint('current.userName : ${current.userName}');
 
         return previous.signInStatus != current.signInStatus ||
             previous.signOutStatus != current.signInStatus;

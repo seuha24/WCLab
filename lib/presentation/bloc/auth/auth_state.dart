@@ -5,12 +5,14 @@ class AuthState extends Equatable {
   final Status signOutStatus;
   final Status patchUserInfoStatus;
   final Status getUserInfoStatus;
+  final String? userName;
 
   const AuthState({
     this.signInStatus = Status.initial,
     this.signOutStatus = Status.initial,
     this.patchUserInfoStatus = Status.initial,
     this.getUserInfoStatus = Status.initial,
+    this.userName,
   });
 
   @override
@@ -19,7 +21,8 @@ class AuthState extends Equatable {
         signInStatus,
         signOutStatus,
         patchUserInfoStatus,
-        getUserInfoStatus
+        getUserInfoStatus,
+        userName,
       ];
 
   AuthState copyWith({
@@ -27,12 +30,14 @@ class AuthState extends Equatable {
     Status? signOutStatus,
     Status? patchUserInfoStatus,
     Status? getUserInfoStatus,
+    String? userName,
   }) {
     return AuthState(
       signInStatus: signInStatus ?? this.signInStatus,
       signOutStatus: signOutStatus ?? this.signOutStatus,
       patchUserInfoStatus: patchUserInfoStatus ?? this.patchUserInfoStatus,
       getUserInfoStatus: getUserInfoStatus ?? this.getUserInfoStatus,
+      userName: userName ?? this.userName,
     );
   }
 }
