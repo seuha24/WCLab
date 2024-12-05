@@ -225,20 +225,15 @@ class _NaverMapViewState extends State<NaverMapView> {
     accLastTime = 0.0;
   }
 
-  Future<void> positionUpdate(UserAccelerometerEvent event) async {
+  Future<void> positionUpdate(UserAccelerometerEvent event, Duration sensorInterval) async {
     // 데카르트 좌표계 -> GPS 좌표계
     Map<String, double> convertToLatitudeLongitude(double positionX, double positionY) {
       debugPrint('finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, convertToLatitudeLongitude 실행 중');
-      // 위도 변화 (positionY는 북남 방향 이동)
-      double deltaLatitude = positionY / 111000; // 1도 위도는 약 111 km
-      // 경도 변화 (positionX는 동서 방향 이동)
-      double deltaLongitude = positionX / (111000 * math.cos(finalLatitude * pi / 180)); // 위도에 따른 경도 변화
-      // 새로운 위도, 경도 계산
-      double newLatitude = finalLatitude + deltaLatitude;
-      double newLongitude = finalLongitude + deltaLongitude;
+      double deltaLatitude = positionY / 111900;
+      double deltaLongitude = positionX / (111900 * math.cos(finalLatitude) * pi / 180);
       return {
-        'latitude': newLatitude,
-        'longitude': newLongitude
+        'latitude': finalLatitude + deltaLatitude,
+        'longitude': finalLongitude + deltaLongitude
       };
     }
     accCurrentTime = DateTime.now().millisecondsSinceEpoch.toDouble();
@@ -376,11 +371,11 @@ class _NaverMapViewState extends State<NaverMapView> {
       resetSpeedUtilsValue();
     }
 
-    Future<void> moveByImu(event) async {
+    Future<void> moveByImu(event, Duration sensorInterval) async {
       setState(() {
         isGps = false;
       });
-      await positionUpdate(event);
+      await positionUpdate(event, sensorInterval);
       moveDot(imuLatitude, imuLongitude);
     }
 
@@ -395,7 +390,7 @@ class _NaverMapViewState extends State<NaverMapView> {
       ));
       if(position.accuracy > gpsAccuracy) {
         debugPrint('가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImu 실행됨.');
-        moveByImu(event);
+        moveByImu(event, SensorInterval.normalInterval);
       } else {
         debugPrint('가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByGPS 실행됨.');
         moveByGps();
