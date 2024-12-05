@@ -15,6 +15,7 @@ class _SettingViewState extends State<SettingView> {
   late String? lightmode;
   late Box box;
   late Box flashbox;
+  final AuthService _authService = DI<AuthService>();
 
   final List<Map<String, dynamic>> modes = [
     {
@@ -53,6 +54,8 @@ class _SettingViewState extends State<SettingView> {
     } else if (flashbox.values.toList()[0] == FlashMode.WITH_WEATHER) {
       lightmode = 'weathers';
     }
+
+    context.read<AuthBloc>().add(GetUserInfoEvent());
   }
 
   @override
@@ -68,7 +71,8 @@ class _SettingViewState extends State<SettingView> {
             right: SizeTheme.w_md,
           ),
           child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (_, state) {
+            builder: (context, state) {
+              final username = state.userName ?? '익명 사용자';
               return Semantics.fromProperties(
                 properties: const SemanticsProperties(
                   button: true,
@@ -78,9 +82,33 @@ class _SettingViewState extends State<SettingView> {
                 ),
                 //  '로그인 화면 이동 버튼, 현재 로그인 상태',
                 child: ListTile(
-                  onTap: () {
-                    context.read<AuthBloc>().add(SignOutAnonymouslyEvent());
-                    context.read<AuthBloc>().add(SignOutWithGoogleEvent());
+                  onTap: () async {
+                    debugPrint('onTap Logout');
+
+                    final authType = await _authService.loadAuthType();
+                    debugPrint('authType : $authType');
+
+                    switch (authType) {
+                      case AuthType.google:
+                        context.read<AuthBloc>().add(SignOutWithGoogleEvent());
+                      case AuthType.apple:
+                        context.read<AuthBloc>().add(SignOutWithAppleEvent());
+                      case AuthType.anonymous:
+                        context.read<AuthBloc>().add(SignOutAnonymouslyEvent());
+                    }
+
+                    /// 토큰 데이터 삭제, 로그인 타입 삭제
+                    _authService.clearAuthData();
+                    // _authService.clearAuthType();
+                    final loadedAuthData = await _authService.loadAuthData();
+                    debugPrint('accessToken : ${loadedAuthData['accessToken']}');
+                    debugPrint('refreshToken : ${loadedAuthData['refreshToken']}');
+                    debugPrint('userName : ${loadedAuthData['userName']}');
+
+                    debugPrint('authType : ${await _authService.loadAuthType()}');
+
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => const SignInView()));
                   },
                   leading: SingleChildRoundedCard(
                     child: Icon(
@@ -93,7 +121,7 @@ class _SettingViewState extends State<SettingView> {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '익명 사용자',
+                      username,
                       style: Theme.of(context).textTheme.displayLarge,
                       semanticsLabel: '',
                     ),
@@ -336,7 +364,7 @@ class _SettingViewState extends State<SettingView> {
                     ),
                   ),
 
-// 경광등
+    // 경광등
                   Semantics.fromProperties(
                     properties: SemanticsProperties(
                       button: true,

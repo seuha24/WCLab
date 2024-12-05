@@ -309,3 +309,23 @@ class SendAppleOAuthTokenToServer {
     return await repository.sendAppleOAuthTokenToServer(token);
   }
 }
+
+class PatchUserInfo {
+  final AuthRepository repository;
+
+  PatchUserInfo(this.repository);
+
+  Future<Either<Failure, Void>> call(String userName) async {
+    return await repository.patchUserInfo(userName);
+  }
+}
+
+class GetUserInfo {
+  final AuthRepository repository;
+
+  GetUserInfo(this.repository);
+
+  Future<Either<Failure, Map<String, dynamic>>> call() async {
+    return await repository.getUserInfo();
+  }
+}

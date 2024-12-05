@@ -17,24 +17,36 @@ class _SignInViewState extends State<SignInView> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state.guestSignInStatus == Status.success ||
-            state.googleSignInStatus == Status.success ||
-            state.appleSignInStatus == Status.success) {
-          debugPrint('state.appleSignInStatus : ${state.appleSignInStatus}');
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const MainView()));
-        } else if (state.guestSignInStatus == Status.failure ||
-            state.googleSignInStatus == Status.failure ||
-            state.appleSignInStatus == Status.failure) {
+        debugPrint('state ::::: $state');
+        if (state.signInStatus == Status.success) {
+          debugPrint('state username : ${state.userName}');
+          if (state.userName == null) {
+            // 유저 닉네임이 미등록된 상태일 때
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const SignupUserInput()));
+          } else {
+            // 유저 닉네임이 등록된 상태일 때
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const MainView()));
+          }
+        } else if (state.signInStatus == Status.failure) {
           showToast(
             message: "Login Failed",
             backgroundColor: Colors.red,
           );
         }
       },
-      listenWhen: (previous, current) =>
-          previous.guestSignInStatus != current.guestSignInStatus ||
-          previous.googleSignOutStatus != current.googleSignOutStatus,
+      listenWhen: (previous, current) {
+        // debugPrint('state previous : $previous');
+        // debugPrint('state current : $current');
+        // debugPrint('previous.signInStatus : ${previous.signInStatus}');
+        // debugPrint('current.signInStatus : ${current.signInStatus}');
+        // debugPrint('previous.userName : ${current.userName}');
+        // debugPrint('current.userName : ${current.userName}');
+
+        return previous.signInStatus != current.signInStatus ||
+            previous.signOutStatus != current.signInStatus;
+      },
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         appBar: AppBar(
@@ -143,18 +155,17 @@ class _SignInViewState extends State<SignInView> {
                                     .read<AuthBloc>()
                                     .add(SignInAnonymouslyEvent());
                               },
-                              child:
-                                  (state.guestSignInStatus == Status.inProgress)
-                                      ? CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary,
-                                        )
-                                      : const Text(
-                                          '로그인 없이 이용하기',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
+                              child: (state.signInStatus == Status.inProgress)
+                                  ? CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    )
+                                  : const Text(
+                                      '로그인 없이 이용하기',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                             ),
                           ),
                         ],
