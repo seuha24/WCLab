@@ -111,7 +111,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   bool isLoading = true; // 로딩을 위한 T/F
 
   GeoLocation? selectedLocation; // 검색된 위치의 좌표값 객체
-  late NaverMapController mapController;
+  NaverMapController? mapController;
   List<LatLng> paths = []; // 모든 경로의 좌표값을 담는 배열
   List<BranchInfo> branchinfo = []; // 분기의 객체 배열
 
@@ -213,6 +213,12 @@ class _NaverMapViewState extends State<NaverMapView> {
     });
   }
 
+  @override
+  void dispose() {
+    _locationUpdateTimer?.cancel();
+    super.dispose();
+  }
+
   // yawRate 계산 - 자이로스코프 회전속도계산
   void yawRateupdate(GyroscopeEvent event, Duration sensorInterval) {
     double dt = sensorInterval.inMilliseconds / 1000.0;
@@ -297,14 +303,11 @@ class _NaverMapViewState extends State<NaverMapView> {
 
     lastTime = currentTime;
 
-
-
-
     // 속력: 벡터의 크기 계산 -> 스칼라(크기)
-    currentSpeed = math.sqrt(accX * accX + accY * accY);
+    // currentSpeed = math.sqrt(accX * accX + accY * accY);
     // 현재 위치 좌표점 계산 - 속력 * 방향 = 위치
-    px += (currentSpeed * math.cos(yawRate));
-    py += (currentSpeed * math.sin(yawRate));
+    // px += (currentSpeed * math.cos(yawRate));
+    // py += (currentSpeed * math.sin(yawRate));
     // px와 py를 사용하여 거리를 계산
     double distanceKm = math.sqrt(px * px + py * py) / 1000.0;
     double bearing = math.atan2(py, px) * radianToAngle; // 방향 이 부분 수정
@@ -611,6 +614,11 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   // 네이버맵에 경로를 포함한 overlays를 띄우기 위한 함수
   void addOverlays(List<LatLng> paths) {
+    if (mapController == null) {
+      debugPrint('addOverlays() mapController is not initialized yet.');
+      return;
+    }
+
     Set<NAddableOverlay> overlays = {
       NMultipartPathOverlay(
         id: "path",
@@ -625,7 +633,7 @@ class _NaverMapViewState extends State<NaverMapView> {
         outlineWidth: 3, // 경로표시 선의 두께 지정 (3->9)
       ),
     };
-    mapController.addOverlayAll(overlays);
+    mapController!.addOverlayAll(overlays);
   }
 
   // 두 위경도 사이의 거리를 계산하는 함수.
@@ -1095,6 +1103,11 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   void _updateMapPosition(currentLatitude, currentLongitude, compassValue) {
+    if (mapController == null) {
+      debugPrint('_updateMapPosition() mapController is not initialized yet.');
+      return;
+    }
+
     // 원하는 줌 레벨을 설정합니다. 예를 들어, 줌 레벨을 15로 설정
     final zoomLevel = 18.5;
     // 현재 위치를 기준으로 카메라 위치를 설정
@@ -1105,10 +1118,15 @@ class _NaverMapViewState extends State<NaverMapView> {
     );
 
     // 카메라 업데이트 적용
-    mapController.updateCamera(cameraUpdate);
+    mapController!.updateCamera(cameraUpdate);
   }
 
   void _updateCurrentLocationMarker(currentLatitude, currentLongitude) async {
+    if (mapController == null) {
+      debugPrint('_updateCurrentLocationMarker() mapController is not initialized yet.');
+      return;
+    }
+
     // GPS에 따라 마커 색상 설정
     final Color markerColor = isGps ? Colors.blue : Colors.red;
     final iconImage = await NOverlayImage.fromWidget(
@@ -1126,10 +1144,15 @@ class _NaverMapViewState extends State<NaverMapView> {
           position: NLatLng(currentLatitude, currentLongitude),
           icon: iconImage);
     });
-    mapController.addOverlay(_currentLocationMarker!);
+    mapController!.addOverlay(_currentLocationMarker!);
   }
 
   void addBranchMarkers() async {
+    if (mapController == null) {
+      debugPrint('addBranchMarkers() mapController is not initialized yet.');
+      return;
+    }
+
     Set<NAddableOverlay> markers = {}; // 마커들을 담을 Set
 
     final iconImage = await NOverlayImage.fromWidget(
@@ -1152,7 +1175,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
 
     // 맵에 마커 추가
-    mapController.addOverlayAll(markers);
+    mapController!.addOverlayAll(markers);
   }
 
   @override
@@ -1354,7 +1377,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
                           // 주기적으로 거리계산, 경로이탈 탐지를 위한 계산을 하는 곳.
 
-                          Timer.periodic(Duration(seconds: 2), (timer) async {
+                          _locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
                             // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remainDistance 변수에 삽입
                             checkBoundary(); //경계이탈, 인덱스
                             indexUpdate();
