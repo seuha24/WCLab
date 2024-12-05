@@ -13,7 +13,6 @@ class _MainViewState extends State<MainView> {
 
   final List<Widget> _widgetOptions = const <Widget>[
     NaverMapView(),
-    //desSearch(),
     SettingView(),
   ];
 
@@ -34,7 +33,10 @@ class _MainViewState extends State<MainView> {
       builder: (context, snapshot) {
         if (snapshot.data != BleStatus.poweredOff) {
           return Scaffold(
-            body: _widgetOptions[_selectedIndex],
+            body: IndexedStack(
+              index: _selectedIndex,
+              children: _widgetOptions,
+            ),
             bottomNavigationBar: BottomNavigationBar(
               unselectedItemColor: Theme.of(context).colorScheme.surface,
               backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -56,7 +58,7 @@ class _MainViewState extends State<MainView> {
               ],
               currentIndex: _selectedIndex,
               selectedItemColor: Theme.of(context).colorScheme.onSecondary,
-              onTap: (index) => _onItemTapped(index),
+              onTap: _onItemTapped,
             ),
           );
         } else {
