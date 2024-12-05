@@ -67,11 +67,8 @@ dependencies:
   geolocator: ^13.0.2
   flutter_compass: ^0.8.0
   latlong2: ^0.9.0
-<<<<<<< HEAD
   simple_kalman: ^1.0.2
-=======
   pretty_dio_logger: ^1.4.0
->>>>>>> 9c338655cd5b64bd653ca96f5fcb3f199b757ea4
 
 dev_dependencies:
   flutter_test:
