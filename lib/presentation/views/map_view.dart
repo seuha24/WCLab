@@ -24,78 +24,23 @@ class MovingAverageFilter {
   final int windowSize;
   final List<double> _values = [];
   MovingAverageFilter(this.windowSize);
+
   double filter(double newValue) {
     _values.add(newValue);
     if (_values.length > windowSize) {
       _values.removeAt(0); // 오래된 값 제거
     }
-    return _values.reduce((a, b) => a + b) / _values.length;
-  }
-}
-
-class WeightedAverageFilter {
-  final List<double?> _queue;
-  final List<double> _weights;
-  int _front = 0;
-  int _rear = 0;
-  int _size = 0;
-  WeightedAverageFilter(int capacity, List<double> weights)
-      : _queue = List<double?>.filled(capacity, null),
-        _weights = List<double>.from(weights);
-  bool get isEmpty => _size == 0;
-  bool get isFull => _size == _queue.length;
-  //새로운 데이터 추가
-  void enqueue(double element) {
-    if (isFull) {
-      dequeue();
-    }
-    _queue[_rear] = element;
-    _rear = (_rear + 1) % _queue.length;
-    _size++;
-  }
-  //제일 오래된 데이터 삭제
-  double? dequeue() {
-    if (isEmpty) {
-      throw Exception("Queue is empty");
-    }
-    double? element = _queue[_front];
-    _queue[_front] = null;
-    _front = (_front + 1) % _queue.length;
-    _size--;
-    return element;
-  }
-
-  //데이터 조회
-  double? peek() {
-    if (isEmpty) {
-      return null;
-    }
-    return _queue[_front];
-  }
-  //queue를 초기화
-  void clear() {
-    while (!isEmpty) {
-      dequeue();
-    }
-  }
-  //queue내의 요소의 평균을 계산
-  double calculateWeightedAverage() {
-    if (isEmpty) {
-      return 0.0;
-    }
+    // 가중치 계산
+    final int length = _values.length;
+    final List<double> weights = [0.1, 0.1, 0.05, 0.02, 0.02];
+    // 가중 평균 계산
     double weightedSum = 0.0;
-    double weightSum = 0.0;
-    for (int i = 0; i < _queue.length; i++) {
-      double? element = _queue[(_front + i) % _queue.length];
-      if (element != null) {
-        weightedSum += element * _weights[i];
-        weightSum += _weights[i];
-      }
+    for (int i = 0; i < length; i++) {
+      weightedSum += _values[i] * weights[i];
     }
-    return weightSum == 0.0 ? 0.0 : weightedSum / weightSum;
+    return weightedSum / 5;
   }
 }
-
 class NaverMapView extends StatefulWidget {
   const NaverMapView({super.key});
   @override
@@ -118,6 +63,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   double velocityX = 0.0, velocityY = 0.0, velocityZ = 0.0;
   double rotationX = 0.0, rotationY = 0.0, rotationZ = 0.0;
   double imuLocationX = 0.0, imuLocationY = 0.0, imuLocationZ = 0.0;
+  double compassValue = 0.0;
   // imu로 계산된 위경도 변수
   double imuLatitude = 0.0, imuLongitude = 0.0;
   // 최종 위경도 변수
@@ -125,11 +71,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   late double finalLongitude;
   // imu, gps 전환 플래그
   bool isGps = false;
-
-  //가중이동평균필터 인스턴스 생성
-  final WeightedAverageFilter _filteringX = WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
-  final WeightedAverageFilter _filteringY = WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
-  final WeightedAverageFilter _filteringZ = WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
 
   double remainDistance = double.infinity; // 다음 분기까지의 남은거리 (초기값: 무한대)
   GeoLocation? startSelectedLocation; // 시작 위치의 좌표값 객체
@@ -158,7 +99,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   double yawRate2 = 0.0;
   double yawRatePerDt = 0.0;
   double yawRateVelocity = 0.0;
-  double compassValue = 0.0;
+  
   double yawRateTurn = 0.0;
   double yawRateTurn2 = 0.0;
   double turn = 0.0;
@@ -239,7 +180,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     curAccZ = curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
     debugPrint('curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
     // 칼만필터 적용
-    final kalman = SimpleKalman(errorMeasure: 5, errorEstimate: 20, q: 0.6);
+    final kalman = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
     curAccX = kalman.filtered(curAccX);
     curAccY = kalman.filtered(curAccY);
     curAccZ = kalman.filtered(curAccZ);
@@ -249,26 +190,18 @@ class _NaverMapViewState extends State<NaverMapView> {
     velocityY = (curAccY - preAccY) * deltaTime;
     velocityZ = (curAccZ - preAccZ) * deltaTime;
     debugPrint('velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, positionUpdateFunc 진행 중...5');
-    // 가중평균필터 적용
-    _filteringX.enqueue(velocityX);
-    _filteringY.enqueue(velocityY);
-    _filteringZ.enqueue(velocityZ);
-    velocityX = _filteringX.calculateWeightedAverage();
-    velocityY = _filteringY.calculateWeightedAverage();
-    velocityZ = _filteringZ.calculateWeightedAverage();
-    debugPrint('velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 가중필터 적용, positionUpdateFunc 진행 중...6');
-    // 이동필터 적용
-    final velocityXFilter = MovingAverageFilter(100);
-    final velocityYFilter = MovingAverageFilter(100);
-    final velocityZFilter = MovingAverageFilter(100);
+    // 가중이동필터 적용
+    final velocityXFilter = MovingAverageFilter(5);
+    final velocityYFilter = MovingAverageFilter(5);
+    final velocityZFilter = MovingAverageFilter(5);
     velocityX = velocityXFilter.filter(velocityX);
     velocityY = velocityYFilter.filter(velocityY);
     velocityZ = velocityZFilter.filter(velocityZ);
     debugPrint('velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 이동필터 적용, positionUpdateFunc 진행 중...7');
-    // 위치 계산
-    imuLocationX += velocityX * deltaTime;
-    imuLocationY += velocityY * deltaTime;
-    imuLocationZ += velocityZ * deltaTime;
+    // 위치 계산, 나침반 적용
+    final headingRadians = compassValue * pi / 180.0;
+    imuLocationX += velocityX * math.cos(headingRadians) * deltaTime;
+    imuLocationY += velocityX * math.sin(headingRadians) * deltaTime;
     debugPrint('imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, imuLocationZ, $imuLocationZ, 실제 이동 거리, positionUpdateFunc 진행 중...8');
     final convertImuLocation = convertToLatitudeLongitude(imuLocationX, imuLocationY);
     setState(() {
