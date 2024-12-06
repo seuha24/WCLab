@@ -32,7 +32,7 @@ class MovingAverageFilter {
     }
     // 가중치 계산
     final int length = _values.length;
-    final List<double> weights = [0.1, 0.1, 0.05, 0.02, 0.02];
+    final List<double> weights = [0.1, 0.08, 0.06, 0.04, 0.02];
     // 가중 평균 계산
     double weightedSum = 0.0;
     for (int i = 0; i < length; i++) {
@@ -313,7 +313,7 @@ class _NaverMapViewState extends State<NaverMapView> {
       curAccY = event.y;
       curAccZ = event.z;
       double accelerationMagnitude = math.sqrt(curAccX * curAccX + curAccY * curAccY + curAccZ * curAccZ);
-      if(accelerationMagnitude > 1.0 && !isAccRuning) {
+      if(accelerationMagnitude > 1.0 && accelerationMagnitude < 10.0 && !isAccRuning) {
         isAccRuning = true;
         // debugPrint('accelerationMagnitude: $accelerationMagnitude, subscribeToSensor<UserAccelerometerEvent> 트리거 됨');
         position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
