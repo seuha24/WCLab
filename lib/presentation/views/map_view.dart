@@ -125,11 +125,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   late double finalLongitude;
   // imu, gps 전환 플래그
   bool isGps = false;
-  // 센서 detlaTime 계산용 변수
-  late double accCurrentTime;
-  double accLastTime = 0.0;
-  late double gyroCurrentTime;
-  double gyroLastTime = 0.0;
 
   //가중이동평균필터 인스턴스 생성
   final WeightedAverageFilter _filteringX = WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
@@ -159,7 +154,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   NMarker? _testMarker;
 
   // 방향
-  double? heading = 0.0;
   double? adjustment;
   double yawRate2 = 0.0;
   double yawRatePerDt = 0.0;
@@ -222,7 +216,6 @@ class _NaverMapViewState extends State<NaverMapView> {
     preAccX = 0.0;
     preAccY = 0.0;
     preAccZ = 0.0;
-    accLastTime = 0.0;
   }
 
   Future<void> positionUpdate(UserAccelerometerEvent event, Duration sensorInterval) async {
@@ -236,11 +229,7 @@ class _NaverMapViewState extends State<NaverMapView> {
         'longitude': finalLongitude + deltaLongitude
       };
     }
-    accCurrentTime = DateTime.now().millisecondsSinceEpoch.toDouble();
-    if(accLastTime == 0.0) {
-      accLastTime = accCurrentTime;
-    }
-    final deltaTime = (accCurrentTime - accLastTime) / 1000.0; // 가속도계가 작동될 때의 Duration 계산
+    final deltaTime = sensorInterval.inMicroseconds / 1000.0; // 가속도계가 작동될 때의 Duration 계산
     curAccX = event.x;
     curAccY = event.y;
     curAccZ = event.z;
@@ -283,7 +272,6 @@ class _NaverMapViewState extends State<NaverMapView> {
       imuLatitude = convertImuLocation['latitude'] ?? 0.0;
       imuLongitude = convertImuLocation['longitude'] ?? 0.0;
       // 마지막 값 초기화
-      accLastTime = accCurrentTime;
       preAccX = curAccX;
       preAccY = curAccY;
       preAccZ = curAccZ;
@@ -306,10 +294,10 @@ class _NaverMapViewState extends State<NaverMapView> {
 
 
   Future<void> _initLocation() async {
-    int gpsAccuracy = 1;
+    int gpsAccuracy = 10;
     Position position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 5
+      distanceFilter: 1
     ));
 
     gpsLatitude = position.latitude;
@@ -360,7 +348,7 @@ class _NaverMapViewState extends State<NaverMapView> {
       });
       position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 5
+        distanceFilter: 1
       ));
       gpsLatitude = position.latitude;
       gpsLongitude = position.longitude;
@@ -369,9 +357,10 @@ class _NaverMapViewState extends State<NaverMapView> {
       s_accuracy = position.accuracy;
       moveDot(gpsLatitude, gpsLongitude);
       resetSpeedUtilsValue();
+      debugPrint('gpsLatitude: $gpsLatitude, gpsLongitude: $gpsLongitude, moveByGPS 실행됨. 현재 GPS 정확도 : ${position.accuracy}');
     }
 
-    Future<void> moveByImu(event, Duration sensorInterval) async {
+    Future<void> moveByImu(UserAccelerometerEvent event, Duration sensorInterval) async {
       setState(() {
         isGps = false;
       });
@@ -379,35 +368,37 @@ class _NaverMapViewState extends State<NaverMapView> {
       moveDot(imuLatitude, imuLongitude);
     }
 
+    // GPS값이 바뀌지 않았더라도 가속도계에서 이벤트 온다면 moveByImu 또는 moveByGps 트리거
     subscribeToSensor<UserAccelerometerEvent>(
     sensorStream: userAccelerometerEventStream(samplingPeriod: SensorInterval.normalInterval),
     onEvent: (event) async {
       final double accelerationMagnitude = math.sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-      if(accelerationMagnitude > 0.1 && accelerationMagnitude < 1.5) {
-      position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 5
-      ));
-      if(position.accuracy > gpsAccuracy) {
-        debugPrint('가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImu 실행됨.');
-        moveByImu(event, SensorInterval.normalInterval);
-      } else {
-        debugPrint('가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByGPS 실행됨.');
-        moveByGps();
-      }
-    }},
+      debugPrint('accelerationMagnitude: $accelerationMagnitude, subscribeToSensor<UserAccelerometerEvent> 실행 중');
+      if(accelerationMagnitude > 0.01 && accelerationMagnitude < 1.0) {
+        position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5
+        ));
+        if(position.accuracy > gpsAccuracy) {
+          debugPrint('가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImu 실행됨.');
+          await moveByImu(event, SensorInterval.normalInterval);
+        } else {
+          debugPrint('가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByGPS 실행됨.');
+          await moveByGps();
+        }
+      } 
+    },
     onError: (e) {
       debugPrint(e);
     });
 
-    // 나침반계에서 이벤트 올 때만 지도 방향 리프레시 하도록 변경
+    // 나침반계에서 이벤트 올 때만 지도 방향 리프레시
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
-        heading = event.heading ?? 0.0;
-        compassValue = heading!;
-        if (_lastDirection == null || (heading! - _lastDirection!).abs() >= _threshold) {
-          _lastDirection = heading; // 마지막 방향 업데이트
+        compassValue = event.heading ?? 0.0;
+        if (_lastDirection == null || (compassValue - _lastDirection!).abs() >= _threshold) {
+          _lastDirection = compassValue;
           _updateMapPosition(finalLatitude, finalLongitude, compassValue);
         }
         s_accuracy = position.accuracy;
@@ -417,25 +408,17 @@ class _NaverMapViewState extends State<NaverMapView> {
       },
     );
 
-    void updateRotation(GyroscopeEvent event) {
-      gyroCurrentTime = DateTime.now().millisecondsSinceEpoch.toDouble();
-      if(gyroLastTime == 0.0) {
-        gyroLastTime = gyroCurrentTime;
-      }
-      final deltaTime = (gyroCurrentTime - gyroLastTime) / 1000.0;
-      setState(() {
-        rotationX += event.x * deltaTime;
-        rotationY += event.y * deltaTime;
-        rotationZ += event.z * deltaTime;
-        gyroLastTime = gyroCurrentTime;
-      });
-    }
-
+    // 자이로스코프계에서 이벤트 올 때만 방향을 리프레시
     subscribeToSensor<GyroscopeEvent>(
-      sensorStream:
-          gyroscopeEventStream(samplingPeriod: Duration(milliseconds: 20)),
-      onEvent: (GyroscopeEvent event) {
-        updateRotation(event);
+      sensorStream: gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
+      onEvent: (GyroscopeEvent event) async {
+        final deltaTime = (SensorInterval.normalInterval).inMilliseconds / 1000.0;
+        setState(() {
+          rotationX += event.x * deltaTime;
+          rotationY += event.y * deltaTime;
+          rotationZ += event.z * deltaTime;
+        });
+        debugPrint('rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, subscribeToSensor<GyroscopeEvent> 실행됨');
       },
       onError: (e) {
         debugPrint(e);
@@ -445,10 +428,9 @@ class _NaverMapViewState extends State<NaverMapView> {
     // GPS 값 변화가 있을 때
     positionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
-      accuracy: LocationAccuracy.high, distanceFilter: 5))
+      accuracy: LocationAccuracy.high, distanceFilter: 1))
     .listen((Position position) {
       if(position.accuracy <= gpsAccuracy) {
-        debugPrint('moveByGPS 실행됨. 현재 GPS 정확도 : ${position.accuracy}');
         moveByGps();
       }
     });
