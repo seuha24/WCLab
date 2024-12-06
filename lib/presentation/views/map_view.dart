@@ -41,6 +41,7 @@ class MovingAverageFilter {
     return weightedSum / 5;
   }
 }
+
 class NaverMapView extends StatefulWidget {
   const NaverMapView({super.key});
   @override
@@ -62,8 +63,9 @@ class _NaverMapViewState extends State<NaverMapView> {
   double curAccX = 0.0, curAccY = 0.0, curAccZ = 0.0;
   double velocityX = 0.0, velocityY = 0.0, velocityZ = 0.0;
   double rotationX = 0.0, rotationY = 0.0, rotationZ = 0.0;
-  double imuLocationX = 0.0, imuLocationY = 0.0, imuLocationZ = 0.0;
+  double imuLocationX = 0.0, imuLocationY = 0.0;
   double compassValue = 0.0;
+  double yawRate = 0.0;
   // imu로 계산된 위경도 변수
   double imuLatitude = 0.0, imuLongitude = 0.0;
   // 최종 위경도 변수
@@ -71,6 +73,12 @@ class _NaverMapViewState extends State<NaverMapView> {
   late double finalLongitude;
   // imu, gps 전환 플래그
   bool isGps = false;
+
+
+
+
+
+
 
   double remainDistance = double.infinity; // 다음 분기까지의 남은거리 (초기값: 무한대)
   GeoLocation? startSelectedLocation; // 시작 위치의 좌표값 객체
@@ -85,8 +93,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   List<LatLng> paths = []; // 모든 경로의 좌표값을 담는 배열
   List<BranchInfo> branchinfo = []; // 분기의 객체 배열
 
-  
-
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
@@ -95,7 +101,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   NMarker? _testMarker;
 
   // 방향
-  double? adjustment;
   double yawRate2 = 0.0;
   double yawRatePerDt = 0.0;
   double yawRateVelocity = 0.0;
@@ -107,8 +112,6 @@ class _NaverMapViewState extends State<NaverMapView> {
   String clock = "";
 
   // 거리
-  double px = 0.0;
-  double py = 0.0;
   double distanceToPath = 0.0;
   double circularDistance = 0.0;
   double lineDistance = 0.0;
@@ -123,7 +126,6 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   double yawRateAccFilteringValue = 0.3;
   double detectiveRange = 0.5; // 감지 범위
-  double iphone12Filter = ((1 / 130) * (math.pi / 180));
 
   // 인덱스
   int currentIndex = 0; // 현재 인덱스
@@ -159,26 +161,16 @@ class _NaverMapViewState extends State<NaverMapView> {
     preAccZ = 0.0;
   }
 
-  Future<void> positionUpdate(Duration sensorInterval) async {
-    // 데카르트 좌표계 -> GPS 좌표계
-    Map<String, double> convertToLatitudeLongitude(double positionX, double positionY) {
-      debugPrint('finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, positionUpdateFunc 진행 중...5');
-      double deltaLatitude = positionY / 111900;
-      double deltaLongitude = positionX / (111900 * math.cos(finalLatitude) * pi / 180);
-      return {
-        'latitude': finalLatitude + deltaLatitude,
-        'longitude': finalLongitude + deltaLongitude
-      };
-    }
+  Future<void> positionUpdate(Duration sensorInterval) async { 
     double deltaTime = (sensorInterval.inMilliseconds)/1000.0; // 가속도계가 작동될 때의 Duration 계산
     debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
     final double accelerationMagnitude = math.sqrt(curAccX * curAccX + curAccY * curAccY + curAccZ * curAccZ);
     debugPrint('accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...2');
     // 중력 보정(자이로스코프 데이터 이용)
-    curAccX = curAccX = 9.81 * math.sin(rotationX);
-    curAccY = curAccY = 9.81 * math.sin(rotationY);
-    curAccZ = curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
-    debugPrint('curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
+    // curAccX = curAccX = 9.81 * math.sin(rotationX);
+    // curAccY = curAccY = 9.81 * math.sin(rotationY);
+    // curAccZ = curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
+    // debugPrint('curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
     // 칼만필터 적용
     final kalman = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
     curAccX = kalman.filtered(curAccX);
@@ -197,21 +189,28 @@ class _NaverMapViewState extends State<NaverMapView> {
     velocityX = velocityXFilter.filter(velocityX);
     velocityY = velocityYFilter.filter(velocityY);
     velocityZ = velocityZFilter.filter(velocityZ);
-    debugPrint('velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 이동필터 적용, positionUpdateFunc 진행 중...7');
-    // 위치 계산, 나침반 적용
-    final headingRadians = compassValue * pi / 180.0;
-    imuLocationX += velocityX * math.cos(headingRadians) * deltaTime;
-    imuLocationY += velocityX * math.sin(headingRadians) * deltaTime;
-    debugPrint('imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, imuLocationZ, $imuLocationZ, 실제 이동 거리, positionUpdateFunc 진행 중...8');
-    final convertImuLocation = convertToLatitudeLongitude(imuLocationX, imuLocationY);
+    debugPrint('velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 이동필터 적용, positionUpdateFunc 진행 중...6');
+    // 속력 계산, 나침반 적용
+    final double currentSpeed = math.sqrt(velocityX * velocityX + velocityY * velocityY);
+    debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...7');
     setState(() {
-      imuLatitude = convertImuLocation['latitude'] ?? 0.0;
-      imuLongitude = convertImuLocation['longitude'] ?? 0.0;
-      // 마지막 값 초기화
-      preAccX = curAccX;
-      preAccY = curAccY;
-      preAccZ = curAccZ;
+      imuLocationX += (currentSpeed * math.cos(yawRate) * deltaTime);
+      imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
     });
+    debugPrint('imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, 실제 이동 거리, positionUpdateFunc 진행 중...8');
+    double distanceKm = math.sqrt(imuLocationX * imuLocationX + imuLocationY * imuLocationY) / 1000.0;
+    double distanceRad = distanceKm / 6371.0;
+    double pointingToRad = math.atan2(imuLocationY, imuLocationX);
+    double startLongitudeRad = finalLongitude * math.pi / 180;
+    double startLatitudeRad = finalLatitude * math.pi / 180;
+    double newLatitudeRad = math.asin(math.sin(startLatitudeRad) * math.cos(distanceRad) + math.cos(startLongitudeRad) * math.sin(distanceRad) * math.cos(pointingToRad));
+    double newLongitudeRad = startLongitudeRad + math.atan2(math.sin(pointingToRad) * math.sin(distanceRad) * math.cos(startLatitudeRad), math.cos(distanceRad) - math.sin(startLatitudeRad) * math.sin(newLatitudeRad));
+    imuLatitude = newLatitudeRad * 180 / math.pi;
+    imuLongitude = newLongitudeRad * 180 / math.pi;
+    // 마지막 값 초기화
+    preAccX = curAccX;
+    preAccY = curAccY;
+    preAccZ = curAccZ;
     debugPrint('imuLatitude: $imuLatitude, imuLongitude: $imuLongitude, positionUpdateFunc 진행 완료...9');
   }
 
@@ -337,7 +336,14 @@ class _NaverMapViewState extends State<NaverMapView> {
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
-        compassValue = event.heading ?? 0.0;
+        setState(() {
+          compassValue = event.heading ?? 0.0;
+          yawRate = compassValue * math.pi / 180;
+          if (yawRate >= 2 * math.pi || yawRate <= -2 * math.pi) {
+            yawRate = 0;
+          }
+        });
+        // debugPrint('compassValue: $compassValue, subscribeToSensor<CompassEvent> 진행 중');
         if (_lastDirection == null || (compassValue - _lastDirection!).abs() >= _threshold) {
           _lastDirection = compassValue;
           _updateMapPosition(finalLatitude, finalLongitude, compassValue);
