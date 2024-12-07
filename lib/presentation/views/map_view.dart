@@ -539,29 +539,24 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   //imu 함수
   List<BranchInfo> getCurrentWindow(
-      List<BranchInfo> branchinfo, int currentIndex, int windowsize) {
-    //windowsize는 언제나 홀수
-    int windowOffset = (windowsize - 1) ~/ 2;
-
-    // 윈도우의 시작과 끝 인덱스 계산
-    int start = currentIndex - windowOffset;
-    int end = currentIndex + windowOffset;
-
-    // 시작 인덱스가 0보다 작지 않도록 조정
-    start = start < 0 ? 0 : start;
-    // 끝 인덱스가 리스트의 마지막 인덱스를 초과하지 않도록 조정
-    end = end >= branchinfo.length ? branchinfo.length - 1 : end;
-
-    // 슬라이딩 윈도우 내의 체크포인트들을 담을 리스트
-    List<BranchInfo> window = [];
-
-    // 시작 인덱스부터 끝 인덱스까지의 체크포인트들을 리스트에 추가
-    for (int i = start; i <= end; i++) {
-      window.add(branchinfo[i]);
+    List<BranchInfo> branchinfo, int currentIndex, int windowsize) {
+      //windowsize는 언제나 홀수
+      int windowOffset = (windowsize - 1) ~/ 2;
+      // 윈도우의 시작과 끝 인덱스 계산
+      int start = currentIndex - windowOffset;
+      int end = currentIndex + windowOffset;
+      // 시작 인덱스가 0보다 작지 않도록 조정
+      start = start < 0 ? 0 : start;
+      // 끝 인덱스가 리스트의 마지막 인덱스를 초과하지 않도록 조정
+      end = end >= branchinfo.length ? branchinfo.length - 1 : end;
+      // 슬라이딩 윈도우 내의 체크포인트들을 담을 리스트
+      List<BranchInfo> window = [];
+      // 시작 인덱스부터 끝 인덱스까지의 체크포인트들을 리스트에 추가
+      for (int i = start; i <= end; i++) {
+        window.add(branchinfo[i]);
+      }
+      return window;
     }
-
-    return window;
-  }
 
   void indexUpdate() {
     double distanceBetweenBranchFunc(
@@ -632,7 +627,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   double rad2deg(double rad) {
     return rad * (180 / pi);
   }
-  
+
   Map<String, double> latLonToXY(
       double currentIndexLatitude,
       double currentIndexLongitude,
@@ -655,24 +650,15 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
 // 두 좌표 사이의 외적을 이용하여 좌우 판단
-  int checkLateralDeviation(
-      double currentIndexLatitude,
-      double currentIndexLongitude,
-      double targetIndexLatitude,
-      double targetIndexLongitude,
-      double finalLatitude,
-      double finalLongitude) {
+  int checkLateralDeviation(double currentIndexLatitude, double currentIndexLongitude, double targetIndexLatitude, double targetIndexLongitude, double finalLatitude, double finalLongitude) {
     // 출발점과 목표 지점을 평면 좌표계로 변환 (출발점이 원점)
-    Map<String, double> pathVector = latLonToXY(currentIndexLatitude,
-        currentIndexLongitude, targetIndexLatitude, targetIndexLongitude);
+    Map<String, double> pathVector = latLonToXY(currentIndexLatitude, currentIndexLongitude, targetIndexLatitude, targetIndexLongitude);
 
     // 출발점과 현재 위치를 평면 좌표계로 변환 (출발점이 원점)
-    Map<String, double> currentVector = latLonToXY(currentIndexLatitude,
-        currentIndexLongitude, finalLatitude, finalLongitude);
+    Map<String, double> currentVector = latLonToXY(currentIndexLatitude, currentIndexLongitude, finalLatitude, finalLongitude);
 
     // 외적 계산 (pathVector x currentVector)
-    double crossProduct = pathVector['x']! * currentVector['y']! -
-        pathVector['y']! * currentVector['x']!;
+    double crossProduct = pathVector['x']! * currentVector['y']! - pathVector['y']! * currentVector['x']!;
 
     // 외적 부호에 따라 좌우 판단
     if (crossProduct > 0) {
@@ -684,7 +670,9 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
   }
 
-  Map<String, double> breakPoint(
+  // yaw rate를 고려하여 타겟까지의 최종 각도를 계산하는 함수
+  double angleToTarget(double currentIndexLongitude, double currentIndexLatitude, double targetIndexLongitude, double targetIndexLatitude, double finalLatitude, double finalLongitude, double bearingToPoint, int boundaryExit) {
+    Map<String, double> breakPoint(
     double currentIndexLongitude,
     double currentIndexLatitude,
     double targetIndexLongitude,
@@ -723,54 +711,16 @@ class _NaverMapViewState extends State<NaverMapView> {
       'breakPointAngleC': C
     };
   }
-
-  //목표까지의 각도 계산
-  // yaw rate를 고려하여 타겟까지의 최종 각도를 계산하는 함수
-  double angleToTarget(
-      double currentIndexLongitude,
-      double currentIndexLatitude,
-      double targetIndexLongitude,
-      double targetIndexLatitude,
-      double finalLatitude,
-      double finalLongitude,
-      double bearingToPoint,
-      int boundaryExit) {
-    Map<String, double> breakPointAngle = breakPoint(
-      currentIndexLongitude,
-      currentIndexLatitude,
-      targetIndexLongitude,
-      targetIndexLatitude,
-      finalLatitude,
-      finalLongitude,
-    );
-
+    Map<String, double> breakPointAngle = breakPoint(currentIndexLongitude, currentIndexLatitude, targetIndexLongitude, targetIndexLatitude, finalLatitude, finalLongitude);
     double guidanceAngle = 0.0;
-    if (boundaryExit > 0) {
-      double baseAngle = (breakPointAngle['breakPointAngleC']! * (180 / math.pi));
-
-      // 목표 지까지의 각도를 계산 (기존 breakPointB + yaw rate 고려)
-
-      guidanceAngle = baseAngle % 360;
-    } else {
-      double baseAngle = (breakPointAngle['breakPointAngleC']! * (180 / math.pi));
-
-      // 목표 지까지의 각도를 계산 (기존 breakPointB + yaw rate 고려)
-
-      guidanceAngle = baseAngle % 360;
-    }
-
+    double baseAngle = (breakPointAngle['breakPointAngleC']! * (180 / math.pi));
+    // 목표 지까지의 각도를 계산 (기존 breakPointB + yaw rate 고려)
+    guidanceAngle = baseAngle % 360;
     return guidanceAngle;
   }
 
   // 유도각도 -> 12시, 1시, 2시... 방향으로 안내
-  String getGuidanceDirection(
-      double currentIndexLongitude,
-      double currentIndexLatitude,
-      double targetIndexLongitude,
-      double targetIndexLatitude,
-      double finalLatitude,
-      double finalLongitude,
-      double bearingToPoint) {
+  String getGuidanceDirection(double currentIndexLongitude, double currentIndexLatitude, double targetIndexLongitude, double targetIndexLatitude, double finalLatitude, double finalLongitude, double bearingToPoint) {
     int boundaryExit = checkLateralDeviation(
       currentIndexLatitude,
       currentIndexLongitude,
@@ -829,7 +779,6 @@ class _NaverMapViewState extends State<NaverMapView> {
         '11시 방향'
       ];
     }
-
     return directionLabels[direction];
   }
 
