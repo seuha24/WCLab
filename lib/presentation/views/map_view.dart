@@ -63,6 +63,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   double curAccX = 0.0, curAccY = 0.0, curAccZ = 0.0;
   double velocityX = 0.0, velocityY = 0.0, velocityZ = 0.0;
   double rotationX = 0.0, rotationY = 0.0, rotationZ = 0.0;
+  double rotationXSum = 0.0, rotationYSum = 0.0, rotationZSum = 0.0;
   double imuLocationX = 0.0, imuLocationY = 0.0;
   double compassValue = 0.0;
   double yawRate = 0.0;
@@ -373,10 +374,32 @@ class _NaverMapViewState extends State<NaverMapView> {
           rotationX = event.x * deltaTime;
           rotationY = event.y * deltaTime;
           rotationZ = event.z * deltaTime;
-          // Yaw Rate 보정
-          updateYawRate(rotationZ * deltaTime);
+          rotationXSum += rotationX;
+          rotationYSum += rotationY;
+          rotationZSum += rotationZ;
+          if(rotationXSum > 2 * math.pi) {
+            rotationXSum -= 2 * math.pi;
+          }
+          if(rotationXSum < - 2 * math.pi) {
+            rotationXSum += 2 * math.pi;
+          }
+          if(rotationYSum > 2 * math.pi) {
+            rotationYSum -= 2 * math.pi;
+          }
+          if(rotationYSum < - 2 * math.pi) {
+            rotationYSum += 2 * math.pi;
+          }
+          if(rotationZSum > 2 * math.pi) {
+            rotationZSum -= 2 * math.pi;
+          }
+          if(rotationZSum < - 2 * math.pi) {
+            rotationZSum += 2 * math.pi;
+          }
+          updateYawRate(rotationX);
+          updateYawRate(rotationY);
+          updateYawRate(rotationZ);
         });
-        debugPrint('rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, subscribeToSensor<GyroscopeEvent> 실행됨');
+        debugPrint('rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, rotationXSum: $rotationXSum, rotationYSum: $rotationYSum, rotationZSum: $rotationZSum, subscribeToSensor<GyroscopeEvent> 실행됨');
       },
       onError: (e) {
         debugPrint(e);
@@ -965,16 +988,13 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
   }
 
-  void _updateMapPosition(gpsLatitude, gpsLongitude, compassValue) {
-    // 원하는 줌 레벨을 설정합니다. 예를 들어, 줌 레벨을 15로 설정
-    final zoomLevel = 18.5;
+  void _updateMapPosition(latitude, longitude, compassValue) {
     // 현재 위치를 기준으로 카메라 위치를 설정
     final cameraUpdate = NCameraUpdate.withParams(
-      target: NLatLng(gpsLatitude, gpsLongitude),
-      zoom: zoomLevel,
+      target: NLatLng(latitude, longitude),
+      zoom: 18.5,
       bearing: compassValue,
     );
-
     // 카메라 업데이트 적용
     mapController.updateCamera(cameraUpdate);
   }
