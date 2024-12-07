@@ -190,9 +190,13 @@ class _NaverMapViewState extends State<NaverMapView> {
     velocityY = velocityYFilter.filter(velocityY);
     velocityZ = velocityZFilter.filter(velocityZ);
     debugPrint('velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 이동필터 적용, positionUpdateFunc 진행 중...6');
-    // 속력 계산, 나침반 적용
+    // Roll, Pitch 보정
+    velocityX = velocityX * math.cos(rotationX);
+    velocityY = velocityY * math.cos(rotationY);
+    // 속력 계산
     final double currentSpeed = math.sqrt(velocityX * velocityX + velocityY * velocityY);
     debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...7');
+    // 실제 이동 거리 계산
     setState(() {
       imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
       imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
@@ -236,7 +240,6 @@ class _NaverMapViewState extends State<NaverMapView> {
       accuracy: LocationAccuracy.high,
       distanceFilter: 1
     ));
-
     gpsLatitude = position.latitude;
     gpsLongitude = position.longitude;
     finalLatitude = gpsLatitude;
@@ -304,7 +307,6 @@ class _NaverMapViewState extends State<NaverMapView> {
       await positionUpdate(sensorInterval);
       moveDot(imuLatitude, imuLongitude);
     }
-
     bool isAccRuning = false;
     // GPS값이 바뀌지 않았더라도 가속도계에서 이벤트 온다면 moveByImuFunc 또는 moveByGpsFunc 트리거
     subscribeToSensor<UserAccelerometerEvent>(
@@ -334,6 +336,13 @@ class _NaverMapViewState extends State<NaverMapView> {
       debugPrint(e);
     });
 
+    void updateYawRate(double value) {
+      yawRate += value;
+      if (yawRate < 0 && yawRate >= -2 * math.pi) {
+        yawRate += 2 * math.pi;
+      }
+    }
+
     // 나침반계에서 이벤트 올 때만 지도 방향 리프레시
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
@@ -341,11 +350,9 @@ class _NaverMapViewState extends State<NaverMapView> {
         setState(() {
           compassValue = event.heading ?? 0.0;
           yawRate = (compassValue * math.pi / 180);
-          if (yawRate < 0 && yawRate >= -2 * math.pi) {
-            yawRate += 2 * math.pi;
-          }
+          updateYawRate(0);
         });
-        debugPrint('compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
+        // debugPrint('compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
         if (_lastDirection == null || (compassValue - _lastDirection!).abs() >= _threshold) {
           _lastDirection = compassValue;
           _updateMapPosition(finalLatitude, finalLongitude, compassValue);
@@ -363,11 +370,13 @@ class _NaverMapViewState extends State<NaverMapView> {
       onEvent: (GyroscopeEvent event) async {
         final deltaTime = (SensorInterval.normalInterval).inMilliseconds / 1000.0;
         setState(() {
-          rotationX += event.x * deltaTime;
-          rotationY += event.y * deltaTime;
-          rotationZ += event.z * deltaTime;
+          rotationX = event.x * deltaTime;
+          rotationY = event.y * deltaTime;
+          rotationZ = event.z * deltaTime;
+          // Yaw Rate 보정
+          updateYawRate(rotationZ * deltaTime);
         });
-        // debugPrint('rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, subscribeToSensor<GyroscopeEvent> 실행됨');
+        debugPrint('rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, subscribeToSensor<GyroscopeEvent> 실행됨');
       },
       onError: (e) {
         debugPrint(e);
