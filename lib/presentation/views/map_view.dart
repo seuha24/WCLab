@@ -32,7 +32,7 @@ class MovingAverageFilter {
     }
     // 가중치 계산
     final int length = _values.length;
-    final List<double> weights = [0.1, 0.08, 0.06, 0.04, 0.02];
+    final List<double> weights = [1, 0.8, 0.6, 0.3, 0.2];
     // 가중 평균 계산
     double weightedSum = 0.0;
     for (int i = 0; i < length; i++) {
@@ -162,15 +162,15 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   Future<void> positionUpdate(Duration sensorInterval) async { 
-    double deltaTime = (sensorInterval.inMilliseconds)/1000.0; // 가속도계가 작동될 때의 Duration 계산
+    double deltaTime = (sensorInterval.inMilliseconds/100.0).toDouble(); // 가속도계가 작동될 때의 Duration 계산
     debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
     final double accelerationMagnitude = math.sqrt(curAccX * curAccX + curAccY * curAccY + curAccZ * curAccZ);
     debugPrint('accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...2');
     // 중력 보정(자이로스코프 데이터 이용)
-    // curAccX = curAccX = 9.81 * math.sin(rotationX);
-    // curAccY = curAccY = 9.81 * math.sin(rotationY);
-    // curAccZ = curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
-    // debugPrint('curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
+    curAccX = curAccX = 9.81 * math.sin(rotationX);
+    curAccY = curAccY = 9.81 * math.sin(rotationY);
+    curAccZ = curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
+    debugPrint('curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
     // 칼만필터 적용
     final kalman = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
     curAccX = kalman.filtered(curAccX);
@@ -194,7 +194,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     final double currentSpeed = math.sqrt(velocityX * velocityX + velocityY * velocityY);
     debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...7');
     setState(() {
-      imuLocationX += (currentSpeed * math.cos(yawRate) * deltaTime);
+      imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
       imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
     });
     debugPrint('imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, 실제 이동 거리, positionUpdateFunc 진행 중...8');
@@ -207,6 +207,8 @@ class _NaverMapViewState extends State<NaverMapView> {
     double newLongitudeRad = startLongitudeRad + math.atan2(math.sin(pointingToRad) * math.sin(distanceRad) * math.cos(startLatitudeRad), math.cos(distanceRad) - math.sin(startLatitudeRad) * math.sin(newLatitudeRad));
     imuLatitude = newLatitudeRad * 180 / math.pi;
     imuLongitude = newLongitudeRad * 180 / math.pi;
+    imuLocationX = 0.0;
+    imuLocationY = 0.0;
     // 마지막 값 초기화
     preAccX = curAccX;
     preAccY = curAccY;
@@ -338,12 +340,12 @@ class _NaverMapViewState extends State<NaverMapView> {
       onEvent: (event) {
         setState(() {
           compassValue = event.heading ?? 0.0;
-          yawRate = compassValue * math.pi / 180;
-          if (yawRate >= 2 * math.pi || yawRate <= -2 * math.pi) {
-            yawRate = 0;
+          yawRate = (compassValue * math.pi / 180);
+          if (yawRate < 0 && yawRate >= -2 * math.pi) {
+            yawRate += 2 * math.pi;
           }
         });
-        // debugPrint('compassValue: $compassValue, subscribeToSensor<CompassEvent> 진행 중');
+        debugPrint('compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
         if (_lastDirection == null || (compassValue - _lastDirection!).abs() >= _threshold) {
           _lastDirection = compassValue;
           _updateMapPosition(finalLatitude, finalLongitude, compassValue);
