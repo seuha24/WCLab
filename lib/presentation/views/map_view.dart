@@ -1013,12 +1013,12 @@ class _NaverMapViewState extends State<NaverMapView> {
                                 ? Text(
                                     '출발지를 입력하세요.',
                                     style: TextStyle(
-                                        fontSize: 17, color: Colors.grey),
+                                        fontSize: AppSizes.scaledFont(18), color: Color(0xff9E9E9E)),
                                   )
                                 : Text(
                                     searchLocation,
                                     style: TextStyle(
-                                        fontSize: 17, color: Colors.black),
+                                        fontSize: AppSizes.scaledFont(18), color: Colors.black),
                                   ),
                             Spacer(),
                             Icon(Icons.search),
@@ -1220,11 +1220,11 @@ class _NaverMapViewState extends State<NaverMapView> {
                                 ? Text(
                                     '목적지를 입력하세요.',
                                     style: TextStyle(
-                                        fontSize: 17, color: Colors.grey),
+                                        fontSize: AppSizes.scaledFont(18), color: Color(0xff9E9E9E)),
                                   )
                                 : Text(
                                     destinationLocation,
-                                    style: TextStyle(fontSize: 17),
+                                    style: TextStyle(fontSize: AppSizes.scaledFont(18)),
                                   ),
                             Spacer(),
                             Icon(Icons.search),

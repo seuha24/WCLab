@@ -17,6 +17,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:safelight/core/utils/app_sizes.dart';
 import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/infrastructure/services/auth_service.dart';
 import 'package:safelight/presentation/views/signup_user_input.dart';

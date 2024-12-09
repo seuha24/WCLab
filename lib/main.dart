@@ -16,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
+import 'package:safelight/presentation/views/signup_user_input.dart';
 
 // import 'package:location_plugin/location_plugin.dart';
 
@@ -50,7 +51,7 @@ class SafeLight extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(390, 844),
+      designSize: const Size(414, 896),
       builder: (context, child) => ValueListenableBuilder(
         valueListenable: Hive.box(SystemTheme.themeBox).listenable(),
         builder: (context, Box box, widget) {

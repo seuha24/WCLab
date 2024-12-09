@@ -15,6 +15,8 @@ class _SignInViewState extends State<SignInView> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('width : ${ScreenUtil().screenWidth}');
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         debugPrint('state ::::: $state');
@@ -51,9 +53,9 @@ class _SignInViewState extends State<SignInView> {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         appBar: AppBar(
           centerTitle: true,
-          title: const Text(
+          title: Text(
             '로그인',
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: AppSizes.scaledFont(24)),
           ),
         ),
         body: Center(
@@ -88,10 +90,10 @@ class _SignInViewState extends State<SignInView> {
                     ),
                     child: Text(
                       '처음 사용하시나요?',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .apply(color: Theme.of(context).colorScheme.primary),
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(18),
+                          fontWeight: FontWeight.bold,
+                        ).apply(color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -106,8 +108,8 @@ class _SignInViewState extends State<SignInView> {
                         child: Container(
                           padding: EdgeInsets.all(2.sp),
                           child: Image(
-                            width: 60.w,
-                            height: 60.w,
+                            width: AppSizes.scaledWidth(60),
+                            height: AppSizes.scaledWidth(60),
                             image: AssetImage(
                               Images.AppleLogo,
                             ),
@@ -122,8 +124,8 @@ class _SignInViewState extends State<SignInView> {
                         child: Container(
                           padding: EdgeInsets.all(2.sp),
                           child: Image(
-                            width: 60.w,
-                            height: 60.w,
+                            width: AppSizes.scaledWidth(60),
+                            height: AppSizes.scaledWidth(60),
                             image: AssetImage(
                               Images.GoogleLogo,
                             ),
@@ -162,9 +164,9 @@ class _SignInViewState extends State<SignInView> {
                                           .colorScheme
                                           .onPrimary,
                                     )
-                                  : const Text(
+                                  : Text(
                                       '로그인 없이 이용하기',
-                                      style: TextStyle(fontSize: 16),
+                                      style: TextStyle(fontSize: AppSizes.scaledFont(18)),
                                     ),
                             ),
                           ),

@@ -66,9 +66,6 @@ class _SettingViewState extends State<SettingView> {
           color: Theme.of(context).colorScheme.secondary,
           padding: EdgeInsets.only(
             top: MediaQuery.of(context).padding.top + SizeTheme.h_lg,
-            bottom: SizeTheme.h_lg,
-            left: SizeTheme.w_md,
-            right: SizeTheme.w_md,
           ),
           child: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
@@ -99,7 +96,6 @@ class _SettingViewState extends State<SettingView> {
 
                     /// 토큰 데이터 삭제, 로그인 타입 삭제
                     _authService.clearAuthData();
-                    // _authService.clearAuthType();
                     final loadedAuthData = await _authService.loadAuthData();
                     debugPrint('accessToken : ${loadedAuthData['accessToken']}');
                     debugPrint('refreshToken : ${loadedAuthData['refreshToken']}');
@@ -111,10 +107,13 @@ class _SettingViewState extends State<SettingView> {
                         builder: (context) => const SignInView()));
                   },
                   leading: SingleChildRoundedCard(
-                    child: Icon(
-                      Icons.person,
-                      size: 30.w,
-                      color: Theme.of(context).colorScheme.primary,
+                    child: Container(
+                      padding: EdgeInsets.all(AppSizes.scaledWidth(2)),
+                      child: Icon(
+                        Icons.person,
+                        size: AppSizes.scaledWidth(30),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                   title: FittedBox(
@@ -122,12 +121,16 @@ class _SettingViewState extends State<SettingView> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       username,
-                      style: Theme.of(context).textTheme.displayLarge,
+                      style: TextStyle(
+                        fontSize: AppSizes.scaledFont(18),
+                        fontWeight: FontWeight.bold,
+                      ),
                       semanticsLabel: '',
                     ),
                   ),
                   trailing: Icon(
                     Icons.logout,
+                    size: AppSizes.scaledWidth(25),
                     color: Theme.of(context).colorScheme.onBackground,
                   ),
                 ),
@@ -135,7 +138,7 @@ class _SettingViewState extends State<SettingView> {
             },
           ),
         ),
-        toolbarHeight: 100.h,
+        toolbarHeight: AppSizes.scaledWidth(100),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -143,7 +146,7 @@ class _SettingViewState extends State<SettingView> {
             Board(
               title: '앱 내 권한',
               titleStyle: TextStyle(
-                  fontSize: 11,
+                  fontSize: AppSizes.scaledFont(16),
                   color: Theme.of(context).colorScheme.onBackground),
               body: Column(
                 children: [
@@ -169,7 +172,10 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '블루투스 권한',
-                            style: Theme.of(context).textTheme.displayLarge,
+                            style: TextStyle(
+                              fontSize: AppSizes.scaledFont(18),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: CupertinoSwitch(
                             value: state,
@@ -214,7 +220,10 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '사용자 위치 정보 권한',
-                            style: Theme.of(context).textTheme.displayLarge,
+                            style: TextStyle(
+                              fontSize: AppSizes.scaledFont(18),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: CupertinoSwitch(
                             value: state,
@@ -243,7 +252,7 @@ class _SettingViewState extends State<SettingView> {
             Board(
               title: '기타',
               titleStyle: TextStyle(
-                  fontSize: 11,
+                  fontSize: AppSizes.scaledFont(18),
                   color: Theme.of(context).colorScheme.onBackground),
               body: Column(
                 children: [
@@ -256,7 +265,10 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '시스템 모드 설정',
-                        style: Theme.of(context).textTheme.displayLarge,
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(18),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       subtitle: Text(
                         mode == 'system'
@@ -264,10 +276,10 @@ class _SettingViewState extends State<SettingView> {
                             : mode == 'light'
                                 ? '라이트모드 적용중'
                                 : '다크모드 적용중',
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayMedium!
-                            .apply(color: ColorTheme.highlight2),
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(16),
+                          fontWeight: FontWeight.bold,
+                        ).apply(color: ColorTheme.highlight2),
                         semanticsLabel: '',
                       ),
                       trailing: Icon(
@@ -291,16 +303,23 @@ class _SettingViewState extends State<SettingView> {
                               headerPadding: EdgeInsets.only(
                                   bottom: SizeTheme.h_sm, left: 2),
                               padding: EdgeInsets.all(SizeTheme.h_sm),
-                              titleStyle:
-                                  Theme.of(context).textTheme.displayLarge,
+                              titleStyle: TextStyle(
+                                fontSize: AppSizes.scaledFont(18),
+                                fontWeight: FontWeight.bold,
+                              ),
                               trailing: TextButton(
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(maxWidth: 50.w),
                                   child: FittedBox(
-                                      child: Text('닫기',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!)),
+                                    child: Text(
+                                      '닫기',
+                                      style: TextStyle(
+                                        fontSize: AppSizes.scaledFont(16),
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 onPressed: () => Navigator.pop(context),
                               ),
@@ -364,7 +383,7 @@ class _SettingViewState extends State<SettingView> {
                     ),
                   ),
 
-    // 경광등
+                  // 경광등
                   Semantics.fromProperties(
                     properties: SemanticsProperties(
                       button: true,
@@ -375,7 +394,10 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '경광등 설정',
-                        style: Theme.of(context).textTheme.displayLarge,
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(18),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       subtitle: Text(
                         lightmode == 'alwayson'
@@ -383,10 +405,10 @@ class _SettingViewState extends State<SettingView> {
                             : lightmode == 'weathers'
                                 ? '주변 환경에 따라 켜기 모드 적용중'
                                 : '항상 끄기 모드 적용중',
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayMedium!
-                            .apply(color: ColorTheme.highlight2),
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(16),
+                          fontWeight: FontWeight.bold,
+                        ).apply(color: ColorTheme.highlight2),
                         semanticsLabel: '',
                       ),
                       trailing: Icon(
@@ -412,15 +434,24 @@ class _SettingViewState extends State<SettingView> {
                               ),
                               padding: EdgeInsets.all(SizeTheme.w_md),
                               titleStyle:
-                                  Theme.of(context).textTheme.displayLarge,
+                              TextStyle(
+                                fontSize: AppSizes.scaledFont(18),
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                               trailing: TextButton(
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(maxWidth: 50.w),
                                   child: FittedBox(
-                                      child: Text('닫기',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium!)),
+                                    child: Text(
+                                      '닫기',
+                                      style: TextStyle(
+                                        fontSize: AppSizes.scaledFont(16),
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 onPressed: () => Navigator.pop(context),
                               ),
@@ -498,7 +529,10 @@ class _SettingViewState extends State<SettingView> {
                           },
                           title: Text(
                             '음성 보조 설정',
-                            style: Theme.of(context).textTheme.displayLarge,
+                            style: TextStyle(
+                              fontSize: AppSizes.scaledFont(18),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           trailing: CupertinoSwitch(
                             value: TTS.enable,
@@ -537,7 +571,10 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '외부 라이센스',
-                        style: Theme.of(context).textTheme.displayLarge,
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(18),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -557,7 +594,10 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '도움말',
-                        style: Theme.of(context).textTheme.displayLarge,
+                        style: TextStyle(
+                          fontSize: AppSizes.scaledFont(18),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),

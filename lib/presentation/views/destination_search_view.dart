@@ -152,7 +152,6 @@ class _DesSearchState extends State<DesSearch> {
                 ),
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -173,11 +172,17 @@ class _DesSearchState extends State<DesSearch> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
+                        isDense: true,
                         hintText: '목적지를 입력하세요.',
-                        hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                        hintStyle: TextStyle(
+                          fontSize: AppSizes.scaledFont(20),
+                          color: Color(0xff9E9E9E),
+                          fontWeight: FontWeight.bold,
+                        ),
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 0),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? Container(
                                 child: IconButton(

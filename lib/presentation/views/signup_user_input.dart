@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safelight/core/utils/app_sizes.dart';
 import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/ui.dart';
@@ -45,7 +46,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
         }
       },
       listenWhen: (previous, current) =>
-          previous.patchUserInfoStatus != current.patchUserInfoStatus,
+      previous.patchUserInfoStatus != current.patchUserInfoStatus,
       child: PopScope(
         canPop: true,
         onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -69,12 +70,15 @@ class _SignupUserInputState extends State<SignupUserInput> {
           }
         },
         child: Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.secondary,
+          backgroundColor: Theme
+              .of(context)
+              .colorScheme
+              .secondary,
           appBar: AppBar(
             centerTitle: true,
-            title: const Text(
+            title: Text(
               '회원가입',
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: AppSizes.scaledFont(24)),
             ),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
@@ -109,8 +113,8 @@ class _SignupUserInputState extends State<SignupUserInput> {
                       return Column(
                         children: [
                           Padding(
-                            padding:
-                                EdgeInsets.symmetric(horizontal: SizeTheme.h_lg),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: SizeTheme.h_lg),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: Size(double.infinity, 60.h),
@@ -127,16 +131,19 @@ class _SignupUserInputState extends State<SignupUserInput> {
                                     .add(PatchUserInfoEvent(userName));
                               },
                               child: (state.patchUserInfoStatus ==
-                                      Status.inProgress)
+                                  Status.inProgress)
                                   ? CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color:
-                                          Theme.of(context).colorScheme.onPrimary,
-                                    )
-                                  : const Text(
-                                      '닉네임 변경하기',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
+                                strokeWidth: 2,
+                                color: Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .onPrimary,
+                              )
+                                  : Text(
+                                '닉네임 변경하기',
+                                style: TextStyle(
+                                    fontSize: AppSizes.scaledFont(18)),
+                              ),
                             ),
                           ),
                         ],
@@ -149,59 +156,88 @@ class _SignupUserInputState extends State<SignupUserInput> {
           ),
           body: Center(
             child: Padding(
-              padding: EdgeInsets.all(16.sp),
+              padding: EdgeInsets.all(AppSizes.scaledWidth(40)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(left: 8.sp, top: 20.sp),
+                    padding: EdgeInsets.only(
+                      left: AppSizes.scaledWidth(8),
+                      // top: AppSizes.scaledHeight(20),
+                    ),
                     child: Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(6.sp),
+                          padding: EdgeInsets.all(AppSizes.scaledWidth(6)),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(13),
+                            color: Theme
+                                .of(context)
+                                .colorScheme
+                                .surface,
+                            borderRadius: BorderRadius.circular(
+                                AppSizes.scaledRadius(8)),
                           ),
                           child: Icon(
                             Icons.person,
-                            size: 30,
-                            color: Theme.of(context).colorScheme.primary,
+                            size: AppSizes.scaledWidth(30),
+                            color: Theme
+                                .of(context)
+                                .colorScheme
+                                .primary,
                           ),
                         ),
                         Gap(),
                         Text(
                           '이름 입력',
-                          style: Theme.of(context).textTheme.labelLarge!.apply(
-                              color: Theme.of(context).colorScheme.onSecondary,
-                              fontSizeDelta: 2),
+                          style: TextStyle(
+                            fontSize: AppSizes.scaledFont(18),
+                            color: Theme
+                                .of(context)
+                                .colorScheme
+                                .onSecondary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Gap(),
+                  Gap(height: 10,),
                   TextField(
                     controller: _userNameTextController,
                     focusNode: _focusNode,
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.black, height: 1),
                     onChanged: (query) {},
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: AppSizes.scaledWidth(11.5),
+                          horizontal: AppSizes.scaledWidth(13)),
                       hintText: '이름 입력',
-                      hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+                      hintStyle: TextStyle(
+                          fontSize: AppSizes.scaledFont(18),
+                          height: 20 / 16,
+                          color: Colors.grey),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6.0),
                         borderSide: BorderSide(
-                          color: Colors.grey, // Border color when focused
+                          color: Color(0xffE4E4E7),
+                          width: 1.0, // Border width when focused
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                        borderSide: BorderSide(
+                          color: Color(0xffE4E4E7),
                           width: 1.0, // Border width when focused
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6.0),
                         borderSide: BorderSide(
-                          color: Colors.grey, // Border color when focused
+                          color: Color(0xffE4E4E7),
                           width: 1.0, // Border width when focused
                         ),
                       ),

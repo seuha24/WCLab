@@ -5,7 +5,9 @@ class StartSearch extends StatefulWidget {
     super.key,
     required this.searchValue,
   });
+
   final String searchValue;
+
   @override
   State<StartSearch> createState() => _StartSearchState();
 }
@@ -151,7 +153,6 @@ class _StartSearchState extends State<StartSearch> {
                 ),
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -172,9 +173,15 @@ class _StartSearchState extends State<StartSearch> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
+                        isDense: true,
                         hintText: '출발지를 입력하세요.',
-                        hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                        hintStyle: TextStyle(
+                          fontSize: AppSizes.scaledFont(20),
+                          color: Color(0xff9E9E9E),
+                          fontWeight: FontWeight.bold,
+                        ),
                         border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 0),
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         suffixIcon: _searchController.text.isNotEmpty

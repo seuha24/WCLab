@@ -25,6 +25,8 @@ class _MainViewState extends State<MainView> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<BleStatus>(
@@ -58,6 +60,13 @@ class _MainViewState extends State<MainView> {
               ],
               currentIndex: _selectedIndex,
               selectedItemColor: Theme.of(context).colorScheme.onSecondary,
+              selectedLabelStyle: TextStyle(
+                fontSize: AppSizes.scaledFont(16),
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontSize: AppSizes.scaledFont(16)
+              ),
               onTap: _onItemTapped,
             ),
           );
