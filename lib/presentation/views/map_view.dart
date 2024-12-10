@@ -23,6 +23,7 @@ class BranchInfo {
 class MovingAverageFilter {
   final int windowSize;
   final List<double> _values = [];
+
   MovingAverageFilter(this.windowSize);
 
   double filter(double newValue) {
@@ -64,6 +65,12 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   // IMU 센서 관련 데이터
   late StreamSubscription<Position> positionStream;
+
+  // 칼만 필터 객체
+  final kalmanX = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
+  final kalmanY = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
+  final kalmanZ = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
+
 
   bool isAccRuning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -163,9 +170,9 @@ class _NaverMapViewState extends State<NaverMapView> {
     debugPrint(
         'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...2');
     // 중력 보정(자이로스코프 데이터 이용)
-    curAccX = curAccX = 9.81 * math.sin(rotationX);
-    curAccY = curAccY = 9.81 * math.sin(rotationY);
-    curAccZ = curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
+    curAccX = 9.81 * math.sin(rotationX);
+    curAccY = 9.81 * math.sin(rotationY);
+    curAccZ = 9.81 * math.cos(rotationX) * math.cos(rotationY);
     debugPrint(
         'curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
 
@@ -176,10 +183,9 @@ class _NaverMapViewState extends State<NaverMapView> {
     curAccZ *= scaleFactor;
 
     // 칼만필터 적용
-    final kalman = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
-    curAccX = kalman.filtered(curAccX);
-    curAccY = kalman.filtered(curAccY);
-    curAccZ = kalman.filtered(curAccZ);
+    curAccX = kalmanX.filtered(curAccX);
+    curAccY = kalmanY.filtered(curAccY);
+    curAccZ = kalmanZ.filtered(curAccZ);
     debugPrint(
         'curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...4');
 
