@@ -49,7 +49,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
       previous.patchUserInfoStatus != current.patchUserInfoStatus,
       child: PopScope(
         canPop: true,
-        onPopInvokedWithResult: (bool didPop, Object? result) async {
+        onPopInvoked: (bool didPop) async {
           if (didPop) {
             debugPrint('didPop : $didPop');
             context.read<AuthBloc>().add(SignOutAllEvent());
