@@ -8,6 +8,7 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/framework/core.dart';
@@ -106,7 +107,7 @@ Future<void> init() async {
     instanceName: USECASE_SIGN_IN_ANONYMOUSLY,
   );
 
-  DI.registerLazySingleton<SignIn>(
+  DI.registerLazySingleton<UseCase>(
     () => SignInWithGoogle(repository: DI()),
     instanceName: USECASE_SIGN_IN_WITH_GOOGLE,
   );
@@ -120,7 +121,6 @@ Future<void> init() async {
     () => SignOutWithGoogle(repository: DI()),
     instanceName: USECASE_SIGN_OUT_WITH_GOOGLE,
   );
-
 
   DI.registerLazySingleton<ConnectCrosswalk>(
     () => SendAcousticSignal(repository: DI()),
@@ -192,8 +192,10 @@ Future<void> init() async {
     () => AuthRemoteDataSourceImpl(
       auth: DI(),
       dio: DioClient().dio,
+      googleSignIn: GoogleSignIn(),
     ),
   );
+
   DI.registerLazySingleton<FlashNativeDataSource>(
     () => FlashNativeDataSourceImpl(),
   );

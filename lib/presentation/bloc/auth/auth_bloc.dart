@@ -41,279 +41,145 @@ const List<String> scopes = <String>[
 ];
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final FirebaseAuth _auth;
-  final GoogleSignIn _googleSignIn;
   final AuthRepository _repository;
   final AuthService _authService = DI<AuthService>();
 
   AuthBloc({required AuthRepository repository})
-      : _auth = FirebaseAuth.instance,
-        _googleSignIn = GoogleSignIn(
-          scopes: scopes,
-          clientId: Platform.isIOS
-              ? DefaultFirebaseOptions.currentPlatform.iosClientId
-              : DefaultFirebaseOptions.currentPlatform.androidClientId,
-        ),
-        _repository = repository,
+      : _repository = repository,
         super(AuthState()) {
-    on<SignInAnonymouslyEvent>(_signInAnonymouslyEvent);
-    on<SignOutAnonymouslyEvent>(_signOutAnonymouslyEvent);
-    on<SignInWithGoogleEvent>(_signInWithGoogleEvent);
-    on<SignOutWithGoogleEvent>(_signOutWithGoogleEvent);
-    on<SignInWithAppleEvent>(_signInWithAppleEvent);
-    on<SignOutWithAppleEvent>(_signOutWithAppleEvent);
-    on<PatchUserInfoEvent>(_patchUserInfoEvent);
-    on<GetUserInfoEvent>(_getUserInfoEvent);
+    on<SignInAnonymouslyEvent>(_handleSignInAnonymously);
+    on<SignOutAnonymouslyEvent>(_handleSignOutAnonymously);
+    on<SignInWithGoogleEvent>(_handleSignInWithGoogle);
+    on<SignOutWithGoogleEvent>(_handleSignOutWithGoogle);
+    on<SignInWithAppleEvent>(_handleSignInWithApple);
+    on<SignOutWithAppleEvent>(_handleSignOutWithApple);
+    on<SignOutAllEvent>(_handleSignOutAll);
+    on<PatchUserInfoEvent>(_handlePatchUserInfo);
+    on<GetUserInfoEvent>(_handleGetUserInfo);
   }
 
-  /// 비회원 로그인
-  Future<void> _signInAnonymouslyEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(userName: null));
-      emit(state.copyWith(signInStatus: Status.inProgress));
-      emit(state.copyWith(signOutStatus: Status.initial));
-      await _auth.signInAnonymously();
-      _authService.saveAuthType(authType: AuthType.anonymous);
-      emit(state.copyWith(userName: '익명 사용자'));
-      emit(state.copyWith(signInStatus: Status.success));
-    } catch (e) {
-      emit(state.copyWith(signInStatus: Status.failure));
-    }
+  Future<void> _handleSignInAnonymously(
+      SignInAnonymouslyEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(signInStatus: Status.inProgress));
+    final result = await _repository.signInAnonymously();
+    result.fold(
+      (failure) => emit(state.copyWith(signInStatus: Status.failure)),
+      (_) => emit(state.copyWith(signInStatus: Status.success)),
+    );
   }
 
-  /// 비회원 로그아웃
-  Future<void> _signOutAnonymouslyEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(signOutStatus: Status.inProgress));
-      await _auth.signOut();
-      emit(state.copyWith(signOutStatus: Status.success));
-    } catch (e) {
-      emit(state.copyWith(signOutStatus: Status.failure));
-    }
+  Future<void> _handleSignOutAnonymously(
+      SignOutAnonymouslyEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(signOutStatus: Status.inProgress));
+    final result = await _repository.signOutAnonymously();
+    result.fold(
+      (failure) => emit(state.copyWith(signOutStatus: Status.failure)),
+      (_) => emit(state.copyWith(signOutStatus: Status.success)),
+    );
   }
 
-  /// 구글 로그인
-  Future<void> _signInWithGoogleEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    debugPrint('Call _signInWithGoogleEvent()');
-    emit(state.copyWith(signInStatus: Status.initial));
+  Future<void> _handleSignInWithGoogle(
+      SignInWithGoogleEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
 
     try {
-      emit(state.copyWith(signInStatus: Status.inProgress));
-      emit(state.copyWith(signOutStatus: Status.initial));
-      emit(state.copyWith(userName: null));
+      // Google 로그인 및 서버로 토큰 전송
+      final response = await _repository.signInWithGoogle();
 
-      GoogleSignInAccount? googleUser;
-      googleUser = await _googleSignIn.signIn();
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser!.authentication;
-
-      final googleToken = googleAuth.accessToken;
-
-      debugPrint('googleToken :::::: $googleToken');
-      if (googleToken != null) {
-        final getAccessToken =
-            await _sendOAuthTokenToServer(googleToken, AuthType.google, emit);
-
-        if (getAccessToken) {
-          await _authService.saveAuthType(authType: AuthType.google);
-
-          emit(state.copyWith(signInStatus: Status.success));
-        } else {
-          emit(state.copyWith(signInStatus: Status.failure));
-        }
+      // 서버 응답 데이터 처리
+      if (response.data!.isNotEmpty) {
+        final userName = response.data?['data']?.userName;
+        emit(state.copyWith(
+          signInStatus: Status.success,
+          userName: userName,
+        ));
       } else {
         emit(state.copyWith(signInStatus: Status.failure));
       }
     } catch (e) {
-      log('Google Sign-In Error: $e');
       emit(state.copyWith(signInStatus: Status.failure));
     }
   }
 
-  /// 구글 로그아웃
-  Future<void> _signOutWithGoogleEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(signOutStatus: Status.inProgress));
-      await _googleSignIn.signOut();
-      await _auth.signOut();
-      await _authService.clearAuthData();
-      emit(state.copyWith(userName: null));
-      emit(state.copyWith(signOutStatus: Status.success));
-    } catch (e) {
-      emit(state.copyWith(signOutStatus: Status.failure));
-    }
-  }
-
-  /// 애플 로그인
-  Future<void> _signInWithAppleEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(state.copyWith(signInStatus: Status.initial));
+  Future<void> _handleSignInWithApple(
+      SignInWithAppleEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
 
     try {
-      emit(state.copyWith(signInStatus: Status.inProgress));
-      emit(state.copyWith(signOutStatus: Status.initial));
-      emit(state.copyWith(userName: null));
-
-      final appleProvider = AppleAuthProvider();
-      final UserCredential userCredential;
-      // Firebase Sign-In
-      await FirebaseAuth.instance.signOut();
-      userCredential = await _auth.signInWithProvider(appleProvider);
-
-      final user = userCredential.user;
-      final idToken = await user?.getIdToken();
-      final appleAccessToken = Platform.isIOS
-          ? userCredential.credential?.accessToken
-          : await user?.getIdToken();
-
-      debugPrint('Apple AccessToken :::::: $appleAccessToken');
-
-      if (appleAccessToken != null) {
-        // 서버로 OAuth 토큰 전송
-        final getAccessToken =
-            await _sendOAuthTokenToServer(appleAccessToken, AuthType.apple, emit);
-
-
-        if (getAccessToken) {
-          await _authService.saveAuthType(authType: AuthType.apple);
-          emit(state.copyWith(signInStatus: Status.success));
-        } else {
-          emit(state.copyWith(signInStatus: Status.failure));
-        }
+      // Apple 로그인 및 서버로 토큰 전송
+      final response = await _repository.signInWithApple();
+      // 서버 응답 데이터 처리
+      if (response.data!.isNotEmpty) {
+        final userName = response.data?['data']?.userName;
+        emit(state.copyWith(
+          signInStatus: Status.success,
+          userName: userName,
+        ));
       } else {
-        log('Apple Sign-In failed: Missing accessToken');
         emit(state.copyWith(signInStatus: Status.failure));
       }
     } catch (e) {
-      log('Unhandled error during Apple Sign-In: $e');
       emit(state.copyWith(signInStatus: Status.failure));
     }
   }
 
-  /// 애플 로그아웃
-  Future<void> _signOutWithAppleEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(signOutStatus: Status.inProgress));
-      await _auth.signOut();
-      await _authService.clearAuthData();
-      emit(state.copyWith(userName: null));
-      emit(state.copyWith(signOutStatus: Status.success));
-    } catch (e) {
-      emit(state.copyWith(signOutStatus: Status.failure));
-    }
+  Future<void> _handleSignOutWithGoogle(
+      SignOutWithGoogleEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(signOutStatus: Status.inProgress));
+    final result = await _repository.signOutWithGoogle();
+    result.fold(
+      (failure) => emit(state.copyWith(signOutStatus: Status.failure)),
+      (_) => emit(state.copyWith(signOutStatus: Status.success)),
+    );
   }
 
-  Future<bool> _sendOAuthTokenToServer(
-    String accessToken,
-    AuthType oauthType,
-    Emitter<AuthState> emit,
-  ) async {
-    debugPrint('Call _sendOAuthTokenToServer()');
-    try {
-      final response = oauthType == AuthType.google
-          ? await _repository.sendGoogleOAuthTokenToServer(accessToken)
-          : await _repository.sendAppleOAuthTokenToServer(accessToken);
-
-      return response.fold(
-        (failure) {
-          // 실패 처리
-          log('Failed to send token to server: $failure');
-          return false;
-        },
-        (authData) async {
-          // 성공 처리
-          // AccessToken, RefreshToken, userName 저장
-          await _authService.saveAuthData(
-            accessToken: authData.accessToken,
-            refreshToken: authData.refreshToken,
-            userName: authData.userName ?? '',
-          );
-
-          // log('::::저장된 토큰::::');
-          final loadedAuthData = await _authService.loadAuthData();
-          debugPrint('accessToken : ${loadedAuthData['accessToken']}');
-          debugPrint('refreshToken : ${loadedAuthData['refreshToken']}');
-          debugPrint('userName : ${loadedAuthData['userName']}');
-
-          emit(state.copyWith(userName: authData.userName));
-
-          return true;
-        },
-      );
-    } catch (e) {
-      log('Error sending OAuth Token to Server: $e');
-      return false;
-    }
+  Future<void> _handleSignOutWithApple(
+      SignOutWithAppleEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(signOutStatus: Status.inProgress));
+    final result = await _repository.signOutWithApple();
+    result.fold(
+      (failure) => emit(state.copyWith(signOutStatus: Status.failure)),
+      (_) => emit(state.copyWith(signOutStatus: Status.success)),
+    );
   }
 
-  /// 유저 닉네임 변경
-  Future<void> _patchUserInfoEvent(
-    PatchUserInfoEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(patchUserInfoStatus: Status.inProgress));
-      final response = await _repository.patchUserInfo(event.userName);
-
-      response.fold(
-        (failure) {
-          // 실패 처리
-          log('Failed to patch user info: $failure');
-          emit(state.copyWith(patchUserInfoStatus: Status.failure));
-        },
-        (result) {
-          // 성공 처리
-          emit(state.copyWith(patchUserInfoStatus: Status.success));
-        },
-      );
-    } catch (e) {
-      emit(state.copyWith(patchUserInfoStatus: Status.failure));
-    }
+  Future<void> _handleSignOutAll(
+      SignOutAllEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(
+      signOutStatus: Status.inProgress,
+    ));
+    final result = await _repository.signOutAll();
+    result.fold(
+      (failure) => emit(state.copyWith(signOutStatus: Status.failure)),
+      (_) => emit(state.copyWith(
+        signOutStatus: Status.success,
+        signInStatus: Status.initial,
+        patchUserInfoStatus: Status.initial,
+        getUserInfoStatus: Status.initial,
+        sendTokenStatus: Status.initial,
+        userName: null,
+      )),
+    );
   }
 
-  /// 유저 정보 가져오기
-  Future<void> _getUserInfoEvent(
-    AuthEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    debugPrint('Call _getUserInfoEvent()');
-    try {
-      emit(state.copyWith(getUserInfoStatus: Status.inProgress));
-      final response = await _repository.getUserInfo();
-      response.fold(
-        (failure) {
-          // 실패 처리
-          log('Failed to get user info: $failure');
-          emit(state.copyWith(patchUserInfoStatus: Status.failure));
-        },
-        (result) {
-          // 성공 처리
-          debugPrint('_getUserInfoEvent username : ${result.toString()}');
-          emit(state.copyWith(patchUserInfoStatus: Status.success));
-          return result.toString();
-        },
-      );
-      emit(state.copyWith(getUserInfoStatus: Status.success));
-    } catch (e) {
-      emit(state.copyWith(getUserInfoStatus: Status.failure));
-    }
+  Future<void> _handlePatchUserInfo(
+      PatchUserInfoEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(patchUserInfoStatus: Status.inProgress));
+    final result = await _repository.patchUserInfo(event.userName);
+    result.fold(
+      (failure) => emit(state.copyWith(patchUserInfoStatus: Status.failure)),
+      (_) => emit(state.copyWith(patchUserInfoStatus: Status.success)),
+    );
+  }
+
+  Future<void> _handleGetUserInfo(
+      GetUserInfoEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(getUserInfoStatus: Status.inProgress));
+    final result = await _repository.getUserInfo();
+    result.fold(
+      (failure) => emit(state.copyWith(getUserInfoStatus: Status.failure)),
+      (data) => emit(state.copyWith(
+          getUserInfoStatus: Status.success, userName: data['userName'])),
+    );
   }
 }

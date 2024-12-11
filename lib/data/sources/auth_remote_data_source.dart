@@ -41,7 +41,7 @@ abstract class AuthRemoteDataSource {
   ///
   /// 익명 로그인 수행에 따른 예외는 아래와 같이 처리된다.
   ///
-  ///   - **[ServerException] :**
+  ///   - **[Exception] :**
   ///   익명 로그인 실패
   ///
   /// **Summary :**
@@ -67,7 +67,7 @@ abstract class AuthRemoteDataSource {
   ///
   /// 익명 로그아웃 수행에 따른 예외는 아래와 같이 처리된다.
   ///
-  ///   - **[ServerException] :**
+  ///   - **[Exception] :**
   ///   익명 로그아웃 실패
   ///
   /// **Summary :**
@@ -84,16 +84,25 @@ abstract class AuthRemoteDataSource {
   ///     [FirebaseAuth를 통한 로그아웃 Best practice](https://firebase.google.com/docs/auth/flutter/anonymous-auth?hl=ko#next_steps)를 확인할 수 있다.
   Future<void> signOutAnonymously();
 
-  Future<void> signInWithGoogle();
+  Future<Response<Map<String, AuthDataModel>>> signInWithGoogle();
+
+  Future<Response<Map<String, AuthDataModel>>> signInWithApple();
+
   Future<void> signOutWithGoogle();
 
-  Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(String token);
-  Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token);
+  Future<void> signOutWithApple();
+
+  Future<void> signOutAll();
+
+  Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(
+      String token);
+
+  Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(
+      String token);
 
   Future<Response<Map<String, dynamic>>> patchUserInfo(String userName);
+
   Future<Response<Map<String, dynamic>>> getUserInfo();
-
-
 }
 
 /// Auth 데이터 처리를 위한 [AuthRemoteDataSource]의 구현부이다.
@@ -101,8 +110,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// 사용자 인증 제어(Auth)를 위한 FirebaseAuth 객체를 담는 변수로서 외부에서 DI되어 사용된다.
   ///
   /// {@macro usecase_part2}
-  FirebaseAuth auth;
-  final Dio dio;
+  final FirebaseAuth _auth;
+  final GoogleSignIn _googleSignIn;
+  final Dio _dio;
 
   /// 사용자 인증(Auth)을 위한 Datasource를 생성한다.
   ///
@@ -138,137 +148,192 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   /// datasource.signOutAnonymously();
   /// ```
   AuthRemoteDataSourceImpl({
-    required this.auth,
-    required this.dio,
-  });
+    required FirebaseAuth auth,
+    required GoogleSignIn googleSignIn,
+    required Dio dio,
+  })  : _auth = auth,
+        _googleSignIn = googleSignIn,
+        _dio = dio;
 
   @override
   Future<void> signInAnonymously() async {
     try {
-      await auth.signInAnonymously();
+      await _auth.signInAnonymously();
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to sign in anonymously');
     }
   }
 
   @override
   Future<void> signOutAnonymously() async {
     try {
-      await auth.currentUser?.delete();
-      await auth.signOut();
+      await _auth.signOut();
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to sign out anonymously');
     }
   }
 
   @override
-  // if (googleUser == null) {}
-  Future<UserCredential> signInWithGoogle() async {
+  Future<Response<Map<String, AuthDataModel>>> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
-      return await auth.signInWithCredential(credential);
+
+      // Firebase 인증
+      await _auth.signInWithCredential(credential);
+
+      // 서버로 토큰 전송
+      final response = await sendGoogleOAuthTokenToServer(googleAuth.accessToken!);
+
+      // Response 데이터를 AuthDataModel로 변환
+      final Map<String, AuthDataModel> transformedData = {
+        'data': AuthDataModel.fromMap(response.data!['data'] as Map<String, dynamic>),
+      };
+
+      return Response<Map<String, AuthDataModel>>(
+        data: transformedData,
+        statusCode: response.statusCode,
+        requestOptions: response.requestOptions,
+        statusMessage: response.statusMessage,
+        extra: response.extra,
+      );
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to sign in with Google');
+    }
+  }
+
+  @override
+  Future<Response<Map<String, AuthDataModel>>> signInWithApple() async {
+    debugPrint('Call signInWithApp()');
+    try {
+      final appleProvider = AppleAuthProvider();
+
+      // Firebase 인증
+      final userCredential = await _auth.signInWithProvider(appleProvider);
+
+      debugPrint('userCredential :$userCredential');
+
+      final user = userCredential.user;
+
+      debugPrint('user : $user');
+      final appleAccessToken = Platform.isIOS
+          ? userCredential.credential?.accessToken
+          : await user?.getIdToken();
+
+      debugPrint('appleAccessToken :$appleAccessToken');
+
+      if (appleAccessToken == null) {
+        throw Exception('Failed to retrieve Apple access token');
+      }
+
+      // 서버로 토큰 전송
+      final response = await sendAppleOAuthTokenToServer(appleAccessToken);
+
+      debugPrint('server response : $response');
+
+      // Response 데이터를 AuthDataModel로 변환
+      final Map<String, AuthDataModel> transformedData = {
+        'data': AuthDataModel.fromMap(response.data!['data'] as Map<String, dynamic>),
+      };
+
+      return Response<Map<String, AuthDataModel>>(
+        data: transformedData,
+        statusCode: response.statusCode,
+        requestOptions: response.requestOptions,
+        statusMessage: response.statusMessage,
+        extra: response.extra,
+      );
+    } catch (e) {
+      throw Exception('Failed to sign in with Apple');
     }
   }
 
   @override
   Future<void> signOutWithGoogle() async {
     try {
-      await auth.signOut();
+      await _googleSignIn.signOut();
+      await _auth.signOut();
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to sign out with Google');
     }
   }
 
 
   @override
-  Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(String token) async {
+  Future<void> signOutWithApple() async {
     try {
-      final response = await dio.post<Map<String, dynamic>>(
+      await _auth.signOut();
+    } catch (e) {
+      throw Exception('Failed to sign out with Apple');
+    }
+  }
+
+  @override
+  Future<void> signOutAll() async {
+    try {
+      await signOutWithGoogle();
+      await signOutWithApple();
+      await signOutAnonymously();
+    } catch (e) {
+      throw Exception('Failed to sign out all');
+    }
+  }
+
+  @override
+  Future<Response<Map<String, dynamic>>> sendGoogleOAuthTokenToServer(
+      String token) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.googleAuthToken,
-        data: {
-          'token': token,
-        },
+        data: {'token': token},
       );
-
       return response;
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to send Google OAuth token to server');
     }
   }
 
   @override
-  Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(String token) async {
+  Future<Response<Map<String, dynamic>>> sendAppleOAuthTokenToServer(
+      String token) async {
     try {
-      final response = await dio.post<Map<String, dynamic>>(
+      final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.appleAuthToken,
-        data: {
-          'token': token,
-        },
+        data: {'token': token},
       );
-
       return response;
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to send Apple OAuth token to server');
     }
   }
 
   @override
   Future<Response<Map<String, dynamic>>> patchUserInfo(String userName) async {
-    debugPrint('Call patchUserInfo()');
-    final authService = DI<AuthService>();
-    final authData = await authService.loadAuthData();
-    final accessToken = authData['accessToken'];
-
-    debugPrint('Authorization : Bearer $accessToken');
-
     try {
-      final response = await dio.patch<Map<String, dynamic>>(
+      final response = await _dio.patch<Map<String, dynamic>>(
         ApiEndpoints.patchUserInfo,
-        data: {
-          'userName': userName,
-        },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $accessToken', // 인증 헤더 추가
-          },
-        ),
+        data: {'userName': userName},
       );
       return response;
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to patch user info');
     }
   }
 
   @override
   Future<Response<Map<String, dynamic>>> getUserInfo() async {
-    debugPrint('Call getUserInfo()');
-    final authService = DI<AuthService>();
-    final authData = await authService.loadAuthData();
-    final accessToken = authData['accessToken'];
-
-    debugPrint('Authorization : Bearer $accessToken');
-
     try {
-      final response = await dio.get<Map<String, dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         ApiEndpoints.getUserInfo,
-        options: Options(
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $accessToken'
-            }
-        ),
       );
       return response;
     } catch (e) {
-      throw ServerException();
+      throw Exception('Failed to get user info');
     }
   }
 }

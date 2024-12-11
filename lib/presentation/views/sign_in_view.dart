@@ -19,9 +19,7 @@ class _SignInViewState extends State<SignInView> {
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        debugPrint('state ::::: $state');
         if (state.signInStatus == Status.success) {
-          debugPrint('state username : ${state.userName}');
           if (state.userName == null) {
             // 유저 닉네임이 미등록된 상태일 때
             Navigator.of(context).push(MaterialPageRoute(
@@ -39,15 +37,7 @@ class _SignInViewState extends State<SignInView> {
         }
       },
       listenWhen: (previous, current) {
-        // debugPrint('state previous : $previous');
-        // debugPrint('state current : $current');
-        // debugPrint('previous.signInStatus : ${previous.signInStatus}');
-        // debugPrint('current.signInStatus : ${current.signInStatus}');
-        // debugPrint('previous.userName : ${current.userName}');
-        // debugPrint('current.userName : ${current.userName}');
-
-        return previous.signInStatus != current.signInStatus ||
-            previous.signOutStatus != current.signInStatus;
+        return previous.signInStatus != current.signInStatus;
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.secondary,

@@ -52,21 +52,12 @@ class _SignupUserInputState extends State<SignupUserInput> {
         onPopInvokedWithResult: (bool didPop, Object? result) async {
           if (didPop) {
             debugPrint('didPop : $didPop');
-            final authType = await _authService.loadAuthType();
-            debugPrint('authType : $authType');
-
-            switch (authType) {
-              case AuthType.google:
-                context.read<AuthBloc>().add(SignOutWithGoogleEvent());
-              case AuthType.apple:
-                context.read<AuthBloc>().add(SignOutWithAppleEvent());
-              case AuthType.anonymous:
-                context.read<AuthBloc>().add(SignOutAnonymouslyEvent());
-            }
-
-            /// 토큰 데이터 삭제, 로그인 타입 삭제
+            context.read<AuthBloc>().add(SignOutAllEvent());
             await _authService.clearAuthData();
-            Navigator.canPop(context);
+
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const SignInView(),
+            ));
           }
         },
         child: Scaffold(
@@ -83,22 +74,12 @@ class _SignupUserInputState extends State<SignupUserInput> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () async {
-                final authType = await _authService.loadAuthType();
-                debugPrint('authType : $authType');
+                context.read<AuthBloc>().add(SignOutAllEvent());
+                await _authService.clearAuthData();
 
-                switch (authType) {
-                  case AuthType.google:
-                    context.read<AuthBloc>().add(SignOutWithGoogleEvent());
-                  case AuthType.apple:
-                    context.read<AuthBloc>().add(SignOutWithAppleEvent());
-                  case AuthType.anonymous:
-                    context.read<AuthBloc>().add(SignOutAnonymouslyEvent());
-                }
-
-                /// 토큰 데이터 삭제, 로그인 타입 삭제
-                _authService.clearAuthData();
-
-                Navigator.canPop(context);
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => const SignInView(),
+                ));
               },
             ),
           ),

@@ -82,29 +82,12 @@ class _SettingViewState extends State<SettingView> {
                   onTap: () async {
                     debugPrint('onTap Logout');
 
-                    final authType = await _authService.loadAuthType();
-                    debugPrint('authType : $authType');
-
-                    switch (authType) {
-                      case AuthType.google:
-                        context.read<AuthBloc>().add(SignOutWithGoogleEvent());
-                      case AuthType.apple:
-                        context.read<AuthBloc>().add(SignOutWithAppleEvent());
-                      case AuthType.anonymous:
-                        context.read<AuthBloc>().add(SignOutAnonymouslyEvent());
-                    }
-
-                    /// 토큰 데이터 삭제, 로그인 타입 삭제
-                    _authService.clearAuthData();
-                    final loadedAuthData = await _authService.loadAuthData();
-                    debugPrint('accessToken : ${loadedAuthData['accessToken']}');
-                    debugPrint('refreshToken : ${loadedAuthData['refreshToken']}');
-                    debugPrint('userName : ${loadedAuthData['userName']}');
-
-                    debugPrint('authType : ${await _authService.loadAuthType()}');
+                    context.read<AuthBloc>().add(SignOutAllEvent());
+                    await _authService.clearAuthData();
 
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => const SignInView()));
+                      builder: (context) => const SignInView(),
+                    ));
                   },
                   leading: SingleChildRoundedCard(
                     child: Container(
@@ -122,9 +105,9 @@ class _SettingViewState extends State<SettingView> {
                     child: Text(
                       username,
                       style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                        fontSize: AppSizes.scaledFont(18),
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontSize: AppSizes.scaledFont(18),
+                            fontWeight: FontWeight.bold,
+                          ),
                       semanticsLabel: '',
                     ),
                   ),
@@ -172,10 +155,13 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '블루투스 권한',
-                            style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                              fontSize: AppSizes.scaledFont(18),
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayLarge!
+                                .copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           trailing: CupertinoSwitch(
                             value: state,
@@ -220,10 +206,13 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '사용자 위치 정보 권한',
-                            style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                              fontSize: AppSizes.scaledFont(18),
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayLarge!
+                                .copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           trailing: CupertinoSwitch(
                             value: state,
@@ -265,10 +254,11 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '시스템 모드 설정',
-                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                          fontSize: AppSizes.scaledFont(18),
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       subtitle: Text(
                         mode == 'system'
@@ -394,10 +384,11 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '경광등 설정',
-                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                          fontSize: AppSizes.scaledFont(18),
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       subtitle: Text(
                         lightmode == 'alwayson'
@@ -433,8 +424,7 @@ class _SettingViewState extends State<SettingView> {
                                 bottom: SizeTheme.h_sm,
                               ),
                               padding: EdgeInsets.all(SizeTheme.w_md),
-                              titleStyle:
-                              TextStyle(
+                              titleStyle: TextStyle(
                                 fontSize: AppSizes.scaledFont(18),
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
@@ -529,10 +519,13 @@ class _SettingViewState extends State<SettingView> {
                           },
                           title: Text(
                             '음성 보조 설정',
-                            style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                              fontSize: AppSizes.scaledFont(18),
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayLarge!
+                                .copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           trailing: CupertinoSwitch(
                             value: TTS.enable,
@@ -571,10 +564,11 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '외부 라이센스',
-                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                          fontSize: AppSizes.scaledFont(18),
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ),
@@ -594,10 +588,11 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '도움말',
-                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                          fontSize: AppSizes.scaledFont(18),
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.displayLarge!.copyWith(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ),
                   ),

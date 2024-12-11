@@ -3,6 +3,7 @@ library repository;
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:latlong2/latlong.dart';

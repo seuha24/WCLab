@@ -267,14 +267,45 @@ class SignOutAnonymously implements SignOut {
   }
 }
 
-class SignInWithGoogle implements SignIn {
-  AuthRepository repository;
+class SignInWithGoogle implements UseCase<AuthDataModel, Map<String, dynamic>> {
+  final AuthRepository repository;
 
   SignInWithGoogle({required this.repository});
 
   @override
-  Future<Either<Failure, Void>> call(Map<String, dynamic>? user) async {
-    return await repository.signInWithGoogle();
+  Future<Either<Failure, AuthDataModel>> call(Map<String, dynamic>? params) async {
+    try {
+      final response = await repository.signInWithGoogle();
+      if (response.data?['success'] == true) {
+        final authData = AuthDataModel.fromMap(response.data!['data'] as Map<String, dynamic>);
+        return Right(authData);
+      } else {
+        return Left(ServerFailure());
+      }
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+}
+
+class SignInWithApple implements UseCase<AuthDataModel, Map<String, dynamic>?> {
+  final AuthRepository repository;
+
+  SignInWithApple({required this.repository});
+
+  @override
+  Future<Either<Failure, AuthDataModel>> call(Map<String, dynamic>? params) async {
+    try {
+      final response = await repository.signInWithApple();
+      if (response.data?['success'] == true) {
+        final authData = AuthDataModel.fromMap(response.data!['data'] as Map<String, dynamic>);
+        return Right(authData);
+      } else {
+        return Left(ServerFailure());
+      }
+    } catch (e) {
+      return Left(ServerFailure());
+    }
   }
 }
 
@@ -286,6 +317,17 @@ class SignOutWithGoogle implements SignOut {
   @override
   Future<Either<Failure, Void>> call(NoParams params) async {
     return await repository.signOutWithGoogle();
+  }
+}
+
+class SignOutWithApple implements SignOut {
+  AuthRepository repository;
+
+  SignOutWithApple({required this.repository});
+
+  @override
+  Future<Either<Failure, Void>> call(NoParams params) async {
+    return await repository.signOutWithApple();
   }
 }
 

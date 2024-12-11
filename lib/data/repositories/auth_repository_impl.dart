@@ -47,8 +47,26 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await authDataSource.signInAnonymously();
       return Right(Void());
-    } on ServerException {
-      return Left(ServerFailure());
+    } catch (e) {
+      return Left(_handleError(e));
+    }
+  }
+
+  @override
+  Future<Response<Map<String, AuthDataModel>>> signInWithGoogle() async {
+    try {
+      return await authDataSource.signInWithGoogle();
+    } catch (e) {
+      throw Exception('Failed to process sign-in');
+    }
+  }
+
+  @override
+  Future<Response<Map<String, AuthDataModel>>> signInWithApple() async {
+    try {
+      return await authDataSource.signInWithApple();
+    } catch (e) {
+      throw Exception('Failed to process sign-in');
     }
   }
 
@@ -57,18 +75,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await authDataSource.signOutAnonymously();
       return Right(Void());
-    } on ServerException {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, Void>> signInWithGoogle() async {
-    try {
-      await authDataSource.signInWithGoogle();
-      return Right(Void());
-    } on ServerException {
-      return Left(ServerFailure());
+    } catch (e) {
+      return Left(_handleError(e));
     }
   }
 
@@ -77,46 +85,50 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await authDataSource.signOutWithGoogle();
       return Right(Void());
-    } on ServerException {
-      return Left(ServerFailure());
+    } catch (e) {
+      return Left(_handleError(e));
     }
   }
 
   @override
-  Future<Either<Failure, AuthDataModel>> sendGoogleOAuthTokenToServer(String token) async {
+  Future<Either<Failure, Void>> signOutWithApple() async {
+    try {
+      await authDataSource.signOutWithApple();
+      return Right(Void());
+    } catch (e) {
+      return Left(_handleError(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Void>> signOutAll() async {
+    try {
+      await authDataSource.signOutAll();
+      return Right(Void());
+    } catch (e) {
+      return Left(_handleError(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthDataModel>> sendGoogleOAuthTokenToServer(
+      String token) async {
     try {
       final response = await authDataSource.sendGoogleOAuthTokenToServer(token);
-      final responseData = response.data ?? {};
-
-      if (responseData['success'] == true) {
-        final AuthDataModel authData = AuthDataModel.fromMap(responseData['data']);
-          return Right(authData);
-      } else {
-        debugPrint('Response data is NULL');
-        return Left(ServerFailure());
-      }
+      return _processAuthResponse(response);
     } catch (e) {
-      debugPrint('Error on sendGoogleOAuthTokenToServer() : $e');
-      return Left(ServerFailure());
+      return Left(_handleError(e));
     }
   }
 
   @override
-  Future<Either<Failure, AuthDataModel>> sendAppleOAuthTokenToServer(String token) async {
+  Future<Either<Failure, AuthDataModel>> sendAppleOAuthTokenToServer(
+      String token) async {
     try {
       final response = await authDataSource.sendAppleOAuthTokenToServer(token);
-      final responseData = response.data ?? {};
-
-      if (responseData['success'] == true) {
-        final AuthDataModel authData = AuthDataModel.fromMap(responseData['data']);
-        return Right(authData);
-      } else {
-        debugPrint('Response data is NULL');
-        return Left(ServerFailure());
-      }
+      return _processAuthResponse(response);
     } catch (e) {
-      debugPrint('Error on sendAppleOAuthTokenToServer() : $e');
-      return Left(ServerFailure());
+      return Left(_handleError(e));
     }
   }
 
@@ -124,19 +136,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, Void>> patchUserInfo(String userName) async {
     try {
       final response = await authDataSource.patchUserInfo(userName);
-      debugPrint('response::::::$response');
-      final responseData = response.data ?? {};
-      debugPrint('responseData::::::$responseData');
-
-      if (responseData['success'] == true) {
-        return Right(Void());
-      } else {
-        debugPrint('Response data is NULL');
-        return Left(ServerFailure());
-      }
+      return _processVoidResponse(response);
     } catch (e) {
-      debugPrint('Error on patchUserInfo() : $e');
-      return Left(ServerFailure());
+      return Left(_handleError(e));
     }
   }
 
@@ -144,19 +146,47 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, Map<String, dynamic>>> getUserInfo() async {
     try {
       final response = await authDataSource.getUserInfo();
-      final responseData = response.data ?? {};
-
-      if (responseData['success'] == true) {
-        final Map<String, dynamic> data = responseData['data'];
-        return Right(data);
-      } else {
-        debugPrint('Response data is NULL');
-        return Left(ServerFailure());
-      }
+      return _processDataResponse(response);
     } catch (e) {
-      debugPrint('Error on sendAppleOAuthTokenToServer() : $e');
+      return Left(_handleError(e));
+    }
+  }
+
+  // Helper Methods
+
+  Either<Failure, AuthDataModel> _processAuthResponse(
+      Response<Map<String, dynamic>> response) {
+    final responseData = response.data ?? {};
+    if (responseData['success'] == true) {
+      final authData = AuthDataModel.fromMap(responseData['data']);
+      return Right(authData);
+    } else {
       return Left(ServerFailure());
     }
   }
 
+  Either<Failure, Void> _processVoidResponse(
+      Response<Map<String, dynamic>> response) {
+    final responseData = response.data ?? {};
+    if (responseData['success'] == true) {
+      return Right(Void());
+    } else {
+      return Left(ServerFailure());
+    }
+  }
+
+  Either<Failure, Map<String, dynamic>> _processDataResponse(
+      Response<Map<String, dynamic>> response) {
+    final responseData = response.data ?? {};
+    if (responseData['success'] == true) {
+      return Right(responseData['data']);
+    } else {
+      return Left(ServerFailure());
+    }
+  }
+
+  Failure _handleError(Object e) {
+    debugPrint('Error: $e');
+    return ServerFailure();
+  }
 }

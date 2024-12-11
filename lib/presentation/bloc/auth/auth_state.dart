@@ -5,6 +5,7 @@ class AuthState extends Equatable {
   final Status signOutStatus;
   final Status patchUserInfoStatus;
   final Status getUserInfoStatus;
+  final Status sendTokenStatus;
   final String? userName;
 
   const AuthState({
@@ -12,6 +13,7 @@ class AuthState extends Equatable {
     this.signOutStatus = Status.initial,
     this.patchUserInfoStatus = Status.initial,
     this.getUserInfoStatus = Status.initial,
+    this.sendTokenStatus = Status.initial,
     this.userName,
   });
 
@@ -22,6 +24,7 @@ class AuthState extends Equatable {
         signOutStatus,
         patchUserInfoStatus,
         getUserInfoStatus,
+        sendTokenStatus,
         userName,
       ];
 
@@ -30,6 +33,7 @@ class AuthState extends Equatable {
     Status? signOutStatus,
     Status? patchUserInfoStatus,
     Status? getUserInfoStatus,
+    Status? sendTokenStatus,
     String? userName,
   }) {
     return AuthState(
@@ -37,6 +41,7 @@ class AuthState extends Equatable {
       signOutStatus: signOutStatus ?? this.signOutStatus,
       patchUserInfoStatus: patchUserInfoStatus ?? this.patchUserInfoStatus,
       getUserInfoStatus: getUserInfoStatus ?? this.getUserInfoStatus,
+      sendTokenStatus: sendTokenStatus ?? this.sendTokenStatus,
       userName: userName ?? this.userName,
     );
   }
