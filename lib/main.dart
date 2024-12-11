@@ -84,9 +84,9 @@ class SafeLight extends StatelessWidget {
               navigatorKey: navigatorKey,
               // showSemanticsDebugger: true, // 접근성 테스트할 때 사용
               debugShowCheckedModeBanner: false,
-              darkTheme: SystemTheme.systemMode(ColorTheme.light),
-              themeMode: ThemeMode.values.byName(mode ?? ThemeMode.system.name),
               theme: SystemTheme.systemMode(ColorTheme.light),
+              darkTheme: SystemTheme.systemMode(ColorTheme.dark),
+              themeMode: ThemeMode.values.byName(mode ?? ThemeMode.system.name),
               home: StreamBuilder(
                 stream: DI.get<FirebaseAuth>().authStateChanges(),
                 builder: (context, snapshot) {

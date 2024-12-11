@@ -25,8 +25,6 @@ class _MainViewState extends State<MainView> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<BleStatus>(
@@ -40,7 +38,6 @@ class _MainViewState extends State<MainView> {
               children: _widgetOptions,
             ),
             bottomNavigationBar: BottomNavigationBar(
-              unselectedItemColor: Theme.of(context).colorScheme.surface,
               backgroundColor: Theme.of(context).colorScheme.secondary,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -64,8 +61,9 @@ class _MainViewState extends State<MainView> {
                 fontSize: AppSizes.scaledFont(16),
                 fontWeight: FontWeight.bold,
               ),
+              unselectedItemColor: Theme.of(context).colorScheme.surface,
               unselectedLabelStyle: TextStyle(
-                fontSize: AppSizes.scaledFont(16)
+                fontSize: AppSizes.scaledFont(16),
               ),
               onTap: _onItemTapped,
             ),

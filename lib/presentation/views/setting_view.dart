@@ -121,7 +121,7 @@ class _SettingViewState extends State<SettingView> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       username,
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.displayLarge!.copyWith(
                         fontSize: AppSizes.scaledFont(18),
                         fontWeight: FontWeight.bold,
                       ),
@@ -172,7 +172,7 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '블루투스 권한',
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.displayLarge!.copyWith(
                               fontSize: AppSizes.scaledFont(18),
                               fontWeight: FontWeight.bold,
                             ),
@@ -220,7 +220,7 @@ class _SettingViewState extends State<SettingView> {
                           ),
                           title: Text(
                             '사용자 위치 정보 권한',
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.displayLarge!.copyWith(
                               fontSize: AppSizes.scaledFont(18),
                               fontWeight: FontWeight.bold,
                             ),
@@ -265,7 +265,7 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '시스템 모드 설정',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
                           fontSize: AppSizes.scaledFont(18),
                           fontWeight: FontWeight.bold,
                         ),
@@ -394,7 +394,7 @@ class _SettingViewState extends State<SettingView> {
                     child: ListTile(
                       title: Text(
                         '경광등 설정',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
                           fontSize: AppSizes.scaledFont(18),
                           fontWeight: FontWeight.bold,
                         ),
@@ -529,7 +529,7 @@ class _SettingViewState extends State<SettingView> {
                           },
                           title: Text(
                             '음성 보조 설정',
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.displayLarge!.copyWith(
                               fontSize: AppSizes.scaledFont(18),
                               fontWeight: FontWeight.bold,
                             ),
@@ -571,7 +571,7 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '외부 라이센스',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
                           fontSize: AppSizes.scaledFont(18),
                           fontWeight: FontWeight.bold,
                         ),
@@ -594,7 +594,7 @@ class _SettingViewState extends State<SettingView> {
                       },
                       title: Text(
                         '도움말',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.displayLarge!.copyWith(
                           fontSize: AppSizes.scaledFont(18),
                           fontWeight: FontWeight.bold,
                         ),
