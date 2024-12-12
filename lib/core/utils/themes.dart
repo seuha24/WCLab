@@ -196,6 +196,7 @@ class ColorTheme implements Themes {
     background: Color(0xffF1F2F6),
     onBackground: Color(0xff939AA3),
     surface: Color(0xffEAEAEA),
+    shadow: null,
   );
 
   static const ColorScheme dark = ColorScheme.dark(
@@ -206,5 +207,6 @@ class ColorTheme implements Themes {
     background: Colors.black,
     onBackground: Color(0xffEAEAEA),
     surface: Color(0xff121215),
+    shadow: Color(0xFF282828),
   );
 }

@@ -23,6 +23,7 @@ class BranchInfo {
 class MovingAverageFilter {
   final int windowSize;
   final List<double> _values = [];
+<<<<<<< HEAD
   final List<double> weights;
 
   MovingAverageFilter(this.windowSize)
@@ -32,6 +33,10 @@ class MovingAverageFilter {
       if (weights[i] < 0) weights[i] = 0.0;
     }
   }
+=======
+
+  MovingAverageFilter(this.windowSize);
+>>>>>>> 019b158916e523bc685020ce7a64f5b72d1a73ae
 
   double filter(double newValue) {
     _values.add(newValue);
@@ -1011,6 +1016,13 @@ class _NaverMapViewState extends State<NaverMapView> {
   Widget build(BuildContext context) {
     final searchLocation = context.watch<SearchBloc>().startLocation;
     final destinationLocation = context.watch<SearchBloc>().destinationLocation;
+
+    final box = Hive.box(SystemTheme.themeBox);
+    final mode = box.get(SystemTheme.mode);
+    final systemBright = MediaQuery.of(context).platformBrightness;
+    bool isDark = (mode == 'dark') ||
+        (mode == 'system' && systemBright == Brightness.dark);
+
     return Scaffold(
       body: isLoading
           ? Center(
@@ -1340,6 +1352,12 @@ class _NaverMapViewState extends State<NaverMapView> {
                       ),
                     ),
                   ),
+                ),
+                Container(
+                  color: isDark
+                      ? Theme.of(context).colorScheme.shadow.withOpacity(0.5)
+                      : null,
+                  height: MediaQuery.of(context).padding.top,
                 ),
               ],
             ),
