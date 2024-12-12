@@ -61,7 +61,10 @@ class _MainViewState extends State<MainView> {
                 fontSize: AppSizes.scaledFont(16),
                 fontWeight: FontWeight.bold,
               ),
-              unselectedItemColor: Theme.of(context).colorScheme.surface,
+              unselectedItemColor: Theme.of(context)
+                  .colorScheme
+                  .onBackground
+                  .withOpacity(0.28),
               unselectedLabelStyle: TextStyle(
                 fontSize: AppSizes.scaledFont(16),
               ),
