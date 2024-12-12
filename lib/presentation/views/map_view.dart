@@ -23,7 +23,6 @@ class BranchInfo {
 class MovingAverageFilter {
   final int windowSize;
   final List<double> _values = [];
-<<<<<<< HEAD
   final List<double> weights;
 
   MovingAverageFilter(this.windowSize)
@@ -33,10 +32,6 @@ class MovingAverageFilter {
       if (weights[i] < 0) weights[i] = 0.0;
     }
   }
-=======
-
-  MovingAverageFilter(this.windowSize);
->>>>>>> 019b158916e523bc685020ce7a64f5b72d1a73ae
 
   double filter(double newValue) {
     _values.add(newValue);
