@@ -209,8 +209,8 @@ class _NaverMapViewState extends State<NaverMapView> {
     imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
     debugPrint(
         'imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, 실제 이동 거리, positionUpdateFunc 진행 중...7');
-    double distanceKm =
-        math.sqrt((imuLocationX * imuLocationX + imuLocationY * imuLocationY) / 1000);
+    double distanceKm = math.sqrt(
+        (imuLocationX * imuLocationX + imuLocationY * imuLocationY) / 1000);
     double distanceRad = distanceKm / 6371.0;
     double pointingToRad = math.atan2(imuLocationY, imuLocationX);
     double startLongitudeRad = finalLongitude * math.pi / 180;
@@ -951,6 +951,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   void _updateCurrentLocationMarker(latitude, longitude) async {
+    debugPrint(':::::::::::::::_updateCurrentLocationMarker');
     if (mapController == null) {
       debugPrint('addOverlays() mapController is not initialized yet.');
       return;
@@ -967,12 +968,11 @@ class _NaverMapViewState extends State<NaverMapView> {
         size: const Size(25, 25),
         context: context);
     // 현재 위치 마커를 새로 추가
-    setState(() {
-      _currentLocationMarker = NMarker(
-          id: 'current_location',
-          position: NLatLng(latitude, longitude),
-          icon: iconImage);
-    });
+    _currentLocationMarker = NMarker(
+        id: 'current_location',
+        position: NLatLng(latitude, longitude),
+        icon: iconImage);
+
     mapController!.addOverlay(_currentLocationMarker!);
   }
 
