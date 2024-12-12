@@ -60,7 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handleSignInAnonymously(
       SignInAnonymouslyEvent event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(signInStatus: Status.inProgress));
+    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: '익명 사용자'));
     final result = await _repository.signInAnonymously();
     result.fold(
       (failure) => emit(state.copyWith(signInStatus: Status.failure)),
