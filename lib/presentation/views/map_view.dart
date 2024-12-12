@@ -164,6 +164,11 @@ class _NaverMapViewState extends State<NaverMapView> {
     preAccZ = 0.0;
   }
 
+  // 칼만필터 적용
+  final kalmanX = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
+  final kalmanY = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
+  final kalmanZ = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
+
   Future<void> positionUpdate(Duration sensorInterval) async {
     double deltaTime = (sensorInterval.inMilliseconds / 1000.0)
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
@@ -171,20 +176,18 @@ class _NaverMapViewState extends State<NaverMapView> {
     final double accelerationMagnitude =
         math.sqrt(curAccX * curAccX + curAccY * curAccY);
     debugPrint(
-        'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...2');
-    // 칼만필터 적용
-    final kalman = SimpleKalman(errorMeasure: 2, errorEstimate: 100, q: 0.8);
-    curAccX = kalman.filtered(curAccX);
-    curAccY = kalman.filtered(curAccY);
-    curAccZ = kalman.filtered(curAccZ);
+        'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
+    curAccX = kalmanX.filtered(curAccX);
+    curAccY = kalmanY.filtered(curAccY);
+    curAccZ = kalmanZ.filtered(curAccZ);
     debugPrint(
-        'curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, positionUpdateFunc 진행 중...3');
+        'curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, Kalman Filter 적용, positionUpdateFunc 진행 중...3');
     // 속도 계산
     velocityX = (curAccX - preAccX) * deltaTime;
     velocityY = (curAccY - preAccY) * deltaTime;
     velocityZ = (curAccZ - preAccZ) * deltaTime;
     debugPrint(
-        'velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, positionUpdateFunc 진행 중...4');
+        'velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 속도 계산, positionUpdateFunc 진행 중...4');
     // 가중이동필터 적용
     final velocityXFilter = MovingAverageFilter(5);
     final velocityYFilter = MovingAverageFilter(5);
@@ -202,15 +205,12 @@ class _NaverMapViewState extends State<NaverMapView> {
         math.sqrt(velocityX * velocityX + velocityY * velocityY);
     debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...6');
     // 실제 이동 거리 계산
-    setState(() {
-      imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
-      imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
-    });
+    imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
+    imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
     debugPrint(
         'imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, 실제 이동 거리, positionUpdateFunc 진행 중...7');
     double distanceKm =
-        math.sqrt(imuLocationX * imuLocationX + imuLocationY * imuLocationY) /
-            1000.0;
+        math.sqrt((imuLocationX * imuLocationX + imuLocationY * imuLocationY) / 1000);
     double distanceRad = distanceKm / 6371.0;
     double pointingToRad = math.atan2(imuLocationY, imuLocationX);
     double startLongitudeRad = finalLongitude * math.pi / 180;
@@ -252,7 +252,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   Future<void> _initLocation() async {
-    int gpsAccuracy = 1;
+    int gpsAccuracy = 14;
     Position position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
             accuracy: LocationAccuracy.high, distanceFilter: 1));
@@ -264,17 +264,16 @@ class _NaverMapViewState extends State<NaverMapView> {
         'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, initLocation 실행 중');
 
     if (position.accuracy <= gpsAccuracy) {
-      setState(() {
-        isGps = true;
-        isLoading = false;
-      });
+      isGps = true;
+      isLoading = false;
     } else {
-      setState(() {
-        isGps = false;
-        isLoading = false;
-      });
+      isGps = false;
+      isLoading = false;
     }
 
+    setState(() {});
+
+    // TODO: Setstate를 여기서만 호출
     void moveDot(importedLatitude, importedLongitude) {
       if (importedLatitude != finalLatitude ||
           importedLongitude != finalLongitude) {
@@ -283,14 +282,12 @@ class _NaverMapViewState extends State<NaverMapView> {
         finalLatitude = importedLatitude;
         finalLongitude = importedLongitude;
         debugPrint(
-            'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDot 진행 완료');
+            'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDotFunc 진행 완료');
       }
     }
 
     Future<void> moveByGps() async {
-      setState(() {
-        isGps = true;
-      });
+      isGps = true;
       position = await Geolocator.getCurrentPosition(
           locationSettings: LocationSettings(
               accuracy: LocationAccuracy.high, distanceFilter: 1));
@@ -306,9 +303,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
 
     Future<void> moveByImu(Duration sensorInterval) async {
-      setState(() {
-        isGps = false;
-      });
+      isGps = false;
       await positionUpdate(sensorInterval);
       moveDot(imuLatitude, imuLongitude);
     }
@@ -348,12 +343,9 @@ class _NaverMapViewState extends State<NaverMapView> {
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
         if (!mounted) return; // 위젯이 제거된 경우 상태 업데이트 방지
-
-        setState(() {
-          compassValue = event.heading ?? 0.0;
-          yawRate = (compassValue * math.pi / 180);
-          updateYawRate(0);
-        });
+        compassValue = event.heading ?? 0.0;
+        yawRate = (compassValue * math.pi / 180);
+        updateYawRate(0);
         // debugPrint('compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
         if ((compassValue - lastCompassValue).abs() >= 1.0) {
           lastCompassValue = compassValue;
@@ -374,17 +366,12 @@ class _NaverMapViewState extends State<NaverMapView> {
 
         final deltaTime =
             (SensorInterval.normalInterval).inMilliseconds / 1000.0;
-        setState(() {
-          rotationX = event.x * deltaTime;
-          rotationY = event.y * deltaTime;
-          rotationZ = event.z * deltaTime;
-          rotationXSum += rotationX;
-          rotationYSum += rotationY;
-          rotationZSum += rotationZ;
-          // updateYawRate(rotationX);
-          // updateYawRate(rotationY);
-          // updateYawRate(rotationZ);
-        });
+        rotationX = event.x * deltaTime;
+        rotationY = event.y * deltaTime;
+        rotationZ = event.z * deltaTime;
+        rotationXSum += rotationX;
+        rotationYSum += rotationY;
+        rotationZSum += rotationZ;
         debugPrint(
             'rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, rotationXSum: $rotationXSum, rotationYSum: $rotationYSum, rotationZSum: $rotationZSum, subscribeToSensor<GyroscopeEvent> 실행됨');
       },
@@ -953,7 +940,6 @@ class _NaverMapViewState extends State<NaverMapView> {
       debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
-
     // 현재 위치를 기준으로 카메라 위치를 설정
     final cameraUpdate = NCameraUpdate.withParams(
       target: NLatLng(latitude, longitude),
