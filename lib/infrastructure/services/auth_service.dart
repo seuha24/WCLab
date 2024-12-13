@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:safelight/framework/controller.dart';
+import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {

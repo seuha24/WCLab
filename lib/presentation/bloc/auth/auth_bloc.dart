@@ -1,38 +1,5 @@
 part of '../../../framework/controller.dart';
 
-enum AuthType {
-  google,
-  apple,
-  anonymous,
-}
-
-extension AuthTypeExtension on AuthType {
-  static String getLabel(AuthType type) {
-    switch (type) {
-      case AuthType.google:
-        return 'google';
-      case AuthType.apple:
-        return 'apple';
-      case AuthType.anonymous:
-        return 'anonymous';
-      default:
-        return 'anonymous';
-    }
-  }
-
-  static AuthType getType(String? type) {
-    switch (type) {
-      case 'google':
-        return AuthType.google;
-      case 'apple':
-        return AuthType.apple;
-      case 'anonymous':
-        return AuthType.anonymous;
-      default:
-        return AuthType.anonymous;
-    }
-  }
-}
 
 // #docregion Initialize
 const List<String> scopes = <String>[
@@ -60,11 +27,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handleSignInAnonymously(
       SignInAnonymouslyEvent event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: '익명 사용자'));
+    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
     final result = await _repository.signInAnonymously();
     result.fold(
       (failure) => emit(state.copyWith(signInStatus: Status.failure)),
-      (_) => emit(state.copyWith(signInStatus: Status.success)),
+      (_) => emit(state.copyWith(signInStatus: Status.success, userName: '익명 사용자')),
     );
   }
 
@@ -81,14 +48,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _handleSignInWithGoogle(
       SignInWithGoogleEvent event, Emitter<AuthState> emit) async {
     emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
-
     try {
       // Google 로그인 및 서버로 토큰 전송
       final response = await _repository.signInWithGoogle();
 
       // 서버 응답 데이터 처리
-      if (response.data!.isNotEmpty) {
-        final userName = response.data?['data']?.userName;
+      if (response.data!.isNotEmpty && response.data != null) {
+        final authData = response.data!['data'];
+        final userName = authData!.userName;
+
+        await _authService.saveAuthData(
+          accessToken: authData.accessToken,
+          refreshToken: authData.refreshToken,
+          userName: authData.userName ?? '',
+        );
+
         emit(state.copyWith(
           signInStatus: Status.success,
           userName: userName,
@@ -109,8 +83,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Apple 로그인 및 서버로 토큰 전송
       final response = await _repository.signInWithApple();
       // 서버 응답 데이터 처리
-      if (response.data!.isNotEmpty) {
-        final userName = response.data?['data']?.userName;
+      if (response.data!.isNotEmpty && response.data != null) {
+        final authData = response.data!['data'];
+        final userName = authData!.userName;
+
+        await _authService.saveAuthData(
+          accessToken: authData.accessToken,
+          refreshToken: authData.refreshToken,
+          userName: authData.userName ?? '',
+        );
+
         emit(state.copyWith(
           signInStatus: Status.success,
           userName: userName,

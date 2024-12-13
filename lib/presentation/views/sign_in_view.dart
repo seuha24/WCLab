@@ -15,7 +15,6 @@ class _SignInViewState extends State<SignInView> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('width : ${ScreenUtil().screenWidth}');
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {

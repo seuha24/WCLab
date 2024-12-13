@@ -1,6 +1,8 @@
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 library injection;
 
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +13,7 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/data/network/dio_client.dart';
+import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/repository.dart';
@@ -192,7 +195,12 @@ Future<void> init() async {
     () => AuthRemoteDataSourceImpl(
       auth: DI(),
       dio: DioClient().dio,
-      googleSignIn: GoogleSignIn(),
+      googleSignIn: GoogleSignIn(
+        scopes: scopes,
+        clientId: Platform.isIOS
+            ? DefaultFirebaseOptions.currentPlatform.iosClientId
+            : DefaultFirebaseOptions.currentPlatform.androidClientId,
+      ),
     ),
   );
 

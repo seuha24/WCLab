@@ -14,6 +14,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/firebase_options.dart';
+import 'package:safelight/infrastructure/services/auth_service.dart';
 import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
 import 'package:safelight/presentation/views/signup_user_input.dart';
@@ -38,15 +39,21 @@ Future<void> main() async {
   await init();
   FlutterNativeSplash.remove();
   // LocationPlugin.register();
-  runApp(SafeLight(auth: DI.get<FirebaseAuth>()));
+
+  final authService = AuthService();
+  final loadedAuthData = await authService.loadAuthData();
+  final userName = loadedAuthData['userName'];
+
+  runApp(SafeLight(auth: DI.get<FirebaseAuth>(), userName: userName));
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class SafeLight extends StatelessWidget {
   final FirebaseAuth auth;
+  final String? userName;
 
-  const SafeLight({super.key, required this.auth});
+  const SafeLight({super.key, required this.auth, required this.userName});
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +97,16 @@ class SafeLight extends StatelessWidget {
               home: StreamBuilder(
                 stream: DI.get<FirebaseAuth>().authStateChanges(),
                 builder: (context, snapshot) {
+                  debugPrint('snapshot.data :${snapshot.data}');
                   if (snapshot.data == null) {
                     return const SignInView();
                   } else {
-                    return const MainView();
+                    final emptyName = userName == '' || userName == null;
+                    if (!snapshot.data!.isAnonymous && emptyName) {
+                      return const SignInView();
+                    } else {
+                      return const MainView();
+                    }
                   }
                 },
               ),

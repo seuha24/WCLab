@@ -18,7 +18,6 @@ import 'package:safelight/data/models/auth_data_model.dart';
 import 'package:safelight/data/network/api_endpoints.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
-import 'package:safelight/infrastructure/services/auth_service.dart';
 import 'package:torch_light/torch_light.dart';
 
 import 'package:camera/camera.dart' as cam;

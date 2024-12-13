@@ -42,7 +42,7 @@ class AuthState extends Equatable {
       patchUserInfoStatus: patchUserInfoStatus ?? this.patchUserInfoStatus,
       getUserInfoStatus: getUserInfoStatus ?? this.getUserInfoStatus,
       sendTokenStatus: sendTokenStatus ?? this.sendTokenStatus,
-      userName: userName ?? this.userName,
+      userName: userName,
     );
   }
 }

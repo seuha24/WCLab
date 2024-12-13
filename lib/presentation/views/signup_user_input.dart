@@ -33,9 +33,18 @@ class _SignupUserInputState extends State<SignupUserInput> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state.patchUserInfoStatus == Status.success ||
             state.patchUserInfoStatus == Status.success) {
+
+          final loadedAuthData = await _authService.loadAuthData();
+
+          await _authService.saveAuthData(
+            accessToken: loadedAuthData['accessToken']!,
+            refreshToken: loadedAuthData['refreshToken']!,
+            userName: _userNameTextController.text,
+          );
+
           Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const MainView()));
         } else if (state.patchUserInfoStatus == Status.failure) {

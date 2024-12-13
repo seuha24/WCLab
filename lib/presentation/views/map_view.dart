@@ -156,7 +156,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   // 새로운 경로, 경로 재설정 시 속도, 방향, 위치, 체크포인트 메세지 초기화
   void resetSpeedUtilsValue() {
-    debugPrint('resetSpeedUtilsValueFunc 실행');
+    // debugPrint('resetSpeedUtilsValueFunc 실행');
     imuLatitude = 0.0;
     imuLongitude = 0.0;
     preAccX = 0.0;
@@ -172,22 +172,22 @@ class _NaverMapViewState extends State<NaverMapView> {
   Future<void> positionUpdate(Duration sensorInterval) async {
     double deltaTime = (sensorInterval.inMilliseconds / 1000.0)
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
-    debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
+    // debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
     final double accelerationMagnitude =
         math.sqrt(curAccX * curAccX + curAccY * curAccY);
-    debugPrint(
-        'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
+    // debugPrint(
+    //     'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
     curAccX = kalmanX.filtered(curAccX);
     curAccY = kalmanY.filtered(curAccY);
     curAccZ = kalmanZ.filtered(curAccZ);
-    debugPrint(
-        'curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, Kalman Filter 적용, positionUpdateFunc 진행 중...3');
+    // debugPrint(
+    //     'curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, Kalman Filter 적용, positionUpdateFunc 진행 중...3');
     // 속도 계산
     velocityX = (curAccX - preAccX) * deltaTime;
     velocityY = (curAccY - preAccY) * deltaTime;
     velocityZ = (curAccZ - preAccZ) * deltaTime;
-    debugPrint(
-        'velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 속도 계산, positionUpdateFunc 진행 중...4');
+    // debugPrint(
+    //     'velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 속도 계산, positionUpdateFunc 진행 중...4');
     // 가중이동필터 적용
     final velocityXFilter = MovingAverageFilter(5);
     final velocityYFilter = MovingAverageFilter(5);
@@ -195,20 +195,20 @@ class _NaverMapViewState extends State<NaverMapView> {
     velocityX = velocityXFilter.filter(velocityX);
     velocityY = velocityYFilter.filter(velocityY);
     velocityZ = velocityZFilter.filter(velocityZ);
-    debugPrint(
-        'velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 이동필터 적용, positionUpdateFunc 진행 중...5');
+    // debugPrint(
+    //     'velocityX: $velocityX, velocityY, $velocityY, velocityZ, $velocityZ, 이동필터 적용, positionUpdateFunc 진행 중...5');
     // Roll, Pitch 보정
     velocityX = velocityX * math.cos(rotationX);
     velocityY = velocityY * math.cos(rotationY);
     // 속력 계산
     final double currentSpeed =
         math.sqrt(velocityX * velocityX + velocityY * velocityY);
-    debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...6');
+    // debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...6');
     // 실제 이동 거리 계산
     imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
     imuLocationY += (currentSpeed * math.sin(yawRate) * deltaTime);
-    debugPrint(
-        'imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, 실제 이동 거리, positionUpdateFunc 진행 중...7');
+    // debugPrint(
+    //     'imuLocationX: $imuLocationX, imuLocationY, $imuLocationY, 실제 이동 거리, positionUpdateFunc 진행 중...7');
     double distanceKm = math.sqrt(
         (imuLocationX * imuLocationX + imuLocationY * imuLocationY) / 1000);
     double distanceRad = distanceKm / 6371.0;
@@ -235,8 +235,8 @@ class _NaverMapViewState extends State<NaverMapView> {
     preAccX = curAccX;
     preAccY = curAccY;
     preAccZ = curAccZ;
-    debugPrint(
-        'imuLatitude: $imuLatitude, imuLongitude: $imuLongitude, positionUpdateFunc 진행 완료...8');
+    // debugPrint(
+    //     'imuLatitude: $imuLatitude, imuLongitude: $imuLongitude, positionUpdateFunc 진행 완료...8');
   }
 
   Future<void> _initTTS() async {
@@ -260,8 +260,8 @@ class _NaverMapViewState extends State<NaverMapView> {
     gpsLongitude = position.longitude;
     finalLatitude = gpsLatitude;
     finalLongitude = gpsLongitude;
-    debugPrint(
-        'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, initLocation 실행 중');
+    // debugPrint(
+    //     'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, initLocation 실행 중');
 
     if (position.accuracy <= gpsAccuracy) {
       isGps = true;
@@ -281,8 +281,8 @@ class _NaverMapViewState extends State<NaverMapView> {
         _updateMapPosition(importedLatitude, importedLongitude, compassValue);
         finalLatitude = importedLatitude;
         finalLongitude = importedLongitude;
-        debugPrint(
-            'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDotFunc 진행 완료');
+        // debugPrint(
+        //     'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDotFunc 진행 완료');
       }
     }
 
@@ -298,8 +298,8 @@ class _NaverMapViewState extends State<NaverMapView> {
       s_accuracy = position.accuracy;
       moveDot(gpsLatitude, gpsLongitude);
       resetSpeedUtilsValue();
-      debugPrint(
-          'gpsLatitude: $gpsLatitude, gpsLongitude: $gpsLongitude, moveByGPS 진행 완료. 현재 GPS 정확도 : ${position.accuracy}');
+      // debugPrint(
+      //     'gpsLatitude: $gpsLatitude, gpsLongitude: $gpsLongitude, moveByGPS 진행 완료. 현재 GPS 정확도 : ${position.accuracy}');
     }
 
     Future<void> moveByImu(Duration sensorInterval) async {
@@ -326,8 +326,8 @@ class _NaverMapViewState extends State<NaverMapView> {
                 locationSettings: LocationSettings(
                     accuracy: LocationAccuracy.high, distanceFilter: 5));
             if (position.accuracy > gpsAccuracy) {
-              debugPrint(
-                  '가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImuFunc 실행됨.');
+              // debugPrint(
+              //     '가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImuFunc 실행됨.');
               await moveByImu(SensorInterval.normalInterval);
             } else {
               await moveByGps();
@@ -372,8 +372,8 @@ class _NaverMapViewState extends State<NaverMapView> {
         rotationXSum += rotationX;
         rotationYSum += rotationY;
         rotationZSum += rotationZ;
-        debugPrint(
-            'rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, rotationXSum: $rotationXSum, rotationYSum: $rotationYSum, rotationZSum: $rotationZSum, subscribeToSensor<GyroscopeEvent> 실행됨');
+        // debugPrint(
+        //     'rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, rotationXSum: $rotationXSum, rotationYSum: $rotationYSum, rotationZSum: $rotationZSum, subscribeToSensor<GyroscopeEvent> 실행됨');
       },
       onError: (e) {
         debugPrint(e);
@@ -473,7 +473,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   // 네이버맵에 경로를 포함한 overlays를 띄우기 위한 함수
   void addOverlays(List<LatLng> paths) {
     if (mapController == null) {
-      debugPrint('addOverlays() mapController is not initialized yet.');
+      // debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
 
@@ -937,7 +937,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   void _updateMapPosition(latitude, longitude, compassValue) {
     if (mapController == null) {
-      debugPrint('addOverlays() mapController is not initialized yet.');
+      // debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
     // 현재 위치를 기준으로 카메라 위치를 설정
@@ -951,9 +951,9 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   void _updateCurrentLocationMarker(latitude, longitude) async {
-    debugPrint(':::::::::::::::_updateCurrentLocationMarker');
+    // debugPrint(':::::::::::::::_updateCurrentLocationMarker');
     if (mapController == null) {
-      debugPrint('addOverlays() mapController is not initialized yet.');
+      // debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
 
@@ -978,7 +978,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   void addBranchMarkers() async {
     if (mapController == null) {
-      debugPrint('addOverlays() mapController is not initialized yet.');
+      // debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
 
