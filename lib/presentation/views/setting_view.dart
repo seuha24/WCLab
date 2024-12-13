@@ -62,6 +62,7 @@ class _SettingViewState extends State<SettingView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: SizedBox.shrink(),
         flexibleSpace: Container(
           color: Theme.of(context).colorScheme.secondary,
           padding: EdgeInsets.only(
@@ -79,16 +80,6 @@ class _SettingViewState extends State<SettingView> {
                 ),
                 //  '로그인 화면 이동 버튼, 현재 로그인 상태',
                 child: ListTile(
-                  onTap: () async {
-                    debugPrint('onTap Logout');
-
-                    context.read<AuthBloc>().add(SignOutAllEvent());
-                    await _authService.clearAuthData();
-
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => const SignInView(),
-                    ));
-                  },
                   leading: SingleChildRoundedCard(
                     child: Container(
                       padding: EdgeInsets.all(AppSizes.scaledWidth(2)),
@@ -111,10 +102,22 @@ class _SettingViewState extends State<SettingView> {
                       semanticsLabel: '',
                     ),
                   ),
-                  trailing: Icon(
-                    Icons.logout,
-                    size: AppSizes.scaledWidth(25),
-                    color: Theme.of(context).colorScheme.onBackground,
+                  trailing: GestureDetector(
+                    onTap: () async {
+                      debugPrint('onTap Logout');
+
+                      context.read<AuthBloc>().add(SignOutAllEvent());
+                      await _authService.clearAuthData();
+
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => const SignInView(),
+                      ));
+                    },
+                    child: Icon(
+                      Icons.logout,
+                      size: AppSizes.scaledWidth(25),
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
                   ),
                 ),
               );
