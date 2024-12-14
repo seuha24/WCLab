@@ -12,6 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:safelight/core/utils/moving_average_filter.dart';
 import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
@@ -250,4 +251,9 @@ Future<void> init() async {
   DI.registerLazySingleton<Message>(() => Message());
 
   DI.registerLazySingleton<FlutterReactiveBle>(() => FlutterReactiveBle());
+
+  DI.registerFactoryParam<MovingAverageFilter, int, void>(
+        (windowSize, _) => MovingAverageFilter(windowSize),
+  );
+
 }
