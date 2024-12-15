@@ -17,9 +17,8 @@ import 'package:safelight/firebase_options.dart';
 import 'package:safelight/infrastructure/services/auth_service.dart';
 import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
-import 'package:safelight/presentation/views/signup_user_input.dart';
+import 'package:safelight/presentation/bloc/navigation_bloc/navigation_bloc.dart';
 
-// import 'package:location_plugin/location_plugin.dart';
 
 import 'framework/controller.dart';
 import 'framework/core.dart';
@@ -85,6 +84,9 @@ class SafeLight extends StatelessWidget {
               ),
               BlocProvider(
                 create: (context) => SearchBloc(),
+              ),
+              BlocProvider(
+                create: (_) => DI.get<NavigationBloc>(),
               ),
             ],
             child: MaterialApp(
