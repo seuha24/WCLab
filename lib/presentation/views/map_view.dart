@@ -1113,11 +1113,16 @@ class _NaverMapViewState extends State<NaverMapView> {
                     await tts.speak('다음 안내까지 $meters미터 남았습니다.');
                   },
                 ),
-                _buildSearchInput(
-                  context,
-                  searchLocation,
-                  destinationLocation,
-                  isDark,
+                Positioned(
+                  top: 65.0,
+                  left: 20.0,
+                  right: 20.0,
+                  child: _buildSearchInput(
+                    context,
+                    searchLocation,
+                    destinationLocation,
+                    isDark,
+                  ),
                 ),
                 Container(
                   color: isDark
@@ -1134,186 +1139,177 @@ class _NaverMapViewState extends State<NaverMapView> {
       String destinationLocation, bool isDark) {
     return Column(
       children: [
-        Positioned(
-          top: 65.0,
-          left: 20.0,
-          right: 20.0,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 190, 164, 164),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: GestureDetector(
-              onTap: () async {
-                GeoLocation? newstartSelectedLocation = await Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        StartSearch(
-                      searchValue: searchLocation,
-                    ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      const begin = 0.0;
-
-                      const end = 1.0;
-
-                      const curve = Curves.easeInOutQuart;
-
-                      var tween = Tween(begin: begin, end: end)
-                          .chain(CurveTween(curve: curve));
-
-                      var fadeAnimation = animation.drive(tween);
-
-                      return FadeTransition(
-                        opacity: fadeAnimation,
-                        child: child,
-                      );
-                    },
+        Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 190, 164, 164),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: GestureDetector(
+            onTap: () async {
+              GeoLocation? newstartSelectedLocation = await Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      StartSearch(
+                    searchValue: searchLocation,
                   ),
-                );
-                if (newstartSelectedLocation != null) {
-                  setState(() {
-                    startSelectedLocation = newstartSelectedLocation;
-                    isStart = true;
-                  });
-                }
-              },
-              child: Container(
-                padding: EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.6),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    const begin = 0.0;
+
+                    const end = 1.0;
+
+                    const curve = Curves.easeInOutQuart;
+
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+
+                    var fadeAnimation = animation.drive(tween);
+
+                    return FadeTransition(
+                      opacity: fadeAnimation,
+                      child: child,
+                    );
+                  },
                 ),
-                child: Row(
-                  children: [
-                    searchLocation.isEmpty
-                        ? Text(
-                            '출발지를 입력하세요.',
-                            style: TextStyle(
-                                fontSize: AppSizes.scaledFont(18),
-                                color: Color(0xff9E9E9E)),
-                          )
-                        : Text(
-                            searchLocation,
-                            style: TextStyle(
-                                fontSize: AppSizes.scaledFont(18),
-                                color: Colors.black),
-                          ),
-                    Spacer(),
-                    Icon(Icons.search),
-                  ],
-                ),
+              );
+              if (newstartSelectedLocation != null) {
+                setState(() {
+                  startSelectedLocation = newstartSelectedLocation;
+                  isStart = true;
+                });
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.6),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  searchLocation.isEmpty
+                      ? Text(
+                          '출발지를 입력하세요.',
+                          style: TextStyle(
+                              fontSize: AppSizes.scaledFont(18),
+                              color: Color(0xff9E9E9E)),
+                        )
+                      : Text(
+                          searchLocation,
+                          style: TextStyle(
+                              fontSize: AppSizes.scaledFont(18),
+                              color: Colors.black),
+                        ),
+                  Spacer(),
+                  Icon(Icons.search),
+                ],
               ),
             ),
           ),
         ),
-        Positioned(
-          top: 122.0,
-          left: 20.0,
-          right: 20.0,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 190, 164, 164),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: GestureDetector(
-              onTap: () async {
-                GeoLocation? newSelectedLocation = await Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        DesSearch(
-                      destinationValue: destinationLocation,
-                    ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      const begin = 0.0;
-                      const end = 1.0;
-                      const curve = Curves.easeInOutQuart;
-
-                      var tween = Tween(begin: begin, end: end)
-                          .chain(CurveTween(curve: curve));
-
-                      var fadeAnimation = animation.drive(tween);
-
-                      return FadeTransition(
-                        opacity: fadeAnimation,
-                        child: child,
-                      );
-                    },
+        Gap(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 190, 164, 164),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: GestureDetector(
+            onTap: () async {
+              GeoLocation? newSelectedLocation = await Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      DesSearch(
+                    destinationValue: destinationLocation,
                   ),
-                );
-                if (newSelectedLocation != null) {
-                  setState(() {
-                    selectedLocation = newSelectedLocation;
-                  });
-                  if (isStart == true) {
-                    await _getGeometry(startSelectedLocation!.lat,
-                        startSelectedLocation!.lng); // 새로운 목적지로 지도 업데이트
-                  } else if (isStart == false) {
-                    await _getGeometry(
-                        finalLatitude, finalLongitude); // 새로운 목적지로 지도 업데이트
-                  }
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    const begin = 0.0;
+                    const end = 1.0;
+                    const curve = Curves.easeInOutQuart;
 
-                  // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
-                  // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
-                  for (int i = 0; i < branchinfo.length - 1; i++) {
-                    // 변경할 값으로 갱신합니다.
-                    double newBearingValue = calculateBearing(
-                        branchinfo[i].point.latitude,
-                        branchinfo[i].point.longitude,
-                        branchinfo[i + 1].point.latitude,
-                        branchinfo[i + 1].point.longitude);
-                    // bearingTobranch 값을 변경합니다.
-                    branchinfo[i].bearingToPoint = newBearingValue;
-                  }
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
 
-                  // 주기적으로 거리계산, 경로이탈 탐지를 위한 계산을 하는 곳.
+                    var fadeAnimation = animation.drive(tween);
 
-                  startNavigationTimer();
+                    return FadeTransition(
+                      opacity: fadeAnimation,
+                      child: child,
+                    );
+                  },
+                ),
+              );
+              if (newSelectedLocation != null) {
+                setState(() {
+                  selectedLocation = newSelectedLocation;
+                });
+                if (isStart == true) {
+                  await _getGeometry(startSelectedLocation!.lat,
+                      startSelectedLocation!.lng); // 새로운 목적지로 지도 업데이트
+                } else if (isStart == false) {
+                  await _getGeometry(
+                      finalLatitude, finalLongitude); // 새로운 목적지로 지도 업데이트
                 }
-              },
-              child: Container(
-                // 버튼 모양의 컨테이너
-                padding: EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.6), // 그림자 색상
-                      spreadRadius: 2, // 그림자 확산 정도
-                      blurRadius: 5, // 그림자 흐림 정도
-                      offset: Offset(0, 2), // 그림자의 위치 (가로, 세로)
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    destinationLocation.isEmpty
-                        ? Text(
-                            '목적지를 입력하세요.',
-                            style: TextStyle(
-                                fontSize: AppSizes.scaledFont(18),
-                                color: Color(0xff9E9E9E)),
-                          )
-                        : Text(
-                            destinationLocation,
-                            style: TextStyle(fontSize: AppSizes.scaledFont(18)),
-                          ),
-                    Spacer(),
-                    Icon(Icons.search),
-                  ],
-                ),
+
+                // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
+                // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
+                for (int i = 0; i < branchinfo.length - 1; i++) {
+                  // 변경할 값으로 갱신합니다.
+                  double newBearingValue = calculateBearing(
+                      branchinfo[i].point.latitude,
+                      branchinfo[i].point.longitude,
+                      branchinfo[i + 1].point.latitude,
+                      branchinfo[i + 1].point.longitude);
+                  // bearingTobranch 값을 변경합니다.
+                  branchinfo[i].bearingToPoint = newBearingValue;
+                }
+
+                // 주기적으로 거리계산, 경로이탈 탐지를 위한 계산을 하는 곳.
+
+                startNavigationTimer();
+              }
+            },
+            child: Container(
+              // 버튼 모양의 컨테이너
+              padding: EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.6), // 그림자 색상
+                    spreadRadius: 2, // 그림자 확산 정도
+                    blurRadius: 5, // 그림자 흐림 정도
+                    offset: Offset(0, 2), // 그림자의 위치 (가로, 세로)
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  destinationLocation.isEmpty
+                      ? Text(
+                          '목적지를 입력하세요.',
+                          style: TextStyle(
+                              fontSize: AppSizes.scaledFont(18),
+                              color: Color(0xff9E9E9E)),
+                        )
+                      : Text(
+                          destinationLocation,
+                          style: TextStyle(fontSize: AppSizes.scaledFont(18)),
+                        ),
+                  Spacer(),
+                  Icon(Icons.search),
+                ],
               ),
             ),
           ),
