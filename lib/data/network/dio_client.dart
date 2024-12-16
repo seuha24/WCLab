@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:safelight/data/network/api_endpoints.dart';
 import 'dio_interceptor.dart';
 
 class DioClient {
@@ -15,7 +16,7 @@ class DioClient {
   DioClient._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: 'https://backend.catholicuniv.pillowstudio.kr',
+        baseUrl: ApiEndpoints.baseUrl,
         connectTimeout: const Duration(seconds: 10), // 연결 타임아웃
         receiveTimeout: const Duration(seconds: 10), // 응답 타임아웃
         contentType: 'application/json',

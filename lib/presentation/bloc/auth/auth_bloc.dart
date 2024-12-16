@@ -1,6 +1,5 @@
 part of '../../../framework/controller.dart';
 
-
 // #docregion Initialize
 const List<String> scopes = <String>[
   'email',
@@ -27,11 +26,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handleSignInAnonymously(
       SignInAnonymouslyEvent event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
+    emit(state.copyWith(
+        signInStatus: Status.inProgress,
+        signOutStatus: Status.initial,
+        userName: null));
     final result = await _repository.signInAnonymously();
     result.fold(
       (failure) => emit(state.copyWith(signInStatus: Status.failure)),
-      (_) => emit(state.copyWith(signInStatus: Status.success, userName: '익명 사용자')),
+      (_) => emit(
+          state.copyWith(signInStatus: Status.success, userName: '익명 사용자')),
     );
   }
 
@@ -47,7 +50,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handleSignInWithGoogle(
       SignInWithGoogleEvent event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
+    emit(state.copyWith(
+        signInStatus: Status.inProgress,
+        signOutStatus: Status.initial,
+        userName: null));
     try {
       // Google 로그인 및 서버로 토큰 전송
       final response = await _repository.signInWithGoogle();
@@ -77,7 +83,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handleSignInWithApple(
       SignInWithAppleEvent event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(signInStatus: Status.inProgress, signOutStatus: Status.initial, userName: null));
+    emit(state.copyWith(
+        signInStatus: Status.inProgress,
+        signOutStatus: Status.initial,
+        userName: null));
 
     try {
       // Apple 로그인 및 서버로 토큰 전송
@@ -131,16 +140,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       signOutStatus: Status.inProgress,
     ));
     final result = await _repository.signOutAll();
-    result.fold(
-      (failure) => emit(state.copyWith(signOutStatus: Status.failure)),
-      (_) => emit(state.copyWith(
-        signOutStatus: Status.success,
-        signInStatus: Status.initial,
-        patchUserInfoStatus: Status.initial,
-        getUserInfoStatus: Status.initial,
-        sendTokenStatus: Status.initial,
-        userName: null,
-      )),
+    await result.fold(
+      (failure) async {
+        emit(state.copyWith(signOutStatus: Status.failure));
+      },
+      (_) async {
+        await _authService.clearAuthData();
+
+        emit(state.copyWith(
+          signOutStatus: Status.success,
+          signInStatus: Status.initial,
+          patchUserInfoStatus: Status.initial,
+          getUserInfoStatus: Status.initial,
+          sendTokenStatus: Status.initial,
+          userName: null,
+        ));
+      },
     );
   }
 

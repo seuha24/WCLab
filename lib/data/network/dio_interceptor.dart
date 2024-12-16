@@ -13,6 +13,11 @@ class AuthInterceptor extends Interceptor {
 
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    // `/auth/refresh` 요청은 제외
+    if (options.path.contains('/auth/refresh')) {
+      return handler.next(options); // 그대로 진행
+    }
+
     // Access Token 추가
     final authService = DI<AuthService>();
     final authData = await authService.loadAuthData();
@@ -65,16 +70,22 @@ class AuthInterceptor extends Interceptor {
     final authData = await authService.loadAuthData();
     final refreshToken = authData['refreshToken'];
 
-    dio.options.headers['Authorization'] = 'Bearer $refreshToken';
-
-
     if (refreshToken == null) {
       throw DioException(requestOptions: RequestOptions(path: 'No Refresh Token'));
     }
 
     try {
+      debugPrint('Bearer refreshToken : $refreshToken');
+
       final response = await dio.post(
         '/auth/refresh',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $refreshToken',
+          },
+          sendTimeout: const Duration(seconds: 10), // 데이터 전송 타임아웃
+          receiveTimeout: const Duration(seconds: 10), // 응답 수신 타임아웃
+        ),
       );
 
       final newAccessToken = response.data['accessToken'];
@@ -90,8 +101,15 @@ class AuthInterceptor extends Interceptor {
         'accessToken': newAccessToken,
         'refreshToken': newRefreshToken,
       };
-    } catch (e) {
-      throw DioException(requestOptions: RequestOptions(path: 'Refresh Token Expired'), error: e);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        debugPrint('Timeout occurred: $e');
+        await _handleLogout(); // 타임아웃 발생 시 로그아웃
+      } else {
+        debugPrint('DioException: $e');
+      }
+      rethrow;
     }
   }
 
