@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,6 +19,7 @@ import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/repository.dart';
+import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/infrastructure/services/auth_service.dart';
@@ -254,8 +256,15 @@ Future<void> init() async {
   DI.registerLazySingleton<FlutterReactiveBle>(() => FlutterReactiveBle());
 
   DI.registerFactoryParam<MovingAverageFilter, int, void>(
-        (windowSize, _) => MovingAverageFilter(windowSize),
+    (windowSize, _) => MovingAverageFilter(windowSize),
   );
 
-  DI.registerFactory<NavigationBloc>(() => NavigationBloc());
+  DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc());
+
+  DI.registerFactoryParam<NavigationLogic, BuildContext, void>(
+    (context, _) => NavigationLogic(
+      context,
+      DI.get<NavigationBloc>(),
+    ),
+  );
 }
