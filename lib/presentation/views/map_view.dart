@@ -269,7 +269,7 @@ class _NaverMapViewState extends State<NaverMapView> {
                         )
                       : Text(
                           destinationLocation,
-                          style: TextStyle(fontSize: AppSizes.scaledFont(18)),
+                          style: TextStyle(fontSize: AppSizes.scaledFont(18), color: Colors.black),
                         ),
                   Spacer(),
                   Icon(Icons.search),
