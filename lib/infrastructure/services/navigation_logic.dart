@@ -346,83 +346,13 @@ class NavigationLogic {
   }
 
   // t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
-  Future<void> _getGeometry(c_lat, c_lng) async {
-    const String apiUrl =
-        'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function'; // api url 주소
-
-    final Map<String, dynamic> requestData = {
-      "startX": c_lng, // 현재 위치의 경도값
-      "startY": c_lat, // 현재 위치의 위도값
-      "angle": 20,
-      "speed": 30,
-      "endPoiId": "10001",
-      "endX": selectedLocation!.lng, // 도착지의 경도값
-      "endY": selectedLocation!.lat, // 도착지의 위도값
-      "reqCoordType": "WGS84GEO",
-      "startName": "%EC%B6%9C%EB%B0%9C",
-      "endName": "%EB%8F%84%EC%B0%A9",
-      "searchOption": "0",
-      "resCoordType": "WGS84GEO",
-      "sort": "index"
-    };
-
-    final Map<String, String> headers = {
-      'accept': 'application/json',
-      'appKey': 'QKrZQE7KkR6MtxXBFx49A6gmY1a8TN3y8IyQ0qjh',
-      'content-type': 'application/json',
-    };
-
-    final response = await http.post(Uri.parse(apiUrl),
-        headers: headers, body: jsonEncode(requestData));
-
-    if (response.statusCode == 200) {
-      // 통신 성공했을 때 처리 로직
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-      List<dynamic> features = responseData['features'];
-      paths.clear(); // 경로 추가 전에 기존 paths배열 초기화
-      branchInfo.clear(); // 경로 추가 전에 기존 branchinfo배열 초기화
-      currentIndex = 0;
-      targetIndex = 0;
-
-      // api로 받은 Json 값을 순회하여 원하는 정보값을 추출하기 위한 for문
-      for (var feature in features) {
-        List<dynamic> coordinates = feature['geometry']['coordinates'];
-        if (feature['geometry']['type'] == 'LineString') {
-          paths.addAll(coordinates.map((coord) => LatLng(coord[1], coord[0])));
-          for (var coord in coordinates) {
-            LatLng point = LatLng(coord[1], coord[0]);
-            if (branchInfo.isNotEmpty &&
-                branchInfo[branchInfo.length - 1].point == point) {
-              continue;
-            }
-            branchInfo.add(BranchInfo(
-              point,
-              '', // 설명
-              0.0, // `bearingToPoint`는 항상 0.0으로 설정
-              int.parse(feature['properties']['facilityType']) == 15,
-              false, // `branch`는 기본적으로 false로 설정
-            ));
-          }
-        }
-        if (feature['geometry']['type'] == 'Point' && branchInfo.isNotEmpty) {
-          double latitude = coordinates[1]; // branch 의 위도
-          double longitude = coordinates[0]; // branch 의 경도
-          String description = feature['properties']['description'];
-          for (var branch in branchInfo) {
-            if (branch.point.latitude == latitude &&
-                branch.point.longitude == longitude) {
-              // 일치하는 BranchInfo 객체를 찾으면
-              branch.branch = true; // branch 속성을 true로 변경
-              branch.description = description; // description 업데이트
-              break; // 일치하는 객체를 찾았으므로 루프 종료
-            }
-          }
-        }
-      }
-      addOverlays(paths); // 전체 보행자 좌표 띄우기
-      addBranchMarkers(); // 마커를 지도에 추가하는 함수 호출
-    }
+  void requestNewPath(double latitude, double longitude) {
+    navigationBloc.add(LoadPath(
+      startLatitude: latitude,
+      startLongitude: longitude,
+      endLatitude: selectedLocation!.lat,
+      endLongitude: selectedLocation!.lng,
+    ));
   }
 
   // 네이버맵에 경로를 포함한 overlays를 띄우기 위한 함수
@@ -1049,7 +979,7 @@ class NavigationLogic {
             if (searchNewPath) {
               searchNewPathTime++;
               if (searchNewPathTime >= 5) {
-                await _getGeometry(
+                requestNewPath(
                     finalLatitude, finalLongitude); // 새로운 목적지로 지도 업데이트
 
                 await tts.speak('경로를 이탈하여 새로운 경로로 안내합니다.');
