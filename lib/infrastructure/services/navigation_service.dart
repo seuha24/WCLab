@@ -1,5 +1,39 @@
 part of '../../framework/ui.dart';
 
+/// NavigationService
+///
+/// 이 클래스는 애플리케이션의 내비게이션 관련 기능을 관리합니다.
+/// 위치 추적, 센서 데이터 처리, 경로 계산 및 길 안내 기능을 통합하여 실시간 내비게이션 지원을 제공합니다.
+///
+/// ### 주요 역할:
+/// - **위치 관리**:
+///   - GPS 및 IMU 센서를 사용하여 현재 위치를 추적합니다.
+///   - 사용자의 위치를 업데이트하고 GPS와 IMU 데이터 소스 간 전환을 처리합니다.
+///
+/// - **경로 계산**:
+///   - 사용자 위치와 목표 경로 간 거리, 방위각, 경계 이탈 여부를 계산합니다.
+///   - 다음 경로 포인트로의 안내 방향(예: "12시 방향", "3시 방향")을 제공합니다.
+///
+/// - **센서 통합**:
+///   - 가속도계, 나침반, 자이로스코프 스트림을 구독하여 고급 위치 업데이트를 수행합니다.
+///   - 칼만 필터 및 가중 이동 평균을 적용하여 센서 데이터를 보정합니다.
+///
+/// - **지도 및 시각화**:
+///   - 지도 컨트롤러와 상호 작용하여 경로, 마커 및 기타 시각적 요소를 표시합니다.
+///   - 지도 카메라 위치를 업데이트하고 분기점 및 경유지 마커를 추가합니다.
+///
+/// - **길 안내 및 알림**:
+///   - 텍스트 음성 변환(TTS)을 사용하여 음성 길 안내를 제공합니다.
+///   - 경계 이탈 또는 방향 조정을 위해 진동 피드백을 트리거합니다.
+///   - 타이머를 관리하여 주기적으로 내비게이션 안내를 업데이트합니다.
+///
+/// - **동적 경로 업데이트**:
+///   - 계획된 경로에서의 이탈 여부를 모니터링합니다.
+///   - 경로 이탈이 감지되면 새로운 경로를 요청합니다.
+///
+/// ### 주요 기능:
+/// - 가속도계 및 자이로스코프 데이터를 사용한 센서 기반 위치 추정.
+/// - GPS와 IMU 데이터를 실시간으로 통합하여 내비게이션 정확도를 향상시킵니다.
 class NavigationService {
   NavigationService(this.context, this.navigationBloc, this.ttsService);
 
@@ -50,7 +84,6 @@ class NavigationService {
     isLoading.value = value; // 상태 업데이트
   }
 
-
   GeoLocation? startSelectedLocation; // 시작 위치의 좌표값 객체
   bool isStart = false; // 출발지가 선택됐을 경우 true, 아닐경우 false
   late double remainStartPoint;
@@ -89,11 +122,14 @@ class NavigationService {
 
   String checkBoundaryCondition = "";
 
-
+  /// 초기화 메서드.
+  /// 내비게이션 서비스를 초기화하고 위치 데이터를 설정합니다.
   void init() {
     _initLocation();
   }
 
+  /// 자원 해제 메서드.
+  /// 센서 스트림 및 타이머를 정리하고 필요한 모든 서비스를 종료합니다.
   void dispose() {
     for (var subscription in _streamSubscriptions) {
       subscription.cancel(); // 각 구독 해제
@@ -106,7 +142,8 @@ class NavigationService {
     ttsService.stop();
   }
 
-  // 새로운 경로, 경로 재설정 시 속도, 방향, 위치, 체크포인트 메세지 초기화
+  /// 속도 및 센서 데이터를 초기화하는 메서드.
+  /// 새로운 경로나 경로 재설정 시 호출됩니다.
   void _resetSpeedUtilsValue() {
     // debugPrint('resetSpeedUtilsValueFunc 실행');
     imuLatitude = 0.0;
@@ -116,12 +153,14 @@ class NavigationService {
     preAccZ = 0.0;
   }
 
-  // 칼만필터 적용
+  /// 칼만필터 적용
   final kalmanX = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
   final kalmanY = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
   final kalmanZ = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
 
-  // 위치 업데이트
+  /// 위치를 업데이트하는 메서드.
+  /// IMU 센서를 기반으로 현재 위치를 계산합니다.
+  /// [sensorInterval]: 센서의 업데이트 간격.
   Future<void> _positionUpdate(Duration sensorInterval) async {
     double deltaTime = (sensorInterval.inMilliseconds / 1000.0)
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
@@ -192,6 +231,8 @@ class NavigationService {
     //     'imuLatitude: $imuLatitude, imuLongitude: $imuLongitude, positionUpdateFunc 진행 완료...8');
   }
 
+  /// Yaw rate를 업데이트하는 메서드.
+  /// [value]: 추가될 Yaw 값.
   void _updateYawRate(double value) {
     yawRate += value;
     if (yawRate < 0 && yawRate >= -2 * math.pi) {
@@ -199,6 +240,8 @@ class NavigationService {
     }
   }
 
+  /// GPS를 통해 초기 위치를 설정하는 메서드.
+  /// GPS 정확도와 상태를 기반으로 초기 위치를 설정합니다.
   Future<void> _initLocation() async {
     int gpsAccuracy = 14;
     Position position = await Geolocator.getCurrentPosition(
@@ -340,7 +383,9 @@ class NavigationService {
     });
   }
 
-  // t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
+  /// t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
+  /// [latitude]: 시작 위도.
+  /// [longitude]: 시작 경도.
   void requestNewPath(double latitude, double longitude) {
     navigationBloc.add(LoadPath(
       startLatitude: latitude,
@@ -350,7 +395,8 @@ class NavigationService {
     ));
   }
 
-  // 네이버맵에 경로를 포함한 overlays를 띄우기 위한 함수
+  /// 지도에 경로 오버레이를 추가하는 메서드.
+  /// [paths]: 표시할 경로의 위경도 리스트.
   void addOverlays(List<LatLng> paths) {
     if (mapController == null) {
       // debugPrint('addOverlays() mapController is not initialized yet.');
@@ -374,7 +420,10 @@ class NavigationService {
     mapController!.addOverlayAll(overlays);
   }
 
-  // 두 위경도 사이의 거리를 계산하는 함수.
+  /// 두 위경도 간의 거리를 계산하는 메서드.
+  /// [lat1], [lon1]: 첫 번째 점의 위경도.
+  /// [lat2], [lon2]: 두 번째 점의 위경도.
+  /// 반환값: 두 점 사이의 거리 (km).
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371.0;
     double toRadians(double degree) {
@@ -394,7 +443,10 @@ class NavigationService {
     return distance;
   }
 
-  // 현재위치로부터 목표위경도로의 방향값을 계산해주는 함수
+  /// 현재 위치에서 목표 지점까지의 방위각을 계산하는 메서드.
+  /// [initialLatitude], [initialLongitude]: 시작 위치의 위경도.
+  /// [targetLatitude], [targetLongitude]: 목표 위치의 위경도.
+  /// 반환값: 방위각 (도).
   double calculateBearing(double initialLatitude, double initialLongitude,
       double targetLatitude, double targetLongitude) {
     double lat1 = initialLatitude * math.pi / 180;
@@ -413,7 +465,11 @@ class NavigationService {
     return bearingDegrees;
   }
 
-  // 특정 점과 두 지점 사이의 최단 거리 계산. 즉, 점과 직선사이의 최소거리를 반환하는 함수.
+  /// 특정 점과 두 지점 간의 최단 거리를 계산하는 메서드.
+  /// [lat1], [lon1]: 첫 번째 지점의 위경도.
+  /// [lat2], [lon2]: 두 번째 지점의 위경도.
+  /// [latP], [lonP]: 점의 위경도.
+  /// 반환값: 점과 선 사이의 최단 거리 (m).
   double pointLineDistance(double lat1, double lon1, double lat2, double lon2,
       double latP, double lonP) {
     // 두 지점 간의 대원 거리 (미터) 계산
@@ -457,7 +513,10 @@ class NavigationService {
 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
 
-  // 센서받아오는 부분
+  /// 센서를 구독하는 메서드.
+  /// [sensorStream]: 센서 이벤트 스트림.
+  /// [onEvent]: 이벤트 발생 시 호출할 함수.
+  /// [onError]: 오류 발생 시 호출할 함수.
   void subscribeToSensor<T>(
       {required Stream<T> sensorStream,
         required Function(T event) onEvent,
@@ -470,7 +529,11 @@ class NavigationService {
     _streamSubscriptions.add(subscription);
   }
 
-  //imu 함수
+  /// 주어진 인덱스를 기준으로 경로의 현재 윈도우를 반환하는 메서드.
+  /// [branchInfo]: 경로 분기 정보 리스트.
+  /// [currentIndex]: 현재 경로의 인덱스.
+  /// [windowsize]: 슬라이딩 윈도우의 크기.
+  /// 반환값: 현재 인덱스 주변의 분기 정보 리스트.
   List<BranchInfo> getCurrentWindow(
       List<BranchInfo> branchinfo, int currentIndex, int windowsize) {
     //windowsize는 언제나 홀수
@@ -814,6 +877,9 @@ class NavigationService {
     }
   }
 
+  /// 지도 위치를 업데이트하는 메서드.
+  /// [latitude], [longitude]: 목표 위치의 위경도.
+  /// [compassValue]: 현재 나침반 값.
   void _updateMapPosition(latitude, longitude, compassValue) {
     if (mapController == null) {
       // debugPrint('addOverlays() mapController is not initialized yet.');
@@ -829,6 +895,8 @@ class NavigationService {
     mapController!.updateCamera(cameraUpdate);
   }
 
+  /// 현재 위치 마커를 업데이트하는 메서드.
+  /// [latitude], [longitude]: 목표 위치의 위경도.
   void _updateCurrentLocationMarker(latitude, longitude) async {
     // debugPrint(':::::::::::::::_updateCurrentLocationMarker');
     if (mapController == null) {
@@ -855,6 +923,8 @@ class NavigationService {
     mapController!.addOverlay(_currentLocationMarker!);
   }
 
+  /// 분기 지점의 마커를 지도에 추가하는 메서드.
+  /// [branchInfo]에 저장된 모든 분기 지점 정보를 기반으로 마커를 생성하고 지도에 추가합니다.
   void addBranchMarkers() async {
     if (mapController == null) {
       // debugPrint('addOverlays() mapController is not initialized yet.');
@@ -888,11 +958,15 @@ class NavigationService {
 
   Timer? navigationTimer;
 
+  /// 내비게이션 상태를 업데이트하는 메서드.
+  /// [currentLat], [currentLng]: 현재 위치의 위경도.
+  /// 내비게이션 상태를 변경하기 위해 이벤트를 호출합니다.
   void _updateNavigation(double currentLat, double currentLng) {
     navigationBloc.add(UpdateNavigation(currentLat, currentLng)); // 이벤트 호출
   }
 
-  // 안내음 타이머
+  /// 내비게이션 타이머를 시작하는 메서드.
+  /// 2초 간격으로 내비게이션 상태를 업데이트하고, 안내 음성 및 경로 이탈 로직을 실행합니다.
   void startNavigationTimer() {
     navigationTimer?.cancel(); // 기존 타이머 제거
     navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
@@ -991,7 +1065,8 @@ class NavigationService {
     });
   }
 
-  // TTS 호출 로직 캡슐화
+  /// TTS를 통해 안내 메시지를 출력하는 메서드.
+  /// [message]: 출력할 메시지.
   Future<void> announceTts(String message) async {
     await ttsService.speak(message);
   }
