@@ -166,7 +166,7 @@ class NavigationService {
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
     // debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
     final double accelerationMagnitude =
-    math.sqrt(curAccX * curAccX + curAccY * curAccY);
+        math.sqrt(curAccX * curAccX + curAccY * curAccY);
     // debugPrint(
     //     'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
     curAccX = kalmanX.filtered(curAccX);
@@ -194,7 +194,7 @@ class NavigationService {
     velocityY = velocityY * math.cos(rotationY);
     // 속력 계산
     final double currentSpeed =
-    math.sqrt(velocityX * velocityX + velocityY * velocityY);
+        math.sqrt(velocityX * velocityX + velocityY * velocityY);
     // debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...6');
     // 실제 이동 거리 계산
     imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
@@ -339,7 +339,8 @@ class NavigationService {
         compassValue = event.heading ?? 0.0;
         yawRate = (compassValue * math.pi / 180);
         _updateYawRate(0);
-        debugPrint('compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
+        debugPrint(
+            'compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
         if ((compassValue - lastCompassValue).abs() >= 1.0) {
           lastCompassValue = compassValue;
           _updateMapPosition(finalLatitude, finalLongitude, compassValue);
@@ -353,7 +354,7 @@ class NavigationService {
 
     subscribeToSensor<GyroscopeEvent>(
       sensorStream:
-      gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
+          gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
       onEvent: (GyroscopeEvent event) async {
         if (!context.mounted) return; // 위젯이 제거된 경우 상태 업데이트 방지
 
@@ -374,8 +375,8 @@ class NavigationService {
     );
 
     positionStream = Geolocator.getPositionStream(
-        locationSettings: LocationSettings(
-            accuracy: LocationAccuracy.high, distanceFilter: 1))
+            locationSettings: LocationSettings(
+                accuracy: LocationAccuracy.high, distanceFilter: 1))
         .listen((Position position) async {
       if (position.accuracy <= gpsAccuracy) {
         await moveByGps();
@@ -386,12 +387,17 @@ class NavigationService {
   /// t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
   /// [latitude]: 시작 위도.
   /// [longitude]: 시작 경도.
-  void requestNewPath(double latitude, double longitude) {
+  void requestNewPath({
+    required double startLat,
+    required double startLng,
+    double? endLat,
+    double? endLng,
+  }) {
     navigationBloc.add(LoadPath(
-      startLatitude: latitude,
-      startLongitude: longitude,
-      endLatitude: selectedLocation!.lat,
-      endLongitude: selectedLocation!.lng,
+      startLatitude: startLat,
+      startLongitude: startLng,
+      endLatitude: endLat ?? selectedLocation!.lat,
+      endLongitude: endLng ?? selectedLocation!.lng,
     ));
   }
 
@@ -519,8 +525,8 @@ class NavigationService {
   /// [onError]: 오류 발생 시 호출할 함수.
   void subscribeToSensor<T>(
       {required Stream<T> sensorStream,
-        required Function(T event) onEvent,
-        required Function(dynamic error) onError}) {
+      required Function(T event) onEvent,
+      required Function(dynamic error) onError}) {
     var subscription = sensorStream.listen(
       onEvent,
       onError: onError,
@@ -587,15 +593,14 @@ class NavigationService {
             currentIndexDistance >=
                 distanceBetweenBranch - (distanceBetweenBranch / 20)) {
           beforeMin = currentDistance;
-          nearestIndex =
-              branchInfo.indexOf(window); // 가장 가까운 체크포인트의 인덱스를 찾습니다.
+          nearestIndex = branchInfo.indexOf(window); // 가장 가까운 체크포인트의 인덱스를 찾습니다.
         }
       }
       return nearestIndex;
     }
 
     List<BranchInfo> currentWindow =
-    getCurrentWindow(branchInfo, currentIndex, 5);
+        getCurrentWindow(branchInfo, currentIndex, 5);
     int nearestIndex = moveIndex(currentWindow);
 
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
@@ -688,13 +693,13 @@ class NavigationService {
       double bearingToPoint,
       int boundaryExit) {
     Map<String, double> breakPoint(
-        double currentIndexLongitude,
-        double currentIndexLatitude,
-        double targetIndexLongitude,
-        double targetIndexLatitude,
-        double finalLatitude,
-        double finalLongitude,
-        ) {
+      double currentIndexLongitude,
+      double currentIndexLatitude,
+      double targetIndexLongitude,
+      double targetIndexLatitude,
+      double finalLatitude,
+      double finalLongitude,
+    ) {
       // 주어진 위경도를 라디안으로 변환
 
       //현재 인덱스
@@ -815,7 +820,7 @@ class NavigationService {
   //branch일 경우의 branchinfo[currentIndex]를 전부 currentWindowValue로 바꿈
   void checkBoundary() {
     List<BranchInfo> currentWindow =
-    getCurrentWindow(branchInfo, currentIndex, 5);
+        getCurrentWindow(branchInfo, currentIndex, 5);
     double beforeMinDistanceToPath = double.maxFinite;
     //점과 직선 최소거리
     for (int i = 0; i < currentWindow.length - 1; i++) {
@@ -826,10 +831,10 @@ class NavigationService {
 
       if (currentWindowValue.branch == true) {
         circularDistance = calculateDistance(
-            currentWindowValue.point.latitude,
-            currentWindowValue.point.longitude,
-            finalLatitude,
-            finalLongitude) *
+                currentWindowValue.point.latitude,
+                currentWindowValue.point.longitude,
+                finalLatitude,
+                finalLongitude) *
             1000;
 
         checkBoundaryCondition = "정방향, 브랜치";
@@ -1030,9 +1035,9 @@ class NavigationService {
             }
           }
           if (currentIndex > 0 &&
-              (branchInfo[currentIndex].bearingToPoint - compassValue)
-                  .abs() <=
-                  18 ||
+                  (branchInfo[currentIndex].bearingToPoint - compassValue)
+                          .abs() <=
+                      18 ||
               (branchInfo[currentIndex].bearingToPoint - compassValue).abs() >=
                   342) {
             Vibration.vibrate(duration: 200);
@@ -1049,7 +1054,9 @@ class NavigationService {
               searchNewPathTime++;
               if (searchNewPathTime >= 5) {
                 requestNewPath(
-                    finalLatitude, finalLongitude); // 새로운 목적지로 지도 업데이트
+                  startLat: finalLatitude,
+                  startLng: finalLongitude,
+                ); // 새로운 목적지로 지도 업데이트
 
                 await announceTts('경로를 이탈하여 새로운 경로로 안내합니다.');
                 searchNewPathTime = 0;

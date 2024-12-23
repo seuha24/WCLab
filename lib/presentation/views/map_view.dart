@@ -1,6 +1,5 @@
 part of '../../framework/ui.dart';
 
-
 /// 네이버 맵 화면을 구현하는 위젯입니다.
 /// 사용자는 이 화면에서 출발지와 목적지를 설정하고 경로를 탐색할 수 있습니다.
 /// 지도 상의 현재 위치를 기반으로 내비게이션 정보를 제공하며,
@@ -14,14 +13,12 @@ class NaverMapView extends StatefulWidget {
 
 class _NaverMapViewState extends State<NaverMapView> {
   late final NavigationService _navService; // 내비게이션 서비스
-  late final NavigationBloc _navigationBloc; // 내비게이션 상태 관리 블록
 
   @override
   void initState() {
     super.initState();
-    // DI를 통해 NavigationService와 NavigationBloc 초기화
+    // DI를 통해 NavigationService 초기화
     _navService = DI.get<NavigationService>(param1: context);
-    _navigationBloc = DI.get<NavigationBloc>();
 
     // 내비게이션 서비스 초기화
     _navService.init();
@@ -91,15 +88,17 @@ class _NaverMapViewState extends State<NaverMapView> {
                 // 네이버 맵 표시
                 NaverMap(
                   options: NaverMapViewOptions(
-                    indoorEnable: true, // 실내 지도 활성화
+                    indoorEnable: true,
+                    // 실내 지도 활성화
                     initialCameraPosition: NCameraPosition(
-                      target: NLatLng(
-                          _navService.finalLatitude, _navService.finalLongitude),
+                      target: NLatLng(_navService.finalLatitude,
+                          _navService.finalLongitude),
                       zoom: 18.5, // 초기 줌 레벨
                       bearing: _navService.compassValue, // 초기 지도 방향
                       tilt: 0, // 초기 입체 각도
                     ),
-                    mapType: NMapType.basic, // 지도 타입 설정
+                    mapType: NMapType.basic,
+                    // 지도 타입 설정
                     activeLayerGroups: [
                       NLayerGroup.building, // 건물 레이어
                       NLayerGroup.transit, // 대중교통 레이어
@@ -112,10 +111,8 @@ class _NaverMapViewState extends State<NaverMapView> {
                     // 현재 위치 마커와 맵 위치 업데이트
                     _navService._updateCurrentLocationMarker(
                         _navService.finalLatitude, _navService.finalLongitude);
-                    _navService._updateMapPosition(
-                        _navService.finalLatitude,
-                        _navService.finalLongitude,
-                        _navService.compassValue);
+                    _navService._updateMapPosition(_navService.finalLatitude,
+                        _navService.finalLongitude, _navService.compassValue);
                   },
                   onMapTapped: (NPoint point, NLatLng latLng) async {
                     // 지도 클릭 시 남은 거리 안내 음성 출력
@@ -169,6 +166,8 @@ class _NaverMapViewState extends State<NaverMapView> {
               ),
             );
             if (newStartLocation != null) {
+              // 출발지 선택 후 내비게이션 서비스에 업데이트
+              // 화면을 갱신하기 위해 setState 호출
               setState(() {
                 _navService.startSelectedLocation = newStartLocation;
                 _navService.isStart = true;
@@ -179,7 +178,8 @@ class _NaverMapViewState extends State<NaverMapView> {
         const SizedBox(height: 10),
         _buildSearchButton(
           context: context,
-          label: destinationLocation.isEmpty ? '목적지를 입력하세요.' : destinationLocation,
+          label:
+              destinationLocation.isEmpty ? '목적지를 입력하세요.' : destinationLocation,
           isDark: isDark,
           onTap: () async {
             // 목적지 설정 화면으로 이동
@@ -191,6 +191,8 @@ class _NaverMapViewState extends State<NaverMapView> {
               ),
             );
             if (newDestinationLocation != null) {
+              // 목적지 선택 후 내비게이션 서비스에 업데이트
+              // 화면을 갱신하기 위해 setState 호출
               setState(() {
                 _navService.selectedLocation = newDestinationLocation;
               });
@@ -203,13 +205,13 @@ class _NaverMapViewState extends State<NaverMapView> {
                   ? _navService.startSelectedLocation!.lng
                   : _navService.finalLongitude;
 
-              // NavigationBloc으로 경로 요청 이벤트 전달
-              _navigationBloc.add(LoadPath(
-                startLatitude: startLat,
-                startLongitude: startLng,
-                endLatitude: newDestinationLocation.lat,
-                endLongitude: newDestinationLocation.lng,
-              ));
+              // NavigationService를 통해 Bloc에 경로 요청
+              _navService.requestNewPath(
+                startLat: startLat,
+                startLng: startLng,
+                endLat: newDestinationLocation.lat,
+                endLng: newDestinationLocation.lng,
+              );
             }
           },
         ),
