@@ -23,6 +23,7 @@ import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/infrastructure/services/tts_service.dart';
 import 'package:safelight/presentation/bloc/navigation_bloc/navigation_bloc.dart';
 
 final DI = GetIt.instance;
@@ -261,10 +262,13 @@ Future<void> init() async {
 
   DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc());
 
-  DI.registerFactoryParam<NavigationLogic, BuildContext, void>(
-    (context, _) => NavigationLogic(
+  DI.registerLazySingleton<TtsService>(() => TtsService());
+
+  DI.registerFactoryParam<NavigationService, BuildContext, void>(
+    (context, _) => NavigationService(
       context,
       DI.get<NavigationBloc>(),
+      DI.get<TtsService>(),
     ),
   );
 }

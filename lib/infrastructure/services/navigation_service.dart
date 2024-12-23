@@ -1,12 +1,11 @@
 part of '../../framework/ui.dart';
 
-class NavigationLogic {
-  NavigationLogic(this.context, this.navigationBloc);
+class NavigationService {
+  NavigationService(this.context, this.navigationBloc, this.ttsService);
 
   late final BuildContext context;
   late final NavigationBloc navigationBloc;
-
-  final FlutterTts tts = FlutterTts();
+  late final TtsService ttsService;
 
   // 네이티브 위치 확인용
   late double s_latitude;
@@ -92,7 +91,6 @@ class NavigationLogic {
 
 
   void init() {
-    _initTTS();
     _initLocation();
   }
 
@@ -104,6 +102,8 @@ class NavigationLogic {
 
     navigationBloc.close();
     navigationTimer?.cancel();
+
+    ttsService.stop();
   }
 
   // 새로운 경로, 경로 재설정 시 속도, 방향, 위치, 체크포인트 메세지 초기화
@@ -190,11 +190,6 @@ class NavigationLogic {
     preAccZ = curAccZ;
     // debugPrint(
     //     'imuLatitude: $imuLatitude, imuLongitude: $imuLongitude, positionUpdateFunc 진행 완료...8');
-  }
-
-  Future<void> _initTTS() async {
-    await tts.setLanguage("ko-KR");
-    await tts.setSpeechRate(0.7);
   }
 
   void _updateYawRate(double value) {
@@ -762,7 +757,7 @@ class NavigationLogic {
     //점과 직선 최소거리
     for (int i = 0; i < currentWindow.length - 1; i++) {
       var currentWindowValue = currentWindow[i];
-      // print("Index: $i");
+      // debugPrint("Index: $i");
 
       targetIndex = currentIndex + 1;
 
@@ -949,15 +944,15 @@ class NavigationLogic {
               // 경광등을 켜라.
               final result = await flashOnWithWeather(NoParams());
               if (result.isLeft()) {
-                print('안전 경광등을 사용할 수 없습니다.');
+                debugPrint('안전 경광등을 사용할 수 없습니다.');
               } else {
-                print('안전 경광등이 켜졌습니다.');
+                debugPrint('안전 경광등이 켜졌습니다.');
               }
-              await tts.speak('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
+              await announceTts('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
             }
 
             if (branchInfo[targetIndex].branch == true) {
-              await tts.speak('${branchInfo[targetIndex].description}하세요.');
+              await announceTts('${branchInfo[targetIndex].description}하세요.');
             }
           }
           if (currentIndex > 0 &&
@@ -967,14 +962,14 @@ class NavigationLogic {
               (branchInfo[currentIndex].bearingToPoint - compassValue).abs() >=
                   342) {
             Vibration.vibrate(duration: 200);
-            print(
+            debugPrint(
                 "경로내 진동 베어링 값 ${(branchInfo[currentIndex].bearingToPoint - compassValue)}");
           }
           //임시 주석
           // 경로 이탈 시 경로이탈 안내
           if (state.outOfBound) {
             Vibration.vibrate(duration: 100);
-            await tts.speak(clock);
+            await announceTts(clock);
             // 경로 재검색 로직 추가
             if (searchNewPath) {
               searchNewPathTime++;
@@ -982,7 +977,7 @@ class NavigationLogic {
                 requestNewPath(
                     finalLatitude, finalLongitude); // 새로운 목적지로 지도 업데이트
 
-                await tts.speak('경로를 이탈하여 새로운 경로로 안내합니다.');
+                await announceTts('경로를 이탈하여 새로운 경로로 안내합니다.');
                 searchNewPathTime = 0;
               }
             } else {
@@ -990,11 +985,14 @@ class NavigationLogic {
             }
           }
         } else if (isStart == true) {
-          await tts.speak("출발지로 이동하세요.");
+          await announceTts("출발지로 이동하세요.");
         }
       }
     });
   }
 
-
+  // TTS 호출 로직 캡슐화
+  Future<void> announceTts(String message) async {
+    await ttsService.speak(message);
+  }
 }

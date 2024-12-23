@@ -8,19 +8,19 @@ class NaverMapView extends StatefulWidget {
 }
 
 class _NaverMapViewState extends State<NaverMapView> {
-  late final NavigationLogic _navLogic;
+  late final NavigationService _navService;
 
   @override
   void initState() {
     super.initState();
-    _navLogic = DI.get<NavigationLogic>(param1: context);
+    _navService = DI.get<NavigationService>(param1: context);
 
-    _navLogic.init();
+    _navService.init();
   }
 
   @override
   void dispose() {
-    _navLogic.dispose();
+    _navService.dispose();
 
     super.dispose();
   }
@@ -40,33 +40,33 @@ class _NaverMapViewState extends State<NaverMapView> {
       listener: (context, state) {
         if (state is NavigationReady) {
           // 경로 및 브랜치 정보 업데이트
-          _navLogic.paths = state.paths;
-          _navLogic.branchInfo = state.branchInfo;
+          _navService.paths = state.paths;
+          _navService.branchInfo = state.branchInfo;
 
           // 지도에 경로 오버레이 추가
-          _navLogic.addOverlays(_navLogic.paths);
-          _navLogic.addBranchMarkers();
+          _navService.addOverlays(_navService.paths);
+          _navService.addBranchMarkers();
 
           // 브랜치 정보 업데이트
-          for (int i = 0; i < _navLogic.branchInfo.length - 1; i++) {
-            double newBearingValue = _navLogic.calculateBearing(
-              _navLogic.branchInfo[i].point.latitude,
-              _navLogic.branchInfo[i].point.longitude,
-              _navLogic.branchInfo[i + 1].point.latitude,
-              _navLogic.branchInfo[i + 1].point.longitude,
+          for (int i = 0; i < _navService.branchInfo.length - 1; i++) {
+            double newBearingValue = _navService.calculateBearing(
+              _navService.branchInfo[i].point.latitude,
+              _navService.branchInfo[i].point.longitude,
+              _navService.branchInfo[i + 1].point.latitude,
+              _navService.branchInfo[i + 1].point.longitude,
             );
-            _navLogic.branchInfo[i].bearingToPoint = newBearingValue;
+            _navService.branchInfo[i].bearingToPoint = newBearingValue;
           }
 
           // 내비게이션 타이머 시작
-          _navLogic.startNavigationTimer();
+          _navService.startNavigationTimer();
         } else if (state is NavigationFailure) {
           // 경로 로드 실패 처리
           debugPrint('경로 로드 실패: ${state.error}');
         }
       },
       child: ValueListenableBuilder<bool>(
-        valueListenable: _navLogic.isLoading,
+        valueListenable: _navService.isLoading,
         builder: (context, isLoading, child) {
           if (isLoading) {
             return Center(child: CircularProgressIndicator());
@@ -78,9 +78,9 @@ class _NaverMapViewState extends State<NaverMapView> {
                   options: NaverMapViewOptions(
                     indoorEnable: true,
                     initialCameraPosition: NCameraPosition(
-                      target: NLatLng(_navLogic.finalLatitude, _navLogic.finalLongitude),
+                      target: NLatLng(_navService.finalLatitude, _navService.finalLongitude),
                       zoom: 18.5, // 지도의 확대 정도
-                      bearing: _navLogic.compassValue, // 지도의 방향
+                      bearing: _navService.compassValue, // 지도의 방향
                       tilt: 0, // 지도의 입체감 정도
                     ),
                     mapType: NMapType.basic,
@@ -91,15 +91,15 @@ class _NaverMapViewState extends State<NaverMapView> {
                     locationButtonEnable: false,
                   ),
                   onMapReady: (controller) {
-                    _navLogic.mapController = controller;
-                    _navLogic._updateCurrentLocationMarker(
-                        _navLogic.finalLatitude, _navLogic.finalLongitude);
-                    _navLogic._updateMapPosition(
-                        _navLogic.finalLatitude, _navLogic.finalLongitude, _navLogic.compassValue);
+                    _navService.mapController = controller;
+                    _navService._updateCurrentLocationMarker(
+                        _navService.finalLatitude, _navService.finalLongitude);
+                    _navService._updateMapPosition(
+                        _navService.finalLatitude, _navService.finalLongitude, _navService.compassValue);
                   },
                   onMapTapped: (NPoint point, NLatLng latLng) async {
-                    int meters = (_navLogic.remainDistance * 1000).round();
-                    await _navLogic.tts.speak('다음 안내까지 $meters미터 남았습니다.');
+                    int meters = (_navService.remainDistance * 1000).round();
+                    await _navService.announceTts('다음 안내까지 $meters미터 남았습니다.');
                   },
                 ),
                 Positioned(
@@ -145,8 +145,8 @@ class _NaverMapViewState extends State<NaverMapView> {
             );
             if (newStartLocation != null) {
               setState(() {
-                _navLogic.startSelectedLocation = newStartLocation;
-                _navLogic.isStart = true;
+                _navService.startSelectedLocation = newStartLocation;
+                _navService.isStart = true;
               });
             }
           },
@@ -166,15 +166,15 @@ class _NaverMapViewState extends State<NaverMapView> {
             );
             if (newDestinationLocation != null) {
               setState(() {
-                _navLogic.selectedLocation = newDestinationLocation;
+                _navService.selectedLocation = newDestinationLocation;
               });
 
-              final startLat = _navLogic.isStart
-                  ? _navLogic.startSelectedLocation!.lat
-                  : _navLogic.finalLatitude;
-              final startLng = _navLogic.isStart
-                  ? _navLogic.startSelectedLocation!.lng
-                  : _navLogic.finalLongitude;
+              final startLat = _navService.isStart
+                  ? _navService.startSelectedLocation!.lat
+                  : _navService.finalLatitude;
+              final startLng = _navService.isStart
+                  ? _navService.startSelectedLocation!.lng
+                  : _navService.finalLongitude;
 
               // NavigationBloc으로 경로 요청
               context.read<NavigationBloc>().add(LoadPath(
