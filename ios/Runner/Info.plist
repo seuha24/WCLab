@@ -45,8 +45,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>FLTEnableImpeller</key>
 	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+    <string>App would like to use speech recognition to convert your voice into text. It is secure and private. 사용자의 음성을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>App would like to access your microphone to enable speech recognition functionality. It is secure and private. 음성 인식 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>App would like to use Bluetooth to search BLE on the app, also for send command. 세이프라이트는 스마트 음향 신호기를 찾고, 신호를 유도하기 위해 블루투스 기능이 필요합니다.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -84,5 +90,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>
