@@ -50,7 +50,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:simple_kalman/simple_kalman.dart';
 
 part '../presentation/views/blue_off_view.dart';
-part '../presentation/views/dutorial_view.dart';
+part '../presentation/views/tutorial_view.dart';
 part '../presentation/views/flashlight_view.dart';
 part '../presentation/views/home_view.dart';
 part '../presentation/views/main_view.dart';

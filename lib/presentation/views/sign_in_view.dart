@@ -74,7 +74,7 @@ class _SignInViewState extends State<SignInView> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const DutorialView(),
+                        builder: (context) => const TutorialView(),
                       ),
                     ),
                     child: Text(

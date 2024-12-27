@@ -585,7 +585,7 @@ class _SettingViewState extends State<SettingView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const DutorialView(),
+                            builder: (context) => const TutorialView(),
                           ),
                         );
                       },

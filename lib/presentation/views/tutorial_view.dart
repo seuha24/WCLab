@@ -1,14 +1,14 @@
 part of ui;
 
 /// 도움말 화면
-class DutorialView extends StatefulWidget {
-  const DutorialView({super.key});
+class TutorialView extends StatefulWidget {
+  const TutorialView({super.key});
 
   @override
-  State<DutorialView> createState() => _DutorialViewState();
+  State<TutorialView> createState() => _TutorialViewState();
 }
 
-class _DutorialViewState extends State<DutorialView> {
+class _TutorialViewState extends State<TutorialView> {
   int _currentIndex = 0;
 
   List<GlobalKey> keys = [
