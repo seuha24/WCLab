@@ -23,7 +23,7 @@ import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
-import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/infrastructure/services/tts_service.dart';
 import 'package:safelight/presentation/bloc/navigation_bloc/navigation_bloc.dart';
 

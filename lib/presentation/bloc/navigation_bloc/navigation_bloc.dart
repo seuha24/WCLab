@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +36,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   late final NavigationApiService apiService;
+  late final StreamSubscription _sensorSubscription;
+
 
   Future<void> _onLoadPath(LoadPath event, Emitter<NavigationState> emit) async {
     emit(NavigationLoading());
@@ -53,7 +56,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       final paths = parsedData['paths'] as List<LatLng>;
       final branchInfo = parsedData['branchInfo'] as List<BranchInfo>;
 
-      // 데이터 로깅
+      /// 데이터 로깅
       // log('paths: $paths');
       // log('branchInfo: $branchInfo');
 

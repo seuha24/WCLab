@@ -14,7 +14,7 @@ import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/usecase.dart';
-import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart';
 
 part '../presentation/bloc/auth/auth_bloc.dart';

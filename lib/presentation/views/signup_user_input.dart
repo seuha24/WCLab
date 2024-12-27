@@ -8,7 +8,7 @@ import 'package:safelight/core/utils/app_sizes.dart';
 import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/ui.dart';
-import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/main.dart';
 
 import '../../framework/controller.dart';

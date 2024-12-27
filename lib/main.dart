@@ -14,7 +14,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/firebase_options.dart';
-import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
 import 'package:safelight/presentation/bloc/navigation_bloc/navigation_bloc.dart';

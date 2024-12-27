@@ -50,8 +50,10 @@ class NavigationService {
   late double gpsLatitude;
   late double gpsLongitude;
 
-  // IMU 센서 관련 데이터
+  // IMU 센서 포지션
   late StreamSubscription<Position> positionStream;
+  // GPS 포지션
+  late Position position;
 
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -158,6 +160,15 @@ class NavigationService {
   final kalmanY = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
   final kalmanZ = SimpleKalman(errorMeasure: 2, errorEstimate: 2, q: 0.8);
 
+  /// Bloc에 전달하기 위한 최종 데이터 계산 메서드.
+  Map<String, dynamic> finalCoordinates() {
+    return {
+      'latitude': finalLatitude,
+      'longitude': finalLongitude,
+      'compassValue': compassValue,
+    };
+  }
+
   /// 위치를 업데이트하는 메서드.
   /// IMU 센서를 기반으로 현재 위치를 계산합니다.
   /// [sensorInterval]: 센서의 업데이트 간격.
@@ -244,7 +255,7 @@ class NavigationService {
   /// GPS 정확도와 상태를 기반으로 초기 위치를 설정합니다.
   Future<void> _initLocation() async {
     int gpsAccuracy = 14;
-    Position position = await Geolocator.getCurrentPosition(
+    position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
             accuracy: LocationAccuracy.high, distanceFilter: 1));
     gpsLatitude = position.latitude;
@@ -262,43 +273,6 @@ class NavigationService {
       isGps = false;
       // isLoading = false;
       updateLoadingState(false);
-    }
-
-    // setState(() {});
-
-    // TODO: Setstate를 여기서만 호출
-    void moveDot(importedLatitude, importedLongitude) {
-      if (importedLatitude != finalLatitude ||
-          importedLongitude != finalLongitude) {
-        _updateCurrentLocationMarker(importedLatitude, importedLongitude);
-        _updateMapPosition(importedLatitude, importedLongitude, compassValue);
-        finalLatitude = importedLatitude;
-        finalLongitude = importedLongitude;
-        // debugPrint(
-        //     'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDotFunc 진행 완료');
-      }
-    }
-
-    Future<void> moveByGps() async {
-      isGps = true;
-      position = await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(
-              accuracy: LocationAccuracy.high, distanceFilter: 1));
-      gpsLatitude = position.latitude;
-      gpsLongitude = position.longitude;
-      s_latitude = position.latitude;
-      s_longitude = position.longitude;
-      s_accuracy = position.accuracy;
-      moveDot(gpsLatitude, gpsLongitude);
-      _resetSpeedUtilsValue();
-      // debugPrint(
-      //     'gpsLatitude: $gpsLatitude, gpsLongitude: $gpsLongitude, moveByGPS 진행 완료. 현재 GPS 정확도 : ${position.accuracy}');
-    }
-
-    Future<void> moveByImu(Duration sensorInterval) async {
-      isGps = false;
-      await _positionUpdate(sensorInterval);
-      moveDot(imuLatitude, imuLongitude);
     }
 
     subscribeToSensor<UserAccelerometerEvent>(
@@ -321,7 +295,7 @@ class NavigationService {
             if (position.accuracy > gpsAccuracy) {
               // debugPrint(
               //     '가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImuFunc 실행됨.');
-              await moveByImu(SensorInterval.normalInterval);
+              await moveByImu();
             } else {
               await moveByGps();
             }
@@ -382,6 +356,40 @@ class NavigationService {
         await moveByGps();
       }
     });
+  }
+
+  void moveDot(importedLatitude, importedLongitude) {
+    if (importedLatitude != finalLatitude ||
+        importedLongitude != finalLongitude) {
+      _updateCurrentLocationMarker(importedLatitude, importedLongitude);
+      _updateMapPosition(importedLatitude, importedLongitude, compassValue);
+      finalLatitude = importedLatitude;
+      finalLongitude = importedLongitude;
+      // debugPrint(
+      //     'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDotFunc 진행 완료');
+    }
+  }
+
+  Future<void> moveByGps() async {
+    isGps = true;
+    position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+            accuracy: LocationAccuracy.high, distanceFilter: 1));
+    gpsLatitude = position.latitude;
+    gpsLongitude = position.longitude;
+    s_latitude = position.latitude;
+    s_longitude = position.longitude;
+    s_accuracy = position.accuracy;
+    moveDot(gpsLatitude, gpsLongitude);
+    _resetSpeedUtilsValue();
+    // debugPrint(
+    //     'gpsLatitude: $gpsLatitude, gpsLongitude: $gpsLongitude, moveByGPS 진행 완료. 현재 GPS 정확도 : ${position.accuracy}');
+  }
+
+  Future<void> moveByImu() async {
+    isGps = false;
+    await _positionUpdate(SensorInterval.normalInterval);
+    moveDot(imuLatitude, imuLongitude);
   }
 
   /// t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
@@ -453,8 +461,7 @@ class NavigationService {
   /// [initialLatitude], [initialLongitude]: 시작 위치의 위경도.
   /// [targetLatitude], [targetLongitude]: 목표 위치의 위경도.
   /// 반환값: 방위각 (도).
-  double calculateBearing(double initialLatitude, double initialLongitude,
-      double targetLatitude, double targetLongitude) {
+  double calculateBearing(double initialLatitude, double initialLongitude, double targetLatitude, double targetLongitude) {
     double lat1 = initialLatitude * math.pi / 180;
     double lon1 = initialLongitude * math.pi / 180;
     double lat2 = targetLatitude * math.pi / 180;
@@ -476,8 +483,7 @@ class NavigationService {
   /// [lat2], [lon2]: 두 번째 지점의 위경도.
   /// [latP], [lonP]: 점의 위경도.
   /// 반환값: 점과 선 사이의 최단 거리 (m).
-  double pointLineDistance(double lat1, double lon1, double lat2, double lon2,
-      double latP, double lonP) {
+  double pointLineDistance(double lat1, double lon1, double lat2, double lon2, double latP, double lonP) {
     // 두 지점 간의 대원 거리 (미터) 계산
     double haversine(double lat1, double lon1, double lat2, double lon2) {
       // 위도와 경도를 라디안으로 변환

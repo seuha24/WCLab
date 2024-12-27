@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:safelight/framework/ui.dart';
-import 'package:safelight/infrastructure/services/auth_service.dart';
+import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart';
 import 'package:safelight/main.dart';
 
