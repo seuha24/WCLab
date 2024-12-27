@@ -15,6 +15,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/moving_average_filter.dart';
 import 'package:safelight/data/network/dio_client.dart';
+import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
@@ -260,9 +261,13 @@ Future<void> init() async {
     (windowSize, _) => MovingAverageFilter(windowSize),
   );
 
-  DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc());
+  DI.registerLazySingleton<NavigationApiService>(() => NavigationApiService());
 
   DI.registerLazySingleton<TtsService>(() => TtsService());
+
+  DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc(
+    DI.get<NavigationApiService>(),
+  ));
 
   DI.registerFactoryParam<NavigationService, BuildContext, void>(
     (context, _) => NavigationService(
