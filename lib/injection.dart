@@ -16,6 +16,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/moving_average_filter.dart';
 import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
+import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
@@ -24,7 +25,6 @@ import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/data/services/auth_service.dart';
-import 'package:safelight/infrastructure/services/tts_service.dart';
 import 'package:safelight/presentation/bloc/navigation_bloc/navigation_bloc.dart';
 
 final DI = GetIt.instance;
