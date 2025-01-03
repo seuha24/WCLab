@@ -25,27 +25,56 @@ class NavigationLoading extends NavigationState {}
 
 class NavigationReady extends NavigationState {
   final List<LatLng> paths;
-  final List<BranchInfo> branchInfo;
+  final List<BranchInfo> branchInfoList;
 
-  const NavigationReady(this.paths, this.branchInfo);
+  const NavigationReady(this.paths, this.branchInfoList);
 
   @override
-  List<Object> get props => [paths, branchInfo];
+  List<Object> get props => [paths, branchInfoList];
 }
 
 class NavigationInProgress extends NavigationState {
   final double remainDistance;
   final bool outOfBound;
   final int currentIndex;
+  final double latitude;
+  final double longitude;
+  final double compassValue;
+  final bool isGps;
 
   const NavigationInProgress({
     required this.remainDistance,
     required this.outOfBound,
     required this.currentIndex,
+    required this.latitude,
+    required this.longitude,
+    required this.compassValue,
+    required this.isGps,
   });
 
   @override
-  List<Object> get props => [remainDistance, outOfBound, currentIndex];
+  List<Object> get props =>
+      [remainDistance, outOfBound, currentIndex, latitude, longitude, compassValue, isGps];
+
+  NavigationInProgress copyWith({
+    double? remainDistance,
+    bool? outOfBound,
+    int? currentIndex,
+    double? latitude,
+    double? longitude,
+    double? compassValue,
+    bool? isGps,
+  }) {
+    return NavigationInProgress(
+      remainDistance: remainDistance ?? this.remainDistance,
+      outOfBound: outOfBound ?? this.outOfBound,
+      currentIndex: currentIndex ?? this.currentIndex,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      compassValue: compassValue ?? this.compassValue,
+      isGps: isGps ?? this.isGps,
+    );
+  }
 }
 
 class NavigationFailure extends NavigationState {

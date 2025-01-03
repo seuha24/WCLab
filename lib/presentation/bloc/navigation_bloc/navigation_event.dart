@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 /// 이 파일은 NavigationBloc에 전달될 수 있는 다양한 이벤트를 정의합니다.
 /// 이 이벤트들은 Bloc 내에서 다양한 동작을 트리거하며, 경로 로드 또는 이동 중 상태 업데이트 등을 수행합니다.
 ///
@@ -33,11 +32,42 @@ class LoadPath extends NavigationEvent {
 }
 
 class UpdateNavigation extends NavigationEvent {
-  final double currentLat;
-  final double currentLng;
+  final double latitude;
+  final double longitude;
+  final double compassValue;
+  final double remainDistance;
+  final bool outOfBound;
+  final int currentIndex;
+  final bool isGps;
 
-  const UpdateNavigation(this.currentLat, this.currentLng);
+  const UpdateNavigation({
+    required this.latitude,
+    required this.longitude,
+    required this.compassValue,
+    required this.remainDistance,
+    required this.outOfBound,
+    required this.currentIndex,
+    required this.isGps,
+  });
 
   @override
-  List<Object> get props => [currentLat, currentLng];
+  List<Object> get props =>
+      [latitude, longitude, compassValue, remainDistance, outOfBound, currentIndex, isGps];
+}
+
+class UpdateLocation extends NavigationEvent {
+  final double latitude;
+  final double longitude;
+  final double compassValue;
+  final bool isGps;
+
+  const UpdateLocation({
+    required this.latitude,
+    required this.longitude,
+    required this.compassValue,
+    required this.isGps,
+  });
+
+  @override
+  List<Object> get props => [latitude, longitude, compassValue, isGps];
 }

@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/domain/entities/branch_info.dart';
+import 'package:safelight/framework/ui.dart';
 import 'navigation_event.dart';
 import 'navigation_state.dart';
 
@@ -30,13 +32,58 @@ import 'navigation_state.dart';
 /// 참고:
 /// - 이 Bloc은 DI(의존성 주입, 예: GetIt)를 통해 애플리케이션의 메인에 등록해야 합니다.
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
-  NavigationBloc(this.apiService) : super(NavigationInitial()) {
+  NavigationBloc(this.apiService, this.navigationService) : super(NavigationInitial()) {
     on<LoadPath>(_onLoadPath);
     on<UpdateNavigation>(_onUpdateNavigation);
+
+    /// Service의 Stream 구독
+
+    /// Path Stream
+    navigationService.pathStream.listen((data) {
+      log('pathStream: $data');
+      add(LoadPath(
+        startLatitude: data['startLatitude'],
+        startLongitude: data['startLongitude'],
+        endLatitude: data['endLatitude'],
+        endLongitude: data['endLongitude'],
+      ));
+    });
+
+    /// Navigation Stream
+    navigationService.navigationStream.listen((data) {
+      log('navigationStream: $data');
+      add(UpdateNavigation(
+        remainDistance: data['remainDistance'],
+        outOfBound: data['outOfBound'],
+        currentIndex: data['currentIndex'],
+        latitude: data['latitude'],
+        longitude: data['longitude'],
+        compassValue: data['compassValue'],
+        isGps: data['isGps'],
+      ));
+    });
   }
 
   late final NavigationApiService apiService;
+  late final NavigationService navigationService;
   late final StreamSubscription _sensorSubscription;
+
+  late final StreamSubscription<Position> _positionSubscription;
+
+
+
+  // void _subscribeToPositionStream() {
+  //   _positionSubscription =
+  //       navigationService.positionStream.listen((Position position) {
+  //         // 위치 데이터를 기반으로 Bloc 이벤트를 추가
+  //         add(UpdateNavigationEvent(
+  //           latitude: position.latitude,
+  //           longitude: position.longitude,
+  //           isGps: position.accuracy <= 10, // GPS 여부를 정확도로 판단
+  //           compassValue: 0.0, // 나침반 값은 추후 추가 가능
+  //         ));
+  //       });
+  // }
 
 
   Future<void> _onLoadPath(LoadPath event, Emitter<NavigationState> emit) async {
@@ -70,11 +117,16 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
   void _onUpdateNavigation(
       UpdateNavigation event, Emitter<NavigationState> emit) {
+    log('_onUpdateNavigation: $event');
     // NavigationInProgress 상태 업데이트
-    emit(NavigationInProgress(
-      remainDistance: 0.5, // 임의 값
-      outOfBound: false,
-      currentIndex: 0,
-    ));
+    // emit(NavigationInProgress(
+    //   remainDistance: event.remainDistance,
+    //   outOfBound: event.outOfBound,
+    //   currentIndex: event.currentIndex,
+    //   latitude: event.latitude,
+    //   longitude: event.longitude,
+    //   compassValue: event.compassValue,
+    //   isGps: event.isGps,
+    // ));
   }
 }

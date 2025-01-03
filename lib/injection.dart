@@ -265,15 +265,13 @@ Future<void> init() async {
 
   DI.registerLazySingleton<TtsService>(() => TtsService());
 
-  DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc(
-    DI.get<NavigationApiService>(),
-  ));
-
-  DI.registerFactoryParam<NavigationService, BuildContext, void>(
-    (context, _) => NavigationService(
-      context,
-      DI.get<NavigationBloc>(),
+  DI.registerLazySingleton<NavigationService>(() => NavigationService(
       DI.get<TtsService>(),
     ),
   );
+
+  DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc(
+    DI.get<NavigationApiService>(),
+    DI.get<NavigationService>(),
+  ));
 }

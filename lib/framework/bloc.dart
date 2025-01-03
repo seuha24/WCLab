@@ -11,4 +11,4 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 part '../presentation/bloc/accelerometer_bloc/accelerometer_event.dart';
 part '../presentation/bloc/accelerometer_bloc/accelerometer_state.dart';
-part '../presentation/bloc/accelerometer_bloc/accelerometer_bloc.dart';
+// part '../presentation/bloc/accelerometer_bloc/accelerometer_bloc.dart';
