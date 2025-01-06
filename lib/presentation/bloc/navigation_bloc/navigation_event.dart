@@ -32,27 +32,7 @@ class LoadPath extends NavigationEvent {
 }
 
 class UpdateNavigation extends NavigationEvent {
-  final double latitude;
-  final double longitude;
-  final double compassValue;
-  final double remainDistance;
-  final bool outOfBound;
-  final int currentIndex;
-  final bool isGps;
-
-  const UpdateNavigation({
-    required this.latitude,
-    required this.longitude,
-    required this.compassValue,
-    required this.remainDistance,
-    required this.outOfBound,
-    required this.currentIndex,
-    required this.isGps,
-  });
-
-  @override
-  List<Object> get props =>
-      [latitude, longitude, compassValue, remainDistance, outOfBound, currentIndex, isGps];
+  const UpdateNavigation();
 }
 
 class UpdateLocation extends NavigationEvent {

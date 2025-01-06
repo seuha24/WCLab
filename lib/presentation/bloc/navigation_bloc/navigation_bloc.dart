@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/domain/entities/branch_info.dart';
 import 'package:safelight/framework/ui.dart';
@@ -50,17 +51,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     });
 
     /// Navigation Stream
-    navigationService.navigationStream.listen((data) {
+    navigationService.navigationStream
+        .throttleTime(Duration(milliseconds: 1000))
+        .listen((data) {
       log('navigationStream: $data');
-      add(UpdateNavigation(
-        remainDistance: data['remainDistance'],
-        outOfBound: data['outOfBound'],
-        currentIndex: data['currentIndex'],
-        latitude: data['latitude'],
-        longitude: data['longitude'],
-        compassValue: data['compassValue'],
-        isGps: data['isGps'],
-      ));
+      add(UpdateNavigation());
     });
   }
 
@@ -118,15 +113,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _onUpdateNavigation(
       UpdateNavigation event, Emitter<NavigationState> emit) {
     log('_onUpdateNavigation: $event');
+
     // NavigationInProgress 상태 업데이트
-    // emit(NavigationInProgress(
-    //   remainDistance: event.remainDistance,
-    //   outOfBound: event.outOfBound,
-    //   currentIndex: event.currentIndex,
-    //   latitude: event.latitude,
-    //   longitude: event.longitude,
-    //   compassValue: event.compassValue,
-    //   isGps: event.isGps,
-    // ));
+    emit(NavigationIdle());
+    emit(NavigationInProgress(timestamp: DateTime.now()));
   }
 }

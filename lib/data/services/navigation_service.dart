@@ -60,22 +60,24 @@ class NavigationService {
 
   /// Path Stream Controller
   final StreamController<Map<String, dynamic>> _pathStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get pathStream => _pathStreamController.stream;
 
   /// Navigation Stream Controller
   final StreamController<Map<String, dynamic>> _navigationStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get navigationStream =>
-      _navigationStreamController.stream.throttleTime(Duration(milliseconds: 200));
+      _navigationStreamController.stream
+          .throttleTime(Duration(milliseconds: 1000));
 
   /// Compass Stream Controller
-  final StreamController<Map<String, dynamic>> _compassStreamController = StreamController.broadcast();
-  Stream<Map<String, dynamic>> get compassStream =>
-      _compassStreamController.stream.throttleTime(Duration(milliseconds: 200));
+  final StreamController<Map<String, dynamic>> _compassStreamController =
+  StreamController.broadcast();
 
+  Stream<Map<String, dynamic>> get compassStream =>
+      _compassStreamController.stream.throttleTime(Duration(milliseconds: 1000));
 
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -198,7 +200,7 @@ class NavigationService {
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
     // debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
     final double accelerationMagnitude =
-        math.sqrt(curAccX * curAccX + curAccY * curAccY);
+    math.sqrt(curAccX * curAccX + curAccY * curAccY);
     // debugPrint(
     //     'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
     curAccX = kalmanX.filtered(curAccX);
@@ -226,7 +228,7 @@ class NavigationService {
     velocityY = velocityY * math.cos(rotationY);
     // 속력 계산
     final double currentSpeed =
-        math.sqrt(velocityX * velocityX + velocityY * velocityY);
+    math.sqrt(velocityX * velocityX + velocityY * velocityY);
     // debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...6');
     // 실제 이동 거리 계산
     imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
@@ -277,6 +279,7 @@ class NavigationService {
   Future<void> _initLocation() async {
     log('initLocation()');
     int gpsAccuracy = 14;
+
     position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
             accuracy: LocationAccuracy.high, distanceFilter: 1));
@@ -284,63 +287,59 @@ class NavigationService {
     gpsLongitude = position.longitude;
     finalLatitude = gpsLatitude;
     finalLongitude = gpsLongitude;
-    // debugPrint(
-    //     'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, initLocation 실행 중');
 
     if (position.accuracy <= gpsAccuracy) {
       isGps = true;
-      // isLoading = false;
       updateLoadingState(false);
     } else {
       isGps = false;
-      // isLoading = false;
       updateLoadingState(false);
     }
 
+    // 가속도계 이벤트 처리
     subscribeToSensor<UserAccelerometerEvent>(
-        sensorStream: userAccelerometerEventStream(
-            samplingPeriod: Duration(milliseconds: 2000)),
-        onEvent: (event) async {
-          curAccX = event.x;
-          curAccY = event.y;
-          curAccZ = event.z;
-          double accelerationMagnitude = math
-              .sqrt(curAccX * curAccX + curAccY * curAccY + curAccZ * curAccZ);
-          if (accelerationMagnitude > 1.0 &&
-              accelerationMagnitude < 10.0 &&
-              !isAccRunning) {
-            isAccRunning = true;
-            // debugPrint('accelerationMagnitude: $accelerationMagnitude, subscribeToSensor<UserAccelerometerEvent> 트리거 됨');
-            position = await Geolocator.getCurrentPosition(
-                locationSettings: LocationSettings(
-                    accuracy: LocationAccuracy.high, distanceFilter: 5));
-            if (position.accuracy > gpsAccuracy) {
-              // debugPrint(
-              //     '가속도계 움직임 감지됨. 현재 GPS 정확도가 ${position.accuracy} 이기 때문에 moveByImuFunc 실행됨.');
-              await moveByImu();
-            } else {
-              await moveByGps();
-            }
+      sensorStream: userAccelerometerEventStream(
+        samplingPeriod: Duration(milliseconds: 1000),
+      ),
+      onEvent: (event) async {
+        log('userAccelerometerEvent: $event');
+        curAccX = event.x;
+        curAccY = event.y;
+        curAccZ = event.z;
+        double accelerationMagnitude = math
+            .sqrt(curAccX * curAccX + curAccY * curAccY + curAccZ * curAccZ);
+        if (accelerationMagnitude > 1.0 &&
+            accelerationMagnitude < 10.0 &&
+            !isAccRunning) {
+          isAccRunning = true;
+          position = await Geolocator.getCurrentPosition(
+              locationSettings: LocationSettings(
+                  accuracy: LocationAccuracy.high, distanceFilter: 5));
+          if (position.accuracy > gpsAccuracy) {
+            log('UserAccelerometerEvent moveByImu()');
+            await moveByImu();
+          } else {
+            log('UserAccelerometerEvent moveByGps()');
+            await moveByGps();
           }
-          isAccRunning = false;
-        },
-        onError: (e) {
-          debugPrint(e);
-        });
+        }
+        isAccRunning = false;
+      },
+      onError: (e) => debugPrint(e),
+    );
 
+    // 나침반 이벤트 처리
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
+        log('compassEvent: $event');
         compassValue = event.heading ?? 0.0;
         yawRate = (compassValue * math.pi / 180);
         _updateYawRate(0);
-        debugPrint(
-            'compassValue: $compassValue, yawRate: $yawRate,subscribeToSensor<CompassEvent> 진행 중');
+
         if ((compassValue - lastCompassValue).abs() >= 1.0) {
           lastCompassValue = compassValue;
-          // _updateMapPosition(finalLatitude, finalLongitude, compassValue);
-
-          _compassStreamController.add({
+          _navigationStreamController.add({
             'latitude': finalLatitude,
             'longitude': finalLongitude,
             'compassValue': compassValue,
@@ -348,35 +347,35 @@ class NavigationService {
         }
         s_accuracy = position.accuracy;
       },
-      onError: (e) {
-        debugPrint(e);
-      },
+      onError: (e) => debugPrint(e),
     );
 
+    // 자이로스코프 이벤트 처리
     subscribeToSensor<GyroscopeEvent>(
-      sensorStream:
-          gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval),
-      onEvent: (GyroscopeEvent event) async {
-        final deltaTime =
-            (SensorInterval.normalInterval).inMilliseconds / 1000.0;
+      sensorStream: gyroscopeEventStream(
+        samplingPeriod: SensorInterval.normalInterval,
+      ),
+      onEvent: (GyroscopeEvent event) {
+        log('gyroscopeEvent: $event');
+        final deltaTime = (SensorInterval.normalInterval).inMilliseconds / 1000.0;
         rotationX = event.x * deltaTime;
         rotationY = event.y * deltaTime;
         rotationZ = event.z * deltaTime;
         rotationXSum += rotationX;
         rotationYSum += rotationY;
         rotationZSum += rotationZ;
-        // debugPrint(
-        //     'rotationX: $rotationX, rotationY: $rotationY, rotationZ: $rotationZ, rotationXSum: $rotationXSum, rotationYSum: $rotationYSum, rotationZSum: $rotationZSum, subscribeToSensor<GyroscopeEvent> 실행됨');
       },
-      onError: (e) {
-        debugPrint(e);
-      },
+      onError: (e) => debugPrint(e),
     );
 
+    // 위치 스트림 처리
     positionStream = Geolocator.getPositionStream(
-            locationSettings: LocationSettings(
-                accuracy: LocationAccuracy.high, distanceFilter: 1))
-        .listen((Position position) async {
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 1,
+      ),
+    ).throttleTime(Duration(milliseconds: 1000)).listen((Position position) async {
+      log('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
         await moveByGps();
       }
@@ -385,6 +384,8 @@ class NavigationService {
 
   void moveDot(importedLatitude, importedLongitude) {
     log('moveDot()');
+    log('moveDot() - importedLatitude: $importedLatitude, importedLongitude: $importedLongitude');
+    log('moveDot() - finalLatitude: $finalLatitude, finalLongitude: $finalLongitude');
     if (importedLatitude != finalLatitude ||
         importedLongitude != finalLongitude) {
       // _updateCurrentLocationMarker(importedLatitude, importedLongitude);
@@ -392,6 +393,7 @@ class NavigationService {
       finalLatitude = importedLatitude;
       finalLongitude = importedLongitude;
 
+      log('_navigationStreamController.add()');
       // Stream에 데이터 전송
       _navigationStreamController.add({
         'remainDistance': remainDistance,
@@ -408,7 +410,7 @@ class NavigationService {
   }
 
   Future<void> moveByGps() async {
-    // log('moveByGps');
+    log('moveByGps');
     isGps = true;
     position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
@@ -581,14 +583,14 @@ class NavigationService {
   /// [onError]: 오류 발생 시 호출할 함수.
   void subscribeToSensor<T>(
       {required Stream<T> sensorStream,
-      required Function(T event) onEvent,
-      required Function(dynamic error) onError}) {
+        required Function(T event) onEvent,
+        required Function(dynamic error) onError}) {
     var subscription =
-        sensorStream.throttleTime(const Duration(milliseconds: 200)).listen(
-              onEvent,
-              onError: onError,
-              cancelOnError: true,
-            );
+    sensorStream.throttleTime(const Duration(milliseconds: 1000)).listen(
+      onEvent,
+      onError: onError,
+      cancelOnError: true,
+    );
     _streamSubscriptions.add(subscription);
   }
 
@@ -659,7 +661,7 @@ class NavigationService {
     }
 
     List<BranchInfo> currentWindow =
-        getCurrentWindow(branchInfoList, currentIndex, 5);
+    getCurrentWindow(branchInfoList, currentIndex, 5);
     int nearestIndex = moveIndex(currentWindow);
 
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
@@ -752,13 +754,13 @@ class NavigationService {
       double bearingToPoint,
       int boundaryExit) {
     Map<String, double> breakPoint(
-      double currentIndexLongitude,
-      double currentIndexLatitude,
-      double targetIndexLongitude,
-      double targetIndexLatitude,
-      double finalLatitude,
-      double finalLongitude,
-    ) {
+        double currentIndexLongitude,
+        double currentIndexLatitude,
+        double targetIndexLongitude,
+        double targetIndexLatitude,
+        double finalLatitude,
+        double finalLongitude,
+        ) {
       // 주어진 위경도를 라디안으로 변환
 
       //현재 인덱스
@@ -879,7 +881,7 @@ class NavigationService {
   //branch일 경우의 branchinfo[currentIndex]를 전부 currentWindowValue로 바꿈
   void checkBoundary() {
     List<BranchInfo> currentWindow =
-        getCurrentWindow(branchInfoList, currentIndex, 5);
+    getCurrentWindow(branchInfoList, currentIndex, 5);
     double beforeMinDistanceToPath = double.maxFinite;
     //점과 직선 최소거리
     for (int i = 0; i < currentWindow.length - 1; i++) {
@@ -890,10 +892,10 @@ class NavigationService {
 
       if (currentWindowValue.branch == true) {
         circularDistance = calculateDistance(
-                currentWindowValue.point.latitude,
-                currentWindowValue.point.longitude,
-                finalLatitude,
-                finalLongitude) *
+            currentWindowValue.point.latitude,
+            currentWindowValue.point.longitude,
+            finalLatitude,
+            finalLongitude) *
             1000;
 
         checkBoundaryCondition = "정방향, 브랜치";
@@ -1106,11 +1108,11 @@ class NavigationService {
           }
         }
         if (currentIndex > 0 &&
-                (branchInfoList[currentIndex].bearingToPoint - compassValue)
-                        .abs() <=
-                    18 ||
             (branchInfoList[currentIndex].bearingToPoint - compassValue)
-                    .abs() >=
+                .abs() <=
+                18 ||
+            (branchInfoList[currentIndex].bearingToPoint - compassValue)
+                .abs() >=
                 342) {
           Vibration.vibrate(duration: 200);
           debugPrint(

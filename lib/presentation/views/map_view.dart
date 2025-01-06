@@ -19,6 +19,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   NMarker? _currentLocationMarker;
   NMarker? _testMarker;
 
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +64,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
           // 지도에 경로 오버레이 및 브랜치 마커 추가
           addOverlays(_navigationBloc.navigationService.paths);
-          addBranchMarkers(_navigationBloc.navigationService.branchInfoList);
+          addBranchMarkers();
 
           // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
           for (int i = 0;
@@ -85,21 +86,16 @@ class _NaverMapViewState extends State<NaverMapView> {
           }
 
           // 내비게이션 타이머 시작
-          // _navigationBloc.navigationService.startNavigationTimer();
+          _navigationBloc.navigationService.startNavigationTimer();
         } else if (state is NavigationInProgress) {
-          // _navigationBloc.navigationService.startNavigationTimer();
+          debugPrint(
+              'NavigationInProgress');
 
-          debugPrint('NavigationInProgress: ${state.remainDistance}');
-
-          addOverlays(_navigationBloc.navigationService.paths);
-          addBranchMarkers(_navigationBloc.navigationService.branchInfoList);
-          _updateCurrentLocationMarker(
-              state.latitude, state.longitude, state.isGps);
-
-          _updateMapPosition(
-              state.latitude,
-              state.longitude,
-              state.compassValue);
+          // 경로 및 마커 업데이트
+          // addOverlays(_navigationBloc.navigationService.paths);
+          // addBranchMarkers();
+          _updateCurrentLocationMarker();
+          _updateMapPosition();
 
         } else if (state is NavigationFailure) {
           // 경로 로드 실패 시 디버그 출력
@@ -143,15 +139,8 @@ class _NaverMapViewState extends State<NaverMapView> {
                     // 맵 컨트롤러 초기화
                     mapController = controller;
                     // 현재 위치 마커와 맵 위치 업데이트
-                    _updateCurrentLocationMarker(
-                        _navigationBloc.navigationService.finalLatitude,
-                        _navigationBloc.navigationService.finalLongitude,
-                        _navigationBloc.navigationService.isGps);
-
-                    _updateMapPosition(
-                        _navigationBloc.navigationService.finalLatitude,
-                        _navigationBloc.navigationService.finalLongitude,
-                        _navigationBloc.navigationService.compassValue);
+                    _updateCurrentLocationMarker();
+                    _updateMapPosition();
                   },
                   onMapTapped: (NPoint point, NLatLng latLng) async {
                     // 지도 클릭 시 남은 거리 안내 음성 출력
@@ -312,7 +301,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   void addOverlays(List<LatLng> paths) {
     debugPrint('addOverlays()');
     if (mapController == null) {
-      // debugPrint('addOverlays() mapController is not initialized yet.');
+      debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
 
@@ -335,15 +324,17 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   /// 현재 위치 마커를 업데이트하는 메서드.
   /// [latitude], [longitude]: 목표 위치의 위경도.
-  void _updateCurrentLocationMarker(latitude, longitude, isGps) async {
+  void _updateCurrentLocationMarker() async {
     debugPrint(':::::::::::::::_updateCurrentLocationMarker');
     if (mapController == null) {
-      // debugPrint('_updateCurrentLocationMarker() mapController is not initialized yet.');
+      debugPrint(
+          '_updateCurrentLocationMarker() mapController is not initialized yet.');
       return;
     }
 
     // GPS에 따라 마커 색상 설정
-    final Color markerColor = isGps ? Colors.blue : Colors.red;
+    final Color markerColor =
+        _navigationBloc.navigationService.isGps ? Colors.blue : Colors.red;
     final iconImage = await NOverlayImage.fromWidget(
         widget: Icon(
           Icons.circle,
@@ -355,7 +346,10 @@ class _NaverMapViewState extends State<NaverMapView> {
     // 현재 위치 마커를 새로 추가
     _currentLocationMarker = NMarker(
         id: 'current_location',
-        position: NLatLng(latitude, longitude),
+        position: NLatLng(
+          _navigationBloc.navigationService.finalLatitude,
+          _navigationBloc.navigationService.finalLongitude,
+        ),
         icon: iconImage);
 
     mapController!.addOverlay(_currentLocationMarker!);
@@ -363,14 +357,15 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   /// 분기 지점의 마커를 지도에 추가하는 메서드.
   /// [branchInfoList]에 저장된 모든 분기 지점 정보를 기반으로 마커를 생성하고 지도에 추가합니다.
-  void addBranchMarkers(List<BranchInfo> branchInfoListList) async {
+  void addBranchMarkers() async {
     debugPrint(':::::::::::::::addBranchMarkers');
     if (mapController == null) {
-      // debugPrint('addBranchMarkers() mapController is not initialized yet.');
+      debugPrint('addBranchMarkers() mapController is not initialized yet.');
       return;
     }
 
     Set<NAddableOverlay> markers = {}; // 마커들을 담을 Set
+    final branchList = _navigationBloc.navigationService.branchInfoList;
 
     final iconImage = await NOverlayImage.fromWidget(
       widget: Icon(
@@ -382,9 +377,9 @@ class _NaverMapViewState extends State<NaverMapView> {
       context: context,
     );
 
-    for (var branch in branchInfoListList) {
+    for (var branch in branchList) {
       _testMarker = NMarker(
-          id: 'checkPoint_${branchInfoListList.indexOf(branch)}', // 각 마커의 고유 ID
+          id: 'checkPoint_${branchList.indexOf(branch)}', // 각 마커의 고유 ID
           position: NLatLng(
               branch.point.latitude, branch.point.longitude), // 마커의 좌표 설정
           icon: iconImage);
@@ -399,17 +394,18 @@ class _NaverMapViewState extends State<NaverMapView> {
   /// 지도 위치를 업데이트하는 메서드.
   /// [latitude], [longitude]: 목표 위치의 위경도.
   /// [compassValue]: 현재 나침반 값.
-  void _updateMapPosition(latitude, longitude, compassValue) {
+  void _updateMapPosition() {
     debugPrint(':::::::::::::::_updateMapPosition');
     if (mapController == null) {
-      // debugPrint('_updateMapPosition() mapController is not initialized yet.');
+      debugPrint('_updateMapPosition() mapController is not initialized yet.');
       return;
     }
     // 현재 위치를 기준으로 카메라 위치를 설정
     final cameraUpdate = NCameraUpdate.withParams(
-      target: NLatLng(latitude, longitude),
+      target: NLatLng(_navigationBloc.navigationService.finalLatitude,
+          _navigationBloc.navigationService.finalLongitude),
       zoom: 18.5,
-      bearing: compassValue,
+      bearing: _navigationBloc.navigationService.compassValue,
     );
     // 카메라 업데이트 적용
     mapController!.updateCamera(cameraUpdate);

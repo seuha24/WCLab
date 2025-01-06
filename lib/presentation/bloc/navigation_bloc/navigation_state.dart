@@ -19,6 +19,8 @@ abstract class NavigationState extends Equatable {
   List<Object> get props => [];
 }
 
+class NavigationIdle extends NavigationState {}
+
 class NavigationInitial extends NavigationState {}
 
 class NavigationLoading extends NavigationState {}
@@ -34,47 +36,8 @@ class NavigationReady extends NavigationState {
 }
 
 class NavigationInProgress extends NavigationState {
-  final double remainDistance;
-  final bool outOfBound;
-  final int currentIndex;
-  final double latitude;
-  final double longitude;
-  final double compassValue;
-  final bool isGps;
-
-  const NavigationInProgress({
-    required this.remainDistance,
-    required this.outOfBound,
-    required this.currentIndex,
-    required this.latitude,
-    required this.longitude,
-    required this.compassValue,
-    required this.isGps,
-  });
-
-  @override
-  List<Object> get props =>
-      [remainDistance, outOfBound, currentIndex, latitude, longitude, compassValue, isGps];
-
-  NavigationInProgress copyWith({
-    double? remainDistance,
-    bool? outOfBound,
-    int? currentIndex,
-    double? latitude,
-    double? longitude,
-    double? compassValue,
-    bool? isGps,
-  }) {
-    return NavigationInProgress(
-      remainDistance: remainDistance ?? this.remainDistance,
-      outOfBound: outOfBound ?? this.outOfBound,
-      currentIndex: currentIndex ?? this.currentIndex,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      compassValue: compassValue ?? this.compassValue,
-      isGps: isGps ?? this.isGps,
-    );
-  }
+  final DateTime timestamp;
+  const NavigationInProgress({required this.timestamp});
 }
 
 class NavigationFailure extends NavigationState {
