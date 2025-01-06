@@ -96,14 +96,17 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       // 데이터 파싱
       final parsedData = apiService.parsePathData(responseData);
       final paths = parsedData['paths'] as List<LatLng>;
-      final branchInfo = parsedData['branchInfo'] as List<BranchInfo>;
+      final branchInfoList = parsedData['branchInfo'] as List<BranchInfo>;
 
       /// 데이터 로깅
       // log('paths: $paths');
       // log('branchInfo: $branchInfo');
 
+      navigationService.paths = paths;
+      navigationService.branchInfoList = branchInfoList;
+
       // BloC 상태 갱신
-      emit(NavigationReady(paths, branchInfo));
+      emit(NavigationReady(paths, branchInfoList));
     } catch (error) {
       // 에러 상태 처리
       emit(NavigationFailure(error.toString()));

@@ -58,13 +58,13 @@ class _NaverMapViewState extends State<NaverMapView> {
         // 내비게이션 상태에 따라 UI와 데이터를 갱신
         if (state is NavigationReady) {
           // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
-          _navigationBloc.navigationService.paths = state.paths;
-          _navigationBloc.navigationService.branchInfoList =
-              state.branchInfoList;
+          // _navigationBloc.navigationService.paths = state.paths;
+          // _navigationBloc.navigationService.branchInfoList =
+          //     state.branchInfoList;
 
           // 지도에 경로 오버레이 및 브랜치 마커 추가
-          addOverlays(_navigationBloc.navigationService.paths);
-          addBranchMarkers();
+          addOverlays(state.paths);
+          addBranchMarkers(state.branchInfoList);
 
           // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
           for (int i = 0;
@@ -357,7 +357,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   /// 분기 지점의 마커를 지도에 추가하는 메서드.
   /// [branchInfoList]에 저장된 모든 분기 지점 정보를 기반으로 마커를 생성하고 지도에 추가합니다.
-  void addBranchMarkers() async {
+  void addBranchMarkers(List<BranchInfo> branchInfoList) async {
     debugPrint(':::::::::::::::addBranchMarkers');
     if (mapController == null) {
       debugPrint('addBranchMarkers() mapController is not initialized yet.');
@@ -365,7 +365,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
 
     Set<NAddableOverlay> markers = {}; // 마커들을 담을 Set
-    final branchList = _navigationBloc.navigationService.branchInfoList;
+    final branchList = branchInfoList;
 
     final iconImage = await NOverlayImage.fromWidget(
       widget: Icon(
