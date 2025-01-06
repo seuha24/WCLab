@@ -70,14 +70,14 @@ class NavigationService {
 
   Stream<Map<String, dynamic>> get navigationStream =>
       _navigationStreamController.stream
-          .throttleTime(Duration(milliseconds: 1000));
+          .throttleTime(Duration(milliseconds: 200));
 
   /// Compass Stream Controller
   final StreamController<Map<String, dynamic>> _compassStreamController =
   StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get compassStream =>
-      _compassStreamController.stream.throttleTime(Duration(milliseconds: 1000));
+      _compassStreamController.stream.throttleTime(Duration(milliseconds: 200));
 
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -299,7 +299,7 @@ class NavigationService {
     // 가속도계 이벤트 처리
     subscribeToSensor<UserAccelerometerEvent>(
       sensorStream: userAccelerometerEventStream(
-        samplingPeriod: Duration(milliseconds: 1000),
+        samplingPeriod: Duration(milliseconds: 200),
       ),
       onEvent: (event) async {
         log('userAccelerometerEvent: $event');
@@ -320,7 +320,8 @@ class NavigationService {
             await moveByImu();
           } else {
             log('UserAccelerometerEvent moveByGps()');
-            await moveByGps();
+            // await moveByGps();
+            await moveByImu();
           }
         }
         isAccRunning = false;
@@ -374,10 +375,11 @@ class NavigationService {
         accuracy: LocationAccuracy.high,
         distanceFilter: 1,
       ),
-    ).throttleTime(Duration(milliseconds: 1000)).listen((Position position) async {
+    ).throttleTime(Duration(milliseconds: 200)).listen((Position position) async {
       log('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
-        await moveByGps();
+        // await moveByGps();
+        await moveByImu();
       }
     });
   }
@@ -430,7 +432,7 @@ class NavigationService {
     // log('moveByImu');
     isGps = false;
     // await _positionUpdate(SensorInterval.normalInterval);
-    await _positionUpdate(Duration(milliseconds: 1000));
+    await _positionUpdate(Duration(milliseconds: 200));
     moveDot(imuLatitude, imuLongitude);
   }
 
@@ -586,7 +588,7 @@ class NavigationService {
         required Function(T event) onEvent,
         required Function(dynamic error) onError}) {
     var subscription =
-    sensorStream.throttleTime(const Duration(milliseconds: 1000)).listen(
+    sensorStream.throttleTime(const Duration(milliseconds: 200)).listen(
       onEvent,
       onError: onError,
       cancelOnError: true,

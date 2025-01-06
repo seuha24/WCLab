@@ -52,7 +52,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
     /// Navigation Stream
     navigationService.navigationStream
-        .throttleTime(Duration(milliseconds: 1000))
+        .throttleTime(Duration(milliseconds: 200))
         .listen((data) {
       log('navigationStream: $data');
       add(UpdateNavigation());
