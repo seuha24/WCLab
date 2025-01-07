@@ -35,9 +35,39 @@ class NavigationReady extends NavigationState {
   List<Object> get props => [paths, branchInfoList];
 }
 
-class NavigationInProgress extends NavigationState {
-  final DateTime timestamp;
-  const NavigationInProgress({required this.timestamp});
+// class NavigationInProgress extends NavigationState {
+//   final DateTime timestamp;
+//   const NavigationInProgress({required this.timestamp});
+// }
+
+class LocationMarkerUpdated extends NavigationState {
+  final double latitude;
+  final double longitude;
+  final bool isGps;
+
+  const LocationMarkerUpdated({
+    required this.latitude,
+    required this.longitude,
+    required this.isGps,
+  });
+
+  @override
+  List<Object> get props => [latitude, longitude, isGps];
+}
+
+class MapPositionUpdated extends NavigationState {
+  final double latitude;
+  final double longitude;
+  final double compassValue;
+
+  const MapPositionUpdated({
+    required this.latitude,
+    required this.longitude,
+    required this.compassValue,
+  });
+
+  @override
+  List<Object> get props => [latitude, longitude, compassValue];
 }
 
 class NavigationFailure extends NavigationState {

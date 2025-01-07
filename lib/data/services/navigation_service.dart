@@ -64,20 +64,20 @@ class NavigationService {
 
   Stream<Map<String, dynamic>> get pathStream => _pathStreamController.stream;
 
-  /// Navigation Stream Controller
-  final StreamController<Map<String, dynamic>> _navigationStreamController =
+  /// Location Marker Stream Controller
+  final StreamController<Map<String, dynamic>> _locationMarkerController =
   StreamController.broadcast();
 
-  Stream<Map<String, dynamic>> get navigationStream =>
-      _navigationStreamController.stream
+  Stream<Map<String, dynamic>> get locationMarkerStream =>
+      _locationMarkerController.stream
           .throttleTime(Duration(milliseconds: 200));
 
-  /// Compass Stream Controller
-  final StreamController<Map<String, dynamic>> _compassStreamController =
+  /// Map Position Stream Controller
+  final StreamController<Map<String, dynamic>> _mapPositionController =
   StreamController.broadcast();
 
-  Stream<Map<String, dynamic>> get compassStream =>
-      _compassStreamController.stream.throttleTime(Duration(milliseconds: 200));
+  Stream<Map<String, dynamic>> get mapPositionStream =>
+      _mapPositionController.stream.throttleTime(Duration(milliseconds: 200));
 
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -340,7 +340,7 @@ class NavigationService {
 
         if ((compassValue - lastCompassValue).abs() >= 1.0) {
           lastCompassValue = compassValue;
-          _navigationStreamController.add({
+          _mapPositionController.add({
             'latitude': finalLatitude,
             'longitude': finalLongitude,
             'compassValue': compassValue,
@@ -397,15 +397,29 @@ class NavigationService {
 
       log('_navigationStreamController.add()');
       // Stream에 데이터 전송
-      _navigationStreamController.add({
-        'remainDistance': remainDistance,
-        'outOfBound': outOfBound,
-        'currentIndex': currentIndex,
+      // _locationMarkerController.add({
+      //   'remainDistance': remainDistance,
+      //   'outOfBound': outOfBound,
+      //   'currentIndex': currentIndex,
+      //   'latitude': importedLatitude,
+      //   'longitude': importedLongitude,
+      //   'compassValue': compassValue,
+      //   'isGps': isGps,
+      // });
+
+      _locationMarkerController.add({
+        'latitude': importedLatitude,
+        'longitude': importedLongitude,
+        'isGps': isGps,
+      });
+
+
+      _mapPositionController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
         'compassValue': compassValue,
-        'isGps': isGps,
       });
+
       // debugPrint(
       //     'finalLatitude: $finalLatitude, finalLongitude: $finalLongitude, moveDotFunc 진행 완료');
     }

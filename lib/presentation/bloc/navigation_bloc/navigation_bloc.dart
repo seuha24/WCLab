@@ -35,7 +35,8 @@ import 'navigation_state.dart';
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   NavigationBloc(this.apiService, this.navigationService) : super(NavigationInitial()) {
     on<LoadPath>(_onLoadPath);
-    on<UpdateNavigation>(_onUpdateNavigation);
+    on<UpdateLocationMarker>(_onUpdateLocationMarker);
+    on<UpdateMapPosition>(_onUpdateMapPosition);
 
     /// Service의 Stream 구독
 
@@ -50,13 +51,31 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       ));
     });
 
-    /// Navigation Stream
-    navigationService.navigationStream
+    /// Location Marker Stream
+    navigationService.locationMarkerStream
         .throttleTime(Duration(milliseconds: 200))
         .listen((data) {
-      log('navigationStream: $data');
-      add(UpdateNavigation());
+      log('locationMarkerStream: $data');
+      add(UpdateLocationMarker(
+        latitude: data['latitude'],
+        longitude: data['longitude'],
+        isGps: data['isGps'],
+      ));
     });
+
+    /// Map Position Stream
+    navigationService.mapPositionStream
+        .throttleTime(Duration(milliseconds: 200))
+        .listen((data) {
+      log('mapPositionStream: $data');
+      add(UpdateMapPosition(
+        latitude: data['latitude'],
+        longitude: data['longitude'],
+        compassValue: data['compassValue'],
+      ));
+    });
+
+
   }
 
   late final NavigationApiService apiService;
@@ -113,12 +132,37 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     }
   }
 
-  void _onUpdateNavigation(
-      UpdateNavigation event, Emitter<NavigationState> emit) {
-    log('_onUpdateNavigation: $event');
+  // void _onUpdateNavigation(
+  //     UpdateNavigation event, Emitter<NavigationState> emit) {
+  //   log('_onUpdateNavigation: $event');
+  //
+  //   // NavigationInProgress 상태 업데이트
+  //   emit(NavigationIdle());
+  //   emit(NavigationInProgress(timestamp: DateTime.now()));
+  // }
 
-    // NavigationInProgress 상태 업데이트
-    emit(NavigationIdle());
-    emit(NavigationInProgress(timestamp: DateTime.now()));
+  void _onUpdateLocationMarker(
+      UpdateLocationMarker event, Emitter<NavigationState> emit) {
+    log('_onUpdateLocationMarker: $event');
+
+    // Location Marker 업데이트
+    emit(LocationMarkerUpdated(
+      latitude: event.latitude,
+      longitude: event.longitude,
+      isGps: event.isGps,
+    ));
   }
+
+  void _onUpdateMapPosition(
+      UpdateMapPosition event, Emitter<NavigationState> emit) {
+    log('_onUpdateMapPosition: $event');
+
+    // Map Position 업데이트
+    emit(MapPositionUpdated(
+      latitude: event.latitude,
+      longitude: event.longitude,
+      compassValue: event.compassValue,
+    ));
+  }
+
 }

@@ -31,8 +31,32 @@ class LoadPath extends NavigationEvent {
       [startLatitude, startLongitude, endLatitude, endLongitude];
 }
 
-class UpdateNavigation extends NavigationEvent {
-  const UpdateNavigation();
+// class UpdateNavigation extends NavigationEvent {
+//   const UpdateNavigation();
+// }
+
+class UpdateLocationMarker extends NavigationEvent {
+  final double latitude;
+  final double longitude;
+  final bool isGps;
+
+  const UpdateLocationMarker({
+    required this.latitude,
+    required this.longitude,
+    required this.isGps,
+  });
+}
+
+class UpdateMapPosition extends NavigationEvent {
+  final double latitude;
+  final double longitude;
+  final double compassValue;
+
+  const UpdateMapPosition({
+    required this.latitude,
+    required this.longitude,
+    required this.compassValue,
+  });
 }
 
 class UpdateLocation extends NavigationEvent {
