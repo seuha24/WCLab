@@ -145,6 +145,8 @@ class _NaverMapViewState extends State<NaverMapView> {
                     mapController = controller;
 
                     // 현재 위치 마커와 맵 위치 업데이트
+                    // todo: onMapReady 새로운 이벤트 필요.
+                    _navigationBloc.add(OnMapReady());
                     // _updateCurrentLocationMarker();
                     // _updateMapPosition();
                   },

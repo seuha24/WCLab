@@ -13,6 +13,10 @@ abstract class NavigationEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class OnMapReady extends NavigationEvent {
+  const OnMapReady();
+}
+
 class LoadPath extends NavigationEvent {
   final double startLatitude;
   final double startLongitude;

@@ -34,6 +34,7 @@ import 'navigation_state.dart';
 /// - 이 Bloc은 DI(의존성 주입, 예: GetIt)를 통해 애플리케이션의 메인에 등록해야 합니다.
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   NavigationBloc(this.apiService, this.navigationService) : super(NavigationInitial()) {
+    on<OnMapReady>(_onMapReady);
     on<LoadPath>(_onLoadPath);
     on<UpdateLocationMarker>(_onUpdateLocationMarker);
     on<UpdateMapPosition>(_onUpdateMapPosition);
@@ -140,6 +141,34 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   //   emit(NavigationIdle());
   //   emit(NavigationInProgress(timestamp: DateTime.now()));
   // }
+
+  void _onMapReady(OnMapReady event, Emitter<NavigationState> emit) {
+    log('_onMapReady: $event');
+    try {
+      emit(NavigationLoading());
+
+      // Service에서 초기 데이터 가져오기
+      final latitude = navigationService.finalLatitude;
+      final longitude = navigationService.finalLongitude;
+      final compassValue = navigationService.compassValue;
+      final isGps = navigationService.isGps;
+
+      emit(LocationMarkerUpdated(
+        latitude: latitude,
+        longitude: longitude,
+        isGps: isGps,
+      ));
+
+      emit(MapPositionUpdated(
+        latitude: latitude,
+        longitude: longitude,
+        compassValue: compassValue,
+      ));
+    } catch (error) {
+      // 오류 발생 상태 방출
+      emit(NavigationFailure(error.toString()));
+    }
+  }
 
   void _onUpdateLocationMarker(
       UpdateLocationMarker event, Emitter<NavigationState> emit) {
