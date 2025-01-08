@@ -397,23 +397,12 @@ class NavigationService {
     log('moveDot() - finalLatitude: $finalLatitude, finalLongitude: $finalLongitude');
     if (importedLatitude != finalLatitude ||
         importedLongitude != finalLongitude) {
-      // _updateCurrentLocationMarker(importedLatitude, importedLongitude);
-      // _updateMapPosition(importedLatitude, importedLongitude, compassValue);
+
       finalLatitude = importedLatitude;
       finalLongitude = importedLongitude;
 
       log('_navigationStreamController.add()');
       // Stream에 데이터 전송
-      // _locationMarkerController.add({
-      //   'remainDistance': remainDistance,
-      //   'outOfBound': outOfBound,
-      //   'currentIndex': currentIndex,
-      //   'latitude': importedLatitude,
-      //   'longitude': importedLongitude,
-      //   'compassValue': compassValue,
-      //   'isGps': isGps,
-      // });
-
       _locationMarkerController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
@@ -473,31 +462,6 @@ class NavigationService {
       'endLongitude': endLng ?? selectedLocation!.lng,
     });
   }
-
-  // /// 지도에 경로 오버레이를 추가하는 메서드.
-  // /// [paths]: 표시할 경로의 위경도 리스트.
-  // void addOverlays(List<LatLng> paths) {
-  //   if (mapController == null) {
-  //     // debugPrint('addOverlays() mapController is not initialized yet.');
-  //     return;
-  //   }
-  //
-  //   Set<NAddableOverlay> overlays = {
-  //     NMultipartPathOverlay(
-  //       id: "path",
-  //       paths: [
-  //         NMultipartPath(
-  //           coords: paths
-  //               .map((coord) => NLatLng(coord.latitude, coord.longitude))
-  //               .toList(),
-  //           outlineColor: Theme.of(context).colorScheme.primary,
-  //         ),
-  //       ],
-  //       outlineWidth: 3, // 경로표시 선의 두께 지정 (3->9)
-  //     ),
-  //   };
-  //   mapController!.addOverlayAll(overlays);
-  // }
 
   /// 두 위경도 간의 거리를 계산하는 메서드.
   /// [lat1], [lon1]: 첫 번째 점의 위경도.
@@ -957,86 +921,6 @@ class NavigationService {
       }
     }
   }
-
-  // /// 지도 위치를 업데이트하는 메서드.
-  // /// [latitude], [longitude]: 목표 위치의 위경도.
-  // /// [compassValue]: 현재 나침반 값.
-  // void _updateMapPosition(latitude, longitude, compassValue) {
-  //   if (mapController == null) {
-  //     // debugPrint('_updateMapPosition() mapController is not initialized yet.');
-  //     return;
-  //   }
-  //   // 현재 위치를 기준으로 카메라 위치를 설정
-  //   final cameraUpdate = NCameraUpdate.withParams(
-  //     target: NLatLng(latitude, longitude),
-  //     zoom: 18.5,
-  //     bearing: compassValue,
-  //   );
-  //   // 카메라 업데이트 적용
-  //   mapController!.updateCamera(cameraUpdate);
-  // }
-
-  // / 현재 위치 마커를 업데이트하는 메서드.
-  // / [latitude], [longitude]: 목표 위치의 위경도.
-  // void _updateCurrentLocationMarker(latitude, longitude) async {
-  //   // debugPrint(':::::::::::::::_updateCurrentLocationMarker');
-  //   if (mapController == null) {
-  //     // debugPrint('_updateCurrentLocationMarker() mapController is not initialized yet.');
-  //     return;
-  //   }
-  //
-  //   // GPS에 따라 마커 색상 설정
-  //   final Color markerColor = isGps ? Colors.blue : Colors.red;
-  //   final iconImage = await NOverlayImage.fromWidget(
-  //       widget: Icon(
-  //         Icons.circle,
-  //         color: markerColor,
-  //         size: 25,
-  //       ),
-  //       size: const Size(25, 25),
-  //       context: context);
-  //   // 현재 위치 마커를 새로 추가
-  //   _currentLocationMarker = NMarker(
-  //       id: 'current_location',
-  //       position: NLatLng(latitude, longitude),
-  //       icon: iconImage);
-  //
-  //   mapController!.addOverlay(_currentLocationMarker!);
-  // }
-  //
-  // / 분기 지점의 마커를 지도에 추가하는 메서드.
-  // / [branchInfoList]에 저장된 모든 분기 지점 정보를 기반으로 마커를 생성하고 지도에 추가합니다.
-  // void addBranchMarkers() async {
-  //   if (mapController == null) {
-  //     // debugPrint('addBranchMarkers() mapController is not initialized yet.');
-  //     return;
-  //   }
-  //
-  //   Set<NAddableOverlay> markers = {}; // 마커들을 담을 Set
-  //
-  //   final iconImage = await NOverlayImage.fromWidget(
-  //       widget: Icon(
-  //         Icons.circle,
-  //         color: Colors.green,
-  //         size: 15,
-  //       ),
-  //       size: const Size(15, 15),
-  //       context: context,
-  //   );
-  //
-  //   for (var branch in branchInfoList) {
-  //     _testMarker = NMarker(
-  //         id: 'checkPoint_${branchInfoList.indexOf(branch)}', // 각 마커의 고유 ID
-  //         position: NLatLng(
-  //             branch.point.latitude, branch.point.longitude), // 마커의 좌표 설정
-  //         icon: iconImage);
-  //
-  //     markers.add(_testMarker!);
-  //   }
-  //
-  //   // 맵에 마커 추가
-  //   mapController!.addOverlayAll(markers);
-  // }
 
   Timer? navigationTimer;
 
