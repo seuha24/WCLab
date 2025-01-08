@@ -160,11 +160,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       log('paths: $paths');
       log('branchInfoList: $branchInfoList');
 
-      // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
-      navigationService.paths = paths;
-      navigationService.branchInfoList = branchInfoList;
-
       // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
+      // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
+      // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
       for (int i = 0; i < branchInfoList.length - 1; i++) {
         double newBearingValue = navigationService.calculateBearing(
           branchInfoList[i].point.latitude,
@@ -174,6 +172,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
         );
         branchInfoList[i].bearingToPoint = newBearingValue;
       }
+
+      // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
+      navigationService.paths = paths;
+      navigationService.branchInfoList = branchInfoList;
 
       // 내비게이션 타이머 시작
       navigationService.startNavigationTimer();
