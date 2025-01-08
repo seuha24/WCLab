@@ -113,21 +113,19 @@ class NavigationService {
   // 길안내 관련 변수
   double remainDistance = double.infinity; // 다음 분기까지의 남은거리 (초기값: 무한대)
 
-  GeoLocation? startSelectedLocation; // 시작 위치의 좌표값 객체
-  bool isStart = false; // 출발지가 선택됐을 경우 true, 아닐경우 false
+  GeoLocation? selectedStartLocation; // 시작 위치의 좌표값 객체
+  bool isSetStart = false; // 출발지가 선택됐을 경우 true, 아닐경우 false
+  bool isSetDestination = false; // 목적지가 선택됐을 경우 true, 아닐경우 false
   late double remainStartPoint;
 
   int branchTargetIndex = 0;
-  GeoLocation? selectedLocation; // 검색된 위치의 좌표값 객체
+  GeoLocation? selectedDestinationLocation; // 검색된 위치의 좌표값 객체
   List<LatLng> paths = []; // 모든 경로의 좌표값을 담는 배열
   List<BranchInfo> branchInfoList = []; // 분기의 객체 배열
 
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
-
-  // NMarker? _currentLocationMarker;
-  // NMarker? _testMarker;
 
   String clock = "";
 
@@ -454,12 +452,13 @@ class NavigationService {
     double? endLat,
     double? endLng,
   }) {
+    log('requestNewPath()');
     // Stream에 데이터 전송
     _pathStreamController.add({
       'startLatitude': startLat,
       'startLongitude': startLng,
-      'endLatitude': endLat ?? selectedLocation!.lat,
-      'endLongitude': endLng ?? selectedLocation!.lng,
+      'endLatitude': endLat ?? selectedDestinationLocation!.lat,
+      'endLongitude': endLng ?? selectedDestinationLocation!.lng,
     });
   }
 
@@ -946,9 +945,9 @@ class NavigationService {
           branchInfoList[0].point.latitude, branchInfoList[0].point.longitude);
 
       if (remainStartPoint < 0.015) {
-        isStart = false;
+        isSetStart = false;
       }
-      if (isStart == false) {
+      if (isSetStart == false) {
         if (branchInfoList.isNotEmpty && targetIndex < branchInfoList.length) {
           branchTargetIndex = targetIndex;
 
@@ -1028,7 +1027,7 @@ class NavigationService {
             searchNewPathTime = 0;
           }
         }
-      } else if (isStart == true) {
+      } else if (isSetStart == true) {
         await announceTts("출발지로 이동하세요.");
       }
     });

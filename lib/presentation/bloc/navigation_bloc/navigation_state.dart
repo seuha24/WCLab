@@ -39,11 +39,15 @@ class NavigationPathLoaded extends NavigationState {
 }
 
 class StartLocationSet extends NavigationState {
-  const StartLocationSet();
+  final GeoLocation startLocation;
+
+  const StartLocationSet(this.startLocation);
 }
 
 class DestinationLocationSet extends NavigationState {
-  const DestinationLocationSet();
+  final GeoLocation destinationLocation;
+
+  const DestinationLocationSet(this.destinationLocation);
 }
 
 // class NavigationInProgress extends NavigationState {

@@ -21,8 +21,10 @@ class _NaverMapViewState extends State<NaverMapView> {
   @override
   void initState() {
     super.initState();
+
     /// Navigation Bloc 의존성 등록
     _navigationBloc = DI.get<NavigationBloc>();
+
     /// Init Navigation Service
     _navigationBloc.add(InitNavigation());
   }
@@ -179,17 +181,24 @@ class _NaverMapViewState extends State<NaverMapView> {
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     StartSearch(searchValue: searchLocation),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = 0.0;
+                  const end = 1.0;
+                  const curve = Curves.easeInOutQuart;
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+                  var fadeAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: fadeAnimation,
+                    child: child,
+                  );
+                },
               ),
             );
             if (newStartLocation != null) {
-              // 출발지 선택 후 내비게이션 서비스에 업데이트
-              // 화면을 갱신하기 위해 setState 호출
-              // setState(() {
-              //   _navigationBloc.navigationService.startSelectedLocation =
-              //       newStartLocation;
-              //   _navigationBloc.navigationService.isStart = true;
-              // });
-
+              /// 출발지 선택 이벤트
               _navigationBloc.add(SetStartLocation(newStartLocation));
             }
           },
@@ -207,33 +216,28 @@ class _NaverMapViewState extends State<NaverMapView> {
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     DesSearch(destinationValue: destinationLocation),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = 0.0;
+                  const end = 1.0;
+                  const curve = Curves.easeInOutQuart;
+
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+
+                  var fadeAnimation = animation.drive(tween);
+
+                  return FadeTransition(
+                    opacity: fadeAnimation,
+                    child: child,
+                  );
+                },
               ),
             );
             if (newDestinationLocation != null) {
-              // 목적지 선택 후 내비게이션 서비스에 업데이트
-              // 화면을 갱신하기 위해 setState 호출
-              // setState(() {
-              //   _navigationBloc.navigationService.selectedLocation =
-              //       newDestinationLocation;
-              // });
+              /// 목적지 선택 이벤트
               _navigationBloc
                   .add(SetDestinationLocation(newDestinationLocation));
-
-              // // 경로 요청을 위해 시작 지점 좌표 설정
-              final startLat = _navigationBloc.navigationService.isStart
-                  ? _navigationBloc.navigationService.startSelectedLocation!.lat
-                  : _navigationBloc.navigationService.finalLatitude;
-              final startLng = _navigationBloc.navigationService.isStart
-                  ? _navigationBloc.navigationService.startSelectedLocation!.lng
-                  : _navigationBloc.navigationService.finalLongitude;
-
-              // NavigationService를 통해 Bloc에 경로 요청
-              _navigationBloc.navigationService.requestNewPath(
-                startLat: startLat,
-                startLng: startLng,
-                endLat: newDestinationLocation.lat,
-                endLng: newDestinationLocation.lng,
-              );
             }
           },
         ),
@@ -292,6 +296,8 @@ class _NaverMapViewState extends State<NaverMapView> {
       debugPrint('addOverlays() mapController is not initialized yet.');
       return;
     }
+
+    debugPrint('paths: $paths');
 
     Set<NAddableOverlay> overlays = {
       NMultipartPathOverlay(

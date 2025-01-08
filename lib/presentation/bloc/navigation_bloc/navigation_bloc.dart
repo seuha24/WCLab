@@ -11,27 +11,6 @@ import 'package:safelight/framework/ui.dart';
 import 'navigation_event.dart';
 import 'navigation_state.dart';
 
-/// 이 파일은 NavigationBloc을 구현하며, 내비게이션 관련 상태 전환을 관리합니다.
-/// Flutter Bloc 아키텍처를 사용하여 비즈니스 로직을 처리합니다.
-///
-/// 역할:
-/// - TMAP API를 사용하여 내비게이션 경로를 가져옵니다 (`LoadPath` 이벤트 처리).
-/// - 이동 중 내비게이션 진행 상태를 관리합니다 (`UpdateNavigation` 이벤트 처리).
-/// - 작업의 성공 또는 실패에 따라 적절한 상태를 방출합니다.
-///
-/// 의존성:
-/// - TMAP API의 인증 키와 엔드포인트 구성이 필요합니다.
-/// - `navigation_event.dart`와 `navigation_state.dart` 파일에 정의된 이벤트와 상태를 사용합니다.
-///
-/// 처리 이벤트:
-/// - `LoadPath`: 내비게이션 경로를 가져오고 경로 및 분기점 정보를 포함한 상태를 업데이트합니다.
-/// - `UpdateNavigation`: 이동 중 남은 거리 및 경계 이탈 여부 등을 포함하여 내비게이션 진행 상태를 업데이트합니다.
-///
-/// 방출 상태:
-/// - `NavigationInitial`, `NavigationLoading`, `NavigationReady`, `NavigationInProgress`, `NavigationFailure`.
-///
-/// 참고:
-/// - 이 Bloc은 DI(의존성 주입, 예: GetIt)를 통해 애플리케이션의 메인에 등록해야 합니다.
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   late final NavigationApiService apiService;
   late final NavigationService navigationService;
@@ -99,35 +78,43 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _onSetStartLocation(
       SetStartLocation event, Emitter<NavigationState> emit) {
     log('_onSetStartLocation: $event');
-    navigationService.startSelectedLocation = event.startLocation;
-    navigationService.isStart = true;
+    navigationService.selectedStartLocation = event.startLocation;
+    navigationService.isSetStart = true;
 
-    emit(StartLocationSet());
+    // 경로 요청을 위해 시작 지점 좌표 설정
+    // 목적지 지점이 설정되어 있으면 경로 요청
+    if(navigationService.isSetDestination) {
+      log(':::목적지가 설정되어 있으므로 경로 요청');
+      navigationService.requestNewPath(
+        startLat: event.startLocation.lat,
+        startLng: event.startLocation.lng,
+        endLat: navigationService.selectedDestinationLocation!.lat,
+        endLng: navigationService.selectedDestinationLocation!.lng,
+      );
+    }
+
+    emit(StartLocationSet(event.startLocation));
   }
 
   void _onSetDestinationLocation(
       SetDestinationLocation event, Emitter<NavigationState> emit) {
     log('_onSetDestinationLocation: $event');
-    navigationService.selectedLocation = event.destinationLocation;
+    navigationService.selectedDestinationLocation = event.destinationLocation;
+    navigationService.isSetDestination = true;
 
     // 경로 요청을 위해 시작 지점 좌표 설정
-    // final startLat = navigationService.isStart
-    //     ? navigationService.startSelectedLocation!.lat
-    //     : navigationService.finalLatitude;
-    // final startLng = navigationService.isStart
-    //     ? navigationService.startSelectedLocation!.lng
-    //     : navigationService.finalLongitude;
-    //
-    // // NavigationService를 통해 Bloc에 경로 요청
-    // navigationService.requestNewPath(
-    //   startLat: startLat,
-    //   startLng: startLng,
-    //   endLat: event.destinationLocation.lat,
-    //   endLng: event.destinationLocation.lng,
-    // );
+    // 시작 지점이 설정되어 있으면 경로 요청
+    if(navigationService.isSetStart) {
+      log(':::출발지가 설정되어 있으므로 경로 요청');
+      navigationService.requestNewPath(
+        startLat: navigationService.selectedStartLocation!.lat,
+        startLng: navigationService.selectedStartLocation!.lng,
+        endLat: event.destinationLocation.lat,
+        endLng: event.destinationLocation.lng,
+      );
+    }
 
-
-    emit(DestinationLocationSet());
+    emit(DestinationLocationSet(event.destinationLocation));
   }
 
   Future<void> _onLoadPath(
@@ -153,6 +140,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       log('paths: $paths');
       log('branchInfoList: $branchInfoList');
 
+      // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
+      navigationService.paths = paths;
+      navigationService.branchInfoList = branchInfoList;
+
       // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
       for (int i = 0; i < branchInfoList.length - 1; i++) {
         double newBearingValue = navigationService.calculateBearing(
@@ -163,10 +154,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
         );
         branchInfoList[i].bearingToPoint = newBearingValue;
       }
-
-      // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
-      navigationService.paths = paths;
-      navigationService.branchInfoList = branchInfoList;
 
       // 내비게이션 타이머 시작
       navigationService.startNavigationTimer();
