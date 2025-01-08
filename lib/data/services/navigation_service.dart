@@ -90,6 +90,11 @@ class NavigationService {
   // GPS 포지션
   late Position position;
 
+  List<BranchInfo> branchinfo = [];
+  double turnUpdate2(double bearingToPoint, double compassValue) {
+    return compassValue - bearingToPoint;
+  }
+
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
   double curAccX = 0.0, curAccY = 0.0, curAccZ = 0.0;
@@ -98,8 +103,7 @@ class NavigationService {
   double rotationXSum = 0.0, rotationYSum = 0.0, rotationZSum = 0.0;
   double imuLocationX = 0.0, imuLocationY = 0.0;
   double compassValue = 0.0, lastCompassValue = 0.0;
-  double yawRate = 0.0;
-
+  double yawRate = 0.0, yawRate2 = 0.0, yawRatePerDt = 0.0, yawRateTurn2 = 0.0, yawRateAccFilteringValue = 0.3;
   // imu로 계산된 위경도 변수
   double imuLatitude = 0.0, imuLongitude = 0.0;
 
@@ -178,6 +182,8 @@ class NavigationService {
     preAccX = 0.0;
     preAccY = 0.0;
     preAccZ = 0.0;
+    yawRatePerDt = 0;
+    yawRate = compassValue * math.pi / 180;
   }
 
   /// 칼만필터 적용
@@ -276,6 +282,14 @@ class NavigationService {
     }
   }
 
+  void _updateYawRate2() {
+    if (yawRate >= 2 * math.pi || yawRate <= -2 * math.pi) {
+      yawRate = 0;
+    }
+    yawRate2 -= yawRatePerDt;
+    yawRateTurn2 = yawRate2 * 180 / math.pi;
+  }
+
   /// GPS를 통해 초기 위치를 설정하는 메서드.
   /// GPS 정확도와 상태를 기반으로 초기 위치를 설정합니다.
   Future<void> _initLocation() async {
@@ -368,6 +382,11 @@ class NavigationService {
         rotationXSum += rotationX;
         rotationYSum += rotationY;
         rotationZSum += rotationZ;
+        if (event.z > yawRateAccFilteringValue * math.pi / 180 ||
+            event.z < -yawRateAccFilteringValue * math.pi / 180) {
+          yawRatePerDt = (event.z * (SensorInterval.normalInterval.inMilliseconds / 1000.0)); // 회전 각도 계산
+        }
+        _updateYawRate2();
       },
       onError: (e) => debugPrint(e),
     );
@@ -598,16 +617,17 @@ class NavigationService {
   }
 
   void indexUpdate() {
+    yawRate2 = turnUpdate2(branchinfo[currentIndex].bearingToPoint, compassValue) * math.pi / 180;
     double distanceBetweenBranchFunc(
         List<BranchInfo> branchInfoList, int currentIndex, int targetIndex) {
-      double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
-      double currentIndexLongitude =
-          branchInfoList[currentIndex].point.longitude;
-      double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
-      double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
-      return calculateDistance(currentIndexLatitude, currentIndexLongitude,
-          targetIndexLatitude, targetIndexLongitude);
-    }
+          double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
+          double currentIndexLongitude =
+              branchInfoList[currentIndex].point.longitude;
+          double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
+          double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
+          return calculateDistance(currentIndexLatitude, currentIndexLongitude,
+              targetIndexLatitude, targetIndexLongitude);
+        }
 
     int moveIndex(List<BranchInfo> currentWindow) {
       double beforeMin = double.maxFinite; // window 내에 가장 가까운 값
@@ -729,6 +749,7 @@ class NavigationService {
       double targetIndexLatitude,
       double finalLatitude,
       double finalLongitude,
+      double yawRateTurn2,
       double bearingToPoint,
       int boundaryExit) {
     Map<String, double> breakPoint(
@@ -779,6 +800,7 @@ class NavigationService {
         finalLatitude,
         finalLongitude);
     double guidanceAngle = 0.0;
+
     double baseAngle = (breakPointAngle['breakPointAngleC']! * (180 / math.pi));
     // 목표 지까지의 각도를 계산 (기존 breakPointB + yaw rate 고려)
     guidanceAngle = baseAngle % 360;
@@ -793,6 +815,7 @@ class NavigationService {
       double targetIndexLatitude,
       double finalLatitude,
       double finalLongitude,
+      double yawRateTurn2,
       double bearingToPoint) {
     int boundaryExit = checkLateralDeviation(
       currentIndexLatitude,
@@ -810,6 +833,7 @@ class NavigationService {
         targetIndexLatitude,
         finalLatitude,
         finalLongitude,
+        yawRateTurn2,
         bearingToPoint,
         boundaryExit);
 
@@ -968,6 +992,7 @@ class NavigationService {
                 branchInfoList[targetIndex].point.latitude,
                 finalLatitude,
                 finalLongitude,
+                yawRateTurn2,
                 branchInfoList[currentIndex].bearingToPoint);
           }
 
