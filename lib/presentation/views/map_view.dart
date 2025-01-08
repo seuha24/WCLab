@@ -63,9 +63,9 @@ class _NaverMapViewState extends State<NaverMapView> {
         } else if (state is NavigationPathLoaded) {
           // 지도에 경로 오버레이 및 브랜치 마커 추가
           log('NavigationPathLoaded: ${state.paths}');
-          setState(() {
-            addOverlays(state.paths);
-            addBranchMarkers(state.branchInfoList);
+          setState(() async {
+            await addOverlays(state.paths);
+            await addBranchMarkers(state.branchInfoList);
           });
         } else if (state is LocationMarkerUpdated) {
           // 위치 마커 업데이트
@@ -95,6 +95,12 @@ class _NaverMapViewState extends State<NaverMapView> {
           return Center(child: CircularProgressIndicator());
         } else {
           /// NavigationReady 이후에 화면 표시
+          final info = _navigationBloc.onGetMapData();
+          final latitude = info['latitude'];
+          final longitude = info['longitude'];
+          final compassValue = info['compassValue'];
+          final remainDistance = info['remainDistance'];
+
           return Scaffold(
             body: Stack(
               children: [
@@ -104,12 +110,10 @@ class _NaverMapViewState extends State<NaverMapView> {
                     indoorEnable: true,
                     // 실내 지도 활성화
                     initialCameraPosition: NCameraPosition(
-                      target: NLatLng(
-                          _navigationBloc.navigationService.finalLatitude,
-                          _navigationBloc.navigationService.finalLongitude),
+                      target: NLatLng(latitude, longitude), // 초기 위치
                       zoom: 18.5,
                       // 초기 줌 레벨
-                      bearing: _navigationBloc.navigationService.compassValue,
+                      bearing: compassValue,
                       // 초기 지도 방향
                       tilt: 0, // 초기 입체 각도
                     ),
@@ -130,12 +134,9 @@ class _NaverMapViewState extends State<NaverMapView> {
                   },
                   onMapTapped: (NPoint point, NLatLng latLng) async {
                     // 지도 클릭 시 남은 거리 안내 음성 출력
-                    int meters =
-                        (_navigationBloc.navigationService.remainDistance *
-                                1000)
-                            .round();
-                    await _navigationBloc.navigationService
-                        .announceTts('다음 안내까지 $meters미터 남았습니다.');
+                    int meters = (remainDistance * 1000).round();
+                    await _navigationBloc
+                        .onAnnounceTts('다음 안내까지 $meters미터 남았습니다.');
                   },
                 ),
                 // 검색 입력창 표시
@@ -199,7 +200,9 @@ class _NaverMapViewState extends State<NaverMapView> {
             );
             if (newStartLocation != null) {
               /// 출발지 선택 이벤트
-              _navigationBloc.add(SetStartLocation(newStartLocation));
+              setState(() {
+                _navigationBloc.add(SetStartLocation(newStartLocation));
+              });
             }
           },
         ),
@@ -236,8 +239,10 @@ class _NaverMapViewState extends State<NaverMapView> {
             );
             if (newDestinationLocation != null) {
               /// 목적지 선택 이벤트
-              _navigationBloc
-                  .add(SetDestinationLocation(newDestinationLocation));
+              setState(() {
+                _navigationBloc
+                    .add(SetDestinationLocation(newDestinationLocation));
+              });
             }
           },
         ),
@@ -290,7 +295,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   /// 지도에 경로 오버레이를 추가하는 메서드.
   /// [paths]: 표시할 경로의 위경도 리스트.
-  void addOverlays(List<LatLng> paths) {
+  Future<void> addOverlays(List<LatLng> paths) async {
     debugPrint('addOverlays()');
     if (mapController == null) {
       debugPrint('addOverlays() mapController is not initialized yet.');
@@ -318,7 +323,7 @@ class _NaverMapViewState extends State<NaverMapView> {
 
   /// 분기 지점의 마커를 지도에 추가하는 메서드.
   /// [branchInfoList]에 저장된 모든 분기 지점 정보를 기반으로 마커를 생성하고 지도에 추가합니다.
-  void addBranchMarkers(List<BranchInfo> branchInfoList) async {
+  Future<void> addBranchMarkers(List<BranchInfo> branchInfoList) async {
     debugPrint(':::::::::::::::addBranchMarkers');
     if (mapController == null) {
       debugPrint('addBranchMarkers() mapController is not initialized yet.');
@@ -360,10 +365,6 @@ class _NaverMapViewState extends State<NaverMapView> {
     bool isGps,
   ) async {
     debugPrint(':::::::::::::::_updateCurrentLocationMarker');
-    // log('**latitude: $latitude, longitude: $longitude, isGps: $isGps');
-    // log('**finalLatitude: ${_navigationBloc.navigationService.finalLatitude}, '
-    //     'finalLongitude: ${_navigationBloc.navigationService.finalLongitude}, '
-    //     'isGps: ${_navigationBloc.navigationService.isGps},');
 
     if (mapController == null) {
       debugPrint(
@@ -401,12 +402,6 @@ class _NaverMapViewState extends State<NaverMapView> {
     double compassValue,
   ) {
     debugPrint(':::::::::::::::_updateMapPosition');
-    // debugPrint(
-    //     '**latitude: $latitude, longitude: $longitude, compassValue: $compassValue');
-    // debugPrint(
-    //     '**finalLatitude: ${_navigationBloc.navigationService.finalLatitude}, '
-    //     'finalLongitude: ${_navigationBloc.navigationService.finalLongitude}, '
-    //     'compassValue: ${_navigationBloc.navigationService.compassValue},');
 
     if (mapController == null) {
       debugPrint('_updateMapPosition() mapController is not initialized yet.');

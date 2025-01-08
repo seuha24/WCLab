@@ -75,6 +75,26 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     });
   }
 
+  // Get Map Data
+  Map<String, dynamic> onGetMapData() {
+    final latitude = navigationService.finalLatitude;
+    final longitude = navigationService.finalLongitude;
+    final compassValue = navigationService.compassValue;
+    final remainDistance = navigationService.remainDistance;
+
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'compassValue': compassValue,
+      'remainDistance': remainDistance,
+    };
+  }
+
+  // Announce TTS
+  Future<void> onAnnounceTts(String message) async {
+    await navigationService.announceTts(message);
+  }
+
   void _onSetStartLocation(
       SetStartLocation event, Emitter<NavigationState> emit) {
     log('_onSetStartLocation: $event');
@@ -83,7 +103,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
     // 경로 요청을 위해 시작 지점 좌표 설정
     // 목적지 지점이 설정되어 있으면 경로 요청
-    if(navigationService.isSetDestination) {
+    if (navigationService.isSetDestination) {
       log(':::목적지가 설정되어 있으므로 경로 요청');
       navigationService.requestNewPath(
         startLat: event.startLocation.lat,
@@ -104,7 +124,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
     // 경로 요청을 위해 시작 지점 좌표 설정
     // 시작 지점이 설정되어 있으면 경로 요청
-    if(navigationService.isSetStart) {
+    if (navigationService.isSetStart) {
       log(':::출발지가 설정되어 있으므로 경로 요청');
       navigationService.requestNewPath(
         startLat: navigationService.selectedStartLocation!.lat,
@@ -176,7 +196,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     }
   }
 
-  void _onCloseNavigation(CloseNavigation event, Emitter<NavigationState> emit) {
+  void _onCloseNavigation(
+      CloseNavigation event, Emitter<NavigationState> emit) {
     log('_onCloseNavigation: $event');
     navigationService.dispose();
   }
