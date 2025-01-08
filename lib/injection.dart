@@ -274,4 +274,7 @@ Future<void> init() async {
     DI.get<NavigationApiService>(),
     DI.get<NavigationService>(),
   ));
+
+  DI.registerLazySingleton<SearchBloc>(() => SearchBloc());
+
 }
