@@ -14,6 +14,10 @@ abstract class NavigationEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class InitNavigation extends NavigationEvent {
+  const InitNavigation();
+}
+
 class OnMapReady extends NavigationEvent {
   const OnMapReady();
 }

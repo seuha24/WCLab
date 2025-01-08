@@ -28,7 +28,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     _searchBloc = DI.get<SearchBloc>();
 
     // 내비게이션 서비스 초기화
-    _navigationBloc.navigationService.init();
+    _navigationBloc.add(InitNavigation());
   }
 
   @override

@@ -153,6 +153,7 @@ class NavigationService {
   /// 초기화 메서드.
   /// 내비게이션 서비스를 초기화하고 위치 데이터를 설정합니다.
   void init() {
+    log('NavigationService init()');
     initLoadingState();
     _initLocation();
   }

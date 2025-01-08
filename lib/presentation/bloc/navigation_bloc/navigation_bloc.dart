@@ -37,6 +37,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   late final NavigationService navigationService;
 
   NavigationBloc(this.apiService, this.navigationService) : super(NavigationInitial()) {
+    on<InitNavigation>(_onInitNavigation);
     on<OnMapReady>(_onMapReady);
     on<StartLoading>((event, emit) => emit(NavigationLoading()));
     on<StopLoading>((event, emit) => emit(NavigationReady()));
@@ -137,6 +138,16 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     } catch (error) {
       // 에러 상태 처리
       emit(NavigationFailure(error.toString()));
+    }
+  }
+
+  void _onInitNavigation(InitNavigation event, Emitter<NavigationState> emit) {
+    log('_onInitNavigation: $event');
+    try {
+      emit(NavigationLoading()); // 로딩 상태 방출
+      navigationService.init(); // NavigationService 초기화 호출
+    } catch (e) {
+      emit(NavigationFailure(e.toString()));
     }
   }
 
