@@ -36,8 +36,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   late final NavigationApiService apiService;
   late final NavigationService navigationService;
 
-  NavigationBloc(this.apiService, this.navigationService) : super(NavigationInitial()) {
+  NavigationBloc(this.apiService, this.navigationService)
+      : super(NavigationInitial()) {
     on<InitNavigation>(_onInitNavigation);
+    on<CloseNavigation>(_onCloseNavigation);
     on<OnMapReady>(_onMapReady);
     on<StartLoading>((event, emit) => emit(NavigationLoading()));
     on<StopLoading>((event, emit) => emit(NavigationReady()));
@@ -94,7 +96,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     });
   }
 
-  void _onSetStartLocation(SetStartLocation event, Emitter<NavigationState> emit) {
+  void _onSetStartLocation(
+      SetStartLocation event, Emitter<NavigationState> emit) {
     log('_onSetStartLocation: $event');
     navigationService.startSelectedLocation = event.startLocation;
     navigationService.isStart = true;
@@ -102,14 +105,34 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     emit(StartLocationSet());
   }
 
-  void _onSetDestinationLocation(SetDestinationLocation event, Emitter<NavigationState> emit) {
+  void _onSetDestinationLocation(
+      SetDestinationLocation event, Emitter<NavigationState> emit) {
     log('_onSetDestinationLocation: $event');
     navigationService.selectedLocation = event.destinationLocation;
+
+    // 경로 요청을 위해 시작 지점 좌표 설정
+    // final startLat = navigationService.isStart
+    //     ? navigationService.startSelectedLocation!.lat
+    //     : navigationService.finalLatitude;
+    // final startLng = navigationService.isStart
+    //     ? navigationService.startSelectedLocation!.lng
+    //     : navigationService.finalLongitude;
+    //
+    // // NavigationService를 통해 Bloc에 경로 요청
+    // navigationService.requestNewPath(
+    //   startLat: startLat,
+    //   startLng: startLng,
+    //   endLat: event.destinationLocation.lat,
+    //   endLng: event.destinationLocation.lng,
+    // );
+
 
     emit(DestinationLocationSet());
   }
 
-  Future<void> _onLoadPath(LoadPath event, Emitter<NavigationState> emit) async {
+  Future<void> _onLoadPath(
+      LoadPath event, Emitter<NavigationState> emit) async {
+    log('_onLoadPath: $event');
     emit(NavigationLoading());
 
     try {
@@ -127,11 +150,26 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       final branchInfoList = parsedData['branchInfo'] as List<BranchInfo>;
 
       /// 데이터 로깅
-      // log('paths: $paths');
-      // log('branchInfo: $branchInfo');
+      log('paths: $paths');
+      log('branchInfoList: $branchInfoList');
 
+      // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
+      for (int i = 0; i < branchInfoList.length - 1; i++) {
+        double newBearingValue = navigationService.calculateBearing(
+          branchInfoList[i].point.latitude,
+          branchInfoList[i].point.longitude,
+          branchInfoList[i + 1].point.latitude,
+          branchInfoList[i + 1].point.longitude,
+        );
+        branchInfoList[i].bearingToPoint = newBearingValue;
+      }
+
+      // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
       navigationService.paths = paths;
       navigationService.branchInfoList = branchInfoList;
+
+      // 내비게이션 타이머 시작
+      navigationService.startNavigationTimer();
 
       // BloC 상태 갱신
       emit(NavigationPathLoaded(paths, branchInfoList));
@@ -149,6 +187,11 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     } catch (e) {
       emit(NavigationFailure(e.toString()));
     }
+  }
+
+  void _onCloseNavigation(CloseNavigation event, Emitter<NavigationState> emit) {
+    log('_onCloseNavigation: $event');
+    navigationService.dispose();
   }
 
   void _onMapReady(OnMapReady event, Emitter<NavigationState> emit) {
@@ -202,5 +245,4 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       compassValue: event.compassValue,
     ));
   }
-
 }

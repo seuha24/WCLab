@@ -1053,21 +1053,11 @@ class NavigationService {
     log('startNavigationTimer()');
     navigationTimer?.cancel(); // 기존 타이머 제거
     navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      log('navigationTimer: $timer');
       // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remainDistance 변수에 삽입
-      // _updateNavigation(finalLatitude, finalLongitude);
-      //
-      // _navigationStreamController.add({
-      //   'remainDistance': remainDistance,
-      //   'outOfBound': outOfBound,
-      //   'currentIndex': currentIndex,
-      //   'latitude': finalLatitude,
-      //   'longitude': finalLongitude,
-      //   'compassValue': compassValue,
-      //   'isGps': isGps,
-      // });
+      checkBoundary(); //경계이탈, 인덱스
+      indexUpdate();
 
-      // final state = navigationBloc.state;
-      // if (state is NavigationInProgress) {
       remainStartPoint = calculateDistance(finalLatitude, finalLongitude,
           branchInfoList[0].point.latitude, branchInfoList[0].point.longitude);
 
@@ -1133,7 +1123,7 @@ class NavigationService {
           debugPrint(
               "경로내 진동 베어링 값 ${(branchInfoList[currentIndex].bearingToPoint - compassValue)}");
         }
-        //임시 주석
+
         // 경로 이탈 시 경로이탈 안내
         if (outOfBound) {
           Vibration.vibrate(duration: 100);

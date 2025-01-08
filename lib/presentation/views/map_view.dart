@@ -12,9 +12,7 @@ class NaverMapView extends StatefulWidget {
 }
 
 class _NaverMapViewState extends State<NaverMapView> {
-  // late final NavigationService _navigationBloc.navigationService; // 내비게이션 서비스
   late final NavigationBloc _navigationBloc;
-  late final SearchBloc _searchBloc;
   NaverMapController? mapController;
 
   NMarker? _currentLocationMarker;
@@ -23,18 +21,16 @@ class _NaverMapViewState extends State<NaverMapView> {
   @override
   void initState() {
     super.initState();
-    // DI를 통해 NavigationService 초기화
+    /// Navigation Bloc 의존성 등록
     _navigationBloc = DI.get<NavigationBloc>();
-    _searchBloc = DI.get<SearchBloc>();
-
-    // 내비게이션 서비스 초기화
+    /// Init Navigation Service
     _navigationBloc.add(InitNavigation());
   }
 
   @override
   void dispose() {
-    // 내비게이션 서비스 자원 정리
-    _navigationBloc.navigationService.dispose();
+    /// Dispose Navigation Service
+    _navigationBloc.add(CloseNavigation());
 
     super.dispose();
   }
@@ -63,36 +59,12 @@ class _NaverMapViewState extends State<NaverMapView> {
           log('DestinationLocationSet');
           setState(() {});
         } else if (state is NavigationPathLoaded) {
-          // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
-          // _navigationBloc.navigationService.paths = state.paths;
-          // _navigationBloc.navigationService.branchInfoList =
-          //     state.branchInfoList;
-
           // 지도에 경로 오버레이 및 브랜치 마커 추가
-          addOverlays(state.paths);
-          addBranchMarkers(state.branchInfoList);
-
-          // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
-          for (int i = 0;
-              i < _navigationBloc.navigationService.branchInfoList.length - 1;
-              i++) {
-            double newBearingValue =
-                _navigationBloc.navigationService.calculateBearing(
-              _navigationBloc
-                  .navigationService.branchInfoList[i].point.latitude,
-              _navigationBloc
-                  .navigationService.branchInfoList[i].point.longitude,
-              _navigationBloc
-                  .navigationService.branchInfoList[i + 1].point.latitude,
-              _navigationBloc
-                  .navigationService.branchInfoList[i + 1].point.longitude,
-            );
-            _navigationBloc.navigationService.branchInfoList[i].bearingToPoint =
-                newBearingValue;
-          }
-
-          // 내비게이션 타이머 시작
-          _navigationBloc.navigationService.startNavigationTimer();
+          log('NavigationPathLoaded: ${state.paths}');
+          setState(() {
+            addOverlays(state.paths);
+            addBranchMarkers(state.branchInfoList);
+          });
         } else if (state is LocationMarkerUpdated) {
           // 위치 마커 업데이트
           debugPrint('LocationMarkerUpdated');
@@ -114,7 +86,6 @@ class _NaverMapViewState extends State<NaverMapView> {
           debugPrint('경로 로드 실패: ${state.error}');
         }
       },
-      // todo :bloc으로 로딩 처리하고 blocConsumer로 변경 필요.
       builder: (context, state) {
         log('builder state : $state');
         // 로딩 상태에 따라 로딩 인디케이터 또는 지도 화면 표시
@@ -248,7 +219,7 @@ class _NaverMapViewState extends State<NaverMapView> {
               _navigationBloc
                   .add(SetDestinationLocation(newDestinationLocation));
 
-              // 경로 요청을 위해 시작 지점 좌표 설정
+              // // 경로 요청을 위해 시작 지점 좌표 설정
               final startLat = _navigationBloc.navigationService.isStart
                   ? _navigationBloc.navigationService.startSelectedLocation!.lat
                   : _navigationBloc.navigationService.finalLatitude;

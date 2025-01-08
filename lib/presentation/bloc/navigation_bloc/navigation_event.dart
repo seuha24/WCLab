@@ -18,6 +18,10 @@ class InitNavigation extends NavigationEvent {
   const InitNavigation();
 }
 
+class CloseNavigation extends NavigationEvent {
+  const CloseNavigation();
+}
+
 class OnMapReady extends NavigationEvent {
   const OnMapReady();
 }
