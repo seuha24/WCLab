@@ -39,9 +39,41 @@ class NavigationService {
 
   late final TtsService ttsService;
 
-  NaverMapController? mapController;
+  /// Stream Controllers
+  ///
+  /// Loading Stream Controller
+  final _loadingController = StreamController<bool>.broadcast();
 
-  // final navigationBloc = NavigationBloc();
+  Stream<bool> get loadingStream => _loadingController.stream;
+
+  void initLoadingState() {
+    _loadingController.add(true);
+  }
+
+  void updateLoadingState(bool isLoading) {
+    _loadingController.add(isLoading);
+  }
+
+  /// Path Stream Controller
+  final StreamController<Map<String, dynamic>> _pathStreamController =
+      StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get pathStream => _pathStreamController.stream;
+
+  /// Location Marker Stream Controller
+  final StreamController<Map<String, dynamic>> _locationMarkerController =
+      StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get locationMarkerStream =>
+      _locationMarkerController.stream
+          .throttleTime(Duration(milliseconds: 200));
+
+  /// Map Position Stream Controller
+  final StreamController<Map<String, dynamic>> _mapPositionController =
+      StreamController.broadcast();
+
+  Stream<Map<String, dynamic>> get mapPositionStream =>
+      _mapPositionController.stream.throttleTime(Duration(milliseconds: 200));
 
   // 네이티브 위치 확인용
   late double s_latitude;
@@ -57,27 +89,6 @@ class NavigationService {
 
   // GPS 포지션
   late Position position;
-
-  /// Path Stream Controller
-  final StreamController<Map<String, dynamic>> _pathStreamController =
-  StreamController.broadcast();
-
-  Stream<Map<String, dynamic>> get pathStream => _pathStreamController.stream;
-
-  /// Location Marker Stream Controller
-  final StreamController<Map<String, dynamic>> _locationMarkerController =
-  StreamController.broadcast();
-
-  Stream<Map<String, dynamic>> get locationMarkerStream =>
-      _locationMarkerController.stream
-          .throttleTime(Duration(milliseconds: 200));
-
-  /// Map Position Stream Controller
-  final StreamController<Map<String, dynamic>> _mapPositionController =
-  StreamController.broadcast();
-
-  Stream<Map<String, dynamic>> get mapPositionStream =>
-      _mapPositionController.stream.throttleTime(Duration(milliseconds: 200));
 
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -101,14 +112,6 @@ class NavigationService {
 
   // 길안내 관련 변수
   double remainDistance = double.infinity; // 다음 분기까지의 남은거리 (초기값: 무한대)
-  // bool isLoading = true; // 로딩을 위한 T/F
-
-  // 상태를 관리하는 ValueNotifier
-  final ValueNotifier<bool> isLoading = ValueNotifier<bool>(true);
-
-  void updateLoadingState(bool value) {
-    isLoading.value = value; // 상태 업데이트
-  }
 
   GeoLocation? startSelectedLocation; // 시작 위치의 좌표값 객체
   bool isStart = false; // 출발지가 선택됐을 경우 true, 아닐경우 false
@@ -116,7 +119,6 @@ class NavigationService {
 
   int branchTargetIndex = 0;
   GeoLocation? selectedLocation; // 검색된 위치의 좌표값 객체
-  // NaverMapController? mapController;
   List<LatLng> paths = []; // 모든 경로의 좌표값을 담는 배열
   List<BranchInfo> branchInfoList = []; // 분기의 객체 배열
 
@@ -151,6 +153,7 @@ class NavigationService {
   /// 초기화 메서드.
   /// 내비게이션 서비스를 초기화하고 위치 데이터를 설정합니다.
   void init() {
+    initLoadingState();
     _initLocation();
   }
 
@@ -200,7 +203,7 @@ class NavigationService {
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
     // debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
     final double accelerationMagnitude =
-    math.sqrt(curAccX * curAccX + curAccY * curAccY);
+        math.sqrt(curAccX * curAccX + curAccY * curAccY);
     // debugPrint(
     //     'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
     curAccX = kalmanX.filtered(curAccX);
@@ -228,7 +231,7 @@ class NavigationService {
     velocityY = velocityY * math.cos(rotationY);
     // 속력 계산
     final double currentSpeed =
-    math.sqrt(velocityX * velocityX + velocityY * velocityY);
+        math.sqrt(velocityX * velocityX + velocityY * velocityY);
     // debugPrint('currentSpeed: $currentSpeed, positionUpdateFunc 진행 중...6');
     // 실제 이동 거리 계산
     imuLocationX -= (currentSpeed * math.cos(yawRate) * deltaTime);
@@ -358,7 +361,8 @@ class NavigationService {
       ),
       onEvent: (GyroscopeEvent event) {
         log('gyroscopeEvent: $event');
-        final deltaTime = (SensorInterval.normalInterval).inMilliseconds / 1000.0;
+        final deltaTime =
+            (SensorInterval.normalInterval).inMilliseconds / 1000.0;
         rotationX = event.x * deltaTime;
         rotationY = event.y * deltaTime;
         rotationZ = event.z * deltaTime;
@@ -375,7 +379,9 @@ class NavigationService {
         accuracy: LocationAccuracy.high,
         distanceFilter: 1,
       ),
-    ).throttleTime(Duration(milliseconds: 200)).listen((Position position) async {
+    )
+        .throttleTime(Duration(milliseconds: 200))
+        .listen((Position position) async {
       log('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
         // await moveByGps();
@@ -412,7 +418,6 @@ class NavigationService {
         'longitude': importedLongitude,
         'isGps': isGps,
       });
-
 
       _mapPositionController.add({
         'latitude': importedLatitude,
@@ -466,13 +471,6 @@ class NavigationService {
       'endLatitude': endLat ?? selectedLocation!.lat,
       'endLongitude': endLng ?? selectedLocation!.lng,
     });
-
-    // navigationBloc.add(LoadPath(
-    //   startLatitude: startLat,
-    //   startLongitude: startLng,
-    //   endLatitude: endLat ?? selectedLocation!.lat,
-    //   endLongitude: endLng ?? selectedLocation!.lng,
-    // ));
   }
 
   // /// 지도에 경로 오버레이를 추가하는 메서드.
@@ -599,14 +597,14 @@ class NavigationService {
   /// [onError]: 오류 발생 시 호출할 함수.
   void subscribeToSensor<T>(
       {required Stream<T> sensorStream,
-        required Function(T event) onEvent,
-        required Function(dynamic error) onError}) {
+      required Function(T event) onEvent,
+      required Function(dynamic error) onError}) {
     var subscription =
-    sensorStream.throttleTime(const Duration(milliseconds: 200)).listen(
-      onEvent,
-      onError: onError,
-      cancelOnError: true,
-    );
+        sensorStream.throttleTime(const Duration(milliseconds: 200)).listen(
+              onEvent,
+              onError: onError,
+              cancelOnError: true,
+            );
     _streamSubscriptions.add(subscription);
   }
 
@@ -677,7 +675,7 @@ class NavigationService {
     }
 
     List<BranchInfo> currentWindow =
-    getCurrentWindow(branchInfoList, currentIndex, 5);
+        getCurrentWindow(branchInfoList, currentIndex, 5);
     int nearestIndex = moveIndex(currentWindow);
 
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
@@ -770,13 +768,13 @@ class NavigationService {
       double bearingToPoint,
       int boundaryExit) {
     Map<String, double> breakPoint(
-        double currentIndexLongitude,
-        double currentIndexLatitude,
-        double targetIndexLongitude,
-        double targetIndexLatitude,
-        double finalLatitude,
-        double finalLongitude,
-        ) {
+      double currentIndexLongitude,
+      double currentIndexLatitude,
+      double targetIndexLongitude,
+      double targetIndexLatitude,
+      double finalLatitude,
+      double finalLongitude,
+    ) {
       // 주어진 위경도를 라디안으로 변환
 
       //현재 인덱스
@@ -897,7 +895,7 @@ class NavigationService {
   //branch일 경우의 branchinfo[currentIndex]를 전부 currentWindowValue로 바꿈
   void checkBoundary() {
     List<BranchInfo> currentWindow =
-    getCurrentWindow(branchInfoList, currentIndex, 5);
+        getCurrentWindow(branchInfoList, currentIndex, 5);
     double beforeMinDistanceToPath = double.maxFinite;
     //점과 직선 최소거리
     for (int i = 0; i < currentWindow.length - 1; i++) {
@@ -908,10 +906,10 @@ class NavigationService {
 
       if (currentWindowValue.branch == true) {
         circularDistance = calculateDistance(
-            currentWindowValue.point.latitude,
-            currentWindowValue.point.longitude,
-            finalLatitude,
-            finalLongitude) *
+                currentWindowValue.point.latitude,
+                currentWindowValue.point.longitude,
+                finalLatitude,
+                finalLongitude) *
             1000;
 
         checkBoundaryCondition = "정방향, 브랜치";
@@ -1124,11 +1122,11 @@ class NavigationService {
           }
         }
         if (currentIndex > 0 &&
+                (branchInfoList[currentIndex].bearingToPoint - compassValue)
+                        .abs() <=
+                    18 ||
             (branchInfoList[currentIndex].bearingToPoint - compassValue)
-                .abs() <=
-                18 ||
-            (branchInfoList[currentIndex].bearingToPoint - compassValue)
-                .abs() >=
+                    .abs() >=
                 342) {
           Vibration.vibrate(duration: 200);
           debugPrint(

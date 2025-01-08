@@ -33,13 +33,29 @@ import 'navigation_state.dart';
 /// 참고:
 /// - 이 Bloc은 DI(의존성 주입, 예: GetIt)를 통해 애플리케이션의 메인에 등록해야 합니다.
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
+  late final NavigationApiService apiService;
+  late final NavigationService navigationService;
+
   NavigationBloc(this.apiService, this.navigationService) : super(NavigationInitial()) {
     on<OnMapReady>(_onMapReady);
+    on<StartLoading>((event, emit) => emit(NavigationLoading()));
+    on<StopLoading>((event, emit) => emit(NavigationReady()));
+    on<SetStartLocation>(_onSetStartLocation);
+    on<SetDestinationLocation>(_onSetDestinationLocation);
     on<LoadPath>(_onLoadPath);
     on<UpdateLocationMarker>(_onUpdateLocationMarker);
     on<UpdateMapPosition>(_onUpdateMapPosition);
 
-    /// Service의 Stream 구독
+    /// Service 의 Stream 구독
+    ///
+    /// Loading Stream
+    navigationService.loadingStream.listen((isLoading) {
+      if (isLoading) {
+        add(StartLoading());
+      } else {
+        add(StopLoading());
+      }
+    });
 
     /// Path Stream
     navigationService.pathStream.listen((data) {
@@ -75,31 +91,22 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
         compassValue: data['compassValue'],
       ));
     });
-
-
   }
 
-  late final NavigationApiService apiService;
-  late final NavigationService navigationService;
-  late final StreamSubscription _sensorSubscription;
+  void _onSetStartLocation(SetStartLocation event, Emitter<NavigationState> emit) {
+    log('_onSetStartLocation: $event');
+    navigationService.startSelectedLocation = event.startLocation;
+    navigationService.isStart = true;
 
-  late final StreamSubscription<Position> _positionSubscription;
+    emit(StartLocationSet());
+  }
 
+  void _onSetDestinationLocation(SetDestinationLocation event, Emitter<NavigationState> emit) {
+    log('_onSetDestinationLocation: $event');
+    navigationService.selectedLocation = event.destinationLocation;
 
-
-  // void _subscribeToPositionStream() {
-  //   _positionSubscription =
-  //       navigationService.positionStream.listen((Position position) {
-  //         // 위치 데이터를 기반으로 Bloc 이벤트를 추가
-  //         add(UpdateNavigationEvent(
-  //           latitude: position.latitude,
-  //           longitude: position.longitude,
-  //           isGps: position.accuracy <= 10, // GPS 여부를 정확도로 판단
-  //           compassValue: 0.0, // 나침반 값은 추후 추가 가능
-  //         ));
-  //       });
-  // }
-
+    emit(DestinationLocationSet());
+  }
 
   Future<void> _onLoadPath(LoadPath event, Emitter<NavigationState> emit) async {
     emit(NavigationLoading());
@@ -126,21 +133,12 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       navigationService.branchInfoList = branchInfoList;
 
       // BloC 상태 갱신
-      emit(NavigationReady(paths, branchInfoList));
+      emit(NavigationPathLoaded(paths, branchInfoList));
     } catch (error) {
       // 에러 상태 처리
       emit(NavigationFailure(error.toString()));
     }
   }
-
-  // void _onUpdateNavigation(
-  //     UpdateNavigation event, Emitter<NavigationState> emit) {
-  //   log('_onUpdateNavigation: $event');
-  //
-  //   // NavigationInProgress 상태 업데이트
-  //   emit(NavigationIdle());
-  //   emit(NavigationInProgress(timestamp: DateTime.now()));
-  // }
 
   void _onMapReady(OnMapReady event, Emitter<NavigationState> emit) {
     log('_onMapReady: $event');

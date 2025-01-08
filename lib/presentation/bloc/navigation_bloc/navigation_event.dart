@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:safelight/framework/ui.dart';
 
 /// 이 파일은 NavigationBloc에 전달될 수 있는 다양한 이벤트를 정의합니다.
 /// 이 이벤트들은 Bloc 내에서 다양한 동작을 트리거하며, 경로 로드 또는 이동 중 상태 업데이트 등을 수행합니다.
@@ -15,6 +16,26 @@ abstract class NavigationEvent extends Equatable {
 
 class OnMapReady extends NavigationEvent {
   const OnMapReady();
+}
+
+class StartLoading extends NavigationEvent {
+  const StartLoading();
+}
+
+class StopLoading extends NavigationEvent {
+  const StopLoading();
+}
+
+class SetStartLocation extends NavigationEvent {
+  final GeoLocation startLocation;
+
+  const SetStartLocation(this.startLocation);
+}
+
+class SetDestinationLocation extends NavigationEvent {
+  final GeoLocation destinationLocation;
+
+  const SetDestinationLocation(this.destinationLocation);
 }
 
 class LoadPath extends NavigationEvent {

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/domain/entities/branch_info.dart';
+import 'package:safelight/framework/ui.dart';
 
 /// 이 파일은 NavigationBloc에서 발생할 수 있는 다양한 상태를 정의합니다.
 /// 상태는 내비게이션 처리의 다양한 단계를 나타내며, 로딩 중 상태, 경로 로드 성공 상태,
@@ -25,14 +26,24 @@ class NavigationInitial extends NavigationState {}
 
 class NavigationLoading extends NavigationState {}
 
-class NavigationReady extends NavigationState {
+class NavigationReady extends NavigationState {}
+
+class NavigationPathLoaded extends NavigationState {
   final List<LatLng> paths;
   final List<BranchInfo> branchInfoList;
 
-  const NavigationReady(this.paths, this.branchInfoList);
+  const NavigationPathLoaded(this.paths, this.branchInfoList);
 
   @override
   List<Object> get props => [paths, branchInfoList];
+}
+
+class StartLocationSet extends NavigationState {
+  const StartLocationSet();
+}
+
+class DestinationLocationSet extends NavigationState {
+  const DestinationLocationSet();
 }
 
 // class NavigationInProgress extends NavigationState {

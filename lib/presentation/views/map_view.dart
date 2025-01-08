@@ -14,6 +14,7 @@ class NaverMapView extends StatefulWidget {
 class _NaverMapViewState extends State<NaverMapView> {
   // late final NavigationService _navigationBloc.navigationService; // 내비게이션 서비스
   late final NavigationBloc _navigationBloc;
+  late final SearchBloc _searchBloc;
   NaverMapController? mapController;
 
   NMarker? _currentLocationMarker;
@@ -24,7 +25,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     super.initState();
     // DI를 통해 NavigationService 초기화
     _navigationBloc = DI.get<NavigationBloc>();
-    // _navigationBloc.navigationService = DI.get<NavigationService>(param1: context);
+    _searchBloc = DI.get<SearchBloc>();
 
     // 내비게이션 서비스 초기화
     _navigationBloc.navigationService.init();
@@ -51,11 +52,17 @@ class _NaverMapViewState extends State<NaverMapView> {
     bool isDark = (mode == 'dark') ||
         (mode == 'system' && systemBright == Brightness.dark);
 
-    return BlocListener<NavigationBloc, NavigationState>(
+    return BlocConsumer<NavigationBloc, NavigationState>(
       listener: (context, state) {
         log('MapView State : $state');
         // 내비게이션 상태에 따라 UI와 데이터를 갱신
-        if (state is NavigationReady) {
+        if (state is StartLocationSet) {
+          log('StartLocationSet');
+          setState(() {});
+        } else if (state is DestinationLocationSet) {
+          log('DestinationLocationSet');
+          setState(() {});
+        } else if (state is NavigationPathLoaded) {
           // 경로 및 브랜치 정보를 내비게이션 서비스에 업데이트
           // _navigationBloc.navigationService.paths = state.paths;
           // _navigationBloc.navigationService.branchInfoList =
@@ -107,13 +114,14 @@ class _NaverMapViewState extends State<NaverMapView> {
           debugPrint('경로 로드 실패: ${state.error}');
         }
       },
-      child: ValueListenableBuilder<bool>(
-        valueListenable: _navigationBloc.navigationService.isLoading,
-        builder: (context, isLoading, child) {
-          // 로딩 상태에 따라 로딩 인디케이터 또는 지도 화면 표시
-          if (isLoading) {
-            return Center(child: CircularProgressIndicator());
-          }
+      // todo :bloc으로 로딩 처리하고 blocConsumer로 변경 필요.
+      builder: (context, state) {
+        log('builder state : $state');
+        // 로딩 상태에 따라 로딩 인디케이터 또는 지도 화면 표시
+        if (state is NavigationLoading || state is NavigationInitial) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          /// NavigationReady 이후에 화면 표시
           return Scaffold(
             body: Stack(
               children: [
@@ -145,10 +153,7 @@ class _NaverMapViewState extends State<NaverMapView> {
                     mapController = controller;
 
                     // 현재 위치 마커와 맵 위치 업데이트
-                    // todo: onMapReady 새로운 이벤트 필요.
                     _navigationBloc.add(OnMapReady());
-                    // _updateCurrentLocationMarker();
-                    // _updateMapPosition();
                   },
                   onMapTapped: (NPoint point, NLatLng latLng) async {
                     // 지도 클릭 시 남은 거리 안내 음성 출력
@@ -182,8 +187,8 @@ class _NaverMapViewState extends State<NaverMapView> {
               ],
             ),
           );
-        },
-      ),
+        }
+      },
     );
   }
 
@@ -208,11 +213,13 @@ class _NaverMapViewState extends State<NaverMapView> {
             if (newStartLocation != null) {
               // 출발지 선택 후 내비게이션 서비스에 업데이트
               // 화면을 갱신하기 위해 setState 호출
-              setState(() {
-                _navigationBloc.navigationService.startSelectedLocation =
-                    newStartLocation;
-                _navigationBloc.navigationService.isStart = true;
-              });
+              // setState(() {
+              //   _navigationBloc.navigationService.startSelectedLocation =
+              //       newStartLocation;
+              //   _navigationBloc.navigationService.isStart = true;
+              // });
+
+              _navigationBloc.add(SetStartLocation(newStartLocation));
             }
           },
         ),
@@ -234,10 +241,12 @@ class _NaverMapViewState extends State<NaverMapView> {
             if (newDestinationLocation != null) {
               // 목적지 선택 후 내비게이션 서비스에 업데이트
               // 화면을 갱신하기 위해 setState 호출
-              setState(() {
-                _navigationBloc.navigationService.selectedLocation =
-                    newDestinationLocation;
-              });
+              // setState(() {
+              //   _navigationBloc.navigationService.selectedLocation =
+              //       newDestinationLocation;
+              // });
+              _navigationBloc
+                  .add(SetDestinationLocation(newDestinationLocation));
 
               // 경로 요청을 위해 시작 지점 좌표 설정
               final startLat = _navigationBloc.navigationService.isStart
