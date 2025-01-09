@@ -64,6 +64,7 @@ class _NaverMapViewState extends State<NaverMapView> {
           // 지도에 경로 오버레이 및 브랜치 마커 추가
           log('NavigationPathLoaded: ${state.paths}');
           setState(() async {
+            await mapController!.clearOverlays(type: NOverlayType.marker);
             await addOverlays(state.paths);
             await addBranchMarkers(state.branchInfoList);
           });
@@ -342,6 +343,8 @@ class _NaverMapViewState extends State<NaverMapView> {
       size: const Size(15, 15),
       context: context,
     );
+
+
 
     for (var branch in branchList) {
       _testMarker = NMarker(

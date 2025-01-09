@@ -98,7 +98,12 @@ class NavigationService {
   double rotationXSum = 0.0, rotationYSum = 0.0, rotationZSum = 0.0;
   double imuLocationX = 0.0, imuLocationY = 0.0;
   double compassValue = 0.0, lastCompassValue = 0.0;
-  double yawRate = 0.0, yawRate2 = 0.0, yawRatePerDt = 0.0, yawRateTurn2 = 0.0, yawRateAccFilteringValue = 0.3;
+  double yawRate = 0.0,
+      yawRate2 = 0.0,
+      yawRatePerDt = 0.0,
+      yawRateTurn2 = 0.0,
+      yawRateAccFilteringValue = 0.3;
+
   // imu로 계산된 위경도 변수
   double imuLatitude = 0.0, imuLongitude = 0.0;
 
@@ -294,7 +299,7 @@ class NavigationService {
   /// GPS 정확도와 상태를 기반으로 초기 위치를 설정합니다.
   Future<void> _initLocation() async {
     log('initLocation()');
-    int gpsAccuracy = 14;
+    int gpsAccuracy = 20;
 
     position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
@@ -385,7 +390,9 @@ class NavigationService {
         rotationZSum += rotationZ;
         if (event.z > yawRateAccFilteringValue * math.pi / 180 ||
             event.z < -yawRateAccFilteringValue * math.pi / 180) {
-          yawRatePerDt = (event.z * (SensorInterval.normalInterval.inMilliseconds / 1000.0)); // 회전 각도 계산
+          yawRatePerDt = (event.z *
+              (SensorInterval.normalInterval.inMilliseconds /
+                  1000.0)); // 회전 각도 계산
         }
         _updateYawRate2();
       },
@@ -415,7 +422,6 @@ class NavigationService {
     log('moveDot() - finalLatitude: $finalLatitude, finalLongitude: $finalLongitude');
     if (importedLatitude != finalLatitude ||
         importedLongitude != finalLongitude) {
-
       finalLatitude = importedLatitude;
       finalLongitude = importedLongitude;
 
@@ -617,17 +623,26 @@ class NavigationService {
   }
 
   void indexUpdate() {
-    yawRate2 = turnUpdate2(branchInfoList[currentIndex].bearingToPoint, compassValue) * math.pi / 180;
+    log('indexUpdate()');
+    log('currentIndex: $currentIndex, targetIndex: $targetIndex');
+    log('branchInfoList.length: ${branchInfoList.length}');
+
+    yawRate2 =
+        turnUpdate2(branchInfoList[currentIndex].bearingToPoint, compassValue) *
+            math.pi /
+            180;
+
     double distanceBetweenBranchFunc(
         List<BranchInfo> branchInfoList, int currentIndex, int targetIndex) {
-          double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
-          double currentIndexLongitude =
-              branchInfoList[currentIndex].point.longitude;
-          double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
-          double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
-          return calculateDistance(currentIndexLatitude, currentIndexLongitude,
-              targetIndexLatitude, targetIndexLongitude);
-        }
+
+      double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
+      double currentIndexLongitude =
+          branchInfoList[currentIndex].point.longitude;
+      double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
+      double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
+      return calculateDistance(currentIndexLatitude, currentIndexLongitude,
+          targetIndexLatitude, targetIndexLongitude);
+    }
 
     int moveIndex(List<BranchInfo> currentWindow) {
       double beforeMin = double.maxFinite; // window 내에 가장 가까운 값
@@ -661,6 +676,11 @@ class NavigationService {
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchInfoList, currentIndex, 5);
     int nearestIndex = moveIndex(currentWindow);
+
+    // targetIndex 업데이트 (순환 처리)
+    targetIndex = (targetIndex + 1) % branchInfoList.length;
+
+    log('nearestIndex: $nearestIndex, currentIndex: $currentIndex');
 
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
         nearestIndex != currentIndex) {
@@ -803,7 +823,7 @@ class NavigationService {
 
     double baseAngle = (breakPointAngle['breakPointAngleC']! * (180 / math.pi));
     // 목표 지까지의 각도를 계산 (기존 breakPointB + yaw rate 고려)
-    guidanceAngle = baseAngle % 360;
+    guidanceAngle =  (baseAngle + yawRateTurn2) % 360;
     return guidanceAngle;
   }
 
@@ -882,6 +902,7 @@ class NavigationService {
   // 좌표점을 확인하여 해당 좌표에 도달했는지 여부를 확인하는 메서드입니다.
   //branch일 경우의 branchInfoList[currentIndex]를 전부 currentWindowValue로 바꿈
   void checkBoundary() {
+    log('checkBoundary()');
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchInfoList, currentIndex, 5);
     double beforeMinDistanceToPath = double.maxFinite;
@@ -961,16 +982,26 @@ class NavigationService {
     navigationTimer?.cancel(); // 기존 타이머 제거
     navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       log('navigationTimer: $timer');
+      log('isSetsStart: $isSetStart');
       // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remainDistance 변수에 삽입
       checkBoundary(); //경계이탈, 인덱스
-      indexUpdate();
+      try {
+        indexUpdate();
+      } catch (e, stackTrace) {
+        log('Exception in indexUpdate: $e');
+        log('StackTrace: $stackTrace');
+      }
 
       remainStartPoint = calculateDistance(finalLatitude, finalLongitude,
           branchInfoList[0].point.latitude, branchInfoList[0].point.longitude);
 
+      log('remainStartPoint: $remainStartPoint');
+      log('isSetStart: $isSetStart');
+
       if (remainStartPoint < 0.015) {
         isSetStart = false;
       }
+
       if (isSetStart == false) {
         if (branchInfoList.isNotEmpty && targetIndex < branchInfoList.length) {
           branchTargetIndex = targetIndex;
