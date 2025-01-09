@@ -622,6 +622,7 @@ class NavigationService {
     return window;
   }
 
+
   void indexUpdate() {
     log('indexUpdate()');
     log('currentIndex: $currentIndex, targetIndex: $targetIndex');
@@ -1027,6 +1028,8 @@ class NavigationService {
                 finalLongitude,
                 branchInfoList[branchTargetIndex].point.latitude,
                 branchInfoList[branchTargetIndex].point.longitude);
+
+            // FIXME : 디바이스의 헤딩과 '12시 방향' 이 일치하지 않는 이슈 수정 필요
             clock = getGuidanceDirection(
                 branchInfoList[currentIndex].point.longitude,
                 branchInfoList[currentIndex].point.latitude,
