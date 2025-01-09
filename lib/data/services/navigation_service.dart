@@ -336,8 +336,7 @@ class NavigationService {
             await moveByImu();
           } else {
             log('UserAccelerometerEvent moveByGps()');
-            // await moveByGps();
-            await moveByImu();
+            await moveByGps();
           }
         }
         isAccRunning = false;
