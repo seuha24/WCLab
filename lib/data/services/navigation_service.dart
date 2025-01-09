@@ -1013,11 +1013,11 @@ class NavigationService {
             } else {
               debugPrint('안전 경광등이 켜졌습니다.');
             }
-            await announceTts('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
+            await speakTTS('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
           }
 
           if (branchInfoList[targetIndex].branch == true) {
-            await announceTts('${branchInfoList[targetIndex].description}하세요.');
+            await speakTTS('${branchInfoList[targetIndex].description}하세요.');
           }
         }
         if (currentIndex > 0 &&
@@ -1035,7 +1035,7 @@ class NavigationService {
         // 경로 이탈 시 경로이탈 안내
         if (outOfBound) {
           Vibration.vibrate(duration: 100);
-          await announceTts(clock);
+          await speakTTS(clock);
           // 경로 재검색 로직 추가
           if (searchNewPath) {
             searchNewPathTime++;
@@ -1045,7 +1045,7 @@ class NavigationService {
                 startLng: finalLongitude,
               ); // 새로운 목적지로 지도 업데이트
 
-              await announceTts('경로를 이탈하여 새로운 경로로 안내합니다.');
+              await speakTTS('경로를 이탈하여 새로운 경로로 안내합니다.');
               searchNewPathTime = 0;
             }
           } else {
@@ -1053,14 +1053,15 @@ class NavigationService {
           }
         }
       } else if (isSetStart == true) {
-        await announceTts("출발지로 이동하세요.");
+        await speakTTS("출발지로 이동하세요.");
       }
     });
   }
 
   /// TTS를 통해 안내 메시지를 출력하는 메서드.
   /// [message]: 출력할 메시지.
-  Future<void> announceTts(String message) async {
+  Future<void> speakTTS(String message) async {
+    debugPrint('speakTTS: $message');
     await ttsService.speak(message);
   }
 }

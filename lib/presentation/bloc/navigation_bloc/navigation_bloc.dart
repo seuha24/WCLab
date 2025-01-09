@@ -92,7 +92,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
   // Announce TTS
   Future<void> onAnnounceTts(String message) async {
-    await navigationService.announceTts(message);
+    await navigationService.speakTTS(message);
   }
 
   void _onSetStartLocation(
@@ -140,7 +140,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   Future<void> _onLoadPath(
       LoadPath event, Emitter<NavigationState> emit) async {
     log('_onLoadPath: $event');
-    emit(NavigationLoading());
+    emit(NavigationIdle());
 
     try {
       // API 호출
