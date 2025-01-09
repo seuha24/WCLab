@@ -373,6 +373,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
 
     // GPS에 따라 마커 색상 설정
+    log('isGps: $isGps');
     final Color markerColor = isGps ? Colors.blue : Colors.red;
     final iconImage = await NOverlayImage.fromWidget(
         widget: Icon(

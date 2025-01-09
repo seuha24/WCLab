@@ -66,14 +66,14 @@ class NavigationService {
 
   Stream<Map<String, dynamic>> get locationMarkerStream =>
       _locationMarkerController.stream
-          .throttleTime(Duration(milliseconds: 200));
+          .throttleTime(SensorInterval.normalInterval);
 
   /// Map Position Stream Controller
   final StreamController<Map<String, dynamic>> _mapPositionController =
       StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get mapPositionStream =>
-      _mapPositionController.stream.throttleTime(Duration(milliseconds: 200));
+      _mapPositionController.stream.throttleTime(SensorInterval.normalInterval);
 
   // 네이티브 위치 확인용
   late double s_latitude;
@@ -89,11 +89,6 @@ class NavigationService {
 
   // GPS 포지션
   late Position position;
-
-  List<BranchInfo> branchinfo = [];
-  double turnUpdate2(double bearingToPoint, double compassValue) {
-    return compassValue - bearingToPoint;
-  }
 
   bool isAccRunning = false;
   double preAccX = 0.0, preAccY = 0.0, preAccZ = 0.0;
@@ -126,6 +121,11 @@ class NavigationService {
   GeoLocation? selectedDestinationLocation; // 검색된 위치의 좌표값 객체
   List<LatLng> paths = []; // 모든 경로의 좌표값을 담는 배열
   List<BranchInfo> branchInfoList = []; // 분기의 객체 배열
+
+  double turnUpdate2(double bearingToPoint, double compassValue) {
+    // 방위각 차이 계산
+    return compassValue - bearingToPoint;
+  }
 
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
@@ -304,6 +304,8 @@ class NavigationService {
     finalLatitude = gpsLatitude;
     finalLongitude = gpsLongitude;
 
+    log('position.accuracy: ${position.accuracy}');
+
     if (position.accuracy <= gpsAccuracy) {
       isGps = true;
       updateLoadingState(false);
@@ -315,7 +317,7 @@ class NavigationService {
     // 가속도계 이벤트 처리
     subscribeToSensor<UserAccelerometerEvent>(
       sensorStream: userAccelerometerEventStream(
-        samplingPeriod: Duration(milliseconds: 200),
+        samplingPeriod: SensorInterval.normalInterval,
       ),
       onEvent: (event) async {
         log('userAccelerometerEvent: $event');
@@ -397,17 +399,17 @@ class NavigationService {
         distanceFilter: 1,
       ),
     )
-        .throttleTime(Duration(milliseconds: 200))
+        .throttleTime(SensorInterval.normalInterval)
         .listen((Position position) async {
       log('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
-        // await moveByGps();
-        await moveByImu();
+        await moveByGps();
+        // await moveByImu();
       }
     });
   }
 
-  void moveDot(importedLatitude, importedLongitude) {
+  void moveDot(importedLatitude, importedLongitude, isGps) {
     log('moveDot()');
     log('moveDot() - importedLatitude: $importedLatitude, importedLongitude: $importedLongitude');
     log('moveDot() - finalLatitude: $finalLatitude, finalLongitude: $finalLongitude');
@@ -447,7 +449,7 @@ class NavigationService {
     s_latitude = position.latitude;
     s_longitude = position.longitude;
     s_accuracy = position.accuracy;
-    moveDot(gpsLatitude, gpsLongitude);
+    moveDot(gpsLatitude, gpsLongitude, true);
     _resetSpeedUtilsValue();
     // debugPrint(
     //     'gpsLatitude: $gpsLatitude, gpsLongitude: $gpsLongitude, moveByGPS 진행 완료. 현재 GPS 정확도 : ${position.accuracy}');
@@ -456,9 +458,8 @@ class NavigationService {
   Future<void> moveByImu() async {
     // log('moveByImu');
     isGps = false;
-    // await _positionUpdate(SensorInterval.normalInterval);
-    await _positionUpdate(Duration(milliseconds: 200));
-    moveDot(imuLatitude, imuLongitude);
+    await _positionUpdate(SensorInterval.normalInterval);
+    moveDot(imuLatitude, imuLongitude, false);
   }
 
   /// t맵에서 api 호출을 통해 경로 검색을 하는 비동기 함수
@@ -582,7 +583,7 @@ class NavigationService {
       required Function(T event) onEvent,
       required Function(dynamic error) onError}) {
     var subscription =
-        sensorStream.throttleTime(const Duration(milliseconds: 200)).listen(
+        sensorStream.throttleTime(SensorInterval.normalInterval).listen(
               onEvent,
               onError: onError,
               cancelOnError: true,
@@ -593,30 +594,30 @@ class NavigationService {
   /// 주어진 인덱스를 기준으로 경로의 현재 윈도우를 반환하는 메서드.
   /// [branchInfoList]: 경로 분기 정보 리스트.
   /// [currentIndex]: 현재 경로의 인덱스.
-  /// [windowsize]: 슬라이딩 윈도우의 크기.
+  /// [windowSize]: 슬라이딩 윈도우의 크기.
   /// 반환값: 현재 인덱스 주변의 분기 정보 리스트.
   List<BranchInfo> getCurrentWindow(
-      List<BranchInfo> branchinfo, int currentIndex, int windowsize) {
-    //windowsize는 언제나 홀수
-    int windowOffset = (windowsize - 1) ~/ 2;
+      List<BranchInfo> branchInfoList, int currentIndex, int windowSize) {
+    //windowSize는 언제나 홀수
+    int windowOffset = (windowSize - 1) ~/ 2;
     // 윈도우의 시작과 끝 인덱스 계산
     int start = currentIndex - windowOffset;
     int end = currentIndex + windowOffset;
     // 시작 인덱스가 0보다 작지 않도록 조정
     start = start < 0 ? 0 : start;
     // 끝 인덱스가 리스트의 마지막 인덱스를 초과하지 않도록 조정
-    end = end >= branchinfo.length ? branchinfo.length - 1 : end;
+    end = end >= branchInfoList.length ? branchInfoList.length - 1 : end;
     // 슬라이딩 윈도우 내의 체크포인트들을 담을 리스트
     List<BranchInfo> window = [];
     // 시작 인덱스부터 끝 인덱스까지의 체크포인트들을 리스트에 추가
     for (int i = start; i <= end; i++) {
-      window.add(branchinfo[i]);
+      window.add(branchInfoList[i]);
     }
     return window;
   }
 
   void indexUpdate() {
-    yawRate2 = turnUpdate2(branchinfo[currentIndex].bearingToPoint, compassValue) * math.pi / 180;
+    yawRate2 = turnUpdate2(branchInfoList[currentIndex].bearingToPoint, compassValue) * math.pi / 180;
     double distanceBetweenBranchFunc(
         List<BranchInfo> branchInfoList, int currentIndex, int targetIndex) {
           double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
@@ -632,7 +633,7 @@ class NavigationService {
       double beforeMin = double.maxFinite; // window 내에 가장 가까운 값
       int nearestIndex = currentIndex; // 현재 인덱스
       double distanceBetweenBranch = distanceBetweenBranchFunc(branchInfoList,
-          currentIndex, targetIndex); //currentWindow-> branchinfo
+          currentIndex, targetIndex); //currentWindow-> branchInfoList
       if (distanceBetweenBranch == 0) {
         nearestIndex = targetIndex;
       }
@@ -879,7 +880,7 @@ class NavigationService {
   }
 
   // 좌표점을 확인하여 해당 좌표에 도달했는지 여부를 확인하는 메서드입니다.
-  //branch일 경우의 branchinfo[currentIndex]를 전부 currentWindowValue로 바꿈
+  //branch일 경우의 branchInfoList[currentIndex]를 전부 currentWindowValue로 바꿈
   void checkBoundary() {
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchInfoList, currentIndex, 5);
@@ -997,7 +998,7 @@ class NavigationService {
 
           // 추가적인 로직
         } else {
-          // branchinfo가 비어 있거나 targetIndex가 유효하지 않을 때의 처리 로직
+          // branchInfoList가 비어 있거나 targetIndex가 유효하지 않을 때의 처리 로직
         }
 
         // 목표지점까지의 남은 거리가 15m 이내라면
