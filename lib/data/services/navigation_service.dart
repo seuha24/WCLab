@@ -769,9 +769,10 @@ class NavigationService {
       double targetIndexLatitude,
       double finalLatitude,
       double finalLongitude,
-      double yawRateTurn2,
+      double adjustedCompassValue,
       double bearingToPoint,
       int boundaryExit) {
+
     Map<String, double> breakPoint(
       double currentIndexLongitude,
       double currentIndexLatitude,
@@ -819,11 +820,14 @@ class NavigationService {
         targetIndexLatitude,
         finalLatitude,
         finalLongitude);
-    double guidanceAngle = 0.0;
 
+    // 목표 방향으로 안내 각도 계산
     double baseAngle = (breakPointAngle['breakPointAngleC']! * (180 / math.pi));
-    // 목표 지까지의 각도를 계산 (기존 breakPointB + yaw rate 고려)
-    guidanceAngle =  (baseAngle + yawRateTurn2) % 360;
+
+    // 목표 지까지의 각도를 계산
+    // adjustedCompassValue를 사용해 나침반 값 보정
+    double guidanceAngle =  (baseAngle + adjustedCompassValue) % 360;
+
     return guidanceAngle;
   }
 
@@ -846,6 +850,13 @@ class NavigationService {
       finalLongitude,
     );
 
+    // 현재 스마트폰 방향을 기준으로 나침반 값 보정
+    double adjustedCompassValue = compassValue; // 기본 나침반 값
+    if (compassValue >= 0 && compassValue <= 360) {
+      // 보정 로직 추가
+      adjustedCompassValue = (compassValue + yawRateTurn2) % 360;
+    }
+
     double guidanceAngle = angleToTarget(
         currentIndexLongitude,
         currentIndexLatitude,
@@ -853,7 +864,7 @@ class NavigationService {
         targetIndexLatitude,
         finalLatitude,
         finalLongitude,
-        yawRateTurn2,
+        adjustedCompassValue,
         bearingToPoint,
         boundaryExit);
 
