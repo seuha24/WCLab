@@ -91,7 +91,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   // Announce TTS
-  Future<void> onAnnounceTts(String message) async {
+  Future<void> onSpeakTTS(String message) async {
     await navigationService.speakTTS(message);
   }
 

@@ -137,7 +137,7 @@ class _NaverMapViewState extends State<NaverMapView> {
                     // 지도 클릭 시 남은 거리 안내 음성 출력
                     int meters = (remainDistance * 1000).round();
                     await _navigationBloc
-                        .onAnnounceTts('다음 안내까지 $meters미터 남았습니다.');
+                        .onSpeakTTS('다음 안내까지 $meters미터 남았습니다.');
                   },
                 ),
                 // 검색 입력창 표시
