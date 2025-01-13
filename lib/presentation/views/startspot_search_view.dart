@@ -18,6 +18,8 @@ class _StartSearchState extends State<StartSearch> {
 
   final FlutterTts tts = FlutterTts();
   final FocusNode _focusNode = FocusNode();
+
+  List<PlaceResult> places = [];
   List<PlaceResult> _searchResults = [];
 
   @override
@@ -26,23 +28,33 @@ class _StartSearchState extends State<StartSearch> {
     if (widget.searchValue.isNotEmpty) {
       _searchController.text = widget.searchValue;
     }
-    _searchController.addListener(_onSearchChanged);
     _focusNode.requestFocus();
     _initTTS();
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged() {
+    debugPrint('debounce timer : ${_debounce?.isActive}');
+    // 디바운스 타이머를 취소
     if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // 디바운스 타이머 설정
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      _performSearch(_searchController.text);
+      final query = _searchController.text.trim();
+      debugPrint('검색어 : $query');
+      if (query.isNotEmpty) {
+        _performSearch(query);
+      } else {
+        setState(() {
+          _searchResults.clear();
+        });
+      }
     });
   }
 
@@ -55,6 +67,7 @@ class _StartSearchState extends State<StartSearch> {
   }
 
   Future<List<PlaceResult>> placeSearch(String query) async {
+    debugPrint('장소검색 api 호출');
     const String apiKey = '93848fcc11798c6f48099dd2e2373263';
     final String apiUrl =
         'https://dapi.kakao.com/v2/local/search/keyword.json?query=$query';
@@ -70,18 +83,24 @@ class _StartSearchState extends State<StartSearch> {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> documents = jsonResponse['documents'];
 
-      List<PlaceResult> places = documents.map((doc) {
-        return PlaceResult(
-          name: doc['place_name'],
-          address: doc['address_name'],
-          geometry: LatLngGeometry(
-            location: GeoLocation(
-              lat: double.parse(doc['y']),
-              lng: double.parse(doc['x']),
+      debugPrint('documents : $documents');
+
+      // 검색 결과가 없는 경우 이전 결과 리스트를 유지.
+      // 검색 결과가 있는 경우 새로운 리스트 생성
+      if(documents.isNotEmpty) {
+        places = documents.map((doc) {
+          return PlaceResult(
+            name: doc['place_name'],
+            address: doc['address_name'],
+            geometry: LatLngGeometry(
+              location: GeoLocation(
+                lat: double.parse(doc['y']),
+                lng: double.parse(doc['x']),
+              ),
             ),
-          ),
-        );
-      }).toList();
+          );
+        }).toList();
+      }
 
       return places;
     } else {
@@ -163,11 +182,7 @@ class _StartSearchState extends State<StartSearch> {
                       style: TextStyle(color: Colors.black),
                       onChanged: (query) {
                         if (query.isNotEmpty) {
-                          _performSearch(query);
-                        } else {
-                          setState(() {
-                            _searchResults = [];
-                          });
+                          _onSearchChanged();
                         }
                       },
                       decoration: InputDecoration(
@@ -259,32 +274,3 @@ class _StartSearchState extends State<StartSearch> {
     );
   }
 }
-// class PlaceResult {
-//   final String name;
-//   final String address;
-//   final LatLngGeometry geometry;
-
-//   PlaceResult({
-//     required this.name,
-//     required this.address,
-//     required this.geometry,
-//   });
-// }
-
-// class GeoLocation {
-//   final double lat;
-//   final double lng;
-
-//   GeoLocation({
-//     required this.lat,
-//     required this.lng,
-//   });
-// }
-
-// class LatLngGeometry {
-//   final GeoLocation location;
-
-//   LatLngGeometry({
-//     required this.location,
-//   });
-// }

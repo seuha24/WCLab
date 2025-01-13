@@ -18,6 +18,8 @@ class _DesSearchState extends State<DesSearch> {
 
   final FlutterTts tts = FlutterTts();
   final FocusNode _focusNode = FocusNode();
+
+  List<PlaceResult> places = [];
   List<PlaceResult> _searchResults = [];
 
   @override
@@ -26,23 +28,33 @@ class _DesSearchState extends State<DesSearch> {
     if (widget.destinationValue.isNotEmpty) {
       _searchController.text = widget.destinationValue;
     }
-    _searchController.addListener(_onSearchChanged);
     _focusNode.requestFocus();
     _initTTS();
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged() {
+    debugPrint('debounce timer : ${_debounce?.isActive}');
+    // 디바운스 타이머를 취소
     if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // 디바운스 타이머 설정
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      _performSearch(_searchController.text);
+      final query = _searchController.text.trim();
+      debugPrint('검색어 : $query');
+      if (query.isNotEmpty) {
+        _performSearch(query);
+      } else {
+        setState(() {
+          _searchResults = [];
+        });
+      }
     });
   }
 
@@ -70,18 +82,22 @@ class _DesSearchState extends State<DesSearch> {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> documents = jsonResponse['documents'];
 
-      List<PlaceResult> places = documents.map((doc) {
-        return PlaceResult(
-          name: doc['place_name'],
-          address: doc['address_name'],
-          geometry: LatLngGeometry(
-            location: GeoLocation(
-              lat: double.parse(doc['y']),
-              lng: double.parse(doc['x']),
+      // 검색 결과가 없는 경우 이전 결과 리스트를 유지.
+      // 검색 결과가 있는 경우 새로운 리스트 생성
+      if(documents.isNotEmpty) {
+        places = documents.map((doc) {
+          return PlaceResult(
+            name: doc['place_name'],
+            address: doc['address_name'],
+            geometry: LatLngGeometry(
+              location: GeoLocation(
+                lat: double.parse(doc['y']),
+                lng: double.parse(doc['x']),
+              ),
             ),
-          ),
-        );
-      }).toList();
+          );
+        }).toList();
+      }
 
       return places;
     } else {
@@ -162,7 +178,7 @@ class _DesSearchState extends State<DesSearch> {
                       style: TextStyle(color: Colors.black),
                       onChanged: (query) {
                         if (query.isNotEmpty) {
-                          _performSearch(query);
+                          _onSearchChanged();
                         } else {
                           setState(() {
                             _searchResults = [];
