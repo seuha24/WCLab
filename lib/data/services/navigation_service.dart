@@ -65,15 +65,14 @@ class NavigationService {
       StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get locationMarkerStream =>
-      _locationMarkerController.stream
-          .throttleTime(SensorInterval.normalInterval);
+      _locationMarkerController.stream;
 
   /// Map Position Stream Controller
   final StreamController<Map<String, dynamic>> _mapPositionController =
       StreamController.broadcast();
 
   Stream<Map<String, dynamic>> get mapPositionStream =>
-      _mapPositionController.stream.throttleTime(SensorInterval.normalInterval);
+      _mapPositionController.stream;
 
   // 네이티브 위치 확인용
   late double s_latitude;
@@ -120,6 +119,7 @@ class NavigationService {
   GeoLocation? selectedStartLocation; // 시작 위치의 좌표값 객체
   bool isSetStart = false; // 출발지가 선택됐을 경우 true, 아닐경우 false
   bool isSetDestination = false; // 목적지가 선택됐을 경우 true, 아닐경우 false
+  bool onStartPoint = false; // 출발지 도착 여부
   late double remainStartPoint;
 
   int branchTargetIndex = 0;
@@ -160,7 +160,7 @@ class NavigationService {
   /// 초기화 메서드.
   /// 내비게이션 서비스를 초기화하고 위치 데이터를 설정합니다.
   void init() {
-    log('NavigationService init()');
+    // debugPrint('NavigationService init()');
     initLoadingState();
     _initLocation();
   }
@@ -298,7 +298,7 @@ class NavigationService {
   /// GPS를 통해 초기 위치를 설정하는 메서드.
   /// GPS 정확도와 상태를 기반으로 초기 위치를 설정합니다.
   Future<void> _initLocation() async {
-    log('initLocation()');
+    // debugPrint('initLocation()');
     int gpsAccuracy = 20;
 
     position = await Geolocator.getCurrentPosition(
@@ -309,7 +309,7 @@ class NavigationService {
     finalLatitude = gpsLatitude;
     finalLongitude = gpsLongitude;
 
-    log('position.accuracy: ${position.accuracy}');
+    // debugPrint('position.accuracy: ${position.accuracy}');
 
     if (position.accuracy <= gpsAccuracy) {
       isGps = true;
@@ -325,7 +325,7 @@ class NavigationService {
         samplingPeriod: SensorInterval.normalInterval,
       ),
       onEvent: (event) async {
-        log('userAccelerometerEvent: $event');
+        // debugPrint('userAccelerometerEvent: $event');
         curAccX = event.x;
         curAccY = event.y;
         curAccZ = event.z;
@@ -339,10 +339,10 @@ class NavigationService {
               locationSettings: LocationSettings(
                   accuracy: LocationAccuracy.high, distanceFilter: 5));
           if (position.accuracy > gpsAccuracy) {
-            log('UserAccelerometerEvent moveByImu()');
+            // debugPrint('UserAccelerometerEvent moveByImu()');
             await moveByImu();
           } else {
-            log('UserAccelerometerEvent moveByGps()');
+            // debugPrint('UserAccelerometerEvent moveByGps()');
             await moveByGps();
           }
         }
@@ -355,7 +355,7 @@ class NavigationService {
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
-        log('compassEvent: $event');
+        // debugPrint('compassEvent: $event');
         compassValue = event.heading ?? 0.0;
         yawRate = (compassValue * math.pi / 180);
         _updateYawRate(0);
@@ -379,7 +379,7 @@ class NavigationService {
         samplingPeriod: SensorInterval.normalInterval,
       ),
       onEvent: (GyroscopeEvent event) {
-        log('gyroscopeEvent: $event');
+        // debugPrint('gyroscopeEvent: $event');
         final deltaTime =
             (SensorInterval.normalInterval).inMilliseconds / 1000.0;
         rotationX = event.x * deltaTime;
@@ -408,7 +408,7 @@ class NavigationService {
     )
         .throttleTime(SensorInterval.normalInterval)
         .listen((Position position) async {
-      log('positionStream: $position');
+      // debugPrint('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
         await moveByGps();
         // await moveByImu();
@@ -417,15 +417,15 @@ class NavigationService {
   }
 
   void moveDot(importedLatitude, importedLongitude, isGps) {
-    log('moveDot()');
-    log('moveDot() - importedLatitude: $importedLatitude, importedLongitude: $importedLongitude');
-    log('moveDot() - finalLatitude: $finalLatitude, finalLongitude: $finalLongitude');
+    debugPrint('moveDot()');
+    // debugPrint('moveDot() - importedLatitude: $importedLatitude, importedLongitude: $importedLongitude');
+    // debugPrint('moveDot() - finalLatitude: $finalLatitude, finalLongitude: $finalLongitude');
     if (importedLatitude != finalLatitude ||
         importedLongitude != finalLongitude) {
       finalLatitude = importedLatitude;
       finalLongitude = importedLongitude;
 
-      log('_navigationStreamController.add()');
+      // debugPrint('_navigationStreamController.add()');
       // Stream에 데이터 전송
       _locationMarkerController.add({
         'latitude': importedLatitude,
@@ -445,7 +445,7 @@ class NavigationService {
   }
 
   Future<void> moveByGps() async {
-    log('moveByGps');
+    // debugPrint('moveByGps');
     isGps = true;
     position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
@@ -462,7 +462,7 @@ class NavigationService {
   }
 
   Future<void> moveByImu() async {
-    // log('moveByImu');
+    // debugPrint('moveByImu');
     isGps = false;
     await _positionUpdate(SensorInterval.normalInterval);
     moveDot(imuLatitude, imuLongitude, false);
@@ -477,7 +477,7 @@ class NavigationService {
     double? endLat,
     double? endLng,
   }) {
-    log('requestNewPath()');
+    // debugPrint('requestNewPath()');
     // Stream에 데이터 전송
     _pathStreamController.add({
       'startLatitude': startLat,
@@ -487,28 +487,6 @@ class NavigationService {
     });
   }
 
-  /// 두 위경도 간의 거리를 계산하는 메서드.
-  /// [lat1], [lon1]: 첫 번째 점의 위경도.
-  /// [lat2], [lon2]: 두 번째 점의 위경도.
-  /// 반환값: 두 점 사이의 거리 (km).
-  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const double earthRadius = 6371.0;
-    double toRadians(double degree) {
-      return degree * math.pi / 180.0;
-    }
-
-    double dLat = toRadians(lat2 - lat1);
-    double dLon = toRadians(lon2 - lon1);
-    double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(toRadians(lat1)) *
-            math.cos(toRadians(lat2)) *
-            math.sin(dLon / 2) *
-            math.sin(dLon / 2);
-    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    // 거리 계산 및 반환 (단위: km)
-    double distance = earthRadius * c;
-    return distance;
-  }
 
   /// 현재 위치에서 목표 지점까지의 방위각을 계산하는 메서드.
   /// [initialLatitude], [initialLongitude]: 시작 위치의 위경도.
@@ -589,7 +567,7 @@ class NavigationService {
       required Function(T event) onEvent,
       required Function(dynamic error) onError}) {
     var subscription =
-        sensorStream.throttleTime(SensorInterval.normalInterval).listen(
+        sensorStream.throttleTime(Duration(milliseconds: 200)).listen(
               onEvent,
               onError: onError,
               cancelOnError: true,
@@ -622,71 +600,72 @@ class NavigationService {
     return window;
   }
 
-
-  void indexUpdate() {
-    log('indexUpdate()');
-    log('currentIndex: $currentIndex, targetIndex: $targetIndex');
-    log('branchInfoList.length: ${branchInfoList.length}');
+  Future<void> indexUpdate() async {
+    debugPrint('indexUpdate()');
+    // debugPrint('currentIndex: $currentIndex, targetIndex: $targetIndex');
+    // debugPrint('branchInfoList.length: ${branchInfoList.length}');
 
     yawRate2 =
         turnUpdate2(branchInfoList[currentIndex].bearingToPoint, compassValue) *
             math.pi /
             180;
 
-    double distanceBetweenBranchFunc(
-        List<BranchInfo> branchInfoList, int currentIndex, int targetIndex) {
-
-      double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
-      double currentIndexLongitude =
-          branchInfoList[currentIndex].point.longitude;
-      double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
-      double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
-      return calculateDistance(currentIndexLatitude, currentIndexLongitude,
-          targetIndexLatitude, targetIndexLongitude);
-    }
-
-    int moveIndex(List<BranchInfo> currentWindow) {
-      double beforeMin = double.maxFinite; // window 내에 가장 가까운 값
-      int nearestIndex = currentIndex; // 현재 인덱스
-      double distanceBetweenBranch = distanceBetweenBranchFunc(branchInfoList,
-          currentIndex, targetIndex); //currentWindow-> branchInfoList
-      if (distanceBetweenBranch == 0) {
-        nearestIndex = targetIndex;
-      }
-      double currentDistance = 0.0;
-      for (BranchInfo window in currentWindow) {
-        currentDistance = calculateDistance(window.point.latitude,
-            window.point.longitude, finalLatitude, finalLongitude);
-
-        double currentIndexDistance = calculateDistance(
-            branchInfoList[nearestIndex].point.latitude,
-            branchInfoList[nearestIndex].point.longitude,
-            finalLatitude,
-            finalLongitude);
-        if (currentDistance < beforeMin &&
-            currentIndexDistance >=
-                distanceBetweenBranch - (distanceBetweenBranch / 20)) {
-          beforeMin = currentDistance;
-          nearestIndex =
-              branchInfoList.indexOf(window); // 가장 가까운 체크포인트의 인덱스를 찾습니다.
-        }
-      }
-      return nearestIndex;
-    }
-
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchInfoList, currentIndex, 5);
-    int nearestIndex = moveIndex(currentWindow);
+    int nearestIndex = await moveIndex(currentWindow);
 
     // targetIndex 업데이트 (순환 처리)
     targetIndex = (targetIndex + 1) % branchInfoList.length;
 
-    log('nearestIndex: $nearestIndex, currentIndex: $currentIndex');
+    debugPrint('nearestIndex: $nearestIndex, currentIndex: $currentIndex');
 
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
         nearestIndex != currentIndex) {
       currentIndex = nearestIndex;
     }
+  }
+
+  Future<double> distanceBetweenBranchFunc(List<BranchInfo> branchInfoList,
+      int currentIndex, int targetIndex) async {
+    double currentIndexLatitude = branchInfoList[currentIndex].point.latitude;
+    double currentIndexLongitude = branchInfoList[currentIndex].point.longitude;
+    double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
+    double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
+    return await calculateDistanceInIsolate(currentIndexLatitude,
+        currentIndexLongitude, targetIndexLatitude, targetIndexLongitude, '1');
+  }
+
+  Future<int> moveIndex(List<BranchInfo> currentWindow) async {
+    double beforeMin = double.maxFinite; // window 내에 가장 가까운 값
+    int nearestIndex = currentIndex; // 현재 인덱스
+    double distanceBetweenBranch = await distanceBetweenBranchFunc(
+        branchInfoList,
+        currentIndex,
+        targetIndex); //currentWindow-> branchInfoList
+    if (distanceBetweenBranch == 0) {
+      nearestIndex = targetIndex;
+    }
+    double currentDistance = 0.0;
+    for (BranchInfo window in currentWindow) {
+      debugPrint('window :$window');
+      currentDistance = await calculateDistanceInIsolate(window.point.latitude,
+          window.point.longitude, finalLatitude, finalLongitude, '2');
+
+      double currentIndexDistance = await calculateDistanceInIsolate(
+          branchInfoList[nearestIndex].point.latitude,
+          branchInfoList[nearestIndex].point.longitude,
+          finalLatitude,
+          finalLongitude,
+          '3');
+      if (currentDistance < beforeMin &&
+          currentIndexDistance >=
+              distanceBetweenBranch - (distanceBetweenBranch / 20)) {
+        beforeMin = currentDistance;
+        nearestIndex =
+            branchInfoList.indexOf(window); // 가장 가까운 체크포인트의 인덱스를 찾습니다.
+      }
+    }
+    return nearestIndex;
   }
 
   // 위도와 경도를 라디안으로 변환하는 함수
@@ -773,7 +752,6 @@ class NavigationService {
       double adjustedCompassValue,
       double bearingToPoint,
       int boundaryExit) {
-
     Map<String, double> breakPoint(
       double currentIndexLongitude,
       double currentIndexLatitude,
@@ -827,7 +805,7 @@ class NavigationService {
 
     // 목표 지까지의 각도를 계산
     // adjustedCompassValue를 사용해 나침반 값 보정
-    double guidanceAngle =  (baseAngle + adjustedCompassValue) % 360;
+    double guidanceAngle = (baseAngle + adjustedCompassValue) % 360;
 
     return guidanceAngle;
   }
@@ -913,8 +891,8 @@ class NavigationService {
 
   // 좌표점을 확인하여 해당 좌표에 도달했는지 여부를 확인하는 메서드입니다.
   //branch일 경우의 branchInfoList[currentIndex]를 전부 currentWindowValue로 바꿈
-  void checkBoundary() {
-    log('checkBoundary()');
+  Future<void> checkBoundary() async {
+    debugPrint('checkBoundary()');
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchInfoList, currentIndex, 5);
     double beforeMinDistanceToPath = double.maxFinite;
@@ -926,11 +904,12 @@ class NavigationService {
       targetIndex = currentIndex + 1;
 
       if (currentWindowValue.branch == true) {
-        circularDistance = calculateDistance(
+        circularDistance = await calculateDistanceInIsolate(
                 currentWindowValue.point.latitude,
                 currentWindowValue.point.longitude,
                 finalLatitude,
-                finalLongitude) *
+                finalLongitude,
+                '4') *
             1000;
 
         checkBoundaryCondition = "정방향, 브랜치";
@@ -980,133 +959,191 @@ class NavigationService {
 
   Timer? navigationTimer;
 
-  /// 내비게이션 상태를 업데이트하는 메서드.
-  /// [currentLat], [currentLng]: 현재 위치의 위경도.
-  /// 내비게이션 상태를 변경하기 위해 이벤트를 호출합니다.
-  void _updateNavigation(double currentLat, double currentLng) {
-    // navigationBloc.add(UpdateNavigation(currentLat, currentLng)); // 이벤트 호출
-  }
-
   /// 내비게이션 타이머를 시작하는 메서드.
   /// 2초 간격으로 내비게이션 상태를 업데이트하고, 안내 음성 및 경로 이탈 로직을 실행합니다.
   void startNavigationTimer() {
-    log('startNavigationTimer()');
+    debugPrint('startNavigationTimer()');
     navigationTimer?.cancel(); // 기존 타이머 제거
     navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
-      log('navigationTimer: $timer');
-      log('isSetsStart: $isSetStart');
+      debugPrint('navigationTimer: $timer');
+      // debugPrint('onStartPoint: onStartPoint');
+
+      _handleNavigationLogic();
+    });
+  }
+
+  Future<void> _handleNavigationLogic() async {
+    try {
       // 현 위치로부터 다음 목표 위경도까지의 거리를 계산하여 remainDistance 변수에 삽입
-      checkBoundary(); //경계이탈, 인덱스
-      try {
-        indexUpdate();
-      } catch (e, stackTrace) {
-        log('Exception in indexUpdate: $e');
-        log('StackTrace: $stackTrace');
-      }
+      await checkBoundary(); //경계이탈, 인덱스
+      await indexUpdate();
 
-      remainStartPoint = calculateDistance(finalLatitude, finalLongitude,
-          branchInfoList[0].point.latitude, branchInfoList[0].point.longitude);
+      remainStartPoint = await calculateDistanceInIsolate(
+          finalLatitude,
+          finalLongitude,
+          branchInfoList[0].point.latitude,
+          branchInfoList[0].point.longitude,
+          '5');
 
-      log('remainStartPoint: $remainStartPoint');
-      log('isSetStart: $isSetStart');
+      debugPrint(
+          'remainStartPoint: $remainStartPoint, onStartPoint: $isSetStart');
 
       if (remainStartPoint < 0.015) {
-        isSetStart = false;
+        onStartPoint = true;
       }
 
-      if (isSetStart == false) {
-        if (branchInfoList.isNotEmpty && targetIndex < branchInfoList.length) {
-          branchTargetIndex = targetIndex;
-
-          while (branchTargetIndex < branchInfoList.length &&
-              !branchInfoList[branchTargetIndex].branch) {
-            branchTargetIndex++;
-          }
-          if (branchInfoList[branchTargetIndex].branch) {
-            remainDistance = calculateDistance(
-                finalLatitude,
-                finalLongitude,
-                branchInfoList[branchTargetIndex].point.latitude,
-                branchInfoList[branchTargetIndex].point.longitude);
-
-            // FIXME : 디바이스의 헤딩과 '12시 방향' 이 일치하지 않는 이슈 수정 필요
-            clock = getGuidanceDirection(
-                branchInfoList[currentIndex].point.longitude,
-                branchInfoList[currentIndex].point.latitude,
-                branchInfoList[targetIndex].point.longitude,
-                branchInfoList[targetIndex].point.latitude,
-                finalLatitude,
-                finalLongitude,
-                yawRateTurn2,
-                branchInfoList[currentIndex].bearingToPoint);
-          }
-
-          // 추가적인 로직
-        } else {
-          // branchInfoList가 비어 있거나 targetIndex가 유효하지 않을 때의 처리 로직
-        }
-
-        // 목표지점까지의 남은 거리가 15m 이내라면
-        //반복되어서 안내문이 나오는 이유
-        if (remainDistance < 0.015) {
-          // 만약 그 목표 지점이 횡단보도라면
-          if (branchInfoList[currentIndex].crosswalk == true) {
-            // 경광등을 켜라.
-            final result = await flashOnWithWeather(NoParams());
-            if (result.isLeft()) {
-              debugPrint('안전 경광등을 사용할 수 없습니다.');
-            } else {
-              debugPrint('안전 경광등이 켜졌습니다.');
-            }
-            await speakTTS('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
-          }
-
-          if (branchInfoList[targetIndex].branch == true) {
-            await speakTTS('${branchInfoList[targetIndex].description}하세요.');
-          }
-        }
-        if (currentIndex > 0 &&
-                (branchInfoList[currentIndex].bearingToPoint - compassValue)
-                        .abs() <=
-                    18 ||
-            (branchInfoList[currentIndex].bearingToPoint - compassValue)
-                    .abs() >=
-                342) {
-          Vibration.vibrate(duration: 200);
-          debugPrint(
-              "경로내 진동 베어링 값 ${(branchInfoList[currentIndex].bearingToPoint - compassValue)}");
-        }
-
-        // 경로 이탈 시 경로이탈 안내
-        if (outOfBound) {
-          Vibration.vibrate(duration: 100);
-          await speakTTS(clock);
-          // 경로 재검색 로직 추가
-          if (searchNewPath) {
-            searchNewPathTime++;
-            if (searchNewPathTime >= 5) {
-              requestNewPath(
-                startLat: finalLatitude,
-                startLng: finalLongitude,
-              ); // 새로운 목적지로 지도 업데이트
-
-              await speakTTS('경로를 이탈하여 새로운 경로로 안내합니다.');
-              searchNewPathTime = 0;
-            }
-          } else {
-            searchNewPathTime = 0;
-          }
-        }
-      } else if (isSetStart == true) {
+      if (onStartPoint == true) {
+        _handleOnStartPointLogic();
+      } else if (onStartPoint == false) {
         await speakTTS("출발지로 이동하세요.");
       }
-    });
+    } catch (e, stackTrace) {
+      debugPrint('Exception in indexUpdate: $e');
+      debugPrint('StackTrace: $stackTrace');
+    }
+  }
+
+  Future<void> _handleOnStartPointLogic() async {
+    if (branchInfoList.isNotEmpty && targetIndex < branchInfoList.length) {
+      branchTargetIndex = targetIndex;
+
+      while (branchTargetIndex < branchInfoList.length &&
+          !branchInfoList[branchTargetIndex].branch) {
+        branchTargetIndex++;
+      }
+      if (branchInfoList[branchTargetIndex].branch) {
+        remainDistance = await calculateDistanceInIsolate(
+            finalLatitude,
+            finalLongitude,
+            branchInfoList[branchTargetIndex].point.latitude,
+            branchInfoList[branchTargetIndex].point.longitude,
+            '6');
+
+        // FIXME : 디바이스의 헤딩과 '12시 방향' 이 일치하지 않는 이슈 수정 필요
+        clock = getGuidanceDirection(
+          branchInfoList[currentIndex].point.longitude,
+          branchInfoList[currentIndex].point.latitude,
+          branchInfoList[targetIndex].point.longitude,
+          branchInfoList[targetIndex].point.latitude,
+          finalLatitude,
+          finalLongitude,
+          yawRateTurn2,
+          branchInfoList[currentIndex].bearingToPoint,
+        );
+
+        await _handleBranchLogic();
+      }
+    }
+  }
+
+  Future<void> _handleBranchLogic() async {
+    // 목표지점까지의 남은 거리가 15m 이내라면
+    //반복되어서 안내문이 나오는 이유
+    if (remainDistance < 0.015) {
+      // 만약 그 목표 지점이 횡단보도라면
+      if (branchInfoList[currentIndex].crosswalk == true) {
+        // 경광등을 켜라.
+        final result = await flashOnWithWeather(NoParams());
+        if (result.isLeft()) {
+          debugPrint('안전 경광등을 사용할 수 없습니다.');
+        } else {
+          debugPrint('안전 경광등이 켜졌습니다.');
+        }
+        await speakTTS('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
+      }
+
+      if (branchInfoList[targetIndex].branch == true) {
+        await speakTTS('${branchInfoList[targetIndex].description}하세요.');
+      }
+    }
+    if (currentIndex > 0 &&
+        (branchInfoList[currentIndex].bearingToPoint - compassValue)
+            .abs() <=
+            18 ||
+        (branchInfoList[currentIndex].bearingToPoint - compassValue)
+            .abs() >=
+            342) {
+      Vibration.vibrate(duration: 200);
+      debugPrint(
+          "경로내 진동 베어링 값 ${(branchInfoList[currentIndex].bearingToPoint - compassValue)}");
+    }
+
+    // 경로 이탈 시 경로이탈 안내
+    if (outOfBound) {
+      Vibration.vibrate(duration: 100);
+      await speakTTS(clock);
+      // 경로 재검색 로직 추가
+      if (searchNewPath) {
+        searchNewPathTime++;
+        if (searchNewPathTime >= 5) {
+          requestNewPath(
+            startLat: finalLatitude,
+            startLng: finalLongitude,
+          ); // 새로운 목적지로 지도 업데이트
+
+          await speakTTS('경로를 이탈하여 새로운 경로로 안내합니다.');
+          searchNewPathTime = 0;
+        }
+      } else {
+        searchNewPathTime = 0;
+      }
+    }
   }
 
   /// TTS를 통해 안내 메시지를 출력하는 메서드.
   /// [message]: 출력할 메시지.
   Future<void> speakTTS(String message) async {
-    debugPrint('speakTTS: $message');
+    // debugPrint('speakTTS: $message');
     await ttsService.speak(message);
   }
 }
+
+
+/// 두 위경도 간의 거리를 계산하는 메서드.
+/// [lat1], [lon1]: 첫 번째 점의 위경도.
+/// [lat2], [lon2]: 두 번째 점의 위경도.
+/// 반환값: 두 점 사이의 거리 (km).
+
+/// - 위경도 계산은 삼각 함수 연산을 포함하므로, 반복 호출 시 메인 스레드에 부하를 줄 수 있음.
+/// - isolate를 활용하여 연산 작업을 별도의 스레드에서 수행함으로써 UI 성능을 개선.
+Future<double> calculateDistanceInIsolate(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+    String word,
+    ) async {
+  debugPrint('word: $word');
+  debugPrint(
+      'calculateDistanceInIsolate() lat1: $lat1, lon1: $lon1, lat2: $lat2, lon2: $lon2');
+
+  final args = [lat1, lon1, lat2, lon2];
+  return await compute(_calculateDistance, args);
+}
+
+double _calculateDistance(List<double> args) {
+  debugPrint('calculateDistance() args: $args');
+
+  const double earthRadius = 6371.0;
+  double toRadians(double degree) {
+    return degree * math.pi / 180.0;
+  }
+
+  double lat1 = args[0];
+  double lon1 = args[1];
+  double lat2 = args[2];
+  double lon2 = args[3];
+
+  double dLat = toRadians(lat2 - lat1);
+  double dLon = toRadians(lon2 - lon1);
+  double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+      math.cos(toRadians(lat1)) *
+          math.cos(toRadians(lat2)) *
+          math.sin(dLon / 2) *
+          math.sin(dLon / 2);
+  double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+  // 거리 계산 및 반환 (단위: km)
+  double distance = earthRadius * c;
+  return distance;
+}
+

@@ -52,7 +52,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
     /// Location Marker Stream
     navigationService.locationMarkerStream
-        .throttleTime(Duration(milliseconds: 200))
         .listen((data) {
       log('locationMarkerStream: $data');
       add(UpdateLocationMarker(
@@ -64,7 +63,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
     /// Map Position Stream
     navigationService.mapPositionStream
-        .throttleTime(Duration(milliseconds: 200))
         .listen((data) {
       log('mapPositionStream: $data');
       add(UpdateMapPosition(

@@ -70,6 +70,7 @@ class _NaverMapViewState extends State<NaverMapView> {
           // BlocConsumer로 상태 처리
           BlocListener<NavigationBloc, NavigationState>(
             listener: (context, state) {
+              debugPrint('BlocListener state: $state');
               if (state is StartLocationSet) {
                 log('StartLocationSet');
                 setState(() {});
@@ -273,6 +274,7 @@ class _NaverMapViewState extends State<NaverMapView> {
   }
 
   void _updateCurrentLocationMarker(double latitude, double longitude, bool isGps) async {
+    debugPrint('updateCurrentLocationMarker()');
     if (mapController == null) return;
 
     final iconImage = await NOverlayImage.fromWidget(
