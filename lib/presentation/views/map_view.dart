@@ -80,7 +80,6 @@ class _NaverMapViewState extends State<NaverMapView> {
               } else if (state is NavigationPathLoaded) {
                 log('NavigationPathLoaded: ${state.paths}');
                 setState(() async {
-                  await mapController!.clearOverlays(type: NOverlayType.marker);
                   await addOverlays(state.paths);
                   await addBranchMarkers(state.branchInfoList);
                 });
@@ -231,6 +230,18 @@ class _NaverMapViewState extends State<NaverMapView> {
     debugPrint('addOverlays()');
     if (mapController == null) return;
 
+    // 현재 위치 마커를 임시로 저장
+    final NMarker? currentLocationMarker = _currentLocationMarker;
+
+    // 모든 기존 마커를 삭제
+    await mapController!.clearOverlays(type: NOverlayType.marker);
+
+    // 유지해야 할 마커를 다시 추가
+    if (currentLocationMarker != null) {
+      await mapController!.addOverlay(currentLocationMarker);
+    }
+
+    // 새로운 경로 오버레이 추가
     Set<NAddableOverlay> overlays = {
       NMultipartPathOverlay(
         id: "path",
@@ -245,7 +256,7 @@ class _NaverMapViewState extends State<NaverMapView> {
         outlineWidth: 3,
       ),
     };
-    mapController!.addOverlayAll(overlays);
+    await mapController!.addOverlayAll(overlays);
   }
 
   Future<void> addBranchMarkers(List<BranchInfo> branchInfoList) async {

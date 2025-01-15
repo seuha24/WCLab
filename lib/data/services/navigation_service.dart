@@ -487,7 +487,6 @@ class NavigationService {
     });
   }
 
-
   /// 현재 위치에서 목표 지점까지의 방위각을 계산하는 메서드.
   /// [initialLatitude], [initialLongitude]: 시작 위치의 위경도.
   /// [targetLatitude], [targetLongitude]: 목표 위치의 위경도.
@@ -632,7 +631,7 @@ class NavigationService {
     double targetIndexLatitude = branchInfoList[targetIndex].point.latitude;
     double targetIndexLongitude = branchInfoList[targetIndex].point.longitude;
     return await calculateDistanceInIsolate(currentIndexLatitude,
-        currentIndexLongitude, targetIndexLatitude, targetIndexLongitude, '1');
+        currentIndexLongitude, targetIndexLatitude, targetIndexLongitude);
   }
 
   Future<int> moveIndex(List<BranchInfo> currentWindow) async {
@@ -649,14 +648,13 @@ class NavigationService {
     for (BranchInfo window in currentWindow) {
       debugPrint('window :$window');
       currentDistance = await calculateDistanceInIsolate(window.point.latitude,
-          window.point.longitude, finalLatitude, finalLongitude, '2');
+          window.point.longitude, finalLatitude, finalLongitude);
 
       double currentIndexDistance = await calculateDistanceInIsolate(
           branchInfoList[nearestIndex].point.latitude,
           branchInfoList[nearestIndex].point.longitude,
           finalLatitude,
-          finalLongitude,
-          '3');
+          finalLongitude);
       if (currentDistance < beforeMin &&
           currentIndexDistance >=
               distanceBetweenBranch - (distanceBetweenBranch / 20)) {
@@ -908,8 +906,7 @@ class NavigationService {
                 currentWindowValue.point.latitude,
                 currentWindowValue.point.longitude,
                 finalLatitude,
-                finalLongitude,
-                '4') *
+                finalLongitude) *
             1000;
 
         checkBoundaryCondition = "정방향, 브랜치";
@@ -982,8 +979,7 @@ class NavigationService {
           finalLatitude,
           finalLongitude,
           branchInfoList[0].point.latitude,
-          branchInfoList[0].point.longitude,
-          '5');
+          branchInfoList[0].point.longitude);
 
       debugPrint(
           'remainStartPoint: $remainStartPoint, onStartPoint: $isSetStart');
@@ -1016,8 +1012,7 @@ class NavigationService {
             finalLatitude,
             finalLongitude,
             branchInfoList[branchTargetIndex].point.latitude,
-            branchInfoList[branchTargetIndex].point.longitude,
-            '6');
+            branchInfoList[branchTargetIndex].point.longitude);
 
         // FIXME : 디바이스의 헤딩과 '12시 방향' 이 일치하지 않는 이슈 수정 필요
         clock = getGuidanceDirection(
@@ -1057,11 +1052,10 @@ class NavigationService {
       }
     }
     if (currentIndex > 0 &&
-        (branchInfoList[currentIndex].bearingToPoint - compassValue)
-            .abs() <=
-            18 ||
-        (branchInfoList[currentIndex].bearingToPoint - compassValue)
-            .abs() >=
+            (branchInfoList[currentIndex].bearingToPoint - compassValue)
+                    .abs() <=
+                18 ||
+        (branchInfoList[currentIndex].bearingToPoint - compassValue).abs() >=
             342) {
       Vibration.vibrate(duration: 200);
       debugPrint(
@@ -1094,12 +1088,9 @@ class NavigationService {
   /// [message]: 출력할 메시지.
   Future<void> speakTTS(String message) async {
     // debugPrint('speakTTS: $message');
-    // Future.delayed(Duration(milliseconds: 500), () {
-      ttsService.speak(message);
-    // });
+    ttsService.speak(message);
   }
 }
-
 
 /// 두 위경도 간의 거리를 계산하는 메서드.
 /// [lat1], [lon1]: 첫 번째 점의 위경도.
@@ -1109,13 +1100,7 @@ class NavigationService {
 /// - 위경도 계산은 삼각 함수 연산을 포함하므로, 반복 호출 시 메인 스레드에 부하를 줄 수 있음.
 /// - isolate를 활용하여 연산 작업을 별도의 스레드에서 수행함으로써 UI 성능을 개선.
 Future<double> calculateDistanceInIsolate(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-    String word,
-    ) async {
-  debugPrint('word: $word');
+    double lat1, double lon1, double lat2, double lon2) async {
   debugPrint(
       'calculateDistanceInIsolate() lat1: $lat1, lon1: $lon1, lat2: $lat2, lon2: $lon2');
 
@@ -1148,4 +1133,3 @@ double _calculateDistance(List<double> args) {
   double distance = earthRadius * c;
   return distance;
 }
-
