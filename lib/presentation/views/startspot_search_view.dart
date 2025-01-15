@@ -16,7 +16,8 @@ class _StartSearchState extends State<StartSearch> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  final FlutterTts tts = FlutterTts();
+  final TtsService ttsService = TtsService();
+
   final FocusNode _focusNode = FocusNode();
 
   List<PlaceResult> places = [];
@@ -29,7 +30,7 @@ class _StartSearchState extends State<StartSearch> {
       _searchController.text = widget.searchValue;
     }
     _focusNode.requestFocus();
-    _initTTS();
+    // _initTTS();
   }
 
   @override
@@ -58,12 +59,21 @@ class _StartSearchState extends State<StartSearch> {
     });
   }
 
-  Future<void> _initTTS() async {
-    await tts.setLanguage("ko-KR");
-  }
+  // Future<void> _initTTS() async {
+  //   await tts.setLanguage("ko-KR");
+  // }
 
-  Future<void> _speakText(String text) async {
-    await tts.speak(text);
+  // Future<void> _speakText(String text) async {
+  //   await tts.speak(text);
+  // }
+
+  /// TTS를 통해 안내 메시지를 출력하는 메서드.
+  /// [message]: 출력할 메시지.
+  Future<void> speakTTS(String message) async {
+    // debugPrint('speakTTS: $message');
+    // Future.delayed(Duration(milliseconds: 500), () {
+    ttsService.speak(message);
+    // });
   }
 
   Future<List<PlaceResult>> placeSearch(String query) async {
@@ -248,20 +258,20 @@ class _StartSearchState extends State<StartSearch> {
                     onTap: () async {
                       FocusScope.of(context).unfocus();
                       _searchController.text = result.name;
-                      _speakText('${result.name}을 선택하셨습니다.');
+                      speakTTS('${result.name}을 선택하셨습니다.');
                       bool? results =
                           await showConfirmationDialog(context, result);
 
                       // result 값에 따라 확인 또는 취소에 따른 작업을 수행할 수 있습니다.
                       if (results != null && results) {
                         // 확인 버튼이 눌렸을 때의 작업
-                        _speakText('${result.name}를 출발지로 선택하셨습니다.');
+                        speakTTS('${result.name}를 출발지로 선택하셨습니다.');
                         Navigator.pop(context, result.geometry.location);
                         context.read<SearchBloc>().add(
                             SearchStartLocationRequested(
                                 searchLocation: result.name));
                       } else {
-                        _speakText('취소');
+                        speakTTS('취소');
                       }
                     },
                   ),
