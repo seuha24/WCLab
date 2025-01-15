@@ -16,7 +16,7 @@ class _DesSearchState extends State<DesSearch> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  final TtsService ttsService = TtsService();
+  final TtsService ttsService = DI.get<TtsService>();
 
   final FocusNode _focusNode = FocusNode();
 
@@ -29,8 +29,8 @@ class _DesSearchState extends State<DesSearch> {
     if (widget.destinationValue.isNotEmpty) {
       _searchController.text = widget.destinationValue;
     }
+
     _focusNode.requestFocus();
-    // _initTTS();
   }
 
   @override
@@ -59,21 +59,10 @@ class _DesSearchState extends State<DesSearch> {
     });
   }
 
-  // Future<void> _initTTS() async {
-  //   await tts.setLanguage("ko-KR");
-  // }
-  //
-  // Future<void> _speakText(String text) async {
-  //   await tts.speak(text);
-  // }
-
   /// TTS를 통해 안내 메시지를 출력하는 메서드.
   /// [message]: 출력할 메시지.
   Future<void> speakTTS(String message) async {
-    // debugPrint('speakTTS: $message');
-    // Future.delayed(Duration(milliseconds: 500), () {
     ttsService.speak(message);
-    // });
   }
 
   Future<List<PlaceResult>> placeSearch(String query) async {
@@ -94,7 +83,7 @@ class _DesSearchState extends State<DesSearch> {
 
       // 검색 결과가 없는 경우 이전 결과 리스트를 유지.
       // 검색 결과가 있는 경우 새로운 리스트 생성
-      if(documents.isNotEmpty) {
+      if (documents.isNotEmpty) {
         places = documents.map((doc) {
           return PlaceResult(
             name: doc['place_name'],
@@ -208,7 +197,8 @@ class _DesSearchState extends State<DesSearch> {
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 0),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? Container(
                                 child: IconButton(
@@ -257,14 +247,14 @@ class _DesSearchState extends State<DesSearch> {
                     onTap: () async {
                       FocusScope.of(context).unfocus();
                       _searchController.text = result.name;
-                      speakTTS('${result.name}을 선택하셨습니다.');
+                      Future.microtask(() => speakTTS('${result.name}을 선택하셨습니다.'));
                       bool? results =
                           await showConfirmationDialog(context, result);
 
                       // result 값에 따라 확인 또는 취소에 따른 작업을 수행할 수 있습니다.
                       if (results != null && results) {
                         // 확인 버튼이 눌렸을 때의 작업
-                        speakTTS('${result.name}으로 안내합니다.');
+                        Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
                         Navigator.pop(context, result.geometry.location);
                         context.read<SearchBloc>().add(
                             SearchDestinationRequested(
