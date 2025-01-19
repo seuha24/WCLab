@@ -211,11 +211,6 @@ class NavigationService {
   Future<void> _positionUpdate(Duration sensorInterval) async {
     double deltaTime = (sensorInterval.inMilliseconds / 1000.0)
         .toDouble(); // 가속도계가 작동될 때의 Duration 계산
-    // debugPrint('deltaTime: $deltaTime, positionUpdateFunc 진행 중...1');
-    final double accelerationMagnitude =
-        math.sqrt(curAccX * curAccX + curAccY * curAccY);
-    // debugPrint(
-    //     'accelerationMagnitude: $accelerationMagnitude, curAccX: $curAccX, curAccY: $curAccY, curAccZ: $curAccZ, 실제 센서 값, positionUpdateFunc 진행 중...2');
     curAccX = kalmanX.filtered(curAccX);
     curAccY = kalmanY.filtered(curAccY);
     curAccZ = kalmanZ.filtered(curAccZ);
