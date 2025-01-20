@@ -361,6 +361,7 @@ class NavigationService {
             'latitude': finalLatitude,
             'longitude': finalLongitude,
             'compassValue': compassValue,
+            'isGps': isGps,
           });
         }
         s_accuracy = position.accuracy;
@@ -425,6 +426,7 @@ class NavigationService {
       _locationMarkerController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
+        'compassValue': compassValue,
         'isGps': isGps,
       });
 
@@ -432,6 +434,7 @@ class NavigationService {
         'latitude': importedLatitude,
         'longitude': importedLongitude,
         'compassValue': compassValue,
+        'isGps': isGps,
       });
 
       // debugPrint(

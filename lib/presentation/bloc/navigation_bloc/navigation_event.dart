@@ -1,5 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:safelight/framework/ui.dart';
+part of '../../../framework/controller.dart';
 
 /// 이 파일은 NavigationBloc에 전달될 수 있는 다양한 이벤트를 정의합니다.
 /// 이 이벤트들은 Bloc 내에서 다양한 동작을 트리거하며, 경로 로드 또는 이동 중 상태 업데이트 등을 수행합니다.
@@ -71,24 +70,31 @@ class LoadPath extends NavigationEvent {
 class UpdateLocationMarker extends NavigationEvent {
   final double latitude;
   final double longitude;
+  final double compassValue;
   final bool isGps;
 
   const UpdateLocationMarker({
     required this.latitude,
     required this.longitude,
+    required this.compassValue,
     required this.isGps,
   });
+
+  @override
+  List<Object> get props => [latitude, longitude, compassValue, isGps];
 }
 
 class UpdateMapPosition extends NavigationEvent {
   final double latitude;
   final double longitude;
   final double compassValue;
+  final bool isGps;
 
   const UpdateMapPosition({
     required this.latitude,
     required this.longitude,
     required this.compassValue,
+    required this.isGps,
   });
 }
 

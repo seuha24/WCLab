@@ -1,5 +1,12 @@
 part of '../../framework/ui.dart';
 
+enum MapControlMode {
+  idle, // 초기 상태 (초기 위치를 설정하기 위한 상태)
+  off, // 자유롭게 지도 이동 (기본)
+  on1, // 지도 고정, 회전하지 않음. marker에 방향 표시, 사용자가 회전하면 Marker의 화살표도 회전
+  on2, // 사용자의 방향 회전에 따라 지도도 회전
+}
+
 class NaverMapView extends StatefulWidget {
   const NaverMapView({super.key});
 
@@ -10,6 +17,7 @@ class NaverMapView extends StatefulWidget {
 class _NaverMapViewState extends State<NaverMapView> {
   late final NavigationBloc _navigationBloc;
   NaverMapController? mapController;
+  MapControlMode _currentMode = MapControlMode.idle;
 
   NMarker? _currentLocationMarker;
   NMarker? _testMarker;
@@ -32,6 +40,83 @@ class _NaverMapViewState extends State<NaverMapView> {
     super.dispose();
   }
 
+  void _toggleMode() {
+    setState(() {
+      // 현재 모드가 idle인 경우 다음 모드로 바로 변경
+      if (_currentMode == MapControlMode.idle) {
+        _currentMode = MapControlMode.off;
+        debugPrint("Mode: Off - 초기화 이후 자유 지도 이동 가능");
+      }
+
+      // idle 상태를 건너뛰도록 로직 추가
+      _currentMode = MapControlMode
+          .values[(_currentMode.index + 1) % MapControlMode.values.length];
+      if (_currentMode == MapControlMode.idle) {
+        _currentMode = MapControlMode.off;
+      }
+
+      switch (_currentMode) {
+        case MapControlMode.idle:
+          debugPrint("Mode: idle - 초기 상태");
+          // idle 상태를 건너뛰도록 처리
+          break;
+        case MapControlMode.off:
+          debugPrint("Mode: Off - 자유 지도 이동 가능");
+          break;
+        case MapControlMode.on1:
+          debugPrint("Mode: On-1 - 지도 현재 위치 고정");
+          // 현재 위치로 지도와 마커 초기화
+          _navigationBloc.add(OnMapReady());
+          break;
+        case MapControlMode.on2:
+          debugPrint("Mode: On-2 - 지도 방향 고정");
+          // 현재 위치로 지도와 마커 초기화
+          _navigationBloc.add(OnMapReady());
+          break;
+      }
+    });
+  }
+
+  void _handleMapDrag() {
+    if (_currentMode != MapControlMode.off) {
+      setState(() {
+        _currentMode = MapControlMode.off;
+      });
+      debugPrint("지도를 드래그하여 Off 상태로 전환");
+    }
+  }
+
+  void _handleMapMode(double latitude, double longitude, double compassValue,
+      bool isGps) async {
+    switch (_currentMode) {
+      case MapControlMode.idle:
+        // 초기 위치 및 지도 설정
+        _updateCurrentLocationMarker(latitude, longitude, compassValue, isGps);
+        _updateMapPosition(latitude, longitude, compassValue);
+        break;
+
+      case MapControlMode.off:
+        // 자유롭게 지도 이동 가능 (기본 동작)
+        _updateCurrentLocationMarker(latitude, longitude, compassValue, isGps);
+        break;
+
+      case MapControlMode.on1:
+        // 지도 고정, 마커 회전
+        final mapBearing =
+            await mapController!.getCameraPosition().then((pos) => pos.bearing);
+        _updateCurrentLocationMarker(latitude, longitude, compassValue, isGps);
+        _updateMapPosition(latitude, longitude, mapBearing); // bearing 유지
+        break;
+
+      case MapControlMode.on2:
+        // 지도와 마커 모두 회전
+        _updateCurrentLocationMarker(latitude, longitude, compassValue, isGps);
+        _updateMapPosition(latitude, longitude,
+            compassValue); // 지도 회전 (bearing = compassValue)
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchLocation = context.watch<SearchBloc>().startLocation;
@@ -40,7 +125,8 @@ class _NaverMapViewState extends State<NaverMapView> {
     final box = Hive.box(SystemTheme.themeBox);
     final mode = box.get(SystemTheme.mode);
     final systemBright = MediaQuery.of(context).platformBrightness;
-    bool isDark = (mode == 'dark') || (mode == 'system' && systemBright == Brightness.dark);
+    bool isDark = (mode == 'dark') ||
+        (mode == 'system' && systemBright == Brightness.dark);
 
     return Scaffold(
       body: Stack(
@@ -48,6 +134,9 @@ class _NaverMapViewState extends State<NaverMapView> {
           // 네이버 맵 표시 (고정된 UI로 한 번만 렌더링)
           NaverMap(
             options: NaverMapViewOptions(
+              // off 모드일땐 rotation 비활성화
+              // rotationGesturesEnable:
+              //     _currentMode == MapControlMode.off ? false : true,
               indoorEnable: true,
               initialCameraPosition: const NCameraPosition(
                 target: NLatLng(37.5665, 126.9780), // 초기 좌표 (서울 시청)
@@ -65,6 +154,11 @@ class _NaverMapViewState extends State<NaverMapView> {
             onMapReady: (controller) {
               mapController = controller;
               _navigationBloc.add(OnMapReady());
+            },
+            onCameraChange: (reason, animated) {
+              if (reason == NCameraUpdateReason.gesture) {
+                _handleMapDrag();
+              }
             },
           ),
           // BlocConsumer로 상태 처리
@@ -85,17 +179,19 @@ class _NaverMapViewState extends State<NaverMapView> {
                 });
               } else if (state is LocationMarkerUpdated) {
                 debugPrint('LocationMarkerUpdated');
-                _updateCurrentLocationMarker(
+                _handleMapMode(
                   state.latitude,
                   state.longitude,
+                  state.compassValue,
                   state.isGps,
                 );
               } else if (state is MapPositionUpdated) {
                 debugPrint('MapPositionUpdated');
-                _updateMapPosition(
+                _handleMapMode(
                   state.latitude,
                   state.longitude,
                   state.compassValue,
+                  state.isGps,
                 );
               } else if (state is NavigationFailure) {
                 debugPrint('경로 로드 실패: ${state.error}');
@@ -117,16 +213,52 @@ class _NaverMapViewState extends State<NaverMapView> {
           ),
           // 시스템 상단 바 높이에 따른 패딩 조정
           Container(
-            color: isDark ? Theme.of(context).colorScheme.shadow.withOpacity(0.5) : null,
+            color: isDark
+                ? Theme.of(context).colorScheme.shadow.withOpacity(0.5)
+                : null,
             height: MediaQuery.of(context).padding.top,
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _toggleMode,
+        backgroundColor: _getButtonColor(),
+        child: Icon(_getButtonIcon()),
+      ),
     );
   }
 
+  // 모드 버튼 아이콘
+  IconData _getButtonIcon() {
+    switch (_currentMode) {
+      case MapControlMode.idle:
+        return Icons.location_disabled;
+      case MapControlMode.off:
+        return Icons.location_disabled;
+      case MapControlMode.on1:
+        return Icons.my_location;
+      case MapControlMode.on2:
+        return Icons.navigation;
+    }
+  }
+
+  // 모드 버튼 색상
+  Color _getButtonColor() {
+    switch (_currentMode) {
+      case MapControlMode.idle:
+        return Colors.grey;
+      case MapControlMode.off:
+        return Colors.grey;
+      case MapControlMode.on1:
+        return Colors.blue;
+      case MapControlMode.on2:
+        return Colors.green;
+    }
+  }
+
   /// 출발지 및 목적지 입력 버튼을 생성하는 메서드.
-  Widget _buildSearchInput(BuildContext context, String searchLocation, String destinationLocation, bool isDark) {
+  Widget _buildSearchInput(BuildContext context, String searchLocation,
+      String destinationLocation, bool isDark) {
     return Column(
       children: [
         _buildSearchButton(
@@ -158,7 +290,8 @@ class _NaverMapViewState extends State<NaverMapView> {
         const SizedBox(height: 10),
         _buildSearchButton(
           context: context,
-          label: destinationLocation.isEmpty ? '목적지를 입력하세요.' : destinationLocation,
+          label:
+              destinationLocation.isEmpty ? '목적지를 입력하세요.' : destinationLocation,
           isDark: isDark,
           onTap: () async {
             GeoLocation? newDestinationLocation = await Navigator.push(
@@ -177,7 +310,8 @@ class _NaverMapViewState extends State<NaverMapView> {
             );
             if (newDestinationLocation != null) {
               setState(() {
-                _navigationBloc.add(SetDestinationLocation(newDestinationLocation));
+                _navigationBloc
+                    .add(SetDestinationLocation(newDestinationLocation));
               });
             }
           },
@@ -215,7 +349,9 @@ class _NaverMapViewState extends State<NaverMapView> {
                 label,
                 style: TextStyle(
                   fontSize: AppSizes.scaledFont(18),
-                  color: label.contains('입력') ? const Color(0xff9E9E9E) : Colors.black,
+                  color: label.contains('입력')
+                      ? const Color(0xff9E9E9E)
+                      : Colors.black,
                 ),
               ),
             ),
@@ -284,20 +420,39 @@ class _NaverMapViewState extends State<NaverMapView> {
     mapController!.addOverlayAll(markers);
   }
 
-  void _updateCurrentLocationMarker(double latitude, double longitude, bool isGps) async {
-    debugPrint('updateCurrentLocationMarker()');
+  void _updateCurrentLocationMarker(double latitude, double longitude,
+      double compassValue, bool isGps) async {
+    debugPrint('_updateCurrentLocationMarker()');
     if (mapController == null) return;
 
+    // 지도 회전 값 가져오기
+    final mapBearing =
+        await mapController!.getCameraPosition().then((pos) => pos.bearing);
+
+    // 마커의 방향 계산
+    double adjustedAngle = compassValue - mapBearing;
+
+    // 0° ~ 360° 범위로 조정
+    if (adjustedAngle < 0) adjustedAngle += 360;
+
+    debugPrint('adjustedAngle = $adjustedAngle');
+
+    // 마커 아이콘 생성
     final iconImage = await NOverlayImage.fromWidget(
-      widget: Icon(
-        Icons.circle,
-        color: isGps ? Colors.blue : Colors.red,
-        size: 25,
+      widget: Transform.rotate(
+        angle: adjustedAngle * (math.pi / 180), // 라디안 변환
+        child: Icon(
+          // off 모드일땐 회전 방향 표시 안함
+          _currentMode == MapControlMode.idle || _currentMode == MapControlMode.off ? Icons.circle : Icons.navigation,
+          color: isGps ? Colors.blue : Colors.red,
+          size: 30,
+        ),
       ),
-      size: const Size(25, 25),
+      size: const Size(30, 30),
       context: context,
     );
 
+    // 마커 업데이트
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(latitude, longitude),
@@ -307,13 +462,14 @@ class _NaverMapViewState extends State<NaverMapView> {
     mapController!.addOverlay(_currentLocationMarker!);
   }
 
-  void _updateMapPosition(double latitude, double longitude, double compassValue) {
+  void _updateMapPosition(
+      double latitude, double longitude, double compassValue) async {
     if (mapController == null) return;
 
     final cameraUpdate = NCameraUpdate.withParams(
       target: NLatLng(latitude, longitude),
       zoom: 18.5,
-      bearing: compassValue,
+      bearing: _currentMode == MapControlMode.on2 ? compassValue : 0.0,
     );
 
     mapController!.updateCamera(cameraUpdate);

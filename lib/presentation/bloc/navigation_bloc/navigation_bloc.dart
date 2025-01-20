@@ -1,15 +1,4 @@
-import 'dart:async';
-import 'dart:developer';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:safelight/data/services/navigation_api_service.dart';
-import 'package:safelight/domain/entities/branch_info.dart';
-import 'package:safelight/framework/ui.dart';
-import 'navigation_event.dart';
-import 'navigation_state.dart';
+part of '../../../framework/controller.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   late final NavigationApiService apiService;
@@ -57,6 +46,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       add(UpdateLocationMarker(
         latitude: data['latitude'],
         longitude: data['longitude'],
+        compassValue: data['compassValue'],
         isGps: data['isGps'],
       ));
     });
@@ -69,6 +59,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
         latitude: data['latitude'],
         longitude: data['longitude'],
         compassValue: data['compassValue'],
+        isGps: data['isGps'],
       ));
     });
   }
@@ -216,6 +207,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       emit(LocationMarkerUpdated(
         latitude: latitude,
         longitude: longitude,
+        compassValue: compassValue,
         isGps: isGps,
       ));
 
@@ -223,6 +215,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
         latitude: latitude,
         longitude: longitude,
         compassValue: compassValue,
+        isGps: isGps,
       ));
     } catch (error) {
       // 오류 발생 상태 방출
@@ -238,6 +231,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     emit(LocationMarkerUpdated(
       latitude: event.latitude,
       longitude: event.longitude,
+      compassValue: event.compassValue,
       isGps: event.isGps,
     ));
   }
@@ -251,6 +245,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       latitude: event.latitude,
       longitude: event.longitude,
       compassValue: event.compassValue,
+      isGps: event.isGps,
     ));
   }
 }

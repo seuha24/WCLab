@@ -1,6 +1,7 @@
 library controller;
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io' show Platform;
 
 import 'package:equatable/equatable.dart';
@@ -8,11 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/status_enum.dart';
+import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/domain/entities/auth_type.dart';
+import 'package:safelight/domain/entities/branch_info.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:safelight/framework/repository.dart';
+import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart';
@@ -28,3 +32,6 @@ part '../presentation/cubit/location_permission_cubit.dart';
 part '../presentation/bloc/search_bloc/search_bloc.dart';
 part '../presentation/bloc/search_bloc/search_event.dart';
 part '../presentation/bloc/search_bloc/search_state.dart';
+part '../presentation/bloc/navigation_bloc/navigation_bloc.dart';
+part '../presentation/bloc/navigation_bloc/navigation_event.dart';
+part '../presentation/bloc/navigation_bloc/navigation_state.dart';

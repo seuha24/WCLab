@@ -1,7 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:safelight/domain/entities/branch_info.dart';
-import 'package:safelight/framework/ui.dart';
+part of '../../../framework/controller.dart';
 
 /// 이 파일은 NavigationBloc에서 발생할 수 있는 다양한 상태를 정의합니다.
 /// 상태는 내비게이션 처리의 다양한 단계를 나타내며, 로딩 중 상태, 경로 로드 성공 상태,
@@ -58,31 +55,35 @@ class DestinationLocationSet extends NavigationState {
 class LocationMarkerUpdated extends NavigationState {
   final double latitude;
   final double longitude;
+  final double compassValue;
   final bool isGps;
 
   const LocationMarkerUpdated({
     required this.latitude,
     required this.longitude,
+    required this.compassValue,
     required this.isGps,
   });
 
   @override
-  List<Object> get props => [latitude, longitude, isGps];
+  List<Object> get props => [latitude, longitude, compassValue, isGps];
 }
 
 class MapPositionUpdated extends NavigationState {
   final double latitude;
   final double longitude;
   final double compassValue;
+  final bool isGps;
 
   const MapPositionUpdated({
     required this.latitude,
     required this.longitude,
     required this.compassValue,
+    required this.isGps,
   });
 
   @override
-  List<Object> get props => [latitude, longitude, compassValue];
+  List<Object> get props => [latitude, longitude, compassValue, isGps];
 }
 
 class NavigationFailure extends NavigationState {

@@ -18,7 +18,6 @@ import 'package:safelight/firebase_options.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
-import 'package:safelight/presentation/bloc/navigation_bloc/navigation_bloc.dart';
 
 
 import 'framework/controller.dart';
