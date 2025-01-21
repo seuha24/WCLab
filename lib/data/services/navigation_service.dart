@@ -330,6 +330,30 @@ class NavigationService {
             accelerationMagnitude < 10.0 &&
             !isAccRunning) {
           isAccRunning = true;
+
+          // 시간 간격 계산 (초 단위)
+          double dt = SensorInterval.normalInterval.inMilliseconds / 1000.0;
+
+          // 가속도 필터링 값 (속도 계산 기준)
+          const double accFilteringValue = 0.06;
+
+          // Velocity(속도) 계산 -> 벡터(크기, 방향)
+          // X 속도 계산
+          if (curAccX > accFilteringValue || curAccX < -accFilteringValue) {
+            velocityX += (curAccX - preAccX) * dt;
+            preAccX = curAccX;
+          } else {
+            velocityX = 0;
+          }
+
+          // Y 속도 계산
+          if (curAccY > accFilteringValue || curAccY < -accFilteringValue) {
+            velocityY += (curAccY - preAccY) * dt;
+            preAccY = curAccY;
+          } else {
+            velocityY = 0;
+          }
+
           position = await Geolocator.getCurrentPosition(
               locationSettings: LocationSettings(
                   accuracy: LocationAccuracy.high, distanceFilter: 5));
@@ -407,7 +431,6 @@ class NavigationService {
       // debugPrint('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
         await moveByGps();
-        // await moveByImu();
       }
     });
   }
@@ -426,14 +449,14 @@ class NavigationService {
       _locationMarkerController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
-        'compassValue': compassValue,
+        'compassValue': yawRate,
         'isGps': isGps,
       });
 
       _mapPositionController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
-        'compassValue': compassValue,
+        'compassValue': yawRate,
         'isGps': isGps,
       });
 

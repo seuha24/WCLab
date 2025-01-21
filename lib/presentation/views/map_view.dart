@@ -77,6 +77,8 @@ class _NaverMapViewState extends State<NaverMapView> {
     });
   }
 
+  /// 사용자가 지도를 드래그했을 때 호출되는 메서드
+  /// 드래그 시 모드를 off로 전환
   void _handleMapDrag() {
     if (_currentMode != MapControlMode.off) {
       setState(() {
@@ -86,6 +88,7 @@ class _NaverMapViewState extends State<NaverMapView> {
     }
   }
 
+  /// 현재 지도 모드에 따라 지도와 마커를 업데이트하는 메서드
   void _handleMapMode(double latitude, double longitude, double compassValue,
       bool isGps) async {
     switch (_currentMode) {
@@ -101,7 +104,7 @@ class _NaverMapViewState extends State<NaverMapView> {
         break;
 
       case MapControlMode.on1:
-        // 지도 고정, 마커 회전
+        // 지도 고정, 마커만 회전
         final mapBearing =
             await mapController!.getCameraPosition().then((pos) => pos.bearing);
         _updateCurrentLocationMarker(latitude, longitude, compassValue, isGps);
