@@ -362,7 +362,8 @@ class NavigationService {
             await moveByImu();
           } else {
             // debugPrint('UserAccelerometerEvent moveByGps()');
-            await moveByGps();
+            // await moveByGps();
+            await moveByImu();
           }
         }
         isAccRunning = false;
@@ -430,7 +431,8 @@ class NavigationService {
         .listen((Position position) async {
       // debugPrint('positionStream: $position');
       if (position.accuracy <= gpsAccuracy) {
-        await moveByGps();
+        // await moveByGps();
+        await moveByImu();
       }
     });
   }
@@ -449,14 +451,14 @@ class NavigationService {
       _locationMarkerController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
-        'compassValue': yawRate,
+        'compassValue': compassValue,
         'isGps': isGps,
       });
 
       _mapPositionController.add({
         'latitude': importedLatitude,
         'longitude': importedLongitude,
-        'compassValue': yawRate,
+        'compassValue': compassValue,
         'isGps': isGps,
       });
 
