@@ -19,8 +19,10 @@ class _NaverMapViewState extends State<NaverMapView> {
   NaverMapController? mapController;
   MapControlMode _currentMode = MapControlMode.idle;
 
+  // 지도 고정 시 현재 지도 방향을 저장하는 변수
+  double? _currentBearing;
+
   NMarker? _currentLocationMarker;
-  NMarker? _testMarker;
 
   @override
   void initState() {
@@ -65,7 +67,13 @@ class _NaverMapViewState extends State<NaverMapView> {
           break;
         case MapControlMode.on1:
           debugPrint("Mode: On-1 - 지도 현재 위치 고정");
-          // 현재 위치로 지도와 마커 초기화
+          // 현재 지도 방향(bearing) 저장
+          if (mapController != null) {
+            mapController!.getCameraPosition().then((position) {
+              _currentBearing = position.bearing;
+              debugPrint("Current Bearing Stored: $_currentBearing");
+            });
+          }
           _navigationBloc.add(OnMapReady());
           break;
         case MapControlMode.on2:
@@ -446,7 +454,10 @@ class _NaverMapViewState extends State<NaverMapView> {
         angle: adjustedAngle * (math.pi / 180), // 라디안 변환
         child: Icon(
           // off 모드일땐 회전 방향 표시 안함
-          _currentMode == MapControlMode.idle || _currentMode == MapControlMode.off ? Icons.circle : Icons.navigation,
+          _currentMode == MapControlMode.idle ||
+                  _currentMode == MapControlMode.off
+              ? Icons.circle
+              : Icons.navigation,
           color: isGps ? Colors.blue : Colors.red,
           size: 30,
         ),
@@ -469,10 +480,17 @@ class _NaverMapViewState extends State<NaverMapView> {
       double latitude, double longitude, double compassValue) async {
     if (mapController == null) return;
 
+    // on1 모드에서는 저장된 방향(_currentBearing)을 사용
+    final targetBearing = _currentMode == MapControlMode.on2
+        ? compassValue
+        : (_currentMode == MapControlMode.on1 && _currentBearing != null)
+            ? _currentBearing
+            : 0.0;
+
     final cameraUpdate = NCameraUpdate.withParams(
       target: NLatLng(latitude, longitude),
       zoom: 18.5,
-      bearing: _currentMode == MapControlMode.on2 ? compassValue : 0.0,
+      bearing: targetBearing,
     );
 
     mapController!.updateCamera(cameraUpdate);
