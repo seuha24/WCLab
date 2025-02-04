@@ -91,7 +91,7 @@ class SafeLight extends StatelessWidget {
               //     return NavigationBloc(DI.get<NavigationApiService>(), navigationService);
               //   },
               // ),
-              BlocProvider(create: (_) => DI.get<NavigationBloc>()),
+              // BlocProvider(create: (_) => DI.get<NavigationBloc>()),
             ],
             child: MaterialApp(
               navigatorKey: navigatorKey,

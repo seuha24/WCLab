@@ -269,8 +269,8 @@ Future<void> init() async {
     ),
   );
 
-  DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc(
-    DI.get<NavigationApiService>(),
-    DI.get<NavigationService>(),
-  ));
+  // DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc(
+  //   DI.get<NavigationApiService>(),
+  //   DI.get<NavigationService>(),
+  // ));
 }

@@ -74,6 +74,7 @@ dependencies:
   latlong2: ^0.9.0
   simple_kalman: ^1.0.2
   pretty_dio_logger: ^1.4.0
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:
