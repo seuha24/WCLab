@@ -992,17 +992,17 @@ class NaverMapViewController extends GetxController {
     debugPrint(
         '_updateCurrentLocationMarker: $current_latitude, $current_longitude');
     if (mapController == null) return;
-    if (_currentLocationMarker != null) {
-      try {
-        mapController.deleteOverlay(
-          NOverlayInfo(type: NOverlayType.marker, id: 'current_location'),
-        );
-      } catch (e) {
-        print("오버레이 삭제 중 에러 발생: $e");
-      }
-    } else {
-      print("삭제할 마커가 없습니다.");
-    }
+    // if (_currentLocationMarker != null) {
+    //   try {
+    //     mapController.deleteOverlay(
+    //       NOverlayInfo(type: NOverlayType.marker, id: 'current_location'),
+    //     );
+    //   } catch (e) {
+    //     print("오버레이 삭제 중 에러 발생: $e");
+    //   }
+    // } else {
+    //   print("삭제할 마커가 없습니다.");
+    // }
     final Color markerColor = isGps ? Colors.blue : Colors.red;
 
     final iconImage = await NOverlayImage.fromWidget(
