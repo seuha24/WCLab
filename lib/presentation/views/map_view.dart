@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:safelight/core/utils/app_sizes.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/presentation/controllers/map_view_controller.dart';
@@ -158,7 +159,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     '';
 
             return Positioned(
-              top: 118.0,
+              top: 122.0,
               left: 20.0,
               right: 20.0,
               child: Container(
@@ -362,12 +363,17 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         controller.destinationLocation.value.isEmpty
                             ? Text(
                                 '목적지를 입력하세요.',
-                                style:
-                                    TextStyle(fontSize: 17, color: Colors.grey),
+                                style: TextStyle(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  color: Colors.grey,
+                                ),
                               )
                             : Text(
                                 controller.destinationLocation.value,
-                                style: TextStyle(fontSize: 17),
+                                style: TextStyle(
+                                  fontSize: AppSizes.scaledFont(18),
+                                  color: Colors.black,
+                                ),
                               ),
                         Spacer(),
                         Icon(Icons.search),
@@ -378,6 +384,12 @@ class NaverMapView extends GetView<NaverMapViewController> {
               ),
             );
           }),
+          Container(
+            color: isDark
+                ? Theme.of(context).colorScheme.shadow.withOpacity(0.5)
+                : null,
+            height: MediaQuery.of(context).padding.top,
+          ),
         ],
       ),
     );
