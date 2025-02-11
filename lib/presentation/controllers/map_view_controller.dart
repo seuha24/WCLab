@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:location_plugin/location_plugin.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:safelight/framework/ui.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:get/get.dart';
@@ -406,7 +407,7 @@ class NaverMapViewController extends GetxController {
     beforeLatitude = current_latitude.value;
     beforeLongitude = current_longitude.value;
     yawRate = compassValue.value * angleToRadian;
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    Timer.periodic(Duration(milliseconds: 100), (timer) {
       s_accuracy = position.accuracy;
       _getLocation();
     });
@@ -631,11 +632,14 @@ class NaverMapViewController extends GetxController {
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
+        debugPrint('CompassEvent: $event');
         heading = event.heading ?? 0.0;
         compassValue.value = heading!;
         if (!compassReady.isCompleted) {
           compassReady.complete();
         }
+
+        // updateMapPosition(current_latitude.value, current_longitude.value, compassValue.value);
       },
       onError: (e) {
         showErrorDialog("Flutter_Compass");
@@ -983,7 +987,8 @@ class NaverMapViewController extends GetxController {
       target: NLatLng(current_latitude, current_longitude),
       zoom: zoomLevel,
       bearing: compassValue,
-    );
+    )..setAnimation(animation: NCameraAnimation.easing);
+
     mapController.updateCamera(cameraUpdate);
   }
 
