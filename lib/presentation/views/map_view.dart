@@ -135,13 +135,15 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         controller.searchLocation.value.isEmpty
                             ? Text(
                                 '출발지를 입력하세요.',
-                                style:
-                                    TextStyle(fontSize: 17, color: Colors.grey),
+                                style: TextStyle(
+                                    fontSize: AppSizes.scaledFont(18),
+                                    color: Colors.grey),
                               )
                             : Text(
                                 controller.searchLocation.value,
                                 style: TextStyle(
-                                    fontSize: 17, color: Colors.black),
+                                    fontSize: AppSizes.scaledFont(18),
+                                    color: Colors.black),
                               ),
                         Spacer(),
                         Icon(Icons.search),

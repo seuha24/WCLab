@@ -245,8 +245,9 @@ Future<void> init() async {
   final FirebaseAuth auth = FirebaseAuth.instance;
   DI.registerLazySingleton(() => auth);
 
-  final FlutterTts tts = FlutterTts();
-  DI.registerLazySingleton(() => tts);
+  // TTS
+  DI.registerLazySingleton(() => FlutterTts());
+  DI.registerLazySingleton<TtsService>(() => TtsService(DI.get<FlutterTts>()));
 
   DI.registerLazySingleton<WeatherValidator>(() => WeatherValidator());
 
@@ -261,8 +262,6 @@ Future<void> init() async {
   );
 
   DI.registerLazySingleton<NavigationApiService>(() => NavigationApiService());
-
-  DI.registerLazySingleton<TtsService>(() => TtsService());
 
   DI.registerLazySingleton<NavigationService>(() => NavigationService(
       DI.get<TtsService>(),

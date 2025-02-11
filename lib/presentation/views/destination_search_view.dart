@@ -16,7 +16,12 @@ class _DesSearchState extends State<DesSearch> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
+  // TTS
   final TtsService ttsService = DI.get<TtsService>();
+
+  Future<void> speakText(String text) async {
+    await ttsService.speak(text);
+  }
 
   final FocusNode _focusNode = FocusNode();
 

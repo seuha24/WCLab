@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:location_plugin/location_plugin.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/framework/ui.dart';
 import 'package:safelight/main.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -103,7 +104,11 @@ class WeightedAverageFilter {
 class NaverMapViewController extends GetxController {
 
   // TTS 관련
-  final FlutterTts tts = FlutterTts();
+  final TtsService ttsService = DI.get<TtsService>();
+
+  Future<void> speakText(String text) async {
+    await ttsService.speak(text);
+  }
 
   // 지도 컨트롤러
   late NaverMapController mapController;
@@ -223,7 +228,6 @@ class NaverMapViewController extends GetxController {
   void onInit() {
     super.onInit();
 
-    _initTTS();
     _getLocation();
     _initLocation();
     startCollectingSensorData();
@@ -381,15 +385,6 @@ class NaverMapViewController extends GetxController {
     super.onClose();
   }
 
-  // TTS 초기화
-  Future<void> _initTTS() async {
-    await tts.setLanguage("ko-KR");
-    await tts.setSpeechRate(0.7);
-  }
-
-  Future<void> speakText(String text) async {
-    await tts.speak(text);
-  }
 
   // 위치 초기화 (GPS 및 IMU)
   Future<void> _initLocation() async {

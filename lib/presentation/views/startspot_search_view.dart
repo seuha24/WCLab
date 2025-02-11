@@ -16,7 +16,12 @@ class _StartSearchState extends State<StartSearch> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
+  // TTS
   final TtsService ttsService = DI.get<TtsService>();
+
+  Future<void> speakText(String text) async {
+    await ttsService.speak(text);
+  }
 
   final FocusNode _focusNode = FocusNode();
 
@@ -61,6 +66,8 @@ class _StartSearchState extends State<StartSearch> {
 
   /// TTS를 통해 안내 메시지를 출력하는 메서드.
   /// [message]: 출력할 메시지.
+
+
   Future<void> speakTTS(String message) async {
     ttsService.speak(message);
   }
