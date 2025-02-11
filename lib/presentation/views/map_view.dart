@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:safelight/framework/controller.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/presentation/controllers/map_view_controller.dart';
 import 'package:safelight/framework/ui.dart';
@@ -57,7 +55,6 @@ class NaverMapView extends GetView<NaverMapViewController> {
             ),
             onMapReady: (naverMapController) {
               debugPrint('네이버 맵 로딩됨');
-              controller.setContext(context);
               controller.mapController = naverMapController;
               controller.updateMapPosition(
                 controller.current_latitude.value,

@@ -11,6 +11,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:location_plugin/location_plugin.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:safelight/framework/ui.dart';
+import 'package:safelight/main.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:get/get.dart';
 import 'package:safelight/framework/usecase.dart';
@@ -100,12 +101,6 @@ class WeightedAverageFilter {
 
 // --- GetX Controller ---
 class NaverMapViewController extends GetxController {
-
-  late BuildContext _context;
-
-  void setContext(BuildContext context) {
-    _context = context;
-  }
 
   // TTS 관련
   final FlutterTts tts = FlutterTts();
@@ -540,7 +535,7 @@ class NaverMapViewController extends GetxController {
     final iconImage = await NOverlayImage.fromWidget(
       widget: Icon(Icons.circle, color: Colors.green, size: 15),
       size: const Size(15, 15),
-      context: _context,
+      context: navigatorKey.currentContext!,
     );
     for (var branch in branchinfo) {
       _testMarker = NMarker(
@@ -1013,7 +1008,7 @@ class NaverMapViewController extends GetxController {
     final iconImage = await NOverlayImage.fromWidget(
         widget: Icon(Icons.circle, color: markerColor, size: 25),
         size: const Size(25, 25),
-        context: _context);
+        context: navigatorKey.currentContext!);
     debugPrint('iconImage: $iconImage');
     _currentLocationMarker = NMarker(
       id: 'current_location',
