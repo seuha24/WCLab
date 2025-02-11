@@ -1,19 +1,23 @@
 part of '../../../framework/controller.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-   String startLocation = '';
-   String destinationLocation = '';
+  String startLocation = '';
+  String destinationLocation = '';
 
   SearchBloc() : super(const SearchState()) {
     on<SearchStartLocationRequested>(_onSearchStartLocationRequested);
     on<SearchDestinationRequested>(_onSearchDestinationRequested);
   }
+
   FutureOr<void> _onSearchStartLocationRequested(
     SearchStartLocationRequested event,
     Emitter<SearchState> emit,
   ) async {
     try {
-      startLocation = event.searchLocation;
+      emit(SearchState(
+        searchStartLocation: event.searchLocation,
+        searchDestinationLocation: state.searchDestinationLocation,
+      ));
     } on Exception catch (e, stacktrace) {
       addError(e, stacktrace);
     }
@@ -24,7 +28,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     try {
-      destinationLocation = event.searchDestination;
+      emit(SearchState(
+        searchStartLocation: state.searchStartLocation,
+        searchDestinationLocation: event.searchDestination,
+      ));
     } on Exception catch (e, stacktrace) {
       addError(e, stacktrace);
     }
