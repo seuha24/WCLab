@@ -109,11 +109,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     );
                     if (newStart != null) {
                       debugPrint('newStart : $newStart');
-                      controller.startSelectedLocation.value = newStart;
-                      controller.isStart.value = true;
-
-                      debugPrint(
-                          'controller.startSelectedLocation.value : ${controller.startSelectedLocation.value}');
+                      controller.handleStartLocationSelection(newStart);
                     }
                   },
                   child: Container(
@@ -191,159 +187,9 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         },
                       ),
                     );
+
                     if (newDest != null) {
-                      controller.selectedLocation.value = newDest;
-                      if (controller.isStart.value) {
-                        await controller.getGeometry(
-                            controller.startSelectedLocation.value!.lat,
-                            controller.startSelectedLocation.value!.lng);
-                      } else {
-                        await controller.getGeometry(
-                            controller.current_latitude.value,
-                            controller.current_longitude.value);
-                      }
-                      // branchinfo의 bearing 값 업데이트
-                      for (int i = 0;
-                          i < controller.branchinfo.length - 1;
-                          i++) {
-                        double newBearingValue = controller.calculateBearing(
-                          controller.branchinfo[i].point.latitude,
-                          controller.branchinfo[i].point.longitude,
-                          controller.branchinfo[i + 1].point.latitude,
-                          controller.branchinfo[i + 1].point.longitude,
-                        );
-                        controller.branchinfo[i].bearingToPoint =
-                            newBearingValue;
-                      }
-                      controller.yawRate2 = controller.turnUpdate2(
-                              controller.branchinfo[controller.targetIndex]
-                                  .bearingToPoint,
-                              controller.compassValue.value) *
-                          controller.angleToRadian;
-                      // 타이머를 통한 경로 안내 시작
-                      Timer.periodic(Duration(seconds: 2), (timer) async {
-                        controller.checkBoundary();
-                        controller.indexUpdate();
-                        controller.remain_startpoint =
-                            controller.calculateDistance(
-                          controller.current_latitude.value,
-                          controller.current_longitude.value,
-                          controller.branchinfo[0].point.latitude,
-                          controller.branchinfo[0].point.longitude,
-                        );
-                        if (controller.remain_startpoint < 0.015) {
-                          controller.isStart.value = false;
-                        }
-                        if (!controller.isStart.value) {
-                          if (controller.branchinfo.isNotEmpty &&
-                              controller.targetIndex <
-                                  controller.branchinfo.length) {
-                            controller.branchTargetIndex =
-                                controller.targetIndex;
-                            while (controller.branchTargetIndex <
-                                    controller.branchinfo.length &&
-                                !controller
-                                    .branchinfo[controller.branchTargetIndex]
-                                    .branch) {
-                              controller.branchTargetIndex++;
-                            }
-                            if (controller
-                                .branchinfo[controller.branchTargetIndex]
-                                .branch) {
-                              controller.remain_distance.value =
-                                  controller.calculateDistance(
-                                controller.current_latitude.value,
-                                controller.current_longitude.value,
-                                controller
-                                    .branchinfo[controller.branchTargetIndex]
-                                    .point
-                                    .latitude,
-                                controller
-                                    .branchinfo[controller.branchTargetIndex]
-                                    .point
-                                    .longitude,
-                              );
-                              controller.clock =
-                                  controller.getGuidanceDirection(
-                                controller.branchinfo[controller.currentIndex]
-                                    .point.longitude,
-                                controller.branchinfo[controller.currentIndex]
-                                    .point.latitude,
-                                controller.branchinfo[controller.targetIndex]
-                                    .point.longitude,
-                                controller.branchinfo[controller.targetIndex]
-                                    .point.latitude,
-                                controller.current_latitude.value,
-                                controller.current_longitude.value,
-                                controller.yawRateTurn2,
-                                controller.branchinfo[controller.currentIndex]
-                                    .bearingToPoint,
-                              );
-                            }
-                          } else {
-                            debugPrint(
-                                "branchinfo 리스트가 비어 있거나 targetIndex가 유효하지 않습니다.");
-                          }
-                          if (controller.remain_distance.value < 0.015) {
-                            if (controller.branchinfo[controller.currentIndex]
-                                    .crosswalk ==
-                                true) {
-                              final result = await controller
-                                  .flashOnWithWeather(NoParams());
-                              if (result.isLeft()) {
-                                debugPrint('안전 경광등을 사용할 수 없습니다.');
-                              } else {
-                                debugPrint('안전 경광등이 켜졌습니다.');
-                              }
-                              controller.speakText('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
-                            }
-                            if (controller.branchinfo[controller.targetIndex]
-                                    .branch ==
-                                true) {
-                              controller.speakText(
-                                  '${controller.branchinfo[controller.targetIndex].description}하세요.');
-                            }
-                          }
-                          if (controller.currentIndex > 0 &&
-                              ((controller.branchinfo[controller.currentIndex]
-                                                  .bearingToPoint -
-                                              controller.compassValue.value)
-                                          .abs() <=
-                                      18 ||
-                                  (controller
-                                                  .branchinfo[
-                                                      controller.currentIndex]
-                                                  .bearingToPoint -
-                                              controller.compassValue.value)
-                                          .abs() >=
-                                      342)) {
-                            Vibration.vibrate(duration: 200);
-                            debugPrint(
-                                "경로내 진동 베어링 값 ${(controller.branchinfo[controller.currentIndex].bearingToPoint - controller.compassValue.value)}");
-                          }
-                          if (controller.outOfBound) {
-                            Vibration.vibrate(duration: 100);
-                            debugPrint('경계이탈');
-                            debugPrint(
-                                'searchNewPath : ${controller.searchNewPath}');
-                            controller.speakText(controller.clock);
-                            if (controller.searchNewPath) {
-                              controller.searchNewPathTime++;
-                              if (controller.searchNewPathTime >= 5) {
-                                await controller.getGeometry(
-                                    controller.current_latitude.value,
-                                    controller.current_longitude.value);
-                                controller.speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
-                                controller.searchNewPathTime = 0;
-                              }
-                            } else {
-                              controller.searchNewPathTime = 0;
-                            }
-                          }
-                        } else if (controller.isStart.value) {
-                          controller.speakText("출발지로 이동하세요.");
-                        }
-                      });
+                      controller.handleDestinationLocationSelection(newDest);
                     }
                   },
                   child: Container(

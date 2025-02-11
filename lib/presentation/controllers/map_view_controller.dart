@@ -11,12 +11,14 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:location_plugin/location_plugin.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:safelight/data/services/tts_service.dart';
+import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/ui.dart';
 import 'package:safelight/main.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:get/get.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/injection.dart';
+import 'package:vibration/vibration.dart';
 
 // --- 데이터 클래스들 ---
 // BranchInfo
@@ -102,7 +104,6 @@ class WeightedAverageFilter {
 
 // --- GetX Controller ---
 class NaverMapViewController extends GetxController {
-
   // TTS 관련
   final TtsService ttsService = DI.get<TtsService>();
 
@@ -328,7 +329,7 @@ class NaverMapViewController extends GetxController {
     double distanceKm = math.sqrt(px * px + py * py) / 1000.0;
     double bearing = math.atan2(py, px) * radianToAngle; // 방향 이 부분 수정
     Map<String, double> latLng =
-    calLatLng(initialLatitude, initialLongitude, bearing, distanceKm);
+        calLatLng(initialLatitude, initialLongitude, bearing, distanceKm);
     newlatitude = latLng['latitude']!;
     newlongitude = latLng['longitude']!;
   }
@@ -384,7 +385,6 @@ class NaverMapViewController extends GetxController {
 
     super.onClose();
   }
-
 
   // 위치 초기화 (GPS 및 IMU)
   Future<void> _initLocation() async {
@@ -1012,5 +1012,126 @@ class NaverMapViewController extends GetxController {
     );
     debugPrint('_currentLocationMarker: $_currentLocationMarker');
     mapController.addOverlay(_currentLocationMarker!);
+  }
+
+
+  // 출발지 설정 후
+  Future<void> handleStartLocationSelection(GeoLocation newStart) async {
+    debugPrint('newStart : $newStart');
+    startSelectedLocation.value = newStart;
+    isStart.value = true;
+
+    debugPrint('startSelectedLocation.value : ${startSelectedLocation.value}');
+  }
+
+  // 목적지 설정 후 경로 안내 시작
+  Future<void> handleDestinationLocationSelection(GeoLocation newDest) async {
+    selectedLocation.value = newDest;
+    if (isStart.value) {
+      await getGeometry(
+          startSelectedLocation.value!.lat, startSelectedLocation.value!.lng);
+    } else {
+      await getGeometry(current_latitude.value, current_longitude.value);
+    }
+    // branchinfo의 bearing 값 업데이트
+    for (int i = 0; i < branchinfo.length - 1; i++) {
+      double newBearingValue = calculateBearing(
+        branchinfo[i].point.latitude,
+        branchinfo[i].point.longitude,
+        branchinfo[i + 1].point.latitude,
+        branchinfo[i + 1].point.longitude,
+      );
+      branchinfo[i].bearingToPoint = newBearingValue;
+    }
+    yawRate2 = turnUpdate2(
+            branchinfo[targetIndex].bearingToPoint, compassValue.value) *
+        angleToRadian;
+    // 타이머를 통한 경로 안내 시작
+    Timer.periodic(Duration(seconds: 2), (timer) async {
+      checkBoundary();
+      indexUpdate();
+      remain_startpoint = calculateDistance(
+        current_latitude.value,
+        current_longitude.value,
+        branchinfo[0].point.latitude,
+        branchinfo[0].point.longitude,
+      );
+      if (remain_startpoint < 0.015) {
+        isStart.value = false;
+      }
+      if (!isStart.value) {
+        if (branchinfo.isNotEmpty && targetIndex < branchinfo.length) {
+          branchTargetIndex = targetIndex;
+          while (branchTargetIndex < branchinfo.length &&
+              !branchinfo[branchTargetIndex].branch) {
+            branchTargetIndex++;
+          }
+          if (branchinfo[branchTargetIndex].branch) {
+            remain_distance.value = calculateDistance(
+              current_latitude.value,
+              current_longitude.value,
+              branchinfo[branchTargetIndex].point.latitude,
+              branchinfo[branchTargetIndex].point.longitude,
+            );
+            clock = getGuidanceDirection(
+              branchinfo[currentIndex].point.longitude,
+              branchinfo[currentIndex].point.latitude,
+              branchinfo[targetIndex].point.longitude,
+              branchinfo[targetIndex].point.latitude,
+              current_latitude.value,
+              current_longitude.value,
+              yawRateTurn2,
+              branchinfo[currentIndex].bearingToPoint,
+            );
+          }
+        } else {
+          debugPrint("branchinfo 리스트가 비어 있거나 targetIndex가 유효하지 않습니다.");
+        }
+        if (remain_distance.value < 0.015) {
+          if (branchinfo[currentIndex].crosswalk == true) {
+            final result = await flashOnWithWeather(NoParams());
+            if (result.isLeft()) {
+              debugPrint('안전 경광등을 사용할 수 없습니다.');
+            } else {
+              debugPrint('안전 경광등이 켜졌습니다.');
+            }
+            speakText('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
+          }
+          if (branchinfo[targetIndex].branch == true) {
+            speakText('${branchinfo[targetIndex].description}하세요.');
+          }
+        }
+        if (currentIndex > 0 &&
+            ((branchinfo[currentIndex].bearingToPoint - compassValue.value)
+                        .abs() <=
+                    18 ||
+                (branchinfo[currentIndex].bearingToPoint - compassValue.value)
+                        .abs() >=
+                    342)) {
+          Vibration.vibrate(duration: 200);
+          debugPrint(
+              "경로내 진동 베어링 값 ${(branchinfo[currentIndex].bearingToPoint - compassValue.value)}");
+        }
+        if (outOfBound) {
+          Vibration.vibrate(duration: 100);
+          debugPrint('경계이탈');
+          debugPrint('searchNewPath : ${searchNewPath}');
+          speakText(clock);
+          if (searchNewPath) {
+            searchNewPathTime++;
+            if (searchNewPathTime >= 5) {
+              await getGeometry(
+                  current_latitude.value, current_longitude.value);
+              speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
+              searchNewPathTime = 0;
+            }
+          } else {
+            searchNewPathTime = 0;
+          }
+        }
+      } else if (isStart.value) {
+        speakText("출발지로 이동하세요.");
+      }
+    });
   }
 }
