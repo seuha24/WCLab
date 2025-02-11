@@ -63,8 +63,6 @@ dependencies:
   vibration: ^1.8.4
   flutter_tts: ^3.6.3
   speech_to_text: ^7.0.0
-  text_to_speech:
-    path: text_to_speech-0.2.3
 
 
   # map & path
