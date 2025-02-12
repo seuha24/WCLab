@@ -9,6 +9,9 @@ enum MapControlMode {
 
 // --- GetX Controller ---
 class NaverMapViewController extends GetxController {
+  // API 서비스
+  final NavigationApiService apiService = DI.get<NavigationApiService>();
+
   // TTS 관련
   final TtsService ttsService = DI.get<TtsService>();
 
@@ -31,8 +34,8 @@ class NaverMapViewController extends GetxController {
   RxDouble remain_distance = double.infinity.obs;
 
   // 출발지, 목적지, 경로 등
-  Rxn<GeoLocation> selectedLocation = Rxn<GeoLocation>();
-  Rxn<GeoLocation> startSelectedLocation = Rxn<GeoLocation>();
+  Rxn<GeoLocation> selectedStartLocation = Rxn<GeoLocation>();
+  Rxn<GeoLocation> selectedDestLocation = Rxn<GeoLocation>();
 
   RxString searchLocation = ''.obs;
   RxString destinationLocation = ''.obs;
@@ -41,6 +44,8 @@ class NaverMapViewController extends GetxController {
   List<BranchInfo> branchinfo = [];
 
   RxBool isStart = false.obs;
+  RxBool isSetStartLocation = false.obs;
+  RxBool isSetDestinationLocation = false.obs;
   late double remain_startpoint;
 
   // 인덱스
@@ -336,72 +341,56 @@ class NaverMapViewController extends GetxController {
     }
   }
 
-  // 경로 검색 (T맵 API)
-  Future<void> getGeometry(double c_lat, double c_lng) async {
-    const String apiUrl =
-        'https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function';
-    final Map<String, dynamic> requestData = {
-      "startX": c_lng,
-      "startY": c_lat,
-      "angle": 20,
-      "speed": 30,
-      "endPoiId": "10001",
-      "endX": selectedLocation.value!.lng,
-      "endY": selectedLocation.value!.lat,
-      "reqCoordType": "WGS84GEO",
-      "startName": "%EC%B6%9C%EB%B0%9C",
-      "endName": "%EB%8F%84%EC%B0%A9",
-      "searchOption": "0",
-      "resCoordType": "WGS84GEO",
-      "sort": "index"
-    };
+  // 경로 API 호출
+  Future<void> loadPathData(
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+  ) async {
+    try {
+      final responseData = await apiService.fetchPathData(
+        startLatitude: startLatitude,
+        startLongitude: startLongitude,
+        endLatitude: endLatitude,
+        endLongitude: endLongitude,
+      );
 
-    final Map<String, String> headers = {
-      'accept': 'application/json',
-      'appKey': 'QKrZQE7KkR6MtxXBFx49A6gmY1a8TN3y8IyQ0qjh',
-      'content-type': 'application/json',
-    };
+      // 데이터 파싱
+      final parsedData = apiService.parsePathData(responseData);
+      final parsedPath = parsedData['paths'] as List<LatLng>;
+      final parsedBranchInfos = parsedData['branchInfo'] as List<BranchInfo>;
 
-    final response = await http.post(Uri.parse(apiUrl),
-        headers: headers, body: jsonEncode(requestData));
+      /// 데이터 로깅
+      debugPrint('paths: $parsedPath');
+      debugPrint('branchInfoList: $parsedBranchInfos');
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      List<dynamic> features = responseData['features'];
-      paths.clear();
-      branchinfo.clear();
-      currentIndex = 0;
-      targetIndex = 0;
-      for (var feature in features) {
-        List<dynamic> coordinates = feature['geometry']['coordinates'];
-        if (feature['geometry']['type'] == 'LineString') {
-          paths.addAll(coordinates.map((coord) => LatLng(coord[1], coord[0])));
-          for (var coord in coordinates) {
-            LatLng point = LatLng(coord[1], coord[0]);
-            if (branchinfo.isNotEmpty && branchinfo.last.point == point)
-              continue;
-            branchinfo.add(BranchInfo(point, '', 0.0,
-                int.parse(feature['properties']['facilityType']) == 15, false));
-          }
-        }
-        if (feature['geometry']['type'] == 'Point' && branchinfo.isNotEmpty) {
-          double latitude = coordinates[1];
-          double longitude = coordinates[0];
-          String description = feature['properties']['description'];
-          for (var branch in branchinfo) {
-            if (branch.point.latitude == latitude &&
-                branch.point.longitude == longitude) {
-              branch.branch = true;
-              branch.description = description;
-              break;
-            }
-          }
-        }
+      // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
+      // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
+      // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
+      for (int i = 0; i < parsedBranchInfos.length - 1; i++) {
+        double newBearingValue = calculateBearing(
+          parsedBranchInfos[i].point.latitude,
+          parsedBranchInfos[i].point.longitude,
+          parsedBranchInfos[i + 1].point.latitude,
+          parsedBranchInfos[i + 1].point.longitude,
+        );
+        parsedBranchInfos[i].bearingToPoint = newBearingValue;
       }
+
+      paths = parsedPath;
+      branchinfo = parsedBranchInfos;
+
+      yawRate2 = turnUpdate2(
+          branchinfo[targetIndex].bearingToPoint, compassValue.value) *
+          angleToRadian;
+
       addOverlays(paths);
       addBranchMarkers();
-    } else {
-      print('Failed to load data. Status code: ${response.statusCode}');
+
+      startNavigationTimer();
+    } catch (e) {
+      debugPrint('Failed to load path data : $e');
     }
   }
 
@@ -850,7 +839,6 @@ class NaverMapViewController extends GetxController {
 
   void updateMapPosition(
       double current_latitude, double current_longitude, double compassValue) {
-
     if (mapController == null) return;
     final zoomLevel = 18.5;
     final cameraUpdate = NCameraUpdate.withParams(
@@ -864,7 +852,6 @@ class NaverMapViewController extends GetxController {
 
   Future<void> updateCurrentLocationMarker(double current_latitude,
       double current_longitude, double compassValue, bool isGps) async {
-
     if (mapController == null) return;
 
     // 지도 회전 값 가져오기
@@ -906,34 +893,44 @@ class NaverMapViewController extends GetxController {
 
   // 출발지 설정 후
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
-    startSelectedLocation.value = newStart;
+    selectedStartLocation.value = newStart;
     isStart.value = true;
+    isSetStartLocation.value = true;
+
+    if (isSetDestinationLocation.value) {
+      debugPrint('목적지가 설정되어 있으므로 경로 요청');
+      await loadPathData(
+        selectedStartLocation.value!.lat,
+        selectedStartLocation.value!.lng,
+        selectedDestLocation.value!.lat,
+        selectedDestLocation.value!.lng,
+      );
+    }
   }
 
   // 목적지 설정 후 경로 안내 시작
   Future<void> handleDestinationLocationSelection(GeoLocation newDest) async {
-    selectedLocation.value = newDest;
-    if (isStart.value) {
-      await getGeometry(
-          startSelectedLocation.value!.lat, startSelectedLocation.value!.lng);
-    } else {
-      await getGeometry(current_latitude.value, current_longitude.value);
-    }
-    // branchinfo의 bearing 값 업데이트
-    for (int i = 0; i < branchinfo.length - 1; i++) {
-      double newBearingValue = calculateBearing(
-        branchinfo[i].point.latitude,
-        branchinfo[i].point.longitude,
-        branchinfo[i + 1].point.latitude,
-        branchinfo[i + 1].point.longitude,
+    selectedDestLocation.value = newDest;
+    isSetDestinationLocation.value = true;
+
+    if (isSetStartLocation.value) {
+      debugPrint('출발지가 설정되어 있으므로 경로 요청');
+      await loadPathData(
+        selectedStartLocation.value!.lat,
+        selectedStartLocation.value!.lng,
+        selectedDestLocation.value!.lat,
+        selectedDestLocation.value!.lng,
       );
-      branchinfo[i].bearingToPoint = newBearingValue;
     }
-    yawRate2 = turnUpdate2(
-            branchinfo[targetIndex].bearingToPoint, compassValue.value) *
-        angleToRadian;
-    // 타이머를 통한 경로 안내 시작
-    Timer.periodic(Duration(seconds: 2), (timer) async {
+
+  }
+
+  Timer? navigationTimer;
+
+  void startNavigationTimer() {
+    debugPrint('startNavigationTimer()');
+    navigationTimer?.cancel(); // 기존 타이머 제거
+    navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       checkBoundary();
       indexUpdate();
       remain_startpoint = calculateDistance(
@@ -1006,8 +1003,12 @@ class NaverMapViewController extends GetxController {
           if (searchNewPath) {
             searchNewPathTime++;
             if (searchNewPathTime >= 5) {
-              await getGeometry(
-                  current_latitude.value, current_longitude.value);
+              await loadPathData(
+                selectedStartLocation.value!.lat,
+                selectedStartLocation.value!.lng,
+                selectedDestLocation.value!.lat,
+                selectedDestLocation.value!.lng,
+              );
               speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
               searchNewPathTime = 0;
             }
