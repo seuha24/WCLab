@@ -15,9 +15,6 @@ class NaverMapView extends GetView<NaverMapViewController> {
     // 컨트롤러 생성 및 등록
     final NaverMapViewController controller = Get.put(NaverMapViewController());
 
-    // 현재 위치 마커
-    NMarker? _currentLocationMarker;
-
     return Scaffold(
       body: Stack(
         children: [

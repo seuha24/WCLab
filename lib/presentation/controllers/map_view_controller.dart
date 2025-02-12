@@ -144,11 +144,6 @@ class NaverMapViewController extends GetxController {
   final WeightedAverageFilter _filteringY =
       WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
 
-  static const Duration _ignoreDuration = Duration(milliseconds: 20);
-  UserAccelerometerEvent? _userAccelerometerEvent;
-  GyroscopeEvent? _gyroscopeEvent;
-  int? _userAccelerometerLastInterval, _gyroscopeLastInterval;
-  DateTime? _userAccelerometerUpdateTime, _gyroscopeUpdateTime;
   final List<StreamSubscription<dynamic>> _streamSubscriptions = [];
 
   @override
@@ -311,7 +306,8 @@ class NaverMapViewController extends GetxController {
   // 위치 초기화 (GPS 및 IMU)
   Future<void> _initLocation() async {
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
+    );
     current_latitude.value = position.latitude;
     current_longitude.value = position.longitude;
     initialLatitude = current_latitude.value;
@@ -328,7 +324,8 @@ class NaverMapViewController extends GetxController {
   Future<void> _getLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
+      );
       if (position.accuracy >= 15) {
         isGps = false;
         velocityX = _filteringX.calculateWeightedAverage();
@@ -352,7 +349,6 @@ class NaverMapViewController extends GetxController {
         compassValue.value,
         isGps,
       );
-
     } catch (e) {
       print("현위치 수신에러 $e");
       isLoading.value = false;
@@ -565,16 +561,7 @@ class NaverMapViewController extends GetxController {
       sensorStream: userAccelerometerEventStream(
           samplingPeriod: Duration(milliseconds: 20)),
       onEvent: (event) {
-        final now = DateTime.now();
         positionUpdate(event, Duration(milliseconds: 20));
-        _userAccelerometerEvent = event;
-        if (_userAccelerometerUpdateTime != null) {
-          final interval = now.difference(_userAccelerometerUpdateTime!);
-          if (interval > _ignoreDuration) {
-            _userAccelerometerLastInterval = interval.inMilliseconds;
-          }
-        }
-        _userAccelerometerUpdateTime = now;
       },
       onError: (e) {
         showErrorDialog("userAccerometer Sensor");
@@ -584,16 +571,7 @@ class NaverMapViewController extends GetxController {
       sensorStream:
           gyroscopeEventStream(samplingPeriod: Duration(milliseconds: 20)),
       onEvent: (GyroscopeEvent event) {
-        final now = DateTime.now();
         yawRateupdate(event, Duration(milliseconds: 20));
-        _gyroscopeEvent = event;
-        if (_gyroscopeUpdateTime != null) {
-          final interval = now.difference(_gyroscopeUpdateTime!);
-          if (interval > _ignoreDuration) {
-            _gyroscopeLastInterval = interval.inMilliseconds;
-          }
-        }
-        _gyroscopeUpdateTime = now;
       },
       onError: (e) {
         showErrorDialog("Gyroscope Sensor");
@@ -916,7 +894,7 @@ class NaverMapViewController extends GetxController {
 
     // 지도 회전 값 가져오기
     final mapBearing =
-    await mapController!.getCameraPosition().then((pos) => pos.bearing);
+        await mapController!.getCameraPosition().then((pos) => pos.bearing);
 
     // 마커의 방향 계산
     double adjustedAngle = compassValue - mapBearing;
@@ -1097,8 +1075,7 @@ class NaverMapViewController extends GetxController {
   /// 현재 지도 모드에 따라 지도와 마커를 업데이트하는 메서드
   Future<void> updateMapByMode(double latitude, double longitude,
       double compassValue, bool isGps) async {
-
-    if(mapController == null) return;
+    if (mapController == null) return;
 
     switch (mapMode.value) {
       case MapControlMode.idle:
