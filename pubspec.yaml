@@ -13,8 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  location_plugin:
-    path: location_plugin
+
   cupertino_icons: ^1.0.2
 
   # themes

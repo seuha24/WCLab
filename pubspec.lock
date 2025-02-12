@@ -840,13 +840,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  location_plugin:
-    dependency: "direct main"
-    description:
-      path: location_plugin
-      relative: true
-    source: path
-    version: "0.0.1"
   logging:
     dependency: transitive
     description:

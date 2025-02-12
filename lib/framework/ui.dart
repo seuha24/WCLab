@@ -1,12 +1,9 @@
 library ui;
 
-//import 'dart:html' as html;
 import 'dart:async';
-import 'dart:developer';
 import 'dart:math' as math;
 import 'dart:io' show Platform;
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +16,6 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:rxdart/rxdart.dart';
@@ -38,7 +34,6 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location_plugin/location_plugin.dart';
 import 'package:lottie/lottie.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:vibration/vibration.dart';
@@ -60,7 +55,6 @@ part '../presentation/views/main_view.dart';
 part '../presentation/views/setting_view.dart';
 part '../presentation/views/sign_in_view.dart';
 part '../presentation/views/destination_search_view.dart';
-part '../presentation/views/swift_location.dart';
 part '../presentation/views/startspot_search_view.dart';
 
 part '../presentation/widgets/board.dart';

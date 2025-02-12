@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
-import 'package:location_plugin/location_plugin.dart';
 import 'package:safelight/core/utils/weighted_average_filter.dart';
 import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/domain/entities/branch_info.dart';
@@ -69,7 +68,6 @@ class NaverMapViewController extends GetxController {
   int branchTargetIndex = 0;
 
   // 네이티브 위치 데이터 (디버깅용)
-  Map<String, dynamic>? currentLocation;
   late double s_latitude;
   late double s_longitude;
   late double s_accuracy;
@@ -160,10 +158,6 @@ class NaverMapViewController extends GetxController {
     _getLocation();
     _initLocation();
     startCollectingSensorData();
-
-    LocationPlugin.locationStream.listen((locationData) {
-      currentLocation = locationData;
-    });
 
     // 나침반 값이 설정된 후 _initLocation 호출
     compassReady.future.then((_) {
@@ -359,10 +353,6 @@ class NaverMapViewController extends GetxController {
         isGps,
       );
 
-      // updateMapPosition(
-      //     current_latitude.value, current_longitude.value, compassValue.value);
-      // updateCurrentLocationMarker(
-      //     current_latitude.value, current_longitude.value);
     } catch (e) {
       print("현위치 수신에러 $e");
       isLoading.value = false;
