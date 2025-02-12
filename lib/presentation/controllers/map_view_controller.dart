@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:location_plugin/location_plugin.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:safelight/core/utils/weighted_average_filter.dart';
 import 'package:safelight/data/services/tts_service.dart';
+import 'package:safelight/domain/entities/branch_info.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/ui.dart';
 import 'package:safelight/main.dart';
@@ -20,87 +20,6 @@ import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/injection.dart';
 import 'package:vibration/vibration.dart';
 
-// --- 데이터 클래스들 ---
-// BranchInfo
-class BranchInfo {
-  LatLng point; // 모든 경로값
-  String description; // 각 분기의 경로값
-  double bearingToPoint; // 다음 경로까지의 방향값
-  bool crosswalk; // 횡단보도 여부
-  bool branch; // 체크포인트(분기) 여부
-
-  BranchInfo(
-    this.point,
-    this.description,
-    this.bearingToPoint,
-    this.crosswalk,
-    this.branch,
-  );
-
-  @override
-  String toString() {
-    return 'BranchInfo{point: $point, branch: $branch, description: $description, bearingToPoint: $bearingToPoint, crosswalk: $crosswalk}';
-  }
-}
-
-// WeightedAverageFilter
-class WeightedAverageFilter {
-  final List<double?> _queue;
-  final List<double> _weights;
-  int _front = 0;
-  int _rear = 0;
-  int _size = 0;
-
-  WeightedAverageFilter(int capacity, List<double> weights)
-      : _queue = List<double?>.filled(capacity, null),
-        _weights = List<double>.from(weights);
-
-  bool get isEmpty => _size == 0;
-
-  bool get isFull => _size == _queue.length;
-
-  void enqueue(double element) {
-    if (isFull) {
-      dequeue();
-    }
-    _queue[_rear] = element;
-    _rear = (_rear + 1) % _queue.length;
-    _size++;
-  }
-
-  double? dequeue() {
-    if (isEmpty) throw Exception("Queue is empty");
-    double? element = _queue[_front];
-    _queue[_front] = null;
-    _front = (_front + 1) % _queue.length;
-    _size--;
-    return element;
-  }
-
-  double? peek() {
-    if (isEmpty) return null;
-    return _queue[_front];
-  }
-
-  void clear() {
-    while (!isEmpty) {
-      dequeue();
-    }
-  }
-
-  double calculateWeightedAverage() {
-    if (isEmpty) return 0.0;
-    double weightedSum = 0.0, weightSum = 0.0;
-    for (int i = 0; i < _queue.length; i++) {
-      double? element = _queue[(_front + i) % _queue.length];
-      if (element != null) {
-        weightedSum += element * _weights[i];
-        weightSum += _weights[i];
-      }
-    }
-    return weightSum == 0.0 ? 0.0 : weightedSum / weightSum;
-  }
-}
 
 // --- GetX Controller ---
 class NaverMapViewController extends GetxController {
@@ -425,7 +344,7 @@ class NaverMapViewController extends GetxController {
       }
       updateMapPosition(
           current_latitude.value, current_longitude.value, compassValue.value);
-      _updateCurrentLocationMarker(
+      updateCurrentLocationMarker(
           current_latitude.value, current_longitude.value);
     } catch (e) {
       print("현위치 수신에러 $e");
@@ -982,7 +901,7 @@ class NaverMapViewController extends GetxController {
     mapController.updateCamera(cameraUpdate);
   }
 
-  void _updateCurrentLocationMarker(
+  void updateCurrentLocationMarker(
       double current_latitude, double current_longitude) async {
     debugPrint(
         '_updateCurrentLocationMarker: $current_latitude, $current_longitude');
