@@ -4,9 +4,7 @@ library injection;
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
@@ -247,7 +245,8 @@ Future<void> init() async {
 
   // TTS
   DI.registerLazySingleton(() => FlutterTts());
-  DI.registerLazySingleton<TtsService>(() => TtsService(DI.get<FlutterTts>()));
+
+  DI.registerLazySingleton<TtsService>(() => TtsService());
 
   DI.registerLazySingleton<WeatherValidator>(() => WeatherValidator());
 
