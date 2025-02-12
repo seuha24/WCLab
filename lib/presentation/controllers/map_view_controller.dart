@@ -385,6 +385,7 @@ class NaverMapViewController extends GetxController {
           branchinfo[targetIndex].bearingToPoint, compassValue.value) *
           angleToRadian;
 
+      await mapController!.clearOverlays(type: NOverlayType.marker);
       addOverlays(paths);
       addBranchMarkers();
 
