@@ -1,15 +1,15 @@
 library controller;
 
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io' show Platform;
+import 'dart:math' as math;
+import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/status_enum.dart';
-import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:safelight/domain/entities/branch_info.dart';
 import 'package:safelight/framework/core.dart';
@@ -20,6 +20,17 @@ import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:safelight/core/utils/weighted_average_filter.dart';
+import 'package:safelight/data/services/tts_service.dart';
+import 'package:safelight/main.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:get/get.dart';
+import 'package:vibration/vibration.dart';
+
 
 part '../presentation/bloc/auth/auth_bloc.dart';
 part '../presentation/bloc/auth/auth_event.dart';
@@ -32,6 +43,4 @@ part '../presentation/cubit/location_permission_cubit.dart';
 part '../presentation/bloc/search_bloc/search_bloc.dart';
 part '../presentation/bloc/search_bloc/search_event.dart';
 part '../presentation/bloc/search_bloc/search_state.dart';
-// part '../presentation/bloc/navigation_bloc/navigation_bloc.dart';
-// part '../presentation/bloc/navigation_bloc/navigation_event.dart';
-// part '../presentation/bloc/navigation_bloc/navigation_state.dart';
+part '../presentation/controllers/map_view_controller.dart';

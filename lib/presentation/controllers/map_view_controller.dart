@@ -1,23 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math' as math;
-import 'package:flutter/material.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'package:latlong2/latlong.dart';
-import 'package:flutter_compass/flutter_compass.dart';
-import 'package:safelight/core/utils/weighted_average_filter.dart';
-import 'package:safelight/data/services/tts_service.dart';
-import 'package:safelight/domain/entities/branch_info.dart';
-import 'package:safelight/framework/core.dart';
-import 'package:safelight/framework/ui.dart';
-import 'package:safelight/main.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'package:get/get.dart';
-import 'package:safelight/framework/usecase.dart';
-import 'package:safelight/injection.dart';
-import 'package:vibration/vibration.dart';
+part of '../../framework/controller.dart';
 
 enum MapControlMode {
   idle, // 초기 상태 (초기 위치를 설정하기 위한 상태)
@@ -417,7 +398,6 @@ class NaverMapViewController extends GetxController {
           }
         }
       }
-      print(branchinfo);
       addOverlays(paths);
       addBranchMarkers();
     } else {
@@ -544,14 +524,11 @@ class NaverMapViewController extends GetxController {
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
       onEvent: (event) {
-        debugPrint('CompassEvent: $event');
         heading = event.heading ?? 0.0;
         compassValue.value = heading!;
         if (!compassReady.isCompleted) {
           compassReady.complete();
         }
-
-        // updateMapPosition(current_latitude.value, current_longitude.value, compassValue.value);
       },
       onError: (e) {
         showErrorDialog("Flutter_Compass");
@@ -651,12 +628,12 @@ class NaverMapViewController extends GetxController {
     int nearestIndex = moveIndex(currentWindow);
     if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
         nearestIndex != currentIndex) {
-      print('인덱스가 변경되었습니다. 새로운 인덱스: $nearestIndex');
+      debugPrint('인덱스가 변경되었습니다. 새로운 인덱스: $nearestIndex');
       currentIndex = nearestIndex;
       yawRate2 = turnUpdate2(
               branchinfo[currentIndex].bearingToPoint, compassValue.value) *
           angleToRadian;
-      print("각도 초기화");
+      debugPrint("각도 초기화");
     }
   }
 
@@ -873,8 +850,7 @@ class NaverMapViewController extends GetxController {
 
   void updateMapPosition(
       double current_latitude, double current_longitude, double compassValue) {
-    debugPrint(
-        'updateMapPosition: $current_latitude, $current_longitude, $compassValue');
+
     if (mapController == null) return;
     final zoomLevel = 18.5;
     final cameraUpdate = NCameraUpdate.withParams(
@@ -888,8 +864,7 @@ class NaverMapViewController extends GetxController {
 
   Future<void> updateCurrentLocationMarker(double current_latitude,
       double current_longitude, double compassValue, bool isGps) async {
-    debugPrint(
-        '_updateCurrentLocationMarker: $current_latitude, $current_longitude');
+
     if (mapController == null) return;
 
     // 지도 회전 값 가져오기
@@ -900,8 +875,6 @@ class NaverMapViewController extends GetxController {
     double adjustedAngle = compassValue - mapBearing;
     // 0° ~ 360° 범위로 조정
     if (adjustedAngle < 0) adjustedAngle += 360;
-
-    debugPrint('adjustedAngle = $adjustedAngle');
 
     final IconData icon = mapMode.value == MapControlMode.idle ||
             mapMode.value == MapControlMode.off
@@ -922,24 +895,19 @@ class NaverMapViewController extends GetxController {
         size: const Size(25, 25),
         context: navigatorKey.currentContext!);
 
-    debugPrint('iconImage: $iconImage');
-
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(current_latitude, current_longitude),
       icon: iconImage,
     );
-    debugPrint('_currentLocationMarker: $_currentLocationMarker');
+
     mapController!.addOverlay(_currentLocationMarker!);
   }
 
   // 출발지 설정 후
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
-    debugPrint('newStart : $newStart');
     startSelectedLocation.value = newStart;
     isStart.value = true;
-
-    debugPrint('startSelectedLocation.value : ${startSelectedLocation.value}');
   }
 
   // 목적지 설정 후 경로 안내 시작
@@ -1058,7 +1026,6 @@ class NaverMapViewController extends GetxController {
     // idle 상태를 건너뛰고 off부터 시작하도록
     if (mapMode.value == MapControlMode.idle) {
       mapMode.value = MapControlMode.off;
-      debugPrint("모드 전환: Off-Mode");
     }
 
     // 다음 모드 인덱스 계산 (idle이 나오면 건너뜀)
@@ -1116,7 +1083,6 @@ class NaverMapViewController extends GetxController {
   void handleMapDrag() {
     if (mapMode.value != MapControlMode.off) {
       mapMode.value = MapControlMode.off;
-      debugPrint("지도를 드래그하여 Off 상태로 전환");
     }
   }
 }
