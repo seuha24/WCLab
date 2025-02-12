@@ -1,83 +1,114 @@
 part of '../../framework/controller.dart';
 
+/// 지도 제어 모드를 나타내는 열거형입니다.
+/// - idle: 초기 상태 (초기 위치를 설정하기 위한 상태)
+/// - off: 자유롭게 지도 이동 (기본)
+/// - on1: 지도 고정, 회전하지 않음. Marker에 방향 표시, 사용자가 회전하면 Marker의 화살표도 회전
+/// - on2: 사용자의 방향 회전에 따라 지도도 회전
 enum MapControlMode {
-  idle, // 초기 상태 (초기 위치를 설정하기 위한 상태)
-  off, // 자유롭게 지도 이동 (기본)
-  on1, // 지도 고정, 회전하지 않음. marker에 방향 표시, 사용자가 회전하면 Marker의 화살표도 회전
-  on2, // 사용자의 방향 회전에 따라 지도도 회전
+  idle,
+  off,
+  on1,
+  on2,
 }
 
-// --- GetX Controller ---
+/// GetX Controller: NaverMapViewController
+/// 네이버 지도와 관련된 위치, 센서, 경로 안내, 오버레이 업데이트 등을 관리합니다.
 class NaverMapViewController extends GetxController {
-  // API 서비스
+  /// API 서비스 (경로 데이터 요청 등)
   final NavigationApiService apiService = DI.get<NavigationApiService>();
 
-  // TTS 관련
+  /// TTS 서비스 (텍스트를 음성으로 변환)
   final TtsService ttsService = DI.get<TtsService>();
 
+  /// 주어진 텍스트를 음성으로 출력합니다.
   Future<void> speakText(String text) async {
     await ttsService.speak(text);
   }
 
-  // 지도 컨트롤러
+  /// 네이버 맵 컨트롤러 (지도 업데이트 및 오버레이 추가에 사용)
   late NaverMapController? mapController;
 
-  // 지도 모드 상태
+  /// 현재 지도 모드를 Reactive 변수로 관리합니다.
   Rx<MapControlMode> mapMode = MapControlMode.idle.obs;
 
-  // 로딩 상태
+  /// 로딩 상태를 나타내는 Reactive 변수입니다.
   RxBool isLoading = true.obs;
 
-  // 위치 관련 (초기값 설정)
+  /// 현재 위도 (초기값: 35.9078)
   RxDouble current_latitude = 35.9078.obs;
+
+  /// 현재 경도 (초기값: 127.7669)
   RxDouble current_longitude = 127.7669.obs;
+
+  /// 경로 안내 시 남은 거리를 나타내는 Reactive 변수입니다.
   RxDouble remain_distance = double.infinity.obs;
 
-  // 출발지, 목적지, 경로 등
+  /// 선택된 시작 위치
   Rxn<GeoLocation> selectedStartLocation = Rxn<GeoLocation>();
+
+  /// 선택된 목적지 위치
   Rxn<GeoLocation> selectedDestLocation = Rxn<GeoLocation>();
 
+  /// 검색창에 표시할 시작 위치 문자열
   RxString searchLocation = ''.obs;
+
+  /// 검색창에 표시할 목적지 문자열
   RxString destinationLocation = ''.obs;
 
+  /// 경로의 좌표 리스트
   List<LatLng> paths = [];
+
+  /// 분기(체크포인트) 정보를 담은 리스트
   List<BranchInfo> branchinfo = [];
 
+  /// 시작 위치가 설정되었는지 여부
   RxBool isStart = false.obs;
+
+  /// 시작 위치가 설정되었음을 나타내는 Reactive 변수
   RxBool isSetStartLocation = false.obs;
+
+  /// 목적지 위치가 설정되었음을 나타내는 Reactive 변수
   RxBool isSetDestinationLocation = false.obs;
+
+  /// 출발지와 목적지 사이의 남은 거리를 나타내는 변수
   late double remain_startpoint;
 
-  // 인덱스
+  /// 분기(체크포인트) 인덱스 관리 변수
   int currentIndex = 0;
   int targetIndex = 0;
   int branchTargetIndex = 0;
 
-  // 네이티브 위치 데이터 (디버깅용)
+  /// 네이티브 위치 데이터 (디버깅용)
   late double s_latitude;
   late double s_longitude;
   late double s_accuracy;
 
-  // Flash 제어 (DI 사용)
+  /// Flash 제어 서비스 (외부 플래시 장치 제어)
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
 
+  /// 위치 업데이트 타이머
   Timer? _locationUpdateTimer;
+
+  /// 현재 위치 마커
   NMarker? _currentLocationMarker;
+
+  /// 테스트용 마커 (분기/체크포인트 디버깅용)
   NMarker? _testMarker;
 
-  // 나침반 값 수신 체크
+  /// 나침반 데이터 수신 완료 여부를 판단하기 위한 Completer
   Completer<void> compassReady = Completer<void>();
 
-  // 가속도 관련
+  // 가속도 관련 변수
   double preAccX = 0.0, preAccY = 0.0;
   double currentpreAccX = 0.0, currentpreAccY = 0.0;
 
-  // 속도 관련
+  // 속도 관련 변수 (가속도 적분)
   double velocityX = 0.0, velocityY = 0.0, currentSpeed = 0.0;
 
-  // 방향 관련
+  // 방향 관련 변수
   late double? heading;
   double? adjustment;
   double yawRate = 0.0,
@@ -91,14 +122,14 @@ class NaverMapViewController extends GetxController {
       firstBearingToPoint = 0.0;
   String clock = "";
 
-  // 거리 관련
+  // 이동 거리 계산 변수
   double px = 0.0, py = 0.0;
   double distanceToPath = 0.0,
       circularDistance = 0.0,
       lineDistance = 0.0,
       nearestDistance = 0.0;
 
-  // 초기 위치값
+  // 초기 위치 (GPS 기준)
   double initialLatitude = 35.9078, initialLongitude = 127.7669;
   late double beforeLatitude, beforeLongitude;
 
@@ -110,7 +141,7 @@ class NaverMapViewController extends GetxController {
   double detectiveRange = 0.5;
   double iphone12Filter = ((1 / 130) * (math.pi / 180));
 
-  // 경계, 검색 관련
+  // 경계 및 재경로 검색 관련 변수들
   bool outOfBound = false;
   double boundary = 5;
   bool searchNewPath = false;
@@ -118,20 +149,27 @@ class NaverMapViewController extends GetxController {
   int searchNewPathTime = 0;
   double distanceToNextCheckpoint = double.maxFinite;
 
+  /// GPS 신호 사용 여부
   bool isGps = true;
+
+  /// 경계 조건 문자열 (디버깅용)
   String checkBoudaryCondition = "";
 
-  // IMU로 계산된 위경도
+  // IMU 데이터를 기반으로 계산된 새로운 위경도 값
   double newlatitude = 0.0, newlongitude = 0.0;
 
-  // 가중 이동평균필터 인스턴스
+  /// 가중 이동평균 필터 인스턴스 (X축)
   final WeightedAverageFilter _filteringX =
       WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
+
+  /// 가중 이동평균 필터 인스턴스 (Y축)
   final WeightedAverageFilter _filteringY =
       WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]);
 
+  /// 센서 스트림 구독들을 보관하는 리스트입니다.
   final List<StreamSubscription<dynamic>> _streamSubscriptions = [];
 
+  /// onInit: 컨트롤러 초기화 시 호출되며, 위치 업데이트, 센서 데이터 수집 등 초기 설정을 수행합니다.
   @override
   void onInit() {
     super.onInit();
@@ -140,68 +178,54 @@ class NaverMapViewController extends GetxController {
     _initLocation();
     startCollectingSensorData();
 
-    // 나침반 값이 설정된 후 _initLocation 호출
+    // 나침반 데이터 수신이 완료되면 다시 _initLocation 호출
     compassReady.future.then((_) {
       _initLocation();
     });
   }
 
-  // yawRate(z축회전 속도) 노이즈 조정
+  /// addYawRateNoise: 센서 측정값에 포함된 잡음을 보정합니다.
+  /// [addValue]: 보정 값.
+  /// Returns the adjusted value.
   double addYawRateNoise(double addValue) {
     return addValue;
   }
 
-  // 새로운 경로, 경로 재설정 시 속도, 방향, 위치, 체크포인트 메세지 초기화
+  /// resetSpeedUtilsValue: 경로 재설정 시 속도, 방향, 위치 계산 관련 변수를 초기화합니다.
   void resetSpeedUtilsValue() {
-    // 방향 초기화
     yawRatePerDt = 0;
     yawRate = compassValue * angleToRadian;
-
-    // 위치 초기화
     px = 0.0;
     py = 0.0;
   }
 
-  // yawRate 계산 - 자이로스코프 회전속도계산
+  /// yawRateupdate: 자이로스코프 이벤트로부터 회전 속도를 계산하여 업데이트합니다.
+  /// [event]: GyroscopeEvent 데이터.
+  /// [sensorInterval]: 센서 업데이트 간격.
   void yawRateupdate(GyroscopeEvent event, Duration sensorInterval) {
     double dt = sensorInterval.inMilliseconds / 1000.0;
-
-    // 설정한 임계값(0.3) 초과 시 회전 속도 계산 - 잡음 필터링
     if (event.z > yawRateAccFilteringValue * angleToRadian ||
         event.z < -yawRateAccFilteringValue * angleToRadian) {
-      yawRatePerDt = (event.z * dt); // 회전 각도 계산
+      yawRatePerDt = (event.z * dt);
     }
-
-    // addYawRateNoise - 휴대기기 필터링 적용(보정)
     yawRate += -(yawRatePerDt + addYawRateNoise(0));
-
-    // 360도가 넘으면 yawRate를 0으로 초기화(0도~360도 값 유지)
     if (yawRate >= 2 * math.pi || yawRate <= -2 * math.pi) {
       yawRate = 0;
     }
-
-    // addYawRateNoise - 휴대기기 필터링 적용(보정)
     yawRate2 += -(yawRatePerDt + addYawRateNoise(0));
-
-    // 360도가 넘으면 yawRate를 0으로 초기화(0도~360도 값 유지)
     if (yawRate2 >= 2 * math.pi || yawRate2 <= -2 * math.pi) {
       yawRate2 = 0;
     }
-
-    // turn 변수에 회전각도 변수 저장
     yawRateTurn2 = yawRate2 * radianToAngle;
   }
 
-  // 이동경로 계산, 가속도 -> 속도계산
+  /// positionUpdate: 가속도 이벤트를 기반으로 속도와 위치를 업데이트합니다.
+  /// [event]: UserAccelerometerEvent 데이터.
+  /// [sensorInterval]: 센서 업데이트 간격.
   void positionUpdate(UserAccelerometerEvent event, Duration sensorInterval) {
     double dt = sensorInterval.inMilliseconds / 1000.0;
-    // 현재 방향과 목표 방향 사이의 각도 차이 알려주며 목표방향으로 얼마나 회전해야 하는지 결정
-
-    // 가속도 x, y 값을 변수에 저장
     currentpreAccX = event.x;
     currentpreAccY = event.y;
-    // Velocity(속도) 계산 -> 벡터(크기, 방향)
-    // X 속도: 특정 임계값(0.06) 초과하면 속도 계산(필터링) - 가속도 * dt(적분)
     if (currentpreAccX > accFilteringValue ||
         currentpreAccX < -accFilteringValue) {
       velocityX += (currentpreAccX - preAccX) * dt;
@@ -209,7 +233,6 @@ class NaverMapViewController extends GetxController {
     } else {
       velocityX = 0;
     }
-    // Y 속도: 특정 임계값(0.06) 초과하면 속도 계산(필터링) - 가속도 * dt(적분)
     if (currentpreAccY > accFilteringValue ||
         currentpreAccY < -accFilteringValue) {
       velocityY += (currentpreAccY - preAccY) * dt;
@@ -217,44 +240,34 @@ class NaverMapViewController extends GetxController {
     } else {
       velocityY = 0;
     }
-    //velocity 값을 wma필터에 넣음
     _filteringX.enqueue(velocityX);
     _filteringY.enqueue(velocityY);
-
-    // 속력: 벡터의 크기 계산 -> 스칼라(크기)
     currentSpeed = math.sqrt(velocityX * velocityX + velocityY * velocityY);
-
-    // 현재 위치 좌표점 계산 - 속력 * 방향 = 위치
     px += (currentSpeed * math.cos(yawRate));
     py += (currentSpeed * math.sin(yawRate));
-
-    // px와 py를 사용하여 거리를 계산
     double distanceKm = math.sqrt(px * px + py * py) / 1000.0;
-    double bearing = math.atan2(py, px) * radianToAngle; // 방향 이 부분 수정
+    double bearing = math.atan2(py, px) * radianToAngle;
     Map<String, double> latLng =
         calLatLng(initialLatitude, initialLongitude, bearing, distanceKm);
     newlatitude = latLng['latitude']!;
     newlongitude = latLng['longitude']!;
   }
 
-  // 함수 정의
+  /// calLatLng: 시작 좌표, 베어링, 이동 거리를 기반으로 새로운 위경도를 계산합니다.
+  /// [startLat]: 시작 위도.
+  /// [startLng]: 시작 경도.
+  /// [bearing]: 이동 방향 (도 단위).
+  /// [distanceKm]: 이동 거리 (킬로미터).
+  /// Returns a map with keys 'latitude' and 'longitude'.
   Map<String, double> calLatLng(
       double startLat, double startLng, double bearing, double distanceKm) {
     const double earthRadiusKm = 6371.0;
-
-    // 위도, 경도를 라디안으로 변환
     double startLatRad = _degreesToRadians(startLat);
     double startLngRad = _degreesToRadians(startLng);
     double bearingRad = _degreesToRadians(bearing);
-
-    // 이동 거리를 라디안으로 변환
     double distanceRad = distanceKm / earthRadiusKm;
-
-    // 새로운 위도 계산
     double newLatRad = math.asin(math.sin(startLatRad) * math.cos(distanceRad) +
         math.cos(startLatRad) * math.sin(distanceRad) * math.cos(bearingRad));
-
-    // 새로운 경도 계산
     double newLngRad = startLngRad +
         math.atan2(
             math.sin(bearingRad) *
@@ -262,34 +275,31 @@ class NaverMapViewController extends GetxController {
                 math.cos(startLatRad),
             math.cos(distanceRad) -
                 math.sin(startLatRad) * math.sin(newLatRad));
-
-    // 라디안을 다시 도로 변환
     double newLat = _radiansToDegrees(newLatRad);
     double newLng = _radiansToDegrees(newLngRad);
-
-    // 결과 반환
     return {'latitude': newLat, 'longitude': newLng};
   }
 
-  // 도를 라디안으로 변환하는 함수
+  /// _degreesToRadians: 도 단위를 라디안으로 변환합니다.
   double _degreesToRadians(double degrees) {
     return degrees * math.pi / 180;
   }
 
-  // 라디안을 도로 변환하는 함수
+  /// _radiansToDegrees: 라디안 단위를 도로 변환합니다.
   double _radiansToDegrees(double radians) {
     return radians * 180 / math.pi;
   }
 
+  /// onClose: 컨트롤러 종료 시 타이머 및 센서 스트림 구독을 취소합니다.
   @override
   void onClose() {
     _locationUpdateTimer?.cancel();
     _streamSubscriptions.forEach((subscription) => subscription.cancel());
-
     super.onClose();
   }
 
-  // 위치 초기화 (GPS 및 IMU)
+  /// _initLocation: GPS 및 IMU 데이터를 기반으로 초기 위치를 설정하고,
+  /// 주기적으로 위치 업데이트를 수행하는 타이머를 시작합니다.
   Future<void> _initLocation() async {
     Position position = await Geolocator.getCurrentPosition(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
@@ -307,6 +317,7 @@ class NaverMapViewController extends GetxController {
     });
   }
 
+  /// _getLocation: 현재 위치를 가져와 센서 데이터와 지도 업데이트를 수행합니다.
   Future<void> _getLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -328,7 +339,6 @@ class NaverMapViewController extends GetxController {
         resetSpeedUtilsValue();
         isLoading.value = false;
       }
-
       onSensorUpdate(
         current_latitude.value,
         current_longitude.value,
@@ -343,11 +353,11 @@ class NaverMapViewController extends GetxController {
 
   // 경로 API 호출
   Future<void> loadPathData(
-    double startLatitude,
-    double startLongitude,
-    double endLatitude,
-    double endLongitude,
-  ) async {
+      double startLatitude,
+      double startLongitude,
+      double endLatitude,
+      double endLongitude,
+      ) async {
     try {
       final responseData = await apiService.fetchPathData(
         startLatitude: startLatitude,
@@ -395,7 +405,8 @@ class NaverMapViewController extends GetxController {
     }
   }
 
-  // 지도 Overlay 추가
+  /// addOverlays: 지도에 경로 오버레이를 추가합니다.
+  /// [paths]: 경로를 나타내는 LatLng 리스트.
   void addOverlays(List<LatLng> paths) {
     if (mapController == null) return;
     Set<NAddableOverlay> overlays = {
@@ -415,7 +426,7 @@ class NaverMapViewController extends GetxController {
     mapController!.addOverlayAll(overlays);
   }
 
-  // 분기(체크포인트) 마커 추가
+  /// addBranchMarkers: 지도에 분기(체크포인트) 마커들을 추가합니다.
   void addBranchMarkers() async {
     if (mapController == null) return;
     Set<NAddableOverlay> markers = {};
@@ -435,7 +446,7 @@ class NaverMapViewController extends GetxController {
     mapController!.addOverlayAll(markers);
   }
 
-  // 거리 및 각도 계산 함수들
+  /// calculateDistance: 두 지점 간의 거리를 haversine 공식을 사용하여 계산합니다.
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadius = 6371.0;
     double toRadians(double degree) => degree * math.pi / 180.0;
@@ -450,6 +461,7 @@ class NaverMapViewController extends GetxController {
     return earthRadius * c;
   }
 
+  /// calculateBearing: 두 지점 간의 방향(베어링)을 계산합니다.
   double calculateBearing(double current_latitude, double current_longitude,
       double target_latitude, double target_longitude) {
     double lat1 = current_latitude * math.pi / 180;
@@ -466,8 +478,10 @@ class NaverMapViewController extends GetxController {
     return bearingDegrees;
   }
 
+  /// _degToRad: 도 단위를 라디안으로 변환합니다.
   double _degToRad(double degrees) => degrees * math.pi / 180;
 
+  /// _haversine: haversine 공식을 사용하여 두 지점 사이의 거리를 미터 단위로 계산합니다.
   double _haversine(double lat1, double lon1, double lat2, double lon2) {
     const double R = 6371e3;
     double dLat = _degToRad(lat2 - lat1);
@@ -481,6 +495,7 @@ class NaverMapViewController extends GetxController {
     return R * c;
   }
 
+  /// pointLineDistance: 한 점과 선분 사이의 최단 거리를 계산합니다.
   double pointLineDistance(double lat1, double lon1, double lat2, double lon2,
       double latP, double lonP) {
     double dist12 = _haversine(lat1, lon1, lat2, lon2);
@@ -492,16 +507,18 @@ class NaverMapViewController extends GetxController {
     return math.sin(angleP12) * dist1P;
   }
 
-  // 센서 관련
-  void subscribeToSensor<T>(
-      {required Stream<T> sensorStream,
-      required Function(T event) onEvent,
-      required Function(dynamic error) onError}) {
+  /// subscribeToSensor: 센서 스트림을 구독하고, 에러 발생 시 처리 후 내부 리스트에 추가합니다.
+  void subscribeToSensor<T>({
+    required Stream<T> sensorStream,
+    required Function(T event) onEvent,
+    required Function(dynamic error) onError,
+  }) {
     var subscription =
         sensorStream.listen(onEvent, onError: onError, cancelOnError: true);
     _streamSubscriptions.add(subscription);
   }
 
+  /// showErrorDialog: 센서가 지원되지 않을 때 기본 다이얼로그를 표시합니다.
   void showErrorDialog(String sensorName) {
     Get.defaultDialog(
       title: "$sensorName Sensor Not Found",
@@ -510,6 +527,7 @@ class NaverMapViewController extends GetxController {
     );
   }
 
+  /// startCollectingSensorData: Compass, Accelerometer, Gyroscope 센서 데이터를 구독합니다.
   void startCollectingSensorData() {
     subscribeToSensor<CompassEvent>(
       sensorStream: FlutterCompass.events!,
@@ -546,6 +564,7 @@ class NaverMapViewController extends GetxController {
     );
   }
 
+  /// stopCollectingSensorData: 모든 센서 스트림 구독을 취소합니다.
   void stopCollectingSensorData() {
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
@@ -553,7 +572,10 @@ class NaverMapViewController extends GetxController {
     _streamSubscriptions.clear();
   }
 
-  // 인덱스 관련 함수들
+  /// getCurrentWindow: branchinfo 리스트에서 현재 인덱스를 중심으로 주어진 창 크기의 서브셋을 반환합니다.
+  /// [branchinfo]: 전체 branch 정보 리스트.
+  /// [currentIndex]: 현재 인덱스.
+  /// [windowsize]: 반환할 창의 크기.
   List<BranchInfo> getCurrentWindow(
       List<BranchInfo> branchinfo, int currentIndex, int windowsize) {
     int windowOffset = (windowsize - 1) ~/ 2;
@@ -568,18 +590,18 @@ class NaverMapViewController extends GetxController {
     return window;
   }
 
+  /// _distanceBetweenBranch: 두 branch 정보 지점 사이의 거리를 계산합니다.
   double _distanceBetweenBranch(
       List<BranchInfo> branchInfo, int currentIndex, int targetIndex) {
     double currentIndex_latitude = branchInfo[currentIndex].point.latitude;
     double currentIndex_longitude = branchInfo[currentIndex].point.longitude;
-
     double targetIndex_latitude = branchInfo[targetIndex].point.latitude;
     double targetIndex_longitude = branchInfo[targetIndex].point.longitude;
-
     return calculateDistance(currentIndex_latitude, currentIndex_longitude,
         targetIndex_latitude, targetIndex_longitude);
   }
 
+  /// moveIndex: 현재 창 내에서 센서 데이터에 따라 가장 적합한 branch 인덱스를 반환합니다.
   int moveIndex(List<BranchInfo> currentWindow) {
     double beforeMin = double.maxFinite;
     int nearestIndex = currentIndex;
@@ -612,6 +634,7 @@ class NaverMapViewController extends GetxController {
     return nearestIndex;
   }
 
+  /// indexUpdate: 현재 센서 데이터 기반으로 분기 인덱스를 업데이트합니다.
   void indexUpdate() {
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchinfo, currentIndex, 5);
@@ -627,22 +650,30 @@ class NaverMapViewController extends GetxController {
     }
   }
 
+  /// deg2rad: 도(degree)를 라디안(radian)으로 변환합니다.
   double deg2rad(double deg) => deg * (math.pi / 180);
 
+  /// sphericalDistance: 두 점 사이의 구면 거리를 계산합니다.
+  /// (구면 삼각법을 사용하여 계산합니다.)
   double sphericalDistance(
           double lat1, double lon1, double lat2, double lon2) =>
       math.acos(math.sin(lat1) * math.sin(lat2) +
           math.cos(lat1) * math.cos(lat2) * math.cos(lon2 - lon1));
 
+  /// sphericalAngle: 구면 삼각법을 사용하여 세 변의 길이가 주어졌을 때 각도를 계산합니다.
   double sphericalAngle(double a, double b, double c) => math.acos(
       (math.cos(a) - math.cos(b) * math.cos(c)) / (math.sin(b) * math.sin(c)));
 
+  /// rad2deg: 라디안(radian)을 도(degree)로 변환합니다.
   double rad2deg(double rad) => rad * (180 / math.pi);
 
+  /// turnUpdate2: 목표 방향과 현재 나침반 값의 차이를 계산하여 회전 보정 값을 구합니다.
   double turnUpdate2(double bearingToPoint, double compassValue) {
     return compassValue - bearingToPoint;
   }
 
+  /// latLonToXY: 위도 및 경도 차이를 기반으로 x, y 거리(미터)를 계산합니다.
+  /// (평균 위도를 이용하여 단순 근사 계산)
   Map<String, double> latLonToXY(
       double currentIndexLatitude,
       double currentIndexLongitude,
@@ -656,6 +687,9 @@ class NaverMapViewController extends GetxController {
     return {'x': x, 'y': y};
   }
 
+  /// checkLateralDeviation: 현재 지점에서 목표 지점까지의 벡터와 현재 지점에서 현재 위치까지의 벡터의 외적을 통해
+  /// 좌우 편차(측면 이탈)를 판단합니다.
+  /// 외적 값이 양이면 왼쪽, 음이면 오른쪽, 0이면 일직선입니다.
   int checkLateralDeviation(
       double currentIndexLatitude,
       double currentIndexLongitude,
@@ -674,6 +708,8 @@ class NaverMapViewController extends GetxController {
     return 0;
   }
 
+  /// breakPoint: 현재 지점(브랜치), 현재 위치, 목표 지점으로 이루어진 삼각형의 각도를 계산합니다.
+  /// 반환값은 'breakPointAngleA', 'breakPointAngleB', 'breakPointAngleC'라는 키를 갖는 Map입니다.
   Map<String, double> breakPoint(
       double currentIndexLongitude,
       double currentIndexLatitude,
@@ -700,6 +736,10 @@ class NaverMapViewController extends GetxController {
     };
   }
 
+  /// angleToTarget: 센서 데이터에 기반하여 목표 브랜치까지의 안내 각도를 계산합니다.
+  /// [yawRateTurn2]: 센서 데이터에 의한 회전 보정 값.
+  /// [bearingToPoint]: 현재 브랜치에서 목표 브랜치까지의 방향.
+  /// [boundaryExit]: 측면 이탈 여부 (좌우 편차 결과).
   double angleToTarget(
       double currentIndexLongitude,
       double currentIndexLatitude,
@@ -728,6 +768,7 @@ class NaverMapViewController extends GetxController {
     return guidanceAngle;
   }
 
+  /// getGuidanceDirection: 안내 각도를 기반으로 방향 라벨(예: "12시 방향")을 반환합니다.
   String getGuidanceDirection(
       double currentIndexLongitude,
       double currentIndexLatitude,
@@ -788,6 +829,8 @@ class NaverMapViewController extends GetxController {
     return directionLabels[direction];
   }
 
+  /// checkBoundary: 현재 위치가 경로(분기)로부터 얼마나 벗어났는지 확인합니다.
+  /// 경로 이탈, 재경로 탐색 등의 조건을 판단합니다.
   void checkBoundary() {
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchinfo, currentIndex, 5);
@@ -838,6 +881,10 @@ class NaverMapViewController extends GetxController {
     }
   }
 
+  /// updateMapPosition: 지도 카메라를 현재 위치 및 모드에 따라 업데이트합니다.
+  /// [current_latitude]: 현재 위도.
+  /// [current_longitude]: 현재 경도.
+  /// [compassValue]: 현재 나침반 값.
   void updateMapPosition(
       double current_latitude, double current_longitude, double compassValue) {
     if (mapController == null) return;
@@ -847,33 +894,29 @@ class NaverMapViewController extends GetxController {
       zoom: zoomLevel,
       bearing: mapMode.value == MapControlMode.on2 ? compassValue : 0.0,
     )..setAnimation(animation: NCameraAnimation.easing);
-
     mapController!.updateCamera(cameraUpdate);
   }
 
+  /// updateCurrentLocationMarker: 지도 상의 현재 위치 마커를 업데이트합니다.
+  /// [current_latitude]: 현재 위도.
+  /// [current_longitude]: 현재 경도.
+  /// [compassValue]: 현재 나침반 값.
+  /// [isGps]: GPS 신호 사용 여부.
   Future<void> updateCurrentLocationMarker(double current_latitude,
       double current_longitude, double compassValue, bool isGps) async {
     if (mapController == null) return;
-
-    // 지도 회전 값 가져오기
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
-
-    // 마커의 방향 계산
     double adjustedAngle = compassValue - mapBearing;
-    // 0° ~ 360° 범위로 조정
     if (adjustedAngle < 0) adjustedAngle += 360;
-
     final IconData icon = mapMode.value == MapControlMode.idle ||
             mapMode.value == MapControlMode.off
         ? Icons.circle
         : Icons.navigation;
-
     final Color markerColor = isGps ? Colors.blue : Colors.red;
-
     final iconImage = await NOverlayImage.fromWidget(
         widget: Transform.rotate(
-          angle: adjustedAngle * (math.pi / 180), // 라디안 변환
+          angle: adjustedAngle * (math.pi / 180),
           child: Icon(
             icon,
             color: markerColor,
@@ -882,22 +925,19 @@ class NaverMapViewController extends GetxController {
         ),
         size: const Size(25, 25),
         context: navigatorKey.currentContext!);
-
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(current_latitude, current_longitude),
       icon: iconImage,
     );
-
     mapController!.addOverlay(_currentLocationMarker!);
   }
 
-  // 출발지 설정 후
+  /// handleStartLocationSelection: 시작 위치를 설정하고, 목적지가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
     selectedStartLocation.value = newStart;
     isStart.value = true;
     isSetStartLocation.value = true;
-
     if (isSetDestinationLocation.value) {
       debugPrint('목적지가 설정되어 있으므로 경로 요청');
       await loadPathData(
@@ -909,11 +949,10 @@ class NaverMapViewController extends GetxController {
     }
   }
 
-  // 목적지 설정 후 경로 안내 시작
+  /// handleDestinationLocationSelection: 목적지 위치를 설정하고, 시작 위치가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleDestinationLocationSelection(GeoLocation newDest) async {
     selectedDestLocation.value = newDest;
     isSetDestinationLocation.value = true;
-
     if (isSetStartLocation.value) {
       debugPrint('출발지가 설정되어 있으므로 경로 요청');
       await loadPathData(
@@ -923,11 +962,11 @@ class NaverMapViewController extends GetxController {
         selectedDestLocation.value!.lng,
       );
     }
-
   }
 
   Timer? navigationTimer;
 
+  /// startNavigationTimer: 경로 안내를 위한 타이머를 시작합니다.
   void startNavigationTimer() {
     debugPrint('startNavigationTimer()');
     navigationTimer?.cancel(); // 기존 타이머 제거
@@ -1023,29 +1062,27 @@ class NaverMapViewController extends GetxController {
     });
   }
 
-  // 모드 토글 메서드
+  /// toggleMapMode: 지도 모드를 토글합니다.
   void toggleMapMode() {
-    // idle 상태를 건너뛰고 off부터 시작하도록
     if (mapMode.value == MapControlMode.idle) {
       mapMode.value = MapControlMode.off;
     }
-
-    // 다음 모드 인덱스 계산 (idle이 나오면 건너뜀)
     int nextIndex = (mapMode.value.index + 1) % MapControlMode.values.length;
     if (MapControlMode.values[nextIndex] == MapControlMode.idle) {
       nextIndex = (nextIndex + 1) % MapControlMode.values.length;
     }
     mapMode.value = MapControlMode.values[nextIndex];
-
     debugPrint("모드 전환: ${mapMode.value}");
   }
 
-  /// 지도 업데이트를 모드에 따라 한번에 처리하는 함수
-  /// 현재 지도 모드에 따라 지도와 마커를 업데이트하는 메서드
+  /// updateMapByMode: 현재 지도 모드에 따라 지도와 마커를 업데이트합니다.
+  /// [latitude]: 현재 위도.
+  /// [longitude]: 현재 경도.
+  /// [compassValue]: 현재 나침반 값.
+  /// [isGps]: GPS 신호 사용 여부.
   Future<void> updateMapByMode(double latitude, double longitude,
       double compassValue, bool isGps) async {
     if (mapController == null) return;
-
     switch (mapMode.value) {
       case MapControlMode.idle:
         await updateCurrentLocationMarker(
@@ -1055,14 +1092,14 @@ class NaverMapViewController extends GetxController {
       case MapControlMode.off:
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        // off 모드에서는 지도 이동은 자유롭게 하므로 카메라 업데이트 생략 가능
+        // off 모드에서는 지도 이동은 자유롭게 하므로 카메라 업데이트 생략
         break;
       case MapControlMode.on1:
         final mapBearing =
             await mapController!.getCameraPosition().then((pos) => pos.bearing);
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        updateMapPosition(latitude, longitude, mapBearing); // 지도 회전은 유지
+        updateMapPosition(latitude, longitude, mapBearing); // 지도 회전 유지
         break;
       case MapControlMode.on2:
         await updateCurrentLocationMarker(
@@ -1072,6 +1109,7 @@ class NaverMapViewController extends GetxController {
     }
   }
 
+  /// onSensorUpdate: 센서 업데이트 데이터(위치, 나침반)를 받아 지도 업데이트를 수행합니다.
   void onSensorUpdate(
       double latitude, double longitude, double compassVal, bool isGps) {
     current_latitude.value = latitude;
@@ -1080,8 +1118,7 @@ class NaverMapViewController extends GetxController {
     updateMapByMode(latitude, longitude, compassVal, isGps);
   }
 
-  /// 사용자가 지도를 드래그했을 때 호출되는 메서드
-  /// 드래그 시 모드를 off로 전환
+  /// handleMapDrag: 사용자가 지도를 드래그하면 지도 모드를 'off'로 전환합니다.
   void handleMapDrag() {
     if (mapMode.value != MapControlMode.off) {
       mapMode.value = MapControlMode.off;
