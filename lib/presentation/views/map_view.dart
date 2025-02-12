@@ -1,30 +1,22 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import 'package:safelight/core/utils/app_sizes.dart';
-import 'package:safelight/framework/controller.dart';
-import 'package:safelight/framework/core.dart';
-import 'package:safelight/presentation/controllers/map_view_controller.dart';
-import 'package:safelight/framework/ui.dart';
-import 'package:vibration/vibration.dart'; // StartSearch, DesSearch 페이지 등
+part of '../../framework/ui.dart';
 
 class NaverMapView extends GetView<NaverMapViewController> {
   const NaverMapView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 컨트롤러 생성 및 등록
-    final NaverMapViewController controller = Get.put(NaverMapViewController());
-
+    // 시스템 테마 모드 확인
     final box = Hive.box(SystemTheme.themeBox);
     final mode = box.get(SystemTheme.mode);
     final systemBright = MediaQuery.of(context).platformBrightness;
     bool isDark = (mode == 'dark') ||
         (mode == 'system' && systemBright == Brightness.dark);
+
+    // 컨트롤러 생성 및 등록
+    final NaverMapViewController controller = Get.put(NaverMapViewController());
+
+    // 현재 위치 마커
+    NMarker? _currentLocationMarker;
 
     return Scaffold(
       body: Stack(
@@ -64,6 +56,11 @@ class NaverMapView extends GetView<NaverMapViewController> {
                 controller.current_longitude.value,
                 controller.compassValue.value,
               );
+            },
+            onCameraChange: (reason, animated) {
+              if (reason == NCameraUpdateReason.gesture) {
+                controller.handleMapDrag();
+              }
             },
             onMapTapped: (NPoint point, NLatLng latLng) {
               int meters = (controller.remain_distance.value * 1000).round();
@@ -240,6 +237,41 @@ class NaverMapView extends GetView<NaverMapViewController> {
           ),
         ],
       ),
+      floatingActionButton: Obx(() {
+        return FloatingActionButton(
+          onPressed: controller.toggleMapMode,
+          backgroundColor: _getButtonColor(),
+          child: Icon(_getButtonIcon()),
+        );
+      })
     );
+  }
+
+  // 모드 버튼 아이콘
+  IconData _getButtonIcon() {
+    switch (controller.mapMode.value) {
+      case MapControlMode.idle:
+        return Icons.location_disabled;
+      case MapControlMode.off:
+        return Icons.location_disabled;
+      case MapControlMode.on1:
+        return Icons.my_location;
+      case MapControlMode.on2:
+        return Icons.navigation;
+    }
+  }
+
+  // 모드 버튼 색상
+  Color _getButtonColor() {
+    switch (controller.mapMode.value) {
+      case MapControlMode.idle:
+        return Colors.grey;
+      case MapControlMode.off:
+        return Colors.grey;
+      case MapControlMode.on1:
+        return Colors.blue;
+      case MapControlMode.on2:
+        return Colors.green;
+    }
   }
 }

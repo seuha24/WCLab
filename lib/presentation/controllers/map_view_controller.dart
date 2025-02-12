@@ -20,6 +20,12 @@ import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/injection.dart';
 import 'package:vibration/vibration.dart';
 
+enum MapControlMode {
+  idle, // 초기 상태 (초기 위치를 설정하기 위한 상태)
+  off, // 자유롭게 지도 이동 (기본)
+  on1, // 지도 고정, 회전하지 않음. marker에 방향 표시, 사용자가 회전하면 Marker의 화살표도 회전
+  on2, // 사용자의 방향 회전에 따라 지도도 회전
+}
 
 // --- GetX Controller ---
 class NaverMapViewController extends GetxController {
@@ -31,7 +37,10 @@ class NaverMapViewController extends GetxController {
   }
 
   // 지도 컨트롤러
-  late NaverMapController mapController;
+  late NaverMapController? mapController;
+
+  // 지도 모드 상태
+  Rx<MapControlMode> mapMode = MapControlMode.idle.obs;
 
   // 로딩 상태
   RxBool isLoading = true.obs;
@@ -342,10 +351,18 @@ class NaverMapViewController extends GetxController {
         resetSpeedUtilsValue();
         isLoading.value = false;
       }
-      updateMapPosition(
-          current_latitude.value, current_longitude.value, compassValue.value);
-      updateCurrentLocationMarker(
-          current_latitude.value, current_longitude.value);
+
+      onSensorUpdate(
+        current_latitude.value,
+        current_longitude.value,
+        compassValue.value,
+        isGps,
+      );
+
+      // updateMapPosition(
+      //     current_latitude.value, current_longitude.value, compassValue.value);
+      // updateCurrentLocationMarker(
+      //     current_latitude.value, current_longitude.value);
     } catch (e) {
       print("현위치 수신에러 $e");
       isLoading.value = false;
@@ -439,7 +456,7 @@ class NaverMapViewController extends GetxController {
         outlineWidth: 3,
       ),
     };
-    mapController.addOverlayAll(overlays);
+    mapController!.addOverlayAll(overlays);
   }
 
   // 분기(체크포인트) 마커 추가
@@ -459,7 +476,7 @@ class NaverMapViewController extends GetxController {
       );
       markers.add(_testMarker!);
     }
-    mapController.addOverlayAll(markers);
+    mapController!.addOverlayAll(markers);
   }
 
   // 거리 및 각도 계산 함수들
@@ -895,44 +912,58 @@ class NaverMapViewController extends GetxController {
     final cameraUpdate = NCameraUpdate.withParams(
       target: NLatLng(current_latitude, current_longitude),
       zoom: zoomLevel,
-      bearing: compassValue,
+      bearing: mapMode.value == MapControlMode.on2 ? compassValue : 0.0,
     )..setAnimation(animation: NCameraAnimation.easing);
 
-    mapController.updateCamera(cameraUpdate);
+    mapController!.updateCamera(cameraUpdate);
   }
 
-  void updateCurrentLocationMarker(
-      double current_latitude, double current_longitude) async {
+  Future<void> updateCurrentLocationMarker(double current_latitude,
+      double current_longitude, double compassValue, bool isGps) async {
     debugPrint(
         '_updateCurrentLocationMarker: $current_latitude, $current_longitude');
     if (mapController == null) return;
-    // if (_currentLocationMarker != null) {
-    //   try {
-    //     mapController.deleteOverlay(
-    //       NOverlayInfo(type: NOverlayType.marker, id: 'current_location'),
-    //     );
-    //   } catch (e) {
-    //     print("오버레이 삭제 중 에러 발생: $e");
-    //   }
-    // } else {
-    //   print("삭제할 마커가 없습니다.");
-    // }
+
+    // 지도 회전 값 가져오기
+    final mapBearing =
+    await mapController!.getCameraPosition().then((pos) => pos.bearing);
+
+    // 마커의 방향 계산
+    double adjustedAngle = compassValue - mapBearing;
+    // 0° ~ 360° 범위로 조정
+    if (adjustedAngle < 0) adjustedAngle += 360;
+
+    debugPrint('adjustedAngle = $adjustedAngle');
+
+    final IconData icon = mapMode.value == MapControlMode.idle ||
+            mapMode.value == MapControlMode.off
+        ? Icons.circle
+        : Icons.navigation;
+
     final Color markerColor = isGps ? Colors.blue : Colors.red;
 
     final iconImage = await NOverlayImage.fromWidget(
-        widget: Icon(Icons.circle, color: markerColor, size: 25),
+        widget: Transform.rotate(
+          angle: adjustedAngle * (math.pi / 180), // 라디안 변환
+          child: Icon(
+            icon,
+            color: markerColor,
+            size: 25,
+          ),
+        ),
         size: const Size(25, 25),
         context: navigatorKey.currentContext!);
+
     debugPrint('iconImage: $iconImage');
+
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(current_latitude, current_longitude),
       icon: iconImage,
     );
     debugPrint('_currentLocationMarker: $_currentLocationMarker');
-    mapController.addOverlay(_currentLocationMarker!);
+    mapController!.addOverlay(_currentLocationMarker!);
   }
-
 
   // 출발지 설정 후
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
@@ -1052,5 +1083,73 @@ class NaverMapViewController extends GetxController {
         speakText("출발지로 이동하세요.");
       }
     });
+  }
+
+  // 모드 토글 메서드
+  void toggleMapMode() {
+    // idle 상태를 건너뛰고 off부터 시작하도록
+    if (mapMode.value == MapControlMode.idle) {
+      mapMode.value = MapControlMode.off;
+      debugPrint("모드 전환: Off-Mode");
+    }
+
+    // 다음 모드 인덱스 계산 (idle이 나오면 건너뜀)
+    int nextIndex = (mapMode.value.index + 1) % MapControlMode.values.length;
+    if (MapControlMode.values[nextIndex] == MapControlMode.idle) {
+      nextIndex = (nextIndex + 1) % MapControlMode.values.length;
+    }
+    mapMode.value = MapControlMode.values[nextIndex];
+
+    debugPrint("모드 전환: ${mapMode.value}");
+  }
+
+  /// 지도 업데이트를 모드에 따라 한번에 처리하는 함수
+  /// 현재 지도 모드에 따라 지도와 마커를 업데이트하는 메서드
+  Future<void> updateMapByMode(double latitude, double longitude,
+      double compassValue, bool isGps) async {
+
+    if(mapController == null) return;
+
+    switch (mapMode.value) {
+      case MapControlMode.idle:
+        await updateCurrentLocationMarker(
+            latitude, longitude, compassValue, isGps);
+        updateMapPosition(latitude, longitude, compassValue);
+        break;
+      case MapControlMode.off:
+        await updateCurrentLocationMarker(
+            latitude, longitude, compassValue, isGps);
+        // off 모드에서는 지도 이동은 자유롭게 하므로 카메라 업데이트 생략 가능
+        break;
+      case MapControlMode.on1:
+        final mapBearing =
+            await mapController!.getCameraPosition().then((pos) => pos.bearing);
+        await updateCurrentLocationMarker(
+            latitude, longitude, compassValue, isGps);
+        updateMapPosition(latitude, longitude, mapBearing); // 지도 회전은 유지
+        break;
+      case MapControlMode.on2:
+        await updateCurrentLocationMarker(
+            latitude, longitude, compassValue, isGps);
+        updateMapPosition(latitude, longitude, compassValue); // 지도와 마커 모두 회전
+        break;
+    }
+  }
+
+  void onSensorUpdate(
+      double latitude, double longitude, double compassVal, bool isGps) {
+    current_latitude.value = latitude;
+    current_longitude.value = longitude;
+    compassValue.value = compassVal;
+    updateMapByMode(latitude, longitude, compassVal, isGps);
+  }
+
+  /// 사용자가 지도를 드래그했을 때 호출되는 메서드
+  /// 드래그 시 모드를 off로 전환
+  void handleMapDrag() {
+    if (mapMode.value != MapControlMode.off) {
+      mapMode.value = MapControlMode.off;
+      debugPrint("지도를 드래그하여 Off 상태로 전환");
+    }
   }
 }
