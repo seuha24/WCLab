@@ -32,6 +32,9 @@ class NaverMapViewController extends GetxController {
   /// 현재 지도 모드를 Reactive 변수로 관리합니다.
   Rx<MapControlMode> mapMode = MapControlMode.idle.obs;
 
+  // 지도 고정 시 현재 지도 방향을 저장하는 변수
+  double? _currentBearing;
+
   /// 로딩 상태를 나타내는 Reactive 변수입니다.
   RxBool isLoading = true.obs;
 
@@ -353,11 +356,11 @@ class NaverMapViewController extends GetxController {
 
   // 경로 API 호출
   Future<void> loadPathData(
-      double startLatitude,
-      double startLongitude,
-      double endLatitude,
-      double endLongitude,
-      ) async {
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+  ) async {
     try {
       final responseData = await apiService.fetchPathData(
         startLatitude: startLatitude,
@@ -392,7 +395,7 @@ class NaverMapViewController extends GetxController {
       branchinfo = parsedBranchInfos;
 
       yawRate2 = turnUpdate2(
-          branchinfo[targetIndex].bearingToPoint, compassValue.value) *
+              branchinfo[targetIndex].bearingToPoint, compassValue.value) *
           angleToRadian;
 
       await mapController!.clearOverlays(type: NOverlayType.marker);
@@ -888,11 +891,19 @@ class NaverMapViewController extends GetxController {
   void updateMapPosition(
       double current_latitude, double current_longitude, double compassValue) {
     if (mapController == null) return;
+
+    // on1 모드에서는 저장된 방향(_currentBearing)을 사용
+    final targetBearing = mapMode.value == MapControlMode.on2
+        ? compassValue
+        : (mapMode.value == MapControlMode.on1 && _currentBearing != null)
+            ? _currentBearing
+            : 0.0;
+
     final zoomLevel = 18.5;
     final cameraUpdate = NCameraUpdate.withParams(
       target: NLatLng(current_latitude, current_longitude),
       zoom: zoomLevel,
-      bearing: mapMode.value == MapControlMode.on2 ? compassValue : 0.0,
+      bearing: targetBearing,
     )..setAnimation(animation: NCameraAnimation.easing);
     mapController!.updateCamera(cameraUpdate);
   }
@@ -1095,11 +1106,15 @@ class NaverMapViewController extends GetxController {
         // off 모드에서는 지도 이동은 자유롭게 하므로 카메라 업데이트 생략
         break;
       case MapControlMode.on1:
-        final mapBearing =
-            await mapController!.getCameraPosition().then((pos) => pos.bearing);
+        if (mapController != null) {
+          mapController!.getCameraPosition().then((position) {
+            _currentBearing = position.bearing;
+          });
+        }
+
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        updateMapPosition(latitude, longitude, mapBearing); // 지도 회전 유지
+        updateMapPosition(latitude, longitude, _currentBearing!); // 지도 회전 유지
         break;
       case MapControlMode.on2:
         await updateCurrentLocationMarker(
