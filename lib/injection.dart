@@ -11,7 +11,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:safelight/core/utils/moving_average_filter.dart';
 import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/data/services/tts_service.dart';
@@ -19,7 +18,6 @@ import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/repository.dart';
-import 'package:safelight/framework/ui.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/data/services/auth_service.dart';
@@ -256,19 +254,5 @@ Future<void> init() async {
 
   DI.registerLazySingleton<FlutterReactiveBle>(() => FlutterReactiveBle());
 
-  DI.registerFactoryParam<MovingAverageFilter, int, void>(
-    (windowSize, _) => MovingAverageFilter(windowSize),
-  );
-
   DI.registerLazySingleton<NavigationApiService>(() => NavigationApiService());
-
-  DI.registerLazySingleton<NavigationService>(() => NavigationService(
-      DI.get<TtsService>(),
-    ),
-  );
-
-  // DI.registerLazySingleton<NavigationBloc>(() => NavigationBloc(
-  //   DI.get<NavigationApiService>(),
-  //   DI.get<NavigationService>(),
-  // ));
 }

@@ -18,24 +18,19 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:rxdart/rxdart.dart';
 import 'package:safelight/core/utils/app_sizes.dart';
-import 'package:safelight/core/utils/moving_average_filter.dart';
 import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/data/services/tts_service.dart';
-import 'package:safelight/domain/entities/branch_info.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/presentation/views/signup_user_input.dart';
 import 'package:safelight/presentation/widgets/custom_toast.dart';
 import 'package:safelight/presentation/widgets/gap.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lottie/lottie.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:vibration/vibration.dart';
 
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
@@ -43,7 +38,6 @@ import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/injection.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:simple_kalman/simple_kalman.dart';
 
 part '../presentation/views/map_view.dart';
 part '../presentation/views/blue_off_view.dart';
@@ -60,4 +54,3 @@ part '../presentation/widgets/board.dart';
 part '../presentation/widgets/compass.dart';
 part '../presentation/widgets/flat_card.dart';
 part '../presentation/widgets/single_child_rounded_card.dart';
-part '../data/services/navigation_service.dart';

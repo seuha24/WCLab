@@ -2,13 +2,28 @@ import 'package:flutter/foundation.dart';
 import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 인증 데이터 관리 서비스를 제공하는 클래스입니다.
+///
+/// 이 클래스는 액세스 토큰, 리프레시 토큰, 사용자 이름 및 로그인 타입을
+/// SharedPreferences를 이용하여 로컬에 저장, 로드, 삭제하는 기능을 제공합니다.
 class AuthService {
+  /// 액세스 토큰 저장을 위한 키 값입니다.
   static const String _accessTokenKey = 'accessToken';
+
+  /// 리프레시 토큰 저장을 위한 키 값입니다.
   static const String _refreshTokenKey = 'refreshToken';
+
+  /// 로그인 타입 저장을 위한 키 값입니다.
   static const String _authTypeTokenKey = 'authTypeToken';
+
+  /// 사용자 이름 저장을 위한 키 값입니다.
   static const String _userNameKey = 'userName';
 
-  /// 인증 데이터 저장
+  /// 인증 데이터를 저장합니다.
+  ///
+  /// [accessToken]과 [refreshToken]은 필수로 저장되며,
+  /// [userName]은 선택적으로 저장됩니다.
+  /// 만약 [userName]이 null인 경우, 저장된 사용자 이름을 삭제합니다.
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
@@ -26,12 +41,17 @@ class AuthService {
     }
   }
 
-  /// 인증 데이터 로드
+  /// 저장된 인증 데이터를 로드합니다.
+  ///
+  /// 반환되는 [Map]에는 'accessToken', 'refreshToken', 'userName' 키가 포함되며,
+  /// 각 값은 저장된 문자열이나 값이 없을 경우 null입니다.
   Future<Map<String, String?>> loadAuthData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    debugPrint('prefs.getString(_accessTokenKey), :${prefs.getString(_accessTokenKey)}');
-    debugPrint('prefs.getString(_refreshTokenKey), :${prefs.getString(_refreshTokenKey)}');
+    debugPrint(
+        'prefs.getString(_accessTokenKey): ${prefs.getString(_accessTokenKey)}');
+    debugPrint(
+        'prefs.getString(_refreshTokenKey): ${prefs.getString(_refreshTokenKey)}');
 
     return {
       'accessToken': prefs.getString(_accessTokenKey),
@@ -40,17 +60,15 @@ class AuthService {
     };
   }
 
-  /// 인증 데이터 삭제
+  /// 저장된 모든 인증 데이터를 삭제합니다.
   Future<void> clearAuthData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    // await prefs.remove(_accessTokenKey);
-    // await prefs.remove(_refreshTokenKey);
-    // await prefs.remove(_userNameKey);
   }
 
-
-  // 로그인 타입 저장
+  /// 로그인 타입을 저장합니다.
+  ///
+  /// [authType]은 [AuthType] 열거형 값이며, 해당 타입의 라벨을 문자열로 변환하여 저장합니다.
   Future<void> saveAuthType({
     required AuthType authType,
   }) async {
@@ -62,10 +80,13 @@ class AuthService {
     await prefs.setString(_authTypeTokenKey, authString);
   }
 
-  /// 로그인 타입 로드
+  /// 저장된 로그인 타입을 로드합니다.
+  ///
+  /// 저장된 문자열을 [AuthType]으로 변환하여 반환합니다.
   Future<AuthType> loadAuthType() async {
     final prefs = await SharedPreferences.getInstance();
-    debugPrint('prefs.getString(_authTypeTokenKey) : ${prefs.getString(_authTypeTokenKey)}');
+    debugPrint(
+        'prefs.getString(_authTypeTokenKey): ${prefs.getString(_authTypeTokenKey)}');
     return AuthTypeExtension.getType(prefs.getString(_authTypeTokenKey));
   }
 }

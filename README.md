@@ -76,6 +76,369 @@ https://dart.dev/guides/language/effective-dart
 
 </details>
 
+<details><summary>flutter_native_splash</summary>
+
+
+### [flutter_native_splash: ^2.2.10+1](https://pub.dev/packages/flutter_native_splash)
+-	앱 실행 시 네이티브 스플래시 화면 자동 생성
+-	다양한 플랫폼(iOS, Android)에서 초기 로딩 화면 커스터마이징 지원
+
+</details>
+
+
+<details><summary>hive & hive_flutter</summary>
+
+
+### [hive: ^2.2.3](https://pub.dev/packages/hive)
+-	경량의 빠른 키-값 데이터베이스
+-	로컬 데이터 저장 및 캐싱에 적합
+
+### [hive_flutter: ^1.1.0](https://pub.dev/packages/hive_flutter)
+-	Hive를 Flutter에서 간편하게 사용하도록 도와주는 확장 패키지
+
+</details>
+
+
+<details><summary>shared_preferences</summary>
+
+
+### [shared_preferences](https://pub.dev/packages/shared_preferences)
+-	간단한 키-값 로컬 저장소
+-	사용자 설정이나 소규모 데이터 저장에 유용
+
+</details>
+
+
+<details><summary>auto_size_text</summary>
+
+
+### [auto_size_text: ^3.0.0](https://pub.dev/packages/auto_size_text)
+-	텍스트의 폰트 크기를 자동으로 조절하여 공간에 맞춤
+-	반응형 UI 구현 시 유용
+
+</details>
+
+
+<details><summary>flutter_screenutil</summary>
+
+
+### [flutter_screenutil: ^5.9.3](https://pub.dev/packages/flutter_screenutil)
+-	다양한 화면 크기에 대응하는 UI 디자인 지원
+-	픽셀, 글꼴 크기 등의 자동 조정 기능 제공
+
+</details>
+
+
+<details><summary>shimmer</summary>
+
+
+### [shimmer: ^3.0.0](https://pub.dev/packages/shimmer)
+-	로딩 시 UI에 반짝이는 효과 적용
+-	콘텐츠 로딩 대기 시 시각적 피드백 제공
+
+</details>
+
+
+<details><summary>lottie</summary>
+
+
+### [lottie: ^2.2.0](https://pub.dev/packages/lottie)
+-	JSON 기반 애니메이션 렌더링 지원
+-	복잡한 애니메이션을 간편하게 구현
+
+</details>
+
+
+<details><summary>fluttertoast</summary>
+
+
+### [fluttertoast: ^8.2.8](https://pub.dev/packages/fluttertoast)
+-	간단한 토스트 메시지 표시 기능 제공
+-	사용자에게 짧은 알림 메시지 전달
+
+</details>
+
+
+<details><summary>cloud_firestore</summary>
+
+
+### [cloud_firestore: ^5.5.1](https://pub.dev/packages/cloud_firestore)
+-	Firebase Firestore 데이터베이스 연동
+-	실시간 데이터 업데이트 및 쿼리 지원
+
+</details>
+
+
+<details><summary>firebase_core</summary>
+
+
+### [firebase_core: ^3.8.1](https://pub.dev/packages/firebase_core)
+-	Firebase 초기화 및 기본 설정 제공
+-	다른 Firebase 서비스와의 연동 기반 역할
+
+</details>
+
+
+<details><summary>firebase_auth</summary>
+
+
+### [firebase_auth: ^5.3.4](https://pub.dev/packages/firebase_auth)
+-	Firebase 기반 인증 기능 제공
+-	이메일, 소셜 로그인 등 다양한 인증 방식 지원
+
+</details>
+
+
+<details><summary>sign_in_with_apple</summary>
+
+
+### [sign_in_with_apple: ^6.1.4](https://pub.dev/packages/sign_in_with_apple)
+-	애플 계정으로 로그인 기능 지원
+-	iOS 및 웹에서 애플 로그인 구현에 용이
+
+</details>
+
+
+<details><summary>google_sign_in</summary>
+
+
+### [google_sign_in: ^6.2.2](https://pub.dev/packages/google_sign_in)
+-	구글 계정으로 로그인 기능 제공
+-	구글 인증 연동을 간편하게 처리
+
+</details>
+
+
+<details><summary>flutter_bloc</summary>
+
+
+### [flutter_bloc: ^8.1.1](https://pub.dev/packages/flutter_bloc)
+-	BLoC 패턴을 활용한 상태 관리 솔루션
+-	이벤트 기반 상태 관리 및 비즈니스 로직 분리 지원
+
+</details>
+
+
+<details><summary>get_it</summary>
+
+
+### [get_it: ^7.2.0](https://pub.dev/packages/get_it)
+-	의존성 주입(Dependency Injection)을 위한 서비스 로케이터
+-	객체 관리 및 인스턴스 재사용에 용이
+
+</details>
+
+
+<details><summary>bloc</summary>
+
+
+### [bloc: ^8.1.0](https://pub.dev/packages/bloc)
+-	BLoC 패턴의 핵심 라이브러리
+-	비즈니스 로직과 이벤트 관리 체계 제공
+
+</details>
+
+
+<details><summary>rxdart</summary>
+
+
+### [rxdart: ^0.27.7](https://pub.dev/packages/rxdart)
+-	Reactive Programming 지원
+-	스트림 기반 데이터 처리 및 변환 기능 제공
+
+</details>
+
+
+<details><summary>equatable</summary>
+
+
+### [equatable: ^2.0.5](https://pub.dev/packages/equatable)
+-	객체 비교를 간편하게 처리
+-	BLoC 및 상태 관리 시 값 비교 최적화 지원
+
+</details>
+
+
+<details><summary>dartz</summary>
+
+
+### [dartz: ^0.10.1](https://pub.dev/packages/dartz)
+-	함수형 프로그래밍 도구 제공
+-	Either, Option 등 함수형 자료구조 지원
+
+</details>
+
+
+<details><summary>dio</summary>
+
+
+### [dio: ^5.7.0](https://pub.dev/packages/dio)
+-	강력한 기능을 갖춘 HTTP 클라이언트
+-	인터셉터, 글로벌 설정, FormData 등 다양한 기능 지원
+
+</details>
+
+
+<details><summary>http</summary>
+
+
+### [http: ^1.2.0](https://pub.dev/packages/http)
+-	간단한 HTTP 요청 처리를 위한 클라이언트
+-	GET, POST 등 기본 요청 메소드 지원
+
+</details>
+
+
+<details><summary>permission_handler</summary>
+
+
+### [permission_handler: ^11.1.0](https://pub.dev/packages/permission_handler)
+-	앱 권한 요청 및 관리 기능 제공
+-	위치, 카메라, 연락처 등 다양한 권한 지원
+
+</details>
+
+
+<details><summary>flutter_local_notifications</summary>
+
+
+### [flutter_local_notifications: ^18.0.1](https://pub.dev/packages/flutter_local_notifications)
+-	로컬 알림 기능 제공
+-	예약 알림, 반복 알림 등 다양한 알림 옵션 지원
+
+</details>
+
+
+<details><summary>sensors_plus</summary>
+
+
+### [sensors_plus: ^4.0.2](https://pub.dev/packages/sensors_plus)
+-	기기 센서 데이터 접근 및 사용 지원
+-	가속도계, 자이로스코프 등 다양한 센서 제공
+
+</details>
+
+
+<details><summary>camera</summary>
+
+
+### [camera: ^0.10.5+9](https://pub.dev/packages/camera)
+-	기기 카메라 접근 및 사진/동영상 촬영 기능 제공
+-	실시간 미리보기 및 촬영 제어 기능 지원
+
+</details>
+
+
+<details><summary>flutter_reactive_ble</summary>
+
+
+### [flutter_reactive_ble: ^5.0.3](https://pub.dev/packages/flutter_reactive_ble)
+-	BLE(Bluetooth Low Energy) 통신 지원
+-	실시간 블루투스 데이터 전송 및 연결 관리 기능 제공
+
+</details>
+
+
+<details><summary>torch_light</summary>
+
+
+### [torch_light: ^1.0.0](https://pub.dev/packages/torch_light)
+-	기기 플래시(토치) 제어 기능 제공
+-	LED 라이트 켜기/끄기 제어 지원
+
+</details>
+
+
+<details><summary>vibration</summary>
+
+
+### [vibration: ^1.8.4](https://pub.dev/packages/vibration)
+-	기기 진동 기능 제어
+-	사용자 피드백 및 알림에 활용
+
+</details>
+
+
+<details><summary>speech_to_text</summary>
+
+
+### [speech_to_text: 0.2.3](https://pub.dev/packages/speech_to_text)
+-	음성 인식 기능 제공
+-	실시간 음성을 텍스트로 변환
+-   코틀린 버전 이슈로 로컬에 위치하여 사용 
+
+</details>
+
+
+<details><summary>text_to_speech</summary>
+
+
+### [text_to_speech](https://pub.dev/packages/text_to_speech)
+-	텍스트를 음성으로 변환(TTS)
+-	경량의 TTS 기능 구현 지원
+
+</details>
+
+
+<details><summary>flutter_naver_map</summary>
+
+
+### [flutter_naver_map: ^1.3.0+1](https://pub.dev/packages/flutter_naver_map)
+-	네이버 지도 API 연동
+-	지도 표시 및 다양한 지도 기능 지원
+
+</details>
+
+
+<details><summary>geolocator</summary>
+
+
+### [geolocator: ^13.0.2](https://pub.dev/packages/geolocator)
+-	기기 위치 정보 접근 및 추적
+-	실시간 위치 업데이트 및 지오코딩 지원
+
+</details>
+
+
+<details><summary>flutter_compass</summary>
+
+
+### [flutter_compass: ^0.8.0](https://pub.dev/packages/flutter_compass)
+-	기기 나침반(컴퍼스) 기능 지원
+-	방향 감지 및 관련 UI 구현에 용이
+
+</details>
+
+
+<details><summary>latlong2</summary>
+
+
+### [latlong2: ^0.9.0](https://pub.dev/packages/latlong2)
+-	위도/경도 계산 및 변환 도구 제공
+-	지도 및 위치 기반 기능 구현 지원
+
+</details>
+
+
+<details><summary>pretty_dio_logger</summary>
+
+
+### [pretty_dio_logger: ^1.4.0](https://pub.dev/packages/pretty_dio_logger)
+-	Dio HTTP 요청/응답 로깅 지원
+-	가독성 높은 로그 출력으로 디버깅에 용이
+
+</details>
+
+
+<details><summary>get</summary>
+
+
+### [get: ^4.6.6](https://pub.dev/packages/get)
+-	Flutter 앱 내 상태 관리 및 라우팅 지원
+-	간편한 의존성 관리와 페이지 전환 기능 제공
+
+</details>
+
 # Bluetooth Core
 Safelight의 블루투스 핵심 로직은 크게 검색(Search)과 연결(Connect)로 나뉩니다.
 각 로직에 대한 설명은 아래와 같습니다.

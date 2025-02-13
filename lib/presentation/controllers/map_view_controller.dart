@@ -369,7 +369,7 @@ class NaverMapViewController extends GetxController {
         endLongitude: endLongitude,
       );
 
-      // 데이터 파싱
+      /// 데이터 파싱
       final parsedData = apiService.parsePathData(responseData);
       final parsedPath = parsedData['paths'] as List<LatLng>;
       final parsedBranchInfos = parsedData['branchInfo'] as List<BranchInfo>;
@@ -1096,30 +1096,33 @@ class NaverMapViewController extends GetxController {
     if (mapController == null) return;
     switch (mapMode.value) {
       case MapControlMode.idle:
+        /// 초기상태로 최초에는 마커와 지도를 업데이트
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
         updateMapPosition(latitude, longitude, compassValue);
         break;
       case MapControlMode.off:
+        /// off 모드에서는 지도 이동은 자유롭게 하므로 카메라 업데이트 생략
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        // off 모드에서는 지도 이동은 자유롭게 하므로 카메라 업데이트 생략
         break;
       case MapControlMode.on1:
+        /// on1 모드에서는 지도 회전을 유지하고 마커만 회전
+        /// 지도를 회전시키기 않기 위해 마지막 bearing 값으로 map을 업데이트
         if (mapController != null) {
           mapController!.getCameraPosition().then((position) {
             _currentBearing = position.bearing;
           });
         }
-
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        updateMapPosition(latitude, longitude, _currentBearing!); // 지도 회전 유지
+        updateMapPosition(latitude, longitude, _currentBearing!);
         break;
       case MapControlMode.on2:
+        /// 지도와 마커 모두 회전
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        updateMapPosition(latitude, longitude, compassValue); // 지도와 마커 모두 회전
+        updateMapPosition(latitude, longitude, compassValue);
         break;
     }
   }
