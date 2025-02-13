@@ -107,25 +107,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
-            // swift_method_channel
-            // Visibility(
-            //   visible: !Platform.isAndroid,
-            //   child: Semantics(
-            //     label: 'swift 연결',
-            //     child: IconButton(
-            //       onPressed: () => Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //           builder: (context) => SwiftView(
-            //             platform: widget.platform,
-            //           ),
-            //         ),
-            //       ),
-            //       icon: const Icon(Icons.ios_share_outlined),
-            //     ),
-            //   ),
-            // ),
-
             // 수정 라이트
             Visibility(
               visible: !Platform.isAndroid,
