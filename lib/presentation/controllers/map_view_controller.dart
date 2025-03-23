@@ -38,11 +38,20 @@ class NaverMapViewController extends GetxController {
   /// 로딩 상태를 나타내는 Reactive 변수입니다.
   RxBool isLoading = true.obs;
 
-  /// 현재 위도 (초기값: 35.9078)
-  RxDouble current_latitude = 35.9078.obs;
+  /// 현재 위도 (초기값: 37.4865) - 가톨릭대학교 위도
+  RxDouble current_latitude = 37.4865.obs;
 
-  /// 현재 경도 (초기값: 127.7669)
-  RxDouble current_longitude = 127.7669.obs;
+  /// 현재 경도 (초기값: 126.8018) - 가톨릭대학교 경도
+  RxDouble current_longitude = 126.8018.obs;
+
+  /// 카메라 마커 위도 (초기값: 37.4865) - 가톨릭대학교 위도
+  RxDouble cameraLatitude = 37.4865.obs;
+
+  /// 카메라 마커 경도 (초기값: 126.8018) - 가톨릭대학교 경도
+  RxDouble cameraLongitude = 126.8018.obs;
+
+  /// 출발지 또는 목적지 설정 모드 (start: 출발지 설정, dest: 목적지 설정, none: 없음)
+  RxString settingMode = 'none'.obs;
 
   /// 경로 안내 시 남은 거리를 나타내는 Reactive 변수입니다.
   RxDouble remain_distance = double.infinity.obs;
@@ -58,6 +67,9 @@ class NaverMapViewController extends GetxController {
 
   /// 검색창에 표시할 목적지 문자열
   RxString destinationLocation = ''.obs;
+
+  /// 경로선택
+  RxString choose_route = ''.obs; 
 
   /// 경로의 좌표 리스트
   List<LatLng> paths = [];
@@ -148,12 +160,17 @@ class NaverMapViewController extends GetxController {
   bool outOfBound = false;
   double boundary = 5;
   bool searchNewPath = false;
-  double searchNewPathBoundary = 30;
+  double searchNewPathBoundary = 15;
   int searchNewPathTime = 0;
   double distanceToNextCheckpoint = double.maxFinite;
+  int searchStartNewPathTime = 0;  //검색시작 새로운경로시간
 
   /// GPS 신호 사용 여부
   bool isGps = true;
+
+  /// 앱 실행 후 GPS 수신도 낮을때 출발지 위치 조정 멘트(한번만)
+  bool ShowLowGpsAlertOnce = false;
+  RxBool showLowAccuracyDialog = false.obs;
 
   /// 경계 조건 문자열 (디버깅용)
   String checkBoudaryCondition = "";
@@ -326,6 +343,13 @@ class NaverMapViewController extends GetxController {
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
       );
+
+      // GPS 정확도에 따라 출발지 안내 멘트 유/무
+      if (!ShowLowGpsAlertOnce && position.accuracy >= 15) {
+      ShowLowGpsAlertOnce = true;
+      showLowAccuracyDialog.value = true;
+    }
+
       if (position.accuracy >= 15) {
         isGps = false;
         velocityX = _filteringX.calculateWeightedAverage();
@@ -360,6 +384,7 @@ class NaverMapViewController extends GetxController {
     double startLongitude,
     double endLatitude,
     double endLongitude,
+    String choose_route,
   ) async {
     try {
       final responseData = await apiService.fetchPathData(
@@ -367,6 +392,7 @@ class NaverMapViewController extends GetxController {
         startLongitude: startLongitude,
         endLatitude: endLatitude,
         endLongitude: endLongitude,
+        choose_route: choose_route,
       );
 
       /// 데이터 파싱
@@ -956,6 +982,7 @@ class NaverMapViewController extends GetxController {
         selectedStartLocation.value!.lng,
         selectedDestLocation.value!.lat,
         selectedDestLocation.value!.lng,
+        choose_route.value
       );
     }
   }
@@ -964,6 +991,17 @@ class NaverMapViewController extends GetxController {
   Future<void> handleDestinationLocationSelection(GeoLocation newDest) async {
     selectedDestLocation.value = newDest;
     isSetDestinationLocation.value = true;
+
+    // 출발지가 설정되지 않은 경우 현재 위치를 출발지로 자동 설정
+    if (!isSetStartLocation.value) {
+      selectedStartLocation.value = GeoLocation(
+        lat: current_latitude.value,  // 현재 GPS 위도
+        lng: current_longitude.value, // 현재 GPS 경도
+      );
+      isSetStartLocation.value = true;
+      debugPrint('출발지가 설정되지 않아 현위치를 출발지로 자동 설정됨: ${selectedStartLocation.value!.lat}, ${selectedStartLocation.value!.lng}');
+    }
+    // 출발지와 목적지가 모두 설정되었을 때 경로 요청
     if (isSetStartLocation.value) {
       debugPrint('출발지가 설정되어 있으므로 경로 요청');
       await loadPathData(
@@ -971,9 +1009,51 @@ class NaverMapViewController extends GetxController {
         selectedStartLocation.value!.lng,
         selectedDestLocation.value!.lat,
         selectedDestLocation.value!.lng,
+        choose_route.value
       );
     }
   }
+
+  //   /// 사용자가 지도를 움직이면 카메라 중심 좌표를 업데이트
+  // void updateCameraPosition(double lat, double lng) {
+  //   cameraLatitude.value = lat;
+  //   cameraLongitude.value = lng;
+  // }
+
+  // /// 현재 카메라 중심을 출발지로 설정
+  // void setStartLocationFromMap() {
+  //   selectedStartLocation.value =
+  //       GeoLocation(lat: cameraLatitude.value, lng: cameraLongitude.value);
+  //   isSetStartLocation.value = true;
+  //   settingMode.value = 'none';
+  //   debugPrint('출발지 설정됨: ${selectedStartLocation.value}');
+  //   requestRoute();
+  // }
+
+  // /// 현재 카메라 중심을 목적지로 설정
+  // void setDestinationLocationFromMap() {
+  //   selectedDestLocation.value =
+  //       GeoLocation(lat: cameraLatitude.value, lng: cameraLongitude.value);
+  //   isSetDestinationLocation.value = true;
+  //   settingMode.value = 'none';
+  //   debugPrint('목적지 설정됨: ${selectedDestLocation.value}');
+  // }
+
+  // /// 출발지 및 목적지가 설정되었을 때 경로 요청
+  // Future<void> requestRoute() async {
+  //   if (isSetStartLocation.value && isSetDestinationLocation.value) {
+  //     debugPrint('경로 요청 중...');
+  //     await loadPathData(
+  //       selectedStartLocation.value!.lat,
+  //       selectedStartLocation.value!.lng,
+  //       selectedDestLocation.value!.lat,
+  //       selectedDestLocation.value!.lng,
+  //       choose_route.value,
+  //     );
+  //   } else {
+  //     debugPrint('출발지 또는 목적지가 설정되지 않음.');
+  //   }
+  // }
 
   Timer? navigationTimer;
 
@@ -984,12 +1064,35 @@ class NaverMapViewController extends GetxController {
     navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
       checkBoundary();
       indexUpdate();
+      // 출발지(첫 번째 분기점)와 현재 위치 사이 거리 계산
       remain_startpoint = calculateDistance(
         current_latitude.value,
         current_longitude.value,
         branchinfo[0].point.latitude,
         branchinfo[0].point.longitude,
       );
+      // 출발지와 현재 위치가 70m 이상 차이나면 재검색 준비
+      if (remain_startpoint > 0.070) {
+        searchStartNewPathTime++;
+        if (searchStartNewPathTime > 14) { // 15초 이상 지속 시 경로 재검색
+        debugPrint('출발지와 너무 멀어짐. 15초 후 자동으로 경로 재검색 수행');
+
+        // 현재 위치를 새로운 출발지로 설정하고 지도 업데이트
+        await loadPathData(
+                current_latitude.value,
+                current_longitude.value,
+                selectedDestLocation.value!.lat,
+                selectedDestLocation.value!.lng,
+                choose_route.value,
+              );
+
+        debugPrint('출발지를 현재 위치로 변경하고 지도 업데이트 완료');
+        searchStartNewPathTime = 0; // 카운트 초기화
+      }
+    } else {
+      searchStartNewPathTime = 0; // 다시 가까워지면 카운트 리셋
+    }
+
       if (remain_startpoint < 0.015) {
         isStart.value = false;
       }
@@ -1055,10 +1158,11 @@ class NaverMapViewController extends GetxController {
             searchNewPathTime++;
             if (searchNewPathTime >= 5) {
               await loadPathData(
-                selectedStartLocation.value!.lat,
-                selectedStartLocation.value!.lng,
+                current_latitude.value,
+                current_longitude.value,
                 selectedDestLocation.value!.lat,
                 selectedDestLocation.value!.lng,
+                choose_route.value,
               );
               speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
               searchNewPathTime = 0;

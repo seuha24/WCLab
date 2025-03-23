@@ -49,6 +49,7 @@ part '../presentation/views/setting_view.dart';
 part '../presentation/views/sign_in_view.dart';
 part '../presentation/views/destination_search_view.dart';
 part '../presentation/views/startspot_search_view.dart';
+part '../presentation/views/test_view.dart';
 
 part '../presentation/widgets/board.dart';
 part '../presentation/widgets/compass.dart';

@@ -74,6 +74,31 @@ class NaverMapView extends GetView<NaverMapViewController> {
                 // 필요 시 추가 처리...
               },
             ),
+            
+            /// 앱 실행 후 GPS 수신도 낮을때 출발지 위치 조정 멘트(한번만)
+            Obx(() {
+              if (controller.showLowAccuracyDialog.value) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: Text("알림"),
+                      content: Text("초기 위치 확인 시 GPS 정확도가 낮습니다.\n출발지 입력 또는 마커로 위치 조정하세요."),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            controller.showLowAccuracyDialog.value = false;
+                            Navigator.of(context).pop(); // 팝업 닫기
+                            },
+                            child: Text("확인"),
+                          ),
+                        ],
+                      )
+                    );
+                  });
+                }
+              return SizedBox.shrink(); // UI를 무언가 반환해야 하니까 빈 위젯
+            }),
 
             /// 출발지 검색 입력창 (상단 위치에 고정)
             Obx(() {
@@ -199,6 +224,41 @@ class NaverMapView extends GetView<NaverMapViewController> {
 
                       if (newDest != null) {
                         controller.handleDestinationLocationSelection(newDest);
+
+                        // 경로 선택 BottomSheet 표시
+                        String? selectedRoute = await showModalBottomSheet<String>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "0"),
+                                    child: Text("추천"),
+                                    ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "4"),
+                                    child: Text("추천+대로우선"),
+                                    ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "10"),
+                                    child: Text("최단"),
+                                    ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "40"),
+                                    child: Text("최단거리+계단제외"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                          if (selectedRoute != null) {
+                          controller.choose_route.value = selectedRoute;
+                          debugPrint('선택된 경로: ${controller.choose_route.value}');
+                          }
                       }
                     },
                     child: Container(
@@ -241,6 +301,72 @@ class NaverMapView extends GetView<NaverMapViewController> {
                 ),
               );
             }),
+
+            // /// 화면 중앙에 고정된 마커
+            // Positioned(
+            //   top: MediaQuery.of(context).size.height / 2 - 24,
+            //   left: MediaQuery.of(context).size.width / 2 - 24,
+            //   child: Icon(Icons.place, color: Colors.red, size: 48),
+            // ),
+
+            // /// 출발지 설정 버튼
+            // Obx(() {
+            //   return Positioned(
+            //     bottom: 100.0,
+            //     left: 20.0,
+            //     right: 20.0,
+            //     child: ElevatedButton(
+            //       onPressed: () {
+            //         controller.setStartLocationFromMap();
+            //         controller.requestRoute();
+            //       },
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: controller.isSetStartLocation.value
+            //             ? Colors.blue
+            //             : Colors.green,
+            //         padding: EdgeInsets.symmetric(vertical: 15.0),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(8.0),
+            //         ),
+            //       ),
+            //       child: Text(
+            //         controller.isSetStartLocation.value ? "출발지 변경" : "출발지 설정",
+            //         style: TextStyle(fontSize: 18, color: Colors.white),
+            //       ),
+            //     ),
+            //   );
+            // }),
+
+            // /// 목적지 설정 버튼
+            // Obx(() {
+            //   return Positioned(
+            //     bottom: 40.0,
+            //     left: 20.0,
+            //     right: 20.0,
+            //     child: ElevatedButton(
+            //       onPressed: () {
+            //         controller.setDestinationLocationFromMap();
+            //         controller.requestRoute();
+            //       },
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: controller.isSetDestinationLocation.value
+            //             ? Colors.blue
+            //             : Colors.green,
+            //         padding: EdgeInsets.symmetric(vertical: 15.0),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(8.0),
+            //         ),
+            //       ),
+            //       child: Text(
+            //         controller.isSetDestinationLocation.value
+            //             ? "목적지 변경"
+            //             : "목적지 설정",
+            //         style: TextStyle(fontSize: 18, color: Colors.white),
+            //       ),
+            //     ),
+            //   );
+            // }),
+
             /// 시스템 상단 바 높이에 따른 패딩 (상단 영역의 색상 처리)
             Container(
               color: isDark

@@ -62,10 +62,15 @@ class NavigationApiService {
   Future<Map<String, dynamic>> fetchPathData({
     required double startLatitude,
     required double startLongitude,
+    //required double current_Latitude,
+    //required double current_longitude,
     required double endLatitude,
     required double endLongitude,
+    required String choose_route,
   }) async {
     final Map<String, dynamic> requestData = {
+      //"startX": current_longitude,
+      //"startY": current_Latitude,
       "startX": startLongitude,
       "startY": startLatitude,
       "angle": 20,
@@ -76,7 +81,7 @@ class NavigationApiService {
       "reqCoordType": "WGS84GEO",
       "startName": "%EC%B6%9C%EB%B0%9C",
       "endName": "%EB%8F%84%EC%B0%A9",
-      "searchOption": "0",
+      "searchOption": choose_route,
       "resCoordType": "WGS84GEO",
       "sort": "index"
     };

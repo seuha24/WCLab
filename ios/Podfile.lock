@@ -1159,52 +1159,52 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.36)
   - camera_avfoundation (0.0.1):
     - Flutter
-  - cloud_firestore (5.5.1):
-    - Firebase/Firestore (= 11.4.0)
+  - cloud_firestore (5.6.5):
+    - Firebase/Firestore (= 11.8.0)
     - firebase_core
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - Firebase/Auth (11.4.0):
+  - Firebase/Auth (11.8.0):
     - Firebase/CoreOnly
-    - FirebaseAuth (~> 11.4.0)
-  - Firebase/CoreOnly (11.4.0):
-    - FirebaseCore (= 11.4.0)
-  - Firebase/Firestore (11.4.0):
+    - FirebaseAuth (~> 11.8.0)
+  - Firebase/CoreOnly (11.8.0):
+    - FirebaseCore (~> 11.8.0)
+  - Firebase/Firestore (11.8.0):
     - Firebase/CoreOnly
-    - FirebaseFirestore (~> 11.4.0)
-  - firebase_auth (5.3.4):
-    - Firebase/Auth (= 11.4.0)
+    - FirebaseFirestore (~> 11.8.0)
+  - firebase_auth (5.5.1):
+    - Firebase/Auth (= 11.8.0)
     - firebase_core
     - Flutter
-  - firebase_core (3.8.1):
-    - Firebase/CoreOnly (= 11.4.0)
+  - firebase_core (3.12.1):
+    - Firebase/CoreOnly (= 11.8.0)
     - Flutter
-  - FirebaseAppCheckInterop (11.5.0)
-  - FirebaseAuth (11.4.0):
+  - FirebaseAppCheckInterop (11.9.0)
+  - FirebaseAuth (11.8.1):
     - FirebaseAppCheckInterop (~> 11.0)
     - FirebaseAuthInterop (~> 11.0)
-    - FirebaseCore (~> 11.4)
-    - FirebaseCoreExtension (~> 11.4)
+    - FirebaseCore (~> 11.8.0)
+    - FirebaseCoreExtension (~> 11.8.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
     - GoogleUtilities/Environment (~> 8.0)
     - GTMSessionFetcher/Core (< 5.0, >= 3.4)
     - RecaptchaInterop (~> 100.0)
-  - FirebaseAuthInterop (11.5.0)
-  - FirebaseCore (11.4.0):
-    - FirebaseCoreInternal (~> 11.0)
+  - FirebaseAuthInterop (11.9.0)
+  - FirebaseCore (11.8.1):
+    - FirebaseCoreInternal (~> 11.8.0)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/Logger (~> 8.0)
-  - FirebaseCoreExtension (11.4.1):
-    - FirebaseCore (~> 11.0)
-  - FirebaseCoreInternal (11.5.0):
+  - FirebaseCoreExtension (11.8.0):
+    - FirebaseCore (~> 11.8.0)
+  - FirebaseCoreInternal (11.8.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
-  - FirebaseFirestore (11.4.0):
-    - FirebaseCore (~> 11.4)
-    - FirebaseCoreExtension (~> 11.4)
-    - FirebaseFirestoreInternal (= 11.4.0)
+  - FirebaseFirestore (11.8.0):
+    - FirebaseCore (~> 11.8.0)
+    - FirebaseCoreExtension (~> 11.8.0)
+    - FirebaseFirestoreInternal (= 11.8.0)
     - FirebaseSharedSwift (~> 11.0)
-  - FirebaseFirestoreInternal (11.4.0):
+  - FirebaseFirestoreInternal (11.8.0):
     - abseil/algorithm (~> 1.20240116.1)
     - abseil/base (~> 1.20240116.1)
     - abseil/container/flat_hash_map (~> 1.20240116.1)
@@ -1214,18 +1214,18 @@ PODS:
     - abseil/time (~> 1.20240116.1)
     - abseil/types (~> 1.20240116.1)
     - FirebaseAppCheckInterop (~> 11.0)
-    - FirebaseCore (~> 11.0)
+    - FirebaseCore (~> 11.8.0)
     - "gRPC-C++ (~> 1.65.0)"
     - gRPC-Core (~> 1.65.0)
     - leveldb-library (~> 1.22)
     - nanopb (~> 3.30910.0)
-  - FirebaseSharedSwift (11.5.0)
+  - FirebaseSharedSwift (11.9.0)
   - Flutter (1.0.0)
   - flutter_compass (0.0.1):
     - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_native_splash (0.0.1):
+  - flutter_native_splash (2.4.3):
     - Flutter
   - flutter_naver_map (1.3.0):
     - Flutter
@@ -1234,7 +1234,6 @@ PODS:
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
-    - Toast
   - geolocator_apple (1.2.0):
     - Flutter
   - google_sign_in_ios (0.0.1):
@@ -1380,9 +1379,10 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
-  - Protobuf (3.29.0)
+  - Protobuf (3.29.3)
   - reactive_ble_mobile (0.0.1):
     - Flutter
+    - FlutterMacOS
     - Protobuf (~> 3.5)
     - SwiftProtobuf (~> 1.0)
   - RecaptchaInterop (100.0.0)
@@ -1397,14 +1397,13 @@ PODS:
     - Flutter
     - FlutterMacOS
     - Try
-  - SwiftProtobuf (1.28.2)
+  - SwiftProtobuf (1.29.0)
   - text_to_speech (0.0.1):
     - Flutter
-  - Toast (4.1.1)
   - torch_light (0.0.1):
     - Flutter
   - Try (2.1.1)
-  - vibration (1.7.5):
+  - vibration (3.0.0):
     - Flutter
 
 DEPENDENCIES:
@@ -1424,7 +1423,7 @@ DEPENDENCIES:
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - reactive_ble_mobile (from `.symlinks/plugins/reactive_ble_mobile/ios`)
+  - reactive_ble_mobile (from `.symlinks/plugins/reactive_ble_mobile/darwin`)
   - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
@@ -1461,7 +1460,6 @@ SPEC REPOS:
     - Protobuf
     - RecaptchaInterop
     - SwiftProtobuf
-    - Toast
     - Try
 
 EXTERNAL SOURCES:
@@ -1498,7 +1496,7 @@ EXTERNAL SOURCES:
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   reactive_ble_mobile:
-    :path: ".symlinks/plugins/reactive_ble_mobile/ios"
+    :path: ".symlinks/plugins/reactive_ble_mobile/darwin"
   sensors_plus:
     :path: ".symlinks/plugins/sensors_plus/ios"
   shared_preferences_foundation:
@@ -1519,29 +1517,29 @@ SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
   camera_avfoundation: dd002b0330f4981e1bbcb46ae9b62829237459a4
-  cloud_firestore: 3fafe78d755b01fe1fd267a87bb52e80b7dacacc
+  cloud_firestore: 56e7bb3888f09698dc061d38d02d87d4fd80e2cb
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
-  Firebase: cf1b19f21410b029b6786a54e9764a0cacad3c99
-  firebase_auth: c4bdd9d7b338ac004008cb5024a643584e0ec03f
-  firebase_core: 418aed674e9a0b8b6088aec16cde82a811f6261f
-  FirebaseAppCheckInterop: d265d9f4484e7ec1c591086408840fdd383d1213
-  FirebaseAuth: c359af98bd703cbf4293eec107a40de08ede6ce6
-  FirebaseAuthInterop: 1219bee9b23e6ebe84c256a0d95adab53d11c331
-  FirebaseCore: e0510f1523bc0eb21653cac00792e1e2bd6f1771
-  FirebaseCoreExtension: f1bc67a4702931a7caa097d8e4ac0a1b0d16720e
-  FirebaseCoreInternal: f47dd28ae7782e6a4738aad3106071a8fe0af604
-  FirebaseFirestore: 2ccdf893fd7e175aa8ec58faa06338b346d27db8
-  FirebaseFirestoreInternal: 004452c4669d5df8869c9f8f7a24ee0009852d5b
-  FirebaseSharedSwift: 302ac5967857ad7e7388b15382d705b8c8d892aa
+  Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
+  firebase_auth: 3d848b9b866b201e5c8e0c06d8b2cec272fd8825
+  firebase_core: ac395f994af4e28f6a38b59e05a88ca57abeb874
+  FirebaseAppCheckInterop: 9226f7217b43e99dfa0bc9f674ad8108cef89feb
+  FirebaseAuth: ad59a1a7b161e75f74c39f70179d2482d40e2737
+  FirebaseAuthInterop: 2a26ee1bea6d47df8048683cfa071e7da657798f
+  FirebaseCore: 99fe0c4b44a39f37d99e6404e02009d2db5d718d
+  FirebaseCoreExtension: 3d3f2017a00d06e09ab4ebe065391b0bb642565e
+  FirebaseCoreInternal: df24ce5af28864660ecbd13596fc8dd3a8c34629
+  FirebaseFirestore: 563a4ab1a65e2858f05e150bb4c31b0f8f79248b
+  FirebaseFirestoreInternal: 8c5921c360a70e447bfeefb245f450e8b50e750b
+  FirebaseSharedSwift: 574e6a5602afe4397a55c8d4f767382d620285de
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
   flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
-  flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
+  flutter_native_splash: df59bb2e1421aa0282cb2e95618af4dcb0c56c29
   flutter_naver_map: d31b1884517151e7b3121e3b24c18733ef4e4387
   flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
-  fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
+  fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
   geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
-  google_sign_in_ios: 07375bfbf2620bc93a602c0e27160d6afc6ead38
+  google_sign_in_ios: 4111e87aa5e24a4404f00ea13479f35e571969cc
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   "gRPC-C++": 2fa52b3141e7789a28a737f251e0c45b4cb20a87
@@ -1554,19 +1552,18 @@ SPEC CHECKSUMS:
   NMapsMap: 99c10429d93340780b6f88d3fc7c0a3850b43664
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  Protobuf: 4bd991351f557a31f4fadd3ce1cdab236ccb9ea5
-  reactive_ble_mobile: 9ce6723d37ccf701dbffd202d487f23f5de03b4c
+  Protobuf: e2de96d939c642ce8da186343ff8929b35223212
+  reactive_ble_mobile: 856183aeda09f2a676bbaecbea8915c3cb1d33df
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
-  sensors_plus: 42b9de1b8237675fa8d8121e4bb93be0f79fa61d
+  sensors_plus: 7229095999f30740798f0eeef5cd120357a8f4f2
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
   speech_to_text: 627d3fd2194770b51abb324ba45c2d39398f24a8
-  SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
+  SwiftProtobuf: b7aa08087e2ab6d162862d143020091254095f69
   text_to_speech: 8669facdbd5b72d2939b810493defd991634f6f9
-  Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   torch_light: 682062fa12102172fa38b6b14c106d93b060f83e
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
-  vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
+  vibration: 3797858f8cbf53d841e189ef8bd533d96e4ca93c
 
 PODFILE CHECKSUM: bf3a5c76e2955b96fc1e90437855d5c03432d187
 
