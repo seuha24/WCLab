@@ -302,70 +302,49 @@ class NaverMapView extends GetView<NaverMapViewController> {
               );
             }),
 
-            // /// 화면 중앙에 고정된 마커
-            // Positioned(
-            //   top: MediaQuery.of(context).size.height / 2 - 24,
-            //   left: MediaQuery.of(context).size.width / 2 - 24,
-            //   child: Icon(Icons.place, color: Colors.red, size: 48),
-            // ),
+            /// 화면 중앙 고정 마커(출발지 설정시 사라짐)
+            Stack(
+              children: [
+                Obx(() {
+                  final isSet = controller.isSetStartLocation.value;
+                   if (isSet) return SizedBox.shrink(); // 숨김 처리
+                return Center(
+                  child: Icon(Icons.place, color: Colors.red, size: 40),
+                );
+              }),
 
-            // /// 출발지 설정 버튼
-            // Obx(() {
-            //   return Positioned(
-            //     bottom: 100.0,
-            //     left: 20.0,
-            //     right: 20.0,
-            //     child: ElevatedButton(
-            //       onPressed: () {
-            //         controller.setStartLocationFromMap();
-            //         controller.requestRoute();
-            //       },
-            //       style: ElevatedButton.styleFrom(
-            //         backgroundColor: controller.isSetStartLocation.value
-            //             ? Colors.blue
-            //             : Colors.green,
-            //         padding: EdgeInsets.symmetric(vertical: 15.0),
-            //         shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(8.0),
-            //         ),
-            //       ),
-            //       child: Text(
-            //         controller.isSetStartLocation.value ? "출발지 변경" : "출발지 설정",
-            //         style: TextStyle(fontSize: 18, color: Colors.white),
-            //       ),
-            //     ),
-            //   );
-            // }),
+            /// 커스텀 출발지 설정 버튼
+            Obx(() {
+              final isSet = controller.isSetStartLocation.value;
 
-            // /// 목적지 설정 버튼
-            // Obx(() {
-            //   return Positioned(
-            //     bottom: 40.0,
-            //     left: 20.0,
-            //     right: 20.0,
-            //     child: ElevatedButton(
-            //       onPressed: () {
-            //         controller.setDestinationLocationFromMap();
-            //         controller.requestRoute();
-            //       },
-            //       style: ElevatedButton.styleFrom(
-            //         backgroundColor: controller.isSetDestinationLocation.value
-            //             ? Colors.blue
-            //             : Colors.green,
-            //         padding: EdgeInsets.symmetric(vertical: 15.0),
-            //         shape: RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(8.0),
-            //         ),
-            //       ),
-            //       child: Text(
-            //         controller.isSetDestinationLocation.value
-            //             ? "목적지 변경"
-            //             : "목적지 설정",
-            //         style: TextStyle(fontSize: 18, color: Colors.white),
-            //       ),
-            //     ),
-            //   );
-            // }),
+              // 이미 설정되면 버튼 제거
+              if (isSet) return SizedBox.shrink();
+              
+            return Positioned(
+              bottom: 100.0,
+              left: 20.0,
+              right: 20.0,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await controller.setCustomStartLocationFromCamera();},
+                  icon: Icon(Icons.add_location_alt, color: Colors.white),
+                  label: Text(
+                    "현재 위치 설정",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
 
             /// 시스템 상단 바 높이에 따른 패딩 (상단 영역의 색상 처리)
             Container(

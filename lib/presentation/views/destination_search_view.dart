@@ -123,7 +123,7 @@ class _DesSearchState extends State<DesSearch> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('목적지 확인'),
+          title: Text('목적지 확인',style: TextStyle(color: Colors.black,),),
           content: Text(
             '${result.name}(으)로 안내할까요?',
             style: TextStyle(

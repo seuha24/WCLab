@@ -44,11 +44,11 @@ class NaverMapViewController extends GetxController {
   /// 현재 경도 (초기값: 126.8018) - 가톨릭대학교 경도
   RxDouble current_longitude = 126.8018.obs;
 
-  /// 카메라 마커 위도 (초기값: 37.4865) - 가톨릭대학교 위도
-  RxDouble cameraLatitude = 37.4865.obs;
+  /// 커스텀 시작 위도 (초기값: 37.4865) - 가톨릭대학교 위도
+  RxDouble cameraStartLat = 37.4865.obs;
 
-  /// 카메라 마커 경도 (초기값: 126.8018) - 가톨릭대학교 경도
-  RxDouble cameraLongitude = 126.8018.obs;
+  /// 커스텀 시작 경도 (초기값: 126.8018) - 가톨릭대학교 경도
+  RxDouble cameraStartLng = 126.8018.obs;
 
   /// 출발지 또는 목적지 설정 모드 (start: 출발지 설정, dest: 목적지 설정, none: 없음)
   RxString settingMode = 'none'.obs;
@@ -171,6 +171,9 @@ class NaverMapViewController extends GetxController {
   /// 앱 실행 후 GPS 수신도 낮을때 출발지 위치 조정 멘트(한번만)
   bool ShowLowGpsAlertOnce = false;
   RxBool showLowAccuracyDialog = false.obs;
+
+  /// 커스텀 시작 지점 사용 여부
+  RxBool isCustomStartPoint = false.obs;
 
   /// 경계 조건 문자열 (디버깅용)
   String checkBoudaryCondition = "";
@@ -970,6 +973,54 @@ class NaverMapViewController extends GetxController {
     mapController!.addOverlay(_currentLocationMarker!);
   }
 
+  /// 출발지를 조정하기 위해 절대 좌표를 상대 좌표로 변환하여 px, py를 업데이트합니다.
+  /// [baseLat], [baseLng]는 기준 좌표 (현재 위치), [targetLat], [targetLng]는 조정하려는 목표 좌표
+  void updateRelativeCoordinates(double baseLat, double baseLng, double targetLat, double targetLng) {
+    Map<String, double> relativePosition = latLonToXY(baseLat, baseLng, targetLat, targetLng);
+    px = relativePosition['y']!;
+    py = relativePosition['x']!;
+    debugPrint('기준 좌표: ($baseLat, $baseLng)');
+    debugPrint('목표 좌표: ($targetLat, $targetLng)');
+    debugPrint('Relative Coordinates: px = $px, py = $py');
+  }
+
+  /// 지도 중심 좌표를 즉시 읽어와서 현재 위치 마커로 고정 설정 (IMU 기반일 때만)
+  Future<void> setCustomStartLocationFromCamera() async {
+    if (!isGps) {
+      isCustomStartPoint.value = true;
+
+    // 현재 카메라 중심을 바로 가져와서 저장
+    final cameraPosition = await mapController!.getCameraPosition();
+    final double targetLat = cameraPosition.target.latitude;
+    final double targetLng = cameraPosition.target.longitude;
+
+    cameraStartLat.value = targetLat;
+    cameraStartLng.value = targetLng;
+
+    // // 기준 좌표 = 기존 위치 (IMU 기준)
+    // final double baseLat = current_latitude.value;
+    // final double baseLng = current_longitude.value;
+
+    // 상대좌표 계산 (IMU 위치 기준 → 사용자 선택 위치로 보정)
+    updateRelativeCoordinates(current_latitude.value, current_longitude.value, cameraStartLat.value, cameraStartLng.value);
+
+    // 현재 위치를 카메라 중심값으로 갱신
+    current_latitude.value = targetLat;
+    current_longitude.value = targetLng;
+
+    // 출발지로 고정
+    selectedStartLocation.value = GeoLocation(lat: targetLat, lng: targetLng);
+    isSetStartLocation.value = true;
+
+    // 마커도 즉시 지도에 반영
+    await updateCurrentLocationMarker(targetLat, targetLng, compassValue.value, false);
+
+    debugPrint("출발지 위치 수동 고정 완료: ($targetLat, $targetLng)");
+  } else {
+    debugPrint("GPS 사용 중이므로 수동 위치 설정 차단됨");
+  }
+}
+
   /// handleStartLocationSelection: 시작 위치를 설정하고, 목적지가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
     selectedStartLocation.value = newStart;
@@ -1013,48 +1064,7 @@ class NaverMapViewController extends GetxController {
       );
     }
   }
-
-  //   /// 사용자가 지도를 움직이면 카메라 중심 좌표를 업데이트
-  // void updateCameraPosition(double lat, double lng) {
-  //   cameraLatitude.value = lat;
-  //   cameraLongitude.value = lng;
-  // }
-
-  // /// 현재 카메라 중심을 출발지로 설정
-  // void setStartLocationFromMap() {
-  //   selectedStartLocation.value =
-  //       GeoLocation(lat: cameraLatitude.value, lng: cameraLongitude.value);
-  //   isSetStartLocation.value = true;
-  //   settingMode.value = 'none';
-  //   debugPrint('출발지 설정됨: ${selectedStartLocation.value}');
-  //   requestRoute();
-  // }
-
-  // /// 현재 카메라 중심을 목적지로 설정
-  // void setDestinationLocationFromMap() {
-  //   selectedDestLocation.value =
-  //       GeoLocation(lat: cameraLatitude.value, lng: cameraLongitude.value);
-  //   isSetDestinationLocation.value = true;
-  //   settingMode.value = 'none';
-  //   debugPrint('목적지 설정됨: ${selectedDestLocation.value}');
-  // }
-
-  // /// 출발지 및 목적지가 설정되었을 때 경로 요청
-  // Future<void> requestRoute() async {
-  //   if (isSetStartLocation.value && isSetDestinationLocation.value) {
-  //     debugPrint('경로 요청 중...');
-  //     await loadPathData(
-  //       selectedStartLocation.value!.lat,
-  //       selectedStartLocation.value!.lng,
-  //       selectedDestLocation.value!.lat,
-  //       selectedDestLocation.value!.lng,
-  //       choose_route.value,
-  //     );
-  //   } else {
-  //     debugPrint('출발지 또는 목적지가 설정되지 않음.');
-  //   }
-  // }
-
+  
   Timer? navigationTimer;
 
   /// startNavigationTimer: 경로 안내를 위한 타이머를 시작합니다.
@@ -1085,7 +1095,7 @@ class NaverMapViewController extends GetxController {
                 selectedDestLocation.value!.lng,
                 choose_route.value,
               );
-
+        speakText("출발지에 벗어나 새로운 경로로 안내합니다.");
         debugPrint('출발지를 현재 위치로 변경하고 지도 업데이트 완료');
         searchStartNewPathTime = 0; // 카운트 초기화
       }

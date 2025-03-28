@@ -168,11 +168,6 @@ class SystemTheme implements Themes {
           fontWeight: FontWeight.bold,
           color: scheme.onSecondary,
         ),
-        // contentTextStyle: TextStyle(
-        //   fontSize: 18.sp,
-        //   fontWeight: FontWeight.normal,
-        //   color: scheme.onSecondary,
-        // ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),

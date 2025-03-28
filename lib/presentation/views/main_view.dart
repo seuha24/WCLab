@@ -12,7 +12,7 @@ class _MainViewState extends State<MainView> {
   final bluetooth = DI.get<FlutterReactiveBle>();
 
   final List<Widget> _widgetOptions = const <Widget>[
-    NaverMapView(),
+    TestView(),
     SettingView(),
   ];
 

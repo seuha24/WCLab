@@ -128,7 +128,7 @@ class _StartSearchState extends State<StartSearch> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('출발지 확인'),
+          title: Text('출발지 확인',style: TextStyle(color: Colors.black,)),
           content: Text(
             '${result.name}에서 시작하시나요?',
             style: TextStyle(
