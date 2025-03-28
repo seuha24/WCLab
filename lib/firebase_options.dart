@@ -65,6 +65,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'safelight-4ca77.firebasestorage.app',
     androidClientId: '502374392525-8jdari7ht81ht2dgf10nu640bq5p2ad2.apps.googleusercontent.com',
     iosClientId: '502374392525-l6045c27lkhpeh6821gnmgst7kqb6dfe.apps.googleusercontent.com',
-    iosBundleId: 'kr.wcl.safelight',
+    iosBundleId: 'com.wcl.safelight',
   );
 }

@@ -1,4 +1,4 @@
-package kr.wcl.safelight
+package com.wcl.safelight
 
 import io.flutter.embedding.android.FlutterActivity
 

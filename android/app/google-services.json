@@ -113,7 +113,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:502374392525:android:565c1deda6ccb3f9a2ff84",
         "android_client_info": {
-          "package_name": "kr.wcl.safelight"
+          "package_name": "com.wcl.safelight"
         }
       },
       "oauth_client": [

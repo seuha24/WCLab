@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="kr.wcl.safelight">
+          package="com.wcl.safelight">
 
     <!-- Permissions options for the `bluetooth` group -->
     <uses-permission android:name="android.permission.BLUETOOTH"/>
