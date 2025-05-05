@@ -16,25 +16,22 @@ class _DesSearchState extends State<DesSearch> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  // TTS
+  // TTS 서비스 (음성 안내용)
   final TtsService ttsService = DI.get<TtsService>();
-
-  Future<void> speakText(String text) async {
-    await ttsService.speak(text);
-  }
 
   final FocusNode _focusNode = FocusNode();
 
-  List<PlaceResult> places = [];
-  List<PlaceResult> _searchResults = [];
+  List<PlaceResult> places = []; // 전체 장소 검색 결과
+  List<PlaceResult> _searchResults = []; // 현재 화면에 표시할 결과
 
   @override
   void initState() {
     super.initState();
+    // 초기 검색어가 있을 경우 입력 필드에 설정
     if (widget.destinationValue.isNotEmpty) {
       _searchController.text = widget.destinationValue;
     }
-
+    // 앱 시작 시 입력창에 자동 포커스
     _focusNode.requestFocus();
   }
 
@@ -45,15 +42,12 @@ class _DesSearchState extends State<DesSearch> {
     super.dispose();
   }
 
+  // 검색어 입력 시 디바운싱 적용 (0.5초 후 실행)
   void _onSearchChanged() {
-    debugPrint('debounce timer : ${_debounce?.isActive}');
-    // 디바운스 타이머를 취소
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-    // 디바운스 타이머 설정
     _debounce = Timer(const Duration(milliseconds: 500), () {
       final query = _searchController.text.trim();
-      debugPrint('검색어 : $query');
       if (query.isNotEmpty) {
         _performSearch(query);
       } else {
@@ -64,14 +58,14 @@ class _DesSearchState extends State<DesSearch> {
     });
   }
 
-  /// TTS를 통해 안내 메시지를 출력하는 메서드.
-  /// [message]: 출력할 메시지.
+  // TTS로 안내 메시지 읽어줌
   Future<void> speakTTS(String message) async {
     ttsService.speak(message);
   }
 
+  // Kakao API를 사용하여 장소 검색 요청
   Future<List<PlaceResult>> placeSearch(String query) async {
-    final String apiKey = '93848fcc11798c6f48099dd2e2373263'; // 실제 API 키로 교체
+    final String apiKey = '93848fcc11798c6f48099dd2e2373263';
     final String apiUrl =
         'https://dapi.kakao.com/v2/local/search/keyword.json?query=$query';
 
@@ -82,12 +76,10 @@ class _DesSearchState extends State<DesSearch> {
     final response = await http.get(Uri.parse(apiUrl), headers: headers);
 
     if (response.statusCode == 200) {
-      print('장소검색 api 통신성공');
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> documents = jsonResponse['documents'];
 
-      // 검색 결과가 없는 경우 이전 결과 리스트를 유지.
-      // 검색 결과가 있는 경우 새로운 리스트 생성
+      // 검색 결과를 PlaceResult 형태로 파싱
       if (documents.isNotEmpty) {
         places = documents.map((doc) {
           return PlaceResult(
@@ -109,6 +101,7 @@ class _DesSearchState extends State<DesSearch> {
     }
   }
 
+  // 입력된 검색어로 장소 검색 실행
   void _performSearch(String query) async {
     List<PlaceResult> results = await placeSearch(query);
     setState(() {
@@ -116,6 +109,7 @@ class _DesSearchState extends State<DesSearch> {
     });
   }
 
+  // 장소를 선택했을 때 확인 다이얼로그 표시
   Future<bool?> showConfirmationDialog(
       BuildContext context, PlaceResult result) async {
     return showDialog<bool>(
@@ -123,25 +117,21 @@ class _DesSearchState extends State<DesSearch> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('목적지 확인',style: TextStyle(color: Colors.black,),),
+          title: Text('목적지 확인', style: TextStyle(color: Colors.black)),
           content: Text(
             '${result.name}(으)로 안내할까요?',
-            style: TextStyle(
-              color: Colors.black,
-            ),
+            style: TextStyle(color: Colors.black),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                // 확인 버튼을 눌렀을 때 수행할 작업
-                Navigator.pop(context, true); // true는 확인을 의미합니다.
+                Navigator.pop(context, true); // 확인
               },
               child: Text('확인'),
             ),
             TextButton(
               onPressed: () {
-                // 취소 버튼을 눌렀을 때 수행할 작업
-                Navigator.pop(context, false); // false는 취소를 의미합니다.
+                Navigator.pop(context, false); // 취소
               },
               child: Text('취소'),
             ),
@@ -151,25 +141,26 @@ class _DesSearchState extends State<DesSearch> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
+          // 상단 검색 입력창
           Container(
             color: Colors.white,
             padding: EdgeInsets.only(top: 50, left: 20, right: 20),
             child: Row(
               children: [
+                // 뒤로가기 버튼
                 IconButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.black,
-                  ),
+                  icon: Icon(Icons.arrow_back_ios, color: Colors.black),
                 ),
+                // 검색 입력창
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -202,23 +193,18 @@ class _DesSearchState extends State<DesSearch> {
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
                         suffixIcon: _searchController.text.isNotEmpty
-                            ? Container(
-                                child: IconButton(
-                                  alignment: Alignment.centerRight,
-                                  icon: Icon(
-                                    Icons.close,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    _searchResults.clear();
-                                    setState(() {});
-                                  },
+                            ? IconButton(
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _searchResults.clear();
+                                  setState(() {});
+                                },
                               )
                             : null,
                       ),
@@ -228,49 +214,100 @@ class _DesSearchState extends State<DesSearch> {
               ],
             ),
           ),
+          // 구분선
           Container(
             height: 1.0,
             width: double.infinity,
             color: Colors.grey,
           ),
-          Expanded(
-            child: ListView.builder(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
-                final result = _searchResults[index];
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0), // 모서리를 둥글게 처리
-                  ),
-                  margin: EdgeInsets.all(8.0),
-                  child: ListTile(
-                    tileColor: Colors.white,
-                    title: Text(result.name),
-                    subtitle: Text(result.address),
-                    onTap: () async {
-                      FocusScope.of(context).unfocus();
-                      _searchController.text = result.name;
-                      Future.microtask(() => speakTTS('${result.name}을 선택하셨습니다.'));
-                      bool? results =
-                          await showConfirmationDialog(context, result);
 
-                      // result 값에 따라 확인 또는 취소에 따른 작업을 수행할 수 있습니다.
-                      if (results != null && results) {
-                        // 확인 버튼이 눌렸을 때의 작업
-                        Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
-                        Navigator.pop(context, result.geometry.location);
-                        context.read<SearchBloc>().add(
+          // 검색 결과 영역
+          Expanded(
+            child: Column(
+              children: [
+                // 검색 결과가 없을 경우 표시할 '지도에서 직접 선택' 버튼
+                if (_searchResults.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: ElevatedButton.icon(
+                      icon: Icon(Icons.map),
+                      label: Text('지도에서 직접 선택'),
+                      onPressed: () async {
+                        // 목적지 선택 지도 화면으로 이동
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DestinationPickerView(),
+                          ),
+                        );
+
+                        // 선택 완료 후 결과 처리
+                        if (result != null && result is Map) {
+                          final GeoLocation pickedLocation = result['location'];
+                          final String pickedAddress = result['address'];
+
+                          _searchController.text = pickedAddress;
+                          speakTTS('$pickedAddress 위치를 선택하셨습니다.');
+
+                          // 선택된 위치를 검색창에서 반환
+                          Navigator.pop(context, pickedLocation);
+
+                          // Bloc 이벤트로 목적지 반영
+                          context.read<SearchBloc>().add(
                             SearchDestinationRequested(
-                                searchDestination: result.name));
-                      } else {
-                        speakTTS('취소');
-                      }
+                              searchDestination: pickedAddress,
+                              geoLocation: pickedLocation,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+
+                // 검색 결과 리스트 표시
+                Expanded(
+                  child: ListView.builder(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final result = _searchResults[index];
+                      return Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        margin: EdgeInsets.all(8.0),
+                        child: ListTile(
+                          tileColor: Colors.white,
+                          title: Text(result.name),
+                          subtitle: Text(result.address),
+                          onTap: () async {
+                            // 장소 선택 시 TTS 안내 및 확인 다이얼로그 표시
+                            FocusScope.of(context).unfocus();
+                            _searchController.text = result.name;
+                            Future.microtask(() => speakTTS('${result.name}을 선택하셨습니다.'));
+                            bool? results = await showConfirmationDialog(context, result);
+
+                            if (results != null && results) {
+                              // 선택 확인 시: 안내 후 위치 반환 + Bloc 이벤트 발생
+                              Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
+                              Navigator.pop(context, result.geometry.location);
+                              context.read<SearchBloc>().add(
+                                SearchDestinationRequested(
+                                  searchDestination: result.name,
+                                  geoLocation: result.geometry.location,
+                                ),
+                              );
+                            } else {
+                              speakTTS('취소');
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ],
@@ -279,6 +316,7 @@ class _DesSearchState extends State<DesSearch> {
   }
 }
 
+// 장소 검색 결과를 담는 모델 클래스
 class PlaceResult {
   final String name;
   final String address;
@@ -291,6 +329,7 @@ class PlaceResult {
   });
 }
 
+// 위경도 정보 모델 클래스
 class GeoLocation {
   final double lat;
   final double lng;
@@ -301,6 +340,7 @@ class GeoLocation {
   });
 }
 
+// LatLng 포맷을 GeoLocation으로 감싼 구조
 class LatLngGeometry {
   final GeoLocation location;
 

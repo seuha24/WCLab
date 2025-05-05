@@ -1,4 +1,3 @@
-// v1.3.1(ios), v1.1.2(android) | 한영찬(hanmango-o) | hanmango.o@gmail.com
 library safelight;
 
 import 'package:cloud_firestore/cloud_firestore.dart';

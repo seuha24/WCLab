@@ -45,3 +45,4 @@ part '../presentation/bloc/search_bloc/search_bloc.dart';
 part '../presentation/bloc/search_bloc/search_event.dart';
 part '../presentation/bloc/search_bloc/search_state.dart';
 part '../presentation/controllers/map_view_controller.dart';
+part '../presentation/controllers/destination_picker_controller.dart';
