@@ -12,7 +12,7 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
   NCameraPosition? _currentCameraPosition;
   NaverMapController? _naverMapController;
   NLatLng? _lastQueriedLatLng; // 마지막 주소 요청 위치 저장
-  final double _distanceThreshold = 0.0005; // 주소 요청을 위한 최소 거리 변화 기준
+  final double _distanceThreshold = 0.0001; // 주소 요청을 위한 최소 거리 변화 기준
 
   @override
   void initState() {
