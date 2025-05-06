@@ -76,7 +76,10 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
         final documents = jsonResponse['documents'];
 
         if (documents.isNotEmpty) {
-          final addressName = documents[0]['address']['address_name'];
+          // 도로명 주소가 있으면 우선 사용, 없으면 지번 주소 사용
+          final addressName = documents[0]['road_address']?['address_name']
+            ?? documents[0]['address']['address_name'];
+            
           _address.value = addressName;
           controller.updateAddress(addressName);
         } else {
