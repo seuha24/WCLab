@@ -197,14 +197,50 @@ class NaverMapViewController extends GetxController {
   void onInit() {
     super.onInit();
 
-    _getLocation();
-    _initLocation();
-    startCollectingSensorData();
+    // _getLocation();
+    // _initLocation();
+    // startCollectingSensorData();
 
-    // 나침반 데이터 수신이 완료되면 다시 _initLocation 호출
-    compassReady.future.then((_) {
-      _initLocation();
-    });
+    // // 나침반 데이터 수신이 완료되면 다시 _initLocation 호출
+    // compassReady.future.then((_) {
+    //   _initLocation();
+    // });
+       _initializeLocationServices();
+  }
+
+  /// 위치 서비스 초기화를 안전하게 수행합니다.
+  Future<void> _initializeLocationServices() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        final newPermission = await Geolocator.requestPermission();
+        if (newPermission == LocationPermission.denied) {
+          // 기본 위치로 설정 (가톨릭대학교)
+          current_latitude.value = 37.4865;
+          current_longitude.value = 126.8018;
+          isLoading.value = false;
+          return;
+        }
+      }
+
+      // 위치 서비스가 활성화되어 있는지 확인
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        debugPrint('위치 서비스가 비활성화되어 있습니다.');
+        current_latitude.value = 37.4865;
+        current_longitude.value = 126.8018;
+        isLoading.value = false;
+        return;
+      }
+
+      await _initLocation();
+      startCollectingSensorData();
+    } catch (e) {
+      debugPrint('위치 서비스 초기화 실패: $e');
+      current_latitude.value = 37.4865;
+      current_longitude.value = 126.8018;
+      isLoading.value = false;
+    }
   }
 
   /// addYawRateNoise: 센서 측정값에 포함된 잡음을 보정합니다.
