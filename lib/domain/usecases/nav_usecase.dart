@@ -39,6 +39,11 @@ abstract class NavUseCase {}
 abstract class GetPosition extends NavUseCase
     implements UseCase<LatLng, NoParams> {}
 
+
+//좌표 전송용 유스케이스 인터페이스
+abstract class SendCustomStartPointUseCase extends NavUseCase {
+  Future<Either<Failure, void>> call(SendStartPointParams params);
+}
 /// 현재 사용자 위치를 반환하는 비즈니스 로직이다.
 ///
 /// GetCurrentPosition은 현재 사용자의 위치(위도, 경도)를 알아야 하는 경우 사용된다.
@@ -108,5 +113,40 @@ class GetCurrentPosition implements GetPosition {
   @override
   Future<Either<Failure, LatLng>> call(NoParams params) async {
     return await repository.getCurrentPosition();
+  }
+}
+
+/// 사용자가 지정한 출발지 정보를 서버에 저장 요청하는 UseCase.
+/// 사용자가 입력한 정보를 Params 형태로 받아서 Repository에 전달한다.
+class SendCustomStartPoint implements SendCustomStartPointUseCase {
+  /// 데이터 처리를 위한 Repository (인터페이스에 의존)
+  NavigatorRepository repository;
+
+  SendCustomStartPoint({required this.repository});
+  
+  /// Params 객체로 받은 데이터를 서버에 전송 요청.
+  @override
+  Future<Either<Failure, void>> call(SendStartPointParams params) async {
+    print("sendCustomStartPoint 유스케이스");
+    return await repository.sendCustomStartPoint(
+      buildingName: params.buildingName,
+      entranceName: params.entranceName,
+      latitude: params.latitude,
+      longitude: params.longitude,
+    );
+    
+  }
+}
+
+/// 특정 건물의 입구 목록을 서버에서 요청하는 UseCase.
+/// 건물 이름을 통해 데이터를 조회하여 받아오는 역할을 수행한다.
+class GetBuildingEntrancesUseCase {
+  final NavigatorRepository repository;
+
+  GetBuildingEntrancesUseCase({required this.repository});
+
+  /// 특정 건물 이름으로 입구 목록을 서버로부터 요청.
+  Future<Either<Failure, BuildingResponse>> call(String buildingName) {
+    return repository.getBuildingEntrances(buildingName: buildingName);
   }
 }

@@ -12,3 +12,4 @@ part '../domain/usecases/crosswalk_usecase.dart';
 part '../domain/usecases/nav_usecase.dart';
 part '../domain/usecases/permission_usecase.dart';
 part '../domain/usecases/service_usecase.dart';
+part '../domain/usecases/send_startpoint_params.dart';

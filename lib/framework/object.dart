@@ -14,3 +14,6 @@ part '../data/models/weather_model.dart';
 
 part '../domain/entities/ambientlightlevel.dart';
 part '../data/models/ambientlightlevel_model.dart';
+
+part '../domain/entities/building_response.dart';
+part '../data/models/building_response_model.dart';

@@ -2,6 +2,7 @@
 library injection;
 
 import 'dart:io';
+import 'package:dio/dio.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -160,6 +161,14 @@ Future<void> init() async {
     () => GetCurrentPosition(repository: DI()),
   );
 
+    DI.registerLazySingleton<SendCustomStartPointUseCase>(
+    () => SendCustomStartPoint(repository: DI()),
+  );
+
+  DI.registerLazySingleton<GetBuildingEntrancesUseCase>(
+  () => GetBuildingEntrancesUseCase(repository: DI()),
+  );
+
   // repository injection area
   DI.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authDataSource: DI()),
@@ -204,7 +213,7 @@ Future<void> init() async {
       ),
     ),
   );
-
+  
   DI.registerLazySingleton<FlashNativeDataSource>(
     () => FlashNativeDataSourceImpl(),
   );
@@ -214,9 +223,8 @@ Future<void> init() async {
   DI.registerLazySingleton<PermissionNativeDataSource>(
     () => PermissionNativeDataSourceImpl(),
   );
-
   DI.registerLazySingleton<NavigateRemoteDataSource>(
-    () => NavigateRemoteDataSourceImpl(geolocator: DI()),
+    () => NavigateRemoteDataSourceImpl(geolocator: DI(),dio: DI()),
   );
   DI.registerLazySingleton<CrosswalkRemoteDataSource>(
     () => CrosswalkRemoteDataSourceImpl(firestore: DI(), distance: DI()),
@@ -227,6 +235,7 @@ Future<void> init() async {
   DI.registerLazySingleton<AmbientLightLevelDataSource>(
     () => AmbientLightLevelDataSourceImpl(),
   );
+  
 
   // core injection area
   final GeolocatorPlatform geolocator = GeolocatorPlatform.instance;
@@ -241,6 +250,8 @@ Future<void> init() async {
   final FirebaseAuth auth = FirebaseAuth.instance;
   DI.registerLazySingleton(() => auth);
 
+  DI.registerLazySingleton<Dio>(() => Dio()); // 추가
+  
   // TTS
   DI.registerLazySingleton(() => FlutterTts());
 

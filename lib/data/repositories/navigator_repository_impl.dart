@@ -49,4 +49,36 @@ class NavigatorRepositoryImpl implements NavigatorRepository {
       return Left(ServerFailure());
     }
   }
+  @override
+  Future<Either<Failure, void>> sendCustomStartPoint({
+    required String buildingName,
+    required String entranceName,
+    required double latitude,
+    required double longitude,
+    }) async {
+      try {
+        await navDataSource.sendCustomStartPoint(
+          buildingName: buildingName,
+          entranceName: entranceName,
+          latitude: latitude,
+          longitude: longitude,
+        );
+        return const Right(null);
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    }
+  @override
+  Future<Either<Failure, BuildingResponse>> getBuildingEntrances({
+    required String buildingName,
+  }) async {
+    try {
+      final result = await navDataSource.getBuildingEntrances(
+        buildingName: buildingName,
+      );
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
 }
