@@ -14,8 +14,10 @@ abstract class NavigateRemoteDataSource {
   });
 
   /// 특정 건물 입구 목록을 서버에서 가져오는 요청.
-  Future<BuildingResponse> getBuildingEntrances({
-  required String buildingName,
+  Future<BuildingResponseModel> getBuildingEntrances({
+    required String encodedAddr,
+    required double longitude,
+    required double latitude,
 });
 
 }
@@ -82,24 +84,19 @@ class NavigateRemoteDataSourceImpl implements NavigateRemoteDataSource {
 
   /// 특정 건물 입구 목록을 서버로부터 GET 방식으로 조회 요청.
   @override
-  Future<BuildingResponse> getBuildingEntrances({
-    required String buildingName,
+  Future<BuildingResponseModel> getBuildingEntrances({
+    required String encodedAddr,
+    required double longitude,
+    required double latitude,
   }) async {
     try {
-      final String urlBuildingName = buildingName;
-
-
-      final response = await dio.get(
-        //api_endpoints.dart의 getBuildingEntrance메서드를 호출하여 urlBuildingName을 넣어 url로 사용
-        ApiEndpoints.getBuildingEntrance(urlBuildingName),
-      );
+      /// URL 경로로 데이터를 직접 전달
+      final url = ApiEndpoints.getBuildingEntrance(encodedAddr, longitude, latitude);
+      final response = await dio.get(url);
 
       if (response.statusCode == 200) {
         print('서버 응답 데이터: ${response.data}');
-        final buildingResponseModel = BuildingResponseModel.fromList(response.data);
-        
-
-        return buildingResponseModel.toEntity();
+        return BuildingResponseModel.fromJson(response.data);
       } else {
         throw ServerException();
       }

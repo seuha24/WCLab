@@ -18,7 +18,7 @@ import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart' as injection;
 import 'package:safelight/injection.dart';
 
-
+import 'framework/usecase.dart';
 import 'framework/controller.dart';
 import 'framework/core.dart';
 import 'framework/ui.dart';
@@ -83,6 +83,11 @@ class SafeLight extends StatelessWidget {
               ),
               BlocProvider(
                 create: (context) => SearchBloc(),
+              ),
+              BlocProvider(
+                create: (context) => EntranceBloc(
+                  getBuildingEntrancesUseCase: DI.get<GetBuildingEntrancesUseCase>(),
+                ),
               ),
               // BlocProvider(
               //   create: (context) {

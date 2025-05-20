@@ -707,8 +707,7 @@ class NaverMapViewController extends GetxController {
     List<BranchInfo> currentWindow =
         getCurrentWindow(branchinfo, currentIndex, 5);
     int nearestIndex = moveIndex(currentWindow);
-    if ((nearestIndex < currentWindow.length || nearestIndex > 0) &&
-        nearestIndex != currentIndex) {
+    if (nearestIndex >= 0 && nearestIndex < branchinfo.length && nearestIndex != currentIndex) {
       debugPrint('인덱스가 변경되었습니다. 새로운 인덱스: $nearestIndex');
       currentIndex = nearestIndex;
       yawRate2 = turnUpdate2(
@@ -1295,23 +1294,23 @@ class NaverMapViewController extends GetxController {
 }
 
 
-/// 임시: 입구 조회 테스트용
-void testFetchBuildingEntrances() async {
-  final usecase = DI.get<GetBuildingEntrancesUseCase>();
+// /// 임시: 입구 조회 테스트용
+// void testFetchBuildingEntrances() async {
+//   final usecase = DI.get<GetBuildingEntrancesUseCase>();
 
-  final buildingName = '홍대입구'; // 여기 임시 고정
+//   final buildingName = '홍대입구'; // 여기 임시 고정
 
-  final result = await usecase.call(buildingName);
+//   final result = await usecase.call(buildingName);
 
-  result.fold(
-    (failure) {
-      debugPrint('출입구 가져오기 실패: $failure');
-    },
-    (buildingResponse) {
-      debugPrint('출입구 목록 불러오기 성공!');
-      for (var entrance in buildingResponse.entrances) {
-        debugPrint('출입구: ${entrance.entranceName}, 위도: ${entrance.location.latitude}, 경도: ${entrance.location.longitude}');
-      }
-    },
-  );
-}
+//   result.fold(
+//     (failure) {
+//       debugPrint('출입구 가져오기 실패: $failure');
+//     },
+//     (buildingResponse) {
+//       debugPrint('출입구 목록 불러오기 성공!');
+//       for (var entrance in buildingResponse.entrances) {
+//         debugPrint('출입구: ${entrance.entranceName}, 위도: ${entrance.location.latitude}, 경도: ${entrance.location.longitude}');
+//       }
+//     },
+//   );
+// }

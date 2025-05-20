@@ -95,9 +95,13 @@ class _StartSearchState extends State<StartSearch> {
       // 검색 결과가 있는 경우 새로운 리스트 생성
       if (documents.isNotEmpty) {
         places = documents.map((doc) {
+          // 도로명 주소가 있으면 우선 사용, 없으면 지번 주소 사용
+          final addressName = doc['road_address_name']?.isNotEmpty == true
+              ? doc['road_address_name']
+              : doc['address_name'];
           return PlaceResult(
             name: doc['place_name'],
-            address: doc['address_name'],
+            address: addressName,
             geometry: LatLngGeometry(
               location: GeoLocation(
                 lat: double.parse(doc['y']),
@@ -139,6 +143,16 @@ class _StartSearchState extends State<StartSearch> {
             TextButton(
               onPressed: () {
                 // 확인 버튼을 눌렀을 때 수행할 작업
+                debugPrint('선택된 장소: ${result.name}');
+                debugPrint('전송되는 주소: ${result.address}');
+                // EntranceBloc에 이벤트 발생
+                context.read<EntranceBloc>().add(
+                  FetchBuildingEntrances(
+                    address: result.address,
+                    longitude: result.geometry.location.lng,
+                    latitude: result.geometry.location.lat,
+                  ),
+                );
                 Navigator.pop(context, true); // true는 확인을 의미합니다.
               },
               child: Text('확인'),
@@ -262,12 +276,27 @@ class _StartSearchState extends State<StartSearch> {
 
                       // result 값에 따라 확인 또는 취소에 따른 작업을 수행할 수 있습니다.
                       if (results != null && results) {
+                        final entranceState = context.read<EntranceBloc>().state;
+                        
                         // 확인 버튼이 눌렸을 때의 작업
+                        if (entranceState is EntranceLoaded && entranceState.buildingResponse.entrances.isNotEmpty) {
+                          // 출입구가 있는 경우 EntranceSelectionView로 전환
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EntranceSelectionView(
+                                buildingResponse: entranceState.buildingResponse,
+                              ),
+                            ),
+                          );
+                        } else {
+                          // 출입구가 없는 경우 기존 경로 검색 로직으로 진행
                         Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
                         Navigator.pop(context, result.geometry.location);
                         context.read<SearchBloc>().add(
-                            SearchStartLocationRequested(
-                                searchLocation: result.name));
+                            SearchStartLocationRequested(searchLocation: result.name),
+                          );
+                        }
                       } else {
                         speakTTS('취소');
                       }

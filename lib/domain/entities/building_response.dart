@@ -1,6 +1,6 @@
 part of object;
 
-
+/// 출입구 정보 엔티티
 class Entrance {
   final String entranceName;
   final LatLng location; // 위도, 경도 정보를 LatLng으로 묶음
@@ -11,10 +11,17 @@ class Entrance {
   });
 }
 
+/// 건물 정보 엔티티
 class BuildingResponse {
-  final List<Entrance> entrances;
+  final int buildingId;         // 건물 ID
+  final String buildingName;    // 건물명
+  final String buildingDetail;  // 건물 상세 정보
+  final List<Entrance> entrances; // 여러 개의 출입구 리스트
 
   BuildingResponse({
+    required this.buildingId,
+    required this.buildingName,
+    required this.buildingDetail,
     required this.entrances,
   });
 }

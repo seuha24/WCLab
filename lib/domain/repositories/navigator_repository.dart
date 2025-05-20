@@ -55,6 +55,8 @@ abstract class NavigatorRepository {
 
   /// 특정 건물 입구 목록을 서버에서 조회 요청.
   Future<Either<Failure, BuildingResponse>> getBuildingEntrances({
-    required String buildingName,
+    required String encodedAddr,
+    required double longitude,
+    required double latitude,
   });
 }

@@ -12,18 +12,12 @@ class ApiEndpoints {
   static const String getUserInfo = '$baseUrl/user/me';
 
   // 출입구 관련 엔드포인트
-  static const String saveBuildingEntrance = '$baseUrl/api/buildings/save';
-  static String getBuildingEntrance(String buildingName) {
-    return '$baseUrl/api/buildings/$buildingName/entrances/coordinates';
-  }
-  // static const String getBuildingEntrance = '$baseUrl/api/buildings/홍대입구/entrances/coordinates';
-}
 
-//   // 출입구 관련 엔드포인트
-//   static const String saveEntrance = '$baseUrl2/encodedAddr/lon/lat';
-//   /// 주소, 위도, 경도로 출입구 정보를 조회하는 엔드포인트
-//   static String getEntranceByAddress(String encodedAddr, double lon, double lat) {
-//     return '$baseUrl2/$encodedAddr/$lon/$lat';
-//     //return '$baseUrl2/$encodedAddr/coordinates';
-//   }
-// }
+  // 출입구 좌표 등록 (POST)
+  static const String saveBuildingEntrance = '$baseUrl2/encodedAddr/save';
+
+  /// 주소, 위도, 경도로 출입구 정보를 조회하는 엔드포인트 (GET)
+  static String getBuildingEntrance(String encodedAddr, double longitude, double latitude) {
+    return '$baseUrl2/$encodedAddr/$longitude/$latitude';
+  }
+}

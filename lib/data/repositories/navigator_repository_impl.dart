@@ -68,16 +68,23 @@ class NavigatorRepositoryImpl implements NavigatorRepository {
         return Left(ServerFailure());
       }
     }
+
+  /// 특정 주소, 위도, 경도로 입구 목록을 서버에서 요청  
   @override
   Future<Either<Failure, BuildingResponse>> getBuildingEntrances({
-    required String buildingName,
+    required String encodedAddr,
+    required double longitude,
+    required double latitude,
   }) async {
     try {
-      final result = await navDataSource.getBuildingEntrances(
-        buildingName: buildingName,
+      final response = await navDataSource.getBuildingEntrances(
+        encodedAddr: encodedAddr,
+        longitude: longitude,
+        latitude: latitude,
       );
-      return Right(result);
-    } on ServerException {
+
+      return Right(response.toEntity());
+    } catch (e) {
       return Left(ServerFailure());
     }
   }

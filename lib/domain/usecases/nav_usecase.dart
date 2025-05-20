@@ -138,15 +138,26 @@ class SendCustomStartPoint implements SendCustomStartPointUseCase {
   }
 }
 
-/// 특정 건물의 입구 목록을 서버에서 요청하는 UseCase.
-/// 건물 이름을 통해 데이터를 조회하여 받아오는 역할을 수행한다.
+/// 특정 주소, 위도, 경도로 입구 목록을 서버에서 요청하는 UseCase.
+/// 주소, 위도, 경도를 통해 데이터를 조회하여 받아오는 역할을 수행한다.
 class GetBuildingEntrancesUseCase {
   final NavigatorRepository repository;
 
   GetBuildingEntrancesUseCase({required this.repository});
 
-  /// 특정 건물 이름으로 입구 목록을 서버로부터 요청.
-  Future<Either<Failure, BuildingResponse>> call(String buildingName) {
-    return repository.getBuildingEntrances(buildingName: buildingName);
+  /// 서버로 전송하는 데이터: `encodedAddr`, `longitude`, `latitude`
+  /// 서버에서 응답받는 데이터: `buildingId`, `buildingName`, `buildingDetail`, `entrances`
+
+  /// 특정 주소, 위도, 경도로 입구 목록을 서버로부터 요청.
+  Future<Either<Failure, BuildingResponse>> call({
+    required String encodedAddr,
+    required double longitude,
+    required double latitude,
+  }) {
+    return repository.getBuildingEntrances(
+      encodedAddr: encodedAddr,
+      longitude: longitude,
+      latitude: latitude,
+    );
   }
 }
