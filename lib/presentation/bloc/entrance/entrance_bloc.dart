@@ -5,6 +5,7 @@ class EntranceBloc extends Bloc<EntranceEvent, EntranceState> {
 
   EntranceBloc({required this.getBuildingEntrancesUseCase}) : super(EntranceInitial()) {
     on<FetchBuildingEntrances>(_onFetchBuildingEntrances);
+    on<SelectEntrance>(_onSelectEntrance);
   }
 
   Future<void> _onFetchBuildingEntrances(
@@ -24,8 +25,8 @@ class EntranceBloc extends Bloc<EntranceEvent, EntranceState> {
 
       final result = await getBuildingEntrancesUseCase(
         encodedAddr: encodedAddr,
-        longitude: event.longitude,
         latitude: event.latitude,
+        longitude: event.longitude,
       );
 
       result.fold(
@@ -46,6 +47,30 @@ class EntranceBloc extends Bloc<EntranceEvent, EntranceState> {
     } catch (e) {
       debugPrint('출입구 정보 요청 중 에러 발생: $e');
       emit(EntranceError(errorMessage: "Failed to process address"));
-    }  
+    }
+  }
+
+  Future<void> _onSelectEntrance(
+    SelectEntrance event,
+    Emitter<EntranceState> emit,
+  ) async {
+    try {
+      if (state is EntranceLoaded) {
+        final currentState = state as EntranceLoaded;
+        final selectedEntrance = currentState.buildingResponse.entrances.firstWhere(
+          (entrance) => entrance.location.latitude == event.latitude && 
+                       entrance.location.longitude == event.longitude,
+        );
+        
+        // 선택된 출입구의 위경도로 업데이트된 BuildingResponse 생성
+        final updatedResponse = currentState.buildingResponse.copyWith(
+          entrances: [selectedEntrance],
+        );
+        
+        emit(EntranceLoaded(buildingResponse: updatedResponse));
+      }
+    } catch (e) {
+      emit(EntranceError(errorMessage: e.toString()));
+    }
   }
 }

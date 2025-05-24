@@ -6,14 +6,14 @@ class BuildingResponseModel {
   final String? buildingName;
   final String? buildingDetail;
   final List<EntranceModel> entrances;
-  //final int exitCount;
+  final int exitCount;
 
   BuildingResponseModel({
     this.buildingId,
     required this.buildingName,
     required this.buildingDetail,
     required this.entrances,
-    //required this.exitCount,
+    required this.exitCount,
   });
 
   /// JSON → Model
@@ -26,7 +26,7 @@ class BuildingResponseModel {
         buildingName: null,
         buildingDetail: null,
         entrances: [],
-        //exitCount: 0,
+        exitCount: 0,
       );
     }
 
@@ -34,12 +34,12 @@ class BuildingResponseModel {
       buildingId: json['bldg_id'] as int?,
       buildingName: json['building_name'] as String?,
       buildingDetail: json['building_detail'] as String?,
-      //exitCount: json['exit_count'] as int?,
       entrances: (json['entrances'] as List?)
               ?.where((e) => e != null)
               .map((e) => EntranceModel.fromMap(e as Map<String, dynamic>))
               .toList() ??
           [],
+      exitCount: json['exit_count'] as int? ?? 0,
     );
   }
 
@@ -50,7 +50,6 @@ class BuildingResponseModel {
       buildingName: buildingName ?? "데이터 없음",
       buildingDetail: buildingDetail ?? "정보 없음",
       entrances: entrances.map((e) => e.toEntity()).toList(),
-      //exitCount: exitCount,
     );
   }
 }
@@ -69,10 +68,36 @@ class EntranceModel {
 
   /// JSON → Model
   factory EntranceModel.fromMap(Map<String, dynamic> map) {
+    double receivedLat = (map['lat'] as num).toDouble();
+    double receivedLon = (map['lon'] as num).toDouble();
+    double finalLatitude;
+    double finalLongitude;
+
+    // 서버 응답에서 lat과 lon의 값이 뒤바뀌어 오는 경우를 처리하기 위한 휴리스틱:
+    // 한국의 위도(latitude)는 대략 33~38.5 범위, 경도(longitude)는 대략 124~132 범위.
+    // 만약 서버에서 받은 'lon' 필드 값이 위도 범위에 있고, 'lat' 필드 값이 경도 범위에 있다면, 
+    // 두 값이 뒤바뀌어 온 것으로 간주합니다 (주로 출입구가 여러 개일 때의 서버 응답 형식).
+    if ((receivedLon >= 33.0 && receivedLon <= 39.0) && 
+        (receivedLat >= 120.0 && receivedLat <= 135.0)) {
+      // 값이 뒤바뀐 경우 (lon이 실제 위도, lat이 실제 경도)
+      finalLatitude = receivedLon;
+      finalLongitude = receivedLat;
+      // debugPrint('EntranceModel.fromMap: Swapped lat/lon based on value range.');
+      // debugPrint('  Original lat: $receivedLat, Original lon: $receivedLon');
+      // debugPrint('  Assigned Latitude: $finalLatitude, Assigned Longitude: $finalLongitude');
+    } else {
+      // 값이 정상적인 순서인 경우 (lat이 실제 위도, lon이 실제 경도) 또는 판별이 어려운 경우 기본 매핑
+      finalLatitude = receivedLat;
+      finalLongitude = receivedLon;
+      // debugPrint('EntranceModel.fromMap: Standard lat/lon mapping.');
+      // debugPrint('  Original lat: $receivedLat, Original lon: $receivedLon');
+      // debugPrint('  Assigned Latitude: $finalLatitude, Assigned Longitude: $finalLongitude');
+    }
+
     return EntranceModel(
-      entranceName: map['name'] as String,
-      longitude: (map['lon'] as num).toDouble(),
-      latitude: (map['lat'] as num).toDouble(),
+      entranceName: map['entranceName'] as String,
+      latitude: finalLatitude,
+      longitude: finalLongitude,
     );
   }
 

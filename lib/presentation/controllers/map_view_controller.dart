@@ -1292,25 +1292,3 @@ class NaverMapViewController extends GetxController {
     }
   }
 }
-
-
-// /// 임시: 입구 조회 테스트용
-// void testFetchBuildingEntrances() async {
-//   final usecase = DI.get<GetBuildingEntrancesUseCase>();
-
-//   final buildingName = '홍대입구'; // 여기 임시 고정
-
-//   final result = await usecase.call(buildingName);
-
-//   result.fold(
-//     (failure) {
-//       debugPrint('출입구 가져오기 실패: $failure');
-//     },
-//     (buildingResponse) {
-//       debugPrint('출입구 목록 불러오기 성공!');
-//       for (var entrance in buildingResponse.entrances) {
-//         debugPrint('출입구: ${entrance.entranceName}, 위도: ${entrance.location.latitude}, 경도: ${entrance.location.longitude}');
-//       }
-//     },
-//   );
-// }

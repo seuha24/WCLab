@@ -22,3 +22,17 @@ class FetchBuildingEntrances extends EntranceEvent {
   @override
   List<Object?> get props => [address, longitude, latitude];
 }
+/// 출입구 선택 이벤트
+class SelectEntrance extends EntranceEvent {
+  final double longitude;
+  final double latitude;
+
+  const SelectEntrance({
+    required this.longitude,
+    required this.latitude,
+  });
+
+  @override
+  List<Object?> get props => [longitude, latitude];
+}
+

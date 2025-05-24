@@ -46,6 +46,7 @@ class _DesSearchState extends State<DesSearch> {
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
+    // 디바운스 타이머 설정
     _debounce = Timer(const Duration(milliseconds: 500), () {
       final query = _searchController.text.trim();
       if (query.isNotEmpty) {
@@ -79,12 +80,19 @@ class _DesSearchState extends State<DesSearch> {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> documents = jsonResponse['documents'];
 
-      // 검색 결과를 PlaceResult 형태로 파싱
+      debugPrint('documents : $documents');
+
+      // 검색 결과가 없는 경우 이전 결과 리스트를 유지.
+      // 검색 결과가 있는 경우 새로운 리스트 생성
       if (documents.isNotEmpty) {
         places = documents.map((doc) {
+          // 도로명 주소가 있으면 우선 사용, 없으면 지번 주소 사용
+          final addressName = doc['road_address_name']?.isNotEmpty == true
+              ? doc['road_address_name']
+              : doc['address_name'];
           return PlaceResult(
             name: doc['place_name'],
-            address: doc['address_name'],
+            address: addressName,
             geometry: LatLngGeometry(
               location: GeoLocation(
                 lat: double.parse(doc['y']),
@@ -125,13 +133,17 @@ class _DesSearchState extends State<DesSearch> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.pop(context, true); // 확인
+                // 확인 버튼을 눌렀을 때 수행할 작업
+                debugPrint('선택된 장소: ${result.name}');
+                debugPrint('전송되는 주소: ${result.address}');
+                Navigator.pop(context, true); // true는 확인을 의미합니다.
               },
               child: Text('확인'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context, false); // 취소
+                // 취소 버튼을 눌렀을 때 수행할 작업
+                Navigator.pop(context, false); // false는 취소를 의미합니다.
               },
               child: Text('취소'),
             ),
@@ -282,22 +294,97 @@ class _DesSearchState extends State<DesSearch> {
                           title: Text(result.name),
                           subtitle: Text(result.address),
                           onTap: () async {
-                            // 장소 선택 시 TTS 안내 및 확인 다이얼로그 표시
                             FocusScope.of(context).unfocus();
                             _searchController.text = result.name;
                             Future.microtask(() => speakTTS('${result.name}을 선택하셨습니다.'));
-                            bool? results = await showConfirmationDialog(context, result);
 
+                            bool? results =
+                                await showConfirmationDialog(context, result);
+
+                            // result 값에 따라 확인 또는 취소에 따른 작업을 수행할 수 있습니다.
                             if (results != null && results) {
-                              // 선택 확인 시: 안내 후 위치 반환 + Bloc 이벤트 발생
-                              Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
-                              Navigator.pop(context, result.geometry.location);
-                              context.read<SearchBloc>().add(
-                                SearchDestinationRequested(
-                                  searchDestination: result.name,
-                                  geoLocation: result.geometry.location,
+                              debugPrint('=== 출입구 정보 요청 시작 ===');
+                              // EntranceBloc에 이벤트 발생
+                              context.read<EntranceBloc>().add(
+                                FetchBuildingEntrances(
+                                  address: result.address,
+                                  longitude: result.geometry.location.lng,
+                                  latitude: result.geometry.location.lat,
                                 ),
                               );
+
+                              // EntranceBloc의 상태 변화를 기다림
+                              await for (final entranceState in context.read<EntranceBloc>().stream) {
+                                debugPrint('=== EntranceBloc 상태 변화 감지 ===');
+                                debugPrint('현재 상태: ${entranceState.runtimeType}');
+                                
+                                if (entranceState is EntranceLoaded) {
+                                  debugPrint('출입구 개수: ${entranceState.buildingResponse.entrances.length}');
+                                  if (entranceState.buildingResponse.entrances.isNotEmpty) {
+                                    debugPrint('출입구 선택 화면으로 이동');
+                                    // 출입구가 있는 경우 EntranceSelectionView로 전환
+                                    if (!mounted) return;
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EntranceSelectionView(
+                                          buildingResponse: entranceState.buildingResponse,
+                                          onEntranceSelected: (entrance) {
+                                            debugPrint('선택된 출입구: ${entrance.entranceName}');
+                                            debugPrint('출입구 좌표: ${entrance.location.latitude}, ${entrance.location.longitude}');
+                                            
+                                            // 출입구 선택 시 SearchBloc에 이벤트 발생 (목적지용)
+                                            context.read<SearchBloc>().add(
+                                              SearchDestinationRequested(
+                                                searchDestination: result.name,
+                                                entrance: entrance,
+                                              ),
+                                            );
+                                            
+                                            Future.microtask(() => speakTTS('${entrance.entranceName}으로 안내합니다.'));
+                                            Navigator.pop(context); // EntranceSelectionView 닫기
+                                            Navigator.pop(context, GeoLocation(
+                                              lat: entrance.location.latitude,  // 위도
+                                              lng: entrance.location.longitude, // 경도
+                                            )); // DesSearch 닫기
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    // 출입구가 없는 경우 (API는 성공했으나 출입구 목록이 비어있는 경우-null)
+                                    debugPrint('출입구가 없어 바로 SearchBloc으로 진행 (EntranceLoaded, entrances empty)');
+                                    debugPrint('장소 좌표: ${result.geometry.location.lat}, ${result.geometry.location.lng}');
+                                    
+                                    if (!mounted) return;
+                                    context.read<SearchBloc>().add(
+                                      SearchDestinationRequested(
+                                        searchDestination: result.name,
+                                      ),
+                                    );
+                                    
+                                    Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
+                                    Navigator.pop(context, result.geometry.location); // DesSearch 닫기
+                                  }
+                                  break; // 상태 처리 후 스트림 구독 종료
+                                } else if (entranceState is EntranceError) {
+                                  // 서버 연결 실패 또는 출입구 정보 로드 실패 시 카카오 API 좌표 사용
+                                  debugPrint('에러 발생: EntranceError. 카카오 API 좌표로 경로 탐색합니다.');
+                                  debugPrint('장소 이름: ${result.name}');
+                                  debugPrint('카카오 API 좌표: ${result.geometry.location.lat}, ${result.geometry.location.lng}');
+                                  
+                                  if (!mounted) return;
+                                  context.read<SearchBloc>().add(
+                                    SearchDestinationRequested(
+                                      searchDestination: result.name, // 출입구 정보 없이 이름만 전달
+                                    ),
+                                  );
+                                  
+                                  Future.microtask(() => speakTTS('${result.name}(으)로 안내합니다.'));
+                                  Navigator.pop(context, result.geometry.location); // DesSearch 닫고 카카오 API 좌표 반환
+                                  break; // 상태 처리 후 스트림 구독 종료
+                                }
+                              }
                             } else {
                               speakTTS('취소');
                             }

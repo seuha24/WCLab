@@ -24,4 +24,18 @@ class BuildingResponse {
     required this.buildingDetail,
     required this.entrances,
   });
+
+  BuildingResponse copyWith({
+    int? buildingId,
+    String? buildingName,
+    String? buildingDetail,
+    List<Entrance>? entrances,
+  }) {
+    return BuildingResponse(
+      buildingId: buildingId ?? this.buildingId,
+      buildingName: buildingName ?? this.buildingName,
+      buildingDetail: buildingDetail ?? this.buildingDetail,
+      entrances: entrances ?? this.entrances,
+    );
+  }
 }

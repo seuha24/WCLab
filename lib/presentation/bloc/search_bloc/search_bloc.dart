@@ -23,6 +23,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           searchStartLocation: event.searchLocation,                  // 새로운 출발지 문자열 설정
           searchDestinationLocation: state.searchDestinationLocation, // 기존 도착지 유지
           destinationGeoLocation: state.destinationGeoLocation,       // 기존 도착지 좌표 유지
+          startEntrance: event.entrance,                              // 새로운 출발지 출입구 정보 설정
+          destinationEntrance: state.destinationEntrance,            // 기존 목적지 출입구 유지
         ),
       );
     } on Exception catch (e, stacktrace) {
@@ -41,6 +43,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           searchStartLocation: state.searchStartLocation,     // 기존 출발지 유지
           searchDestinationLocation: event.searchDestination, // 새로운 도착지 문자열 설정
           destinationGeoLocation: event.geoLocation,          // 새로운 도착지 좌표 설정 (지도 선택용)
+          startEntrance: state.startEntrance,                 // 기존 출발지 출입구 유지
+          destinationEntrance: event.entrance,                // 새로운 목적지 출입구 정보 설정
         ),
       );
     } on Exception catch (e, stacktrace) {

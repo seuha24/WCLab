@@ -11,11 +11,19 @@ class SearchState extends Equatable {
   /// 사용자가 선택한 목적지의 좌표 (지도 선택 기반)
   final GeoLocation? destinationGeoLocation;
 
+  /// 사용자가 선택한 출발지 출입구 (건물인 경우)
+  final Entrance? startEntrance;
+
+  /// 사용자가 선택한 목적지 출입구 (건물인 경우)
+  final Entrance? destinationEntrance;
+
   /// 생성자 - 모든 필드는 선택형
   const SearchState({
     this.searchStartLocation,
     this.searchDestinationLocation,
     this.destinationGeoLocation,
+    this.startEntrance,
+    this.destinationEntrance,
   });
 
   /// 상태 비교를 위한 Equatable 구현
@@ -24,6 +32,8 @@ class SearchState extends Equatable {
     searchStartLocation,
     searchDestinationLocation,
     destinationGeoLocation,
+    startEntrance,
+    destinationEntrance,
   ];
 
   /// 상태 복사를 위한 copyWith 메서드
@@ -32,11 +42,18 @@ class SearchState extends Equatable {
     String? searchStartLocation,
     String? searchDestinationLocation,
     GeoLocation? destinationGeoLocation,
+    Entrance? startEntrance,
+    Entrance? destinationEntrance,
   }) {
     return SearchState(
       searchStartLocation: searchStartLocation ?? this.searchStartLocation,
       searchDestinationLocation: searchDestinationLocation ?? this.searchDestinationLocation,
       destinationGeoLocation: destinationGeoLocation ?? this.destinationGeoLocation,
+      startEntrance: startEntrance ?? this.startEntrance,
+      destinationEntrance: destinationEntrance ?? this.destinationEntrance,
     );
   }
+
+  // 하위 호환성을 위한 getter (기존 코드에서 entrance를 사용하는 경우)
+  Entrance? get entrance => startEntrance;
 }
