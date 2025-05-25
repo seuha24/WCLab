@@ -143,30 +143,6 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       if (newStart != null) {
                         debugPrint('출발지 좌표: ${newStart.lat}, ${newStart.lng}');
                         controller.handleStartLocationSelection(newStart);
-                        
-                        // SearchBloc 상태 확인
-                        final searchState = context.read<SearchBloc>().state;
-                        debugPrint('SearchBloc 상태:');
-                        debugPrint('출발지: ${searchState.searchStartLocation}');
-                        debugPrint('출입구: ${searchState.entrance?.entranceName}');
-                        
-                        // SearchBloc 상태 업데이트
-                        if (searchState.entrance != null) {
-                          // 출입구가 있는 경우
-                          context.read<SearchBloc>().add(
-                            SearchStartLocationRequested(
-                              searchLocation: searchState.searchStartLocation ?? '',
-                              entrance: searchState.entrance,
-                            ),
-                          );
-                        } else {
-                          // 출입구가 없는 경우
-                          context.read<SearchBloc>().add(
-                            SearchStartLocationRequested(
-                              searchLocation: searchState.searchStartLocation ?? '',
-                            ),
-                          );
-                        }
                       }
                     },
                     child: Container(
