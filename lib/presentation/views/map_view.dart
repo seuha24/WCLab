@@ -249,7 +249,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                                     child: Text("최단"),
                                     ),
                                   ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "40"),
+                                    onPressed: () => Navigator.pop(context, "30"),
                                     child: Text("최단거리+계단제외"),
                                     ),
                                   ],
@@ -260,6 +260,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
                           if (selectedRoute != null) {
                           controller.choose_route.value = selectedRoute;
                           debugPrint('선택된 경로: ${controller.choose_route.value}');
+                          // 경로 선택 완료 후 경로 탐색 시작
+                          await controller.startNavigation();
                           }
                       }
                     },
@@ -328,7 +330,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
               right: 20.0,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  await controller.setCustomStartLocationFromCamera();},
+                  await controller.setCustomStartLocationFromCamera(); // 카메라 중심을 출발지로 설정
+                  },
                   icon: Icon(Icons.add_location_alt, color: Colors.white),
                   label: Text(
                     "현재 위치 설정",

@@ -83,7 +83,7 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
             ?? documents[0]['address']['address_name'];
             
           _address.value = addressName;
-          controller.updateAddress(addressName);
+          controller.updateAddress(addressName); // 컨트롤러에 주소 업데이트
         } else {
           _address.value = '주소를 찾을 수 없습니다';
         }
@@ -140,7 +140,7 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
             },
           ),
 
-          /// 중심 고정 마커
+          /// 중심에 고정된 마커 아이콘
           Center(
             child: Icon(
               Icons.location_pin,

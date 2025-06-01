@@ -385,21 +385,21 @@ class NaverMapViewController extends GetxController {
 
       // GPS 정확도에 따라 출발지 안내 멘트 유/무
       if (!ShowLowGpsAlertOnce && position.accuracy >= 15) {
-      ShowLowGpsAlertOnce = true;
-      showLowAccuracyDialog.value = true;
+      ShowLowGpsAlertOnce = true;    // 중복 표시 방지 플래그
+      showLowAccuracyDialog.value = true;  // 알림 다이얼로그 표시 신호
     }
 
       if (position.accuracy >= 15) {
-        isGps = false;
+        isGps = false;      // GPS 신호 불량
         velocityX = _filteringX.calculateWeightedAverage();
         velocityY = _filteringY.calculateWeightedAverage();
-        current_latitude.value = newlatitude;
-        current_longitude.value = newlongitude;
+        current_latitude.value = newlatitude; // 센서 계산 위도
+        current_longitude.value = newlongitude; // 센서 계산 경도
         isLoading.value = false;
       } else {
-        isGps = true;
-        current_latitude.value = position.latitude;
-        current_longitude.value = position.longitude;
+        isGps = true;      // GPS 신호 정상
+        current_latitude.value = position.latitude; //  GPS 위도
+        current_longitude.value = position.longitude; //  GPS 경도
         initialLatitude = current_latitude.value;
         initialLongitude = current_longitude.value;
         resetSpeedUtilsValue();
@@ -1021,23 +1021,28 @@ class NaverMapViewController extends GetxController {
 
   /// 지도 중심 좌표를 즉시 읽어와서 현재 위치 마커로 고정 설정 (IMU 기반일 때만)
   Future<void> setCustomStartLocationFromCamera() async {
-    if (!isGps) {
-      isCustomStartPoint.value = true;
+    if (!isGps) {                       // GPS 신호 불량일 때만 활성화
+      isCustomStartPoint.value = true;  // 커스텀 출발지 플래그 설정
 
     // 현재 카메라 중심을 바로 가져와서 저장
     final cameraPosition = await mapController!.getCameraPosition();
     final double targetLat = cameraPosition.target.latitude;
     final double targetLng = cameraPosition.target.longitude;
 
-    cameraStartLat.value = targetLat;
-    cameraStartLng.value = targetLng;
+    cameraStartLat.value = targetLat;  // 카메라 중심 위도
+    cameraStartLng.value = targetLng;  // 카메라 중심 경도
 
     // // 기준 좌표 = 기존 위치 (IMU 기준)
     // final double baseLat = current_latitude.value;
     // final double baseLng = current_longitude.value;
 
     // 상대좌표 계산 (IMU 위치 기준 → 사용자 선택 위치로 보정)
-    updateRelativeCoordinates(current_latitude.value, current_longitude.value, cameraStartLat.value, cameraStartLng.value);
+    updateRelativeCoordinates(
+      current_latitude.value,
+      current_longitude.value,
+      cameraStartLat.value,
+      cameraStartLng.value
+    );
 
     // 현재 위치를 카메라 중심값으로 갱신
     current_latitude.value = targetLat;
@@ -1061,16 +1066,8 @@ class NaverMapViewController extends GetxController {
     selectedStartLocation.value = newStart;
     isStart.value = true;
     isSetStartLocation.value = true;
-    if (isSetDestinationLocation.value) {
-      debugPrint('목적지가 설정되어 있으므로 경로 요청');
-      await loadPathData(
-        selectedStartLocation.value!.lat,
-        selectedStartLocation.value!.lng,
-        selectedDestLocation.value!.lat,
-        selectedDestLocation.value!.lng,
-        choose_route.value
-      );
-    }
+    // 출발지만 설정하고 경로 요청은 하지 않음
+    debugPrint('출발지가 설정되었습니다.');
   }
 
   /// handleDestinationLocationSelection: 목적지 위치를 설정하고, 시작 위치가 이미 설정되어 있다면 경로 데이터를 요청합니다.
@@ -1087,9 +1084,14 @@ class NaverMapViewController extends GetxController {
       isSetStartLocation.value = true;
       debugPrint('출발지가 설정되지 않아 현위치를 출발지로 자동 설정됨: ${selectedStartLocation.value!.lat}, ${selectedStartLocation.value!.lng}');
     }
-    // 출발지와 목적지가 모두 설정되었을 때 경로 요청
-    if (isSetStartLocation.value) {
-      debugPrint('출발지가 설정되어 있으므로 경로 요청');
+    // 경로 요청은 하지 않고 목적지만 설정
+    debugPrint('목적지가 설정되었습니다. 경로 선택을 기다립니다.');
+  }
+
+  /// startNavigation: 경로 선택이 완료된 후 경로 탐색을 시작합니다.
+  Future<void> startNavigation() async {
+    if (isSetStartLocation.value && isSetDestinationLocation.value) {
+      debugPrint('경로 선택 완료. 경로 탐색을 시작합니다.');
       await loadPathData(
         selectedStartLocation.value!.lat,
         selectedStartLocation.value!.lng,
@@ -1097,9 +1099,11 @@ class NaverMapViewController extends GetxController {
         selectedDestLocation.value!.lng,
         choose_route.value
       );
+    } else {
+      debugPrint('출발지 또는 목적지가 설정되지 않았습니다.');
     }
   }
-  
+
   Timer? navigationTimer;
 
   /// startNavigationTimer: 경로 안내를 위한 타이머를 시작합니다.

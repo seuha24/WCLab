@@ -161,7 +161,7 @@ class SystemTheme implements Themes {
           color: scheme.onSecondary,
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: scheme.surface,
         titleTextStyle: TextStyle(
           fontSize: 16.sp,
