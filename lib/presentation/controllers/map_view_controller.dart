@@ -1103,7 +1103,7 @@ class NaverMapViewController extends GetxController {
       debugPrint('출발지 또는 목적지가 설정되지 않았습니다.');
     }
   }
-
+// 업로드
   Timer? navigationTimer;
 
   /// startNavigationTimer: 경로 안내를 위한 타이머를 시작합니다.
