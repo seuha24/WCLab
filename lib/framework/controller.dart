@@ -47,5 +47,8 @@ part '../presentation/bloc/search_bloc/search_state.dart';
 part '../presentation/bloc/entrance/entrance_bloc.dart';  
 part '../presentation/bloc/entrance/entrance_event.dart';
 part '../presentation/bloc/entrance/entrance_state.dart';
+part '../presentation/bloc/registration_bloc/registration_bloc.dart';  
+part '../presentation/bloc/registration_bloc/registration_event.dart';
+part '../presentation/bloc/registration_bloc/registration_state.dart';
 part '../presentation/controllers/map_view_controller.dart';
 part '../presentation/controllers/destination_picker_controller.dart';

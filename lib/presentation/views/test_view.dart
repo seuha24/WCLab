@@ -28,6 +28,7 @@ class _TestViewState extends State<TestView> {
            // _buildButton(context, 'BLE', Colors.blue, BlueOffView(state: BleStatus.poweredOff)),
             _buildButton(context, '경광등', Colors.yellow, FlashlightView(flashOn: DI.get<ControlFlash>(instanceName: USECASE_CONTROL_FLASH_ON), flashOff: DI.get<ControlFlash>(instanceName: USECASE_CONTROL_FLASH_OFF))),
             _buildButton(context, '설정', Colors.green, SettingView()),
+            _buildButton(context, '출입구 등록', Colors.purple, EntranceRegistrationView()),
           ],
         ),
       ),

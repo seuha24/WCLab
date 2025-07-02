@@ -44,19 +44,14 @@ abstract class NavigatorRepository {
   /// {@macro repository_part3}
   Future<Either<Failure, LatLng>> getCurrentPosition();
 
-  /// 사용자 지정 출발지 정보를 서버에 저장 요청.
-  Future<Either<Failure, void>> sendCustomStartPoint({
-    required String buildingName,
-    required String entranceName,
-    required double latitude,
-    required double longitude,
-    
-  });
-
   /// 특정 건물 입구 목록을 서버에서 조회 요청.
   Future<Either<Failure, BuildingResponse>> getBuildingEntrances({
     required String encodedAddr,
     required double longitude,
     required double latitude,
   });
+
+  /// 출입구 등록을 위한 메소드
+  Future<Either<Failure, void>> sendCustomStartPointParams(
+      SendPointParams params);
 }

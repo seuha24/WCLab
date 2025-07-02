@@ -1,6 +1,7 @@
 class ApiEndpoints {
   static const String baseUrl = 'https://backend.catholicuniv.pillowstudio.kr';
   static const String baseUrl2 = 'http://cuksl.xyz:3306';
+  static const String baseUrl3 = 'http://aws.cuksl.xyz:3333';
 
   // Auth 관련 엔드포인트
   static const String googleAuthToken = '$baseUrl/auth/google/token';
@@ -14,7 +15,7 @@ class ApiEndpoints {
   // 출입구 관련 엔드포인트
 
   // 출입구 좌표 등록 (POST)
-  static const String saveBuildingEntrance = '$baseUrl2/encodedAddr/save';
+  static const String saveBuildingEntrance = '$baseUrl2/save/entrances';
 
   /// 주소, 위도, 경도로 출입구 정보를 조회하는 엔드포인트 (GET)
   static String getBuildingEntrance(String encodedAddr, double longitude, double latitude) {

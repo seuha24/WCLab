@@ -7,10 +7,11 @@ abstract class NavigateRemoteDataSource {
 
   /// 사용자 지정 출발지 정보를 서버에 전송.
   Future<void> sendCustomStartPoint({
+    required String roadAddress,
     required String buildingName,
-    required String entranceName,
-    required double latitude,
-    required double longitude,
+    required String buildingDetail,
+    required Map<String, double> buildingPoint,
+    required List<Map<String, dynamic>> entrances,
   });
 
   /// 특정 건물 입구 목록을 서버에서 가져오는 요청.
@@ -18,8 +19,7 @@ abstract class NavigateRemoteDataSource {
     required String encodedAddr,
     required double longitude,
     required double latitude,
-});
-
+  });
 }
 
 /// 실제 서버와의 통신을 담당하는 DataSource 구현 클래스.
@@ -45,42 +45,71 @@ class NavigateRemoteDataSourceImpl implements NavigateRemoteDataSource {
     }
   }
 
+  // 11. 실제 HTTP 요청 수행
   @override
   Future<void> sendCustomStartPoint({
+    required String roadAddress,
     required String buildingName,
-    required String entranceName,
-    required double latitude,
-    required double longitude,
+    required String buildingDetail,
+    required Map<String, double> buildingPoint,
+    required List<Map<String, dynamic>> entrances,
   }) async {
-    print("DatasourceImpl: sendCustomStartPoint 함수 진입");
+    print("\n=== 출입구 데이터 서버 전송 시작 ===");
+    print("요청 URL: ${ApiEndpoints.saveBuildingEntrance}");
+    print("요청 메서드: POST");
+    print("\n전송할 데이터:");
+    print("1. 도로명 주소: $roadAddress");
+    print("2. 건물명: $buildingName");
+    print("3. 건물 상세: $buildingDetail");
+    print("4. 건물 위치: $buildingPoint");
+    print("5. 출입구 정보: $entrances");
+
     try {
+      final requestData = {
+        'roadAddress': roadAddress,
+        'buildingName': buildingName,
+        'buildingDetail': buildingDetail,
+        'buildingPoint': buildingPoint,
+        'entrances': entrances,
+      };
+
+      // HTTP 요청 데이터 로그 출력
+      debugPrint('\n=== 서버로 전송될 HTTP 요청 데이터 (DataSource Layer) ===');
+      debugPrint(jsonEncode(requestData));
+      debugPrint('=====================================================\n');
+
       final response = await dio.post(
-      ApiEndpoints.saveBuildingEntrance,//api_endpoints.dart에서 가져와서 url로 사용
-        data: {
-          'buildingName': buildingName,
-          'entranceName': entranceName,
-          'latitude': latitude,
-          'longitude': longitude,
-        },
+        ApiEndpoints.saveBuildingEntrance,
+        data: requestData,
       );
-      print("response: $response");
+
+      print("\n=== 서버 응답 ===");
+      print("상태 코드: ${response.statusCode}");
+      print("응답 데이터: ${response.data}");
+      print("===============================\n");
+
       if (response.statusCode != 200) {
         throw ServerException();
       }
     } catch (e) {
-      print('DatasourceImpl: 서버 통신 에러 $e');
+      print('\n=== 서버 통신 에러 ===');
+      print('에러 타입: ${e.runtimeType}');
+      print('에러 메시지: $e');
 
       if (e is DioException) {
-        print('DioException 발생');
+        print('DioException 상세 정보:');
         print('statusCode: ${e.response?.statusCode}');
         print('response data: ${e.response?.data}');
         print('message: ${e.message}');
+        print('error: ${e.error}');
+        print('type: ${e.type}');
+        print('request options: ${e.requestOptions.uri}');
       }
+      print('===============================\n');
 
       throw ServerException();
-}
-
-}
+    }
+  }
 
   /// 특정 건물 입구 목록을 서버로부터 GET 방식으로 조회 요청.
   @override

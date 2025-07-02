@@ -42,7 +42,7 @@ abstract class GetPosition extends NavUseCase
 
 //좌표 전송용 유스케이스 인터페이스
 abstract class SendCustomStartPointUseCase extends NavUseCase {
-  Future<Either<Failure, void>> call(SendStartPointParams params);
+  Future<Either<Failure, void>> call(SendPointParams params);
 }
 /// 현재 사용자 위치를 반환하는 비즈니스 로직이다.
 ///
@@ -120,21 +120,15 @@ class GetCurrentPosition implements GetPosition {
 /// 사용자가 입력한 정보를 Params 형태로 받아서 Repository에 전달한다.
 class SendCustomStartPoint implements SendCustomStartPointUseCase {
   /// 데이터 처리를 위한 Repository (인터페이스에 의존)
-  NavigatorRepository repository;
+  final NavigatorRepository repository;
 
   SendCustomStartPoint({required this.repository});
   
   /// Params 객체로 받은 데이터를 서버에 전송 요청.
   @override
-  Future<Either<Failure, void>> call(SendStartPointParams params) async {
-    print("sendCustomStartPoint 유스케이스");
-    return await repository.sendCustomStartPoint(
-      buildingName: params.buildingName,
-      entranceName: params.entranceName,
-      latitude: params.latitude,
-      longitude: params.longitude,
-    );
-    
+  Future<Either<Failure, void>> call(SendPointParams params) async {
+    // 단순히 repository 호출만 수행
+    return await repository.sendCustomStartPointParams(params);
   }
 }
 

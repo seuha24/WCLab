@@ -49,25 +49,30 @@ class NavigatorRepositoryImpl implements NavigatorRepository {
       return Left(ServerFailure());
     }
   }
+
+  /// 출발지(건물 및 출입구 정보) 등록 요청
   @override
-  Future<Either<Failure, void>> sendCustomStartPoint({
-    required String buildingName,
-    required String entranceName,
-    required double latitude,
-    required double longitude,
-    }) async {
-      try {
-        await navDataSource.sendCustomStartPoint(
-          buildingName: buildingName,
-          entranceName: entranceName,
-          latitude: latitude,
-          longitude: longitude,
-        );
-        return const Right(null);
-      } on ServerException {
-        return Left(ServerFailure());
-      }
+  Future<Either<Failure, void>> sendCustomStartPointParams(
+      SendPointParams params) async {
+    try {
+      // Model을 사용하여 데이터 변환
+      final model = SendStartPointModel(params);
+      final json = model.toJson();
+
+      // DataSource 호출
+      await navDataSource.sendCustomStartPoint(
+        roadAddress: json['roadAddress'] as String,
+        buildingName: json['buildingName'] as String,
+        buildingDetail: json['buildingDetail'] as String,
+        buildingPoint: json['buildingPoint'] as Map<String, double>,
+        entrances: json['entrances'] as List<Map<String, dynamic>>,
+      );
+
+      return const Right(null);
+    } on ServerException {
+      return Left(ServerFailure());
     }
+  }
 
   /// 특정 주소, 위도, 경도로 입구 목록을 서버에서 요청  
   @override
