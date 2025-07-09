@@ -139,7 +139,6 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         ),
                       );
                       
-                      debugPrint('newStart : $newStart');
                       if (newStart != null) {
                         debugPrint('출발지 좌표: ${newStart.lat}, ${newStart.lng}');
                         controller.handleStartLocationSelection(newStart);
@@ -358,17 +357,74 @@ class NaverMapView extends GetView<NaverMapViewController> {
                   : null,
               height: MediaQuery.of(context).padding.top,
             ),
+
+            /// 지도 모드 버튼 (우측 하단)
+            Positioned(
+              right: 20.0,
+              bottom: 20.0,
+              child: Obx(() {
+                return FloatingActionButton(
+                  onPressed: () {
+                    controller.toggleMapMode();
+
+                    /// 모드 변경 시 시각적 피드백 추가
+                    HapticFeedback.mediumImpact();
+                  },
+                  backgroundColor: _getButtonColor(),
+                  child: AnimatedRotation(
+                    duration: Duration(milliseconds: 300),
+                    turns: controller.mapMode.value == MapControlMode.on2 ? 0.5 : 0,
+                    child: Icon(_getButtonIcon()),
+                  ),
+                );
+              }),
+            ),
+
+            /// 경로 안내 종료 버튼 (하단 중앙)
+            Positioned(
+              bottom: 20.0,
+              left: 0,
+              right: 0,
+              child: Obx(() {
+                if (controller.isNavigating.value) {
+                  return Center(
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        controller.stopNavigationTimer();
+                        // 검색 상태 초기화 추가
+                        context.read<SearchBloc>().add(SearchResetRequested());
+                        // 검색창 텍스트도 초기화
+                        controller.searchLocation.value = '';
+                        controller.destinationLocation.value = '';
+                      },
+                      backgroundColor: Colors.red,
+                      icon: Icon(Icons.stop, color: Colors.white),
+                      label: Text(
+                        '경로 안내 종료',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  );
+                }
+                return SizedBox.shrink();
+              }),
+            ),
           ],
-        ),
-        /// 모드 토글 FloatingActionButton (맵 모드를 전환합니다.)
-        floatingActionButton: Obx(() {
-          return FloatingActionButton(
-            onPressed: controller.toggleMapMode,
-            backgroundColor: _getButtonColor(),
-            child: Icon(_getButtonIcon()),
-          );
-        }));
-  }
+        ));
+      }
+
+        //// 주석처리 확인하기 - 연주
+        //   ],
+        // ),
+        // /// 모드 토글 FloatingActionButton (맵 모드를 전환합니다.)
+        // floatingActionButton: Obx(() {
+        //   return FloatingActionButton(
+        //     onPressed: controller.toggleMapMode,
+        //     backgroundColor: _getButtonColor(),
+        //     child: Icon(_getButtonIcon()),
+        //   );
+        // }));
+        //}
 
   /// 모드 토글 버튼의 아이콘을 결정합니다.
   IconData _getButtonIcon() {

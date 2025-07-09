@@ -1,5 +1,6 @@
 class ApiEndpoints {
-  static const String baseUrl = 'https://backend.catholicuniv.pillowstudio.kr';
+  //static const String baseUrl = 'https://backend.catholicuniv.pillowstudio.kr';
+  static const String baseUrl = 'http://aws2.cuksl.xyz:3333';
   static const String baseUrl2 = 'http://cuksl.xyz:3306';
   static const String baseUrl3 = 'http://aws.cuksl.xyz:3333';
 

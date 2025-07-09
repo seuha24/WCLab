@@ -10,6 +10,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     // 목적지 설정 이벤트 핸들링 등록
     on<SearchDestinationRequested>(_onSearchDestinationRequested);
+
+    // 검색 결과 초기화 이벤트 핸들링 등록
+    on<SearchResetRequested>(_onSearchResetRequested);
   }
 
   // 출발지 설정 이벤트 처리 함수
@@ -50,5 +53,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     } on Exception catch (e, stacktrace) {
       addError(e, stacktrace);
     }
+  }
+
+  /// 검색 결과 초기화 이벤트 처리 함수
+  FutureOr<void> _onSearchResetRequested(
+    SearchResetRequested event,
+    Emitter<SearchState> emit,
+  ) async {
+    emit(const SearchState()); // 모든 값을 초기 상태로 초기화
   }
 }

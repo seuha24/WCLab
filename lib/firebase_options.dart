@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyAB3aeeUTqk4zr2UmT-QGNsVi8U-Z5USIQ',
     appId: '1:502374392525:android:565c1deda6ccb3f9a2ff84',
     messagingSenderId: '502374392525',
-    projectId: 'safelight-4ca77',
+    projectId: 'safelight-1',
     storageBucket: 'safelight-4ca77.firebasestorage.app',
   );
 

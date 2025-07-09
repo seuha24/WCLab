@@ -37,3 +37,6 @@ class SearchDestinationRequested extends SearchEvent {
   @override
   List<Object?> get props => [searchDestination, geoLocation, entrance];
 }
+
+/// 검색 결과 초기화
+class SearchResetRequested extends SearchEvent {}
