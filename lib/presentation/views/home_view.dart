@@ -68,7 +68,7 @@ class _HomeViewState extends State<HomeView> {
                       FlashMode.WITH_WEATHER) {
                     lightmode = 'weathers';
                   }
-                  print(lightmode);
+                  debugPrint('라이트 모드 변경: $lightmode');
                 },
                 icon: const Icon(Icons.settings),
               ),
