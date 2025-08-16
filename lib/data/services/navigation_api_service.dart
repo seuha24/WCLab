@@ -23,22 +23,22 @@ import 'package:safelight/domain/entities/branch_info.dart';
 /// - `latlong2`: 좌표 데이터 관리
 /// - `BranchInfo`: 브랜치 지점 데이터를 나타내는 도메인 엔티티
 
-/// 경유지를 포함한 경로 결과를 담는 클래스
-class MultiWaypointPathResult {
-  final List<LatLng> paths;
-  final List<BranchInfo> branchInfo;
-  final double totalDistance; // 미터 단위
-  final int totalTime; // 초 단위
-  final List<Map<String, dynamic>> segmentDetails; // 각 구간별 상세 정보
+// /// 경유지를 포함한 경로 결과를 담는 클래스
+// class MultiWaypointPathResult {
+//   final List<LatLng> paths;
+//   final List<BranchInfo> branchInfo;
+//   final double totalDistance; // 미터 단위
+//   final int totalTime; // 초 단위
+//   final List<Map<String, dynamic>> segmentDetails; // 각 구간별 상세 정보
 
-  MultiWaypointPathResult({
-    required this.paths,
-    required this.branchInfo,
-    required this.totalDistance,
-    required this.totalTime,
-    required this.segmentDetails,
-  });
-}
+//   MultiWaypointPathResult({
+//     required this.paths,
+//     required this.branchInfo,
+//     required this.totalDistance,
+//     required this.totalTime,
+//     required this.segmentDetails,
+//   });
+// }
 
 class NavigationApiService {
   /// TMAP API URL
@@ -119,167 +119,167 @@ class NavigationApiService {
     }
   }
 
-  /// **fetchMultiWaypointPath**
-  ///
-  /// 경유지를 포함한 전체 경로를 구간별로 API 호출하여 합치는 메서드입니다.
-  ///
-  /// - **매개변수**:
-  ///   - `waypoints` (List<LatLng>): 출발지, 경유지들, 도착지 순서의 좌표 리스트
-  ///   - `chooseRoute` (String): 경로 옵션 ("0": 추천, "4": 추천+대로우선, "10": 최단, "30": 최단거리+계단제외)
-  ///
-  /// - **반환값**:
-  ///   - `Future<MultiWaypointPathResult>`: 통합된 경로 정보를 반환합니다.
-  ///
-  /// - **예외**:
-  ///   - 경유지가 2개 미만일 때 `ArgumentError`가 발생합니다.
-  ///   - API 호출 실패 시 `Exception`이 발생합니다.
-  ///
-  /// - **사용 예시**:
-  /// ```dart
-  /// final apiService = NavigationApiService();
-  /// final waypoints = [
-  ///   LatLng(37.55677, 126.92365), // 출발
-  ///   LatLng(37.55395, 126.92775), // 경유지1
-  ///   LatLng(37.55337, 126.92577), // 경유지2
-  ///   LatLng(37.55279, 126.92432), // 도착
-  /// ];
-  /// final result = await apiService.fetchMultiWaypointPath(waypoints, "0");
-  /// print('총 거리: ${result.totalDistance}m');
-  /// print('총 시간: ${result.totalTime}초');
-  /// ```
-  Future<MultiWaypointPathResult> fetchMultiWaypointPath({
-    required List<LatLng> waypoints,
-    required String chooseRoute,
-  }) async {
-    if (waypoints.length < 2) {
-      throw ArgumentError('최소 2개의 지점(출발지, 도착지)이 필요합니다.');
-    }
+  // /// **fetchMultiWaypointPath**
+  // ///
+  // /// 경유지를 포함한 전체 경로를 구간별로 API 호출하여 합치는 메서드입니다.
+  // ///
+  // /// - **매개변수**:
+  // ///   - `waypoints` (List<LatLng>): 출발지, 경유지들, 도착지 순서의 좌표 리스트
+  // ///   - `chooseRoute` (String): 경로 옵션 ("0": 추천, "4": 추천+대로우선, "10": 최단, "30": 최단거리+계단제외)
+  // ///
+  // /// - **반환값**:
+  // ///   - `Future<MultiWaypointPathResult>`: 통합된 경로 정보를 반환합니다.
+  // ///
+  // /// - **예외**:
+  // ///   - 경유지가 2개 미만일 때 `ArgumentError`가 발생합니다.
+  // ///   - API 호출 실패 시 `Exception`이 발생합니다.
+  // ///
+  // /// - **사용 예시**:
+  // /// ```dart
+  // /// final apiService = NavigationApiService();
+  // /// final waypoints = [
+  // ///   LatLng(37.55677, 126.92365), // 출발
+  // ///   LatLng(37.55395, 126.92775), // 경유지1
+  // ///   LatLng(37.55337, 126.92577), // 경유지2
+  // ///   LatLng(37.55279, 126.92432), // 도착
+  // /// ];
+  // /// final result = await apiService.fetchMultiWaypointPath(waypoints, "0");
+  // /// print('총 거리: ${result.totalDistance}m');
+  // /// print('총 시간: ${result.totalTime}초');
+  // /// ```
+  // Future<MultiWaypointPathResult> fetchMultiWaypointPath({
+  //   required List<LatLng> waypoints,
+  //   required String chooseRoute,
+  // }) async {
+  //   if (waypoints.length < 2) {
+  //     throw ArgumentError('최소 2개의 지점(출발지, 도착지)이 필요합니다.');
+  //   }
 
-    List<LatLng> allPaths = [];
-    List<BranchInfo> allBranchInfo = [];
-    double totalDistance = 0.0;
-    int totalTime = 0;
-    List<Map<String, dynamic>> segmentDetails = [];
+  //   List<LatLng> allPaths = [];
+  //   List<BranchInfo> allBranchInfo = [];
+  //   double totalDistance = 0.0;
+  //   int totalTime = 0;
+  //   List<Map<String, dynamic>> segmentDetails = [];
 
-    // 각 구간별로 API 호출
-    for (int i = 0; i < waypoints.length - 1; i++) {
-      final startPoint = waypoints[i];
-      final endPoint = waypoints[i + 1];
+  //   // 각 구간별로 API 호출
+  //   for (int i = 0; i < waypoints.length - 1; i++) {
+  //     final startPoint = waypoints[i];
+  //     final endPoint = waypoints[i + 1];
 
-      print('구간 ${i + 1}: ${startPoint.latitude}, ${startPoint.longitude} -> ${endPoint.latitude}, ${endPoint.longitude}');
+  //     print('구간 ${i + 1}: ${startPoint.latitude}, ${startPoint.longitude} -> ${endPoint.latitude}, ${endPoint.longitude}');
 
-      try {
-        // 구간별 경로 데이터 가져오기
-        final segmentData = await fetchPathData(
-          startLatitude: startPoint.latitude,
-          startLongitude: startPoint.longitude,
-          endLatitude: endPoint.latitude,
-          endLongitude: endPoint.longitude,
-          choose_route: chooseRoute,
-        );
+  //     try {
+  //       // 구간별 경로 데이터 가져오기
+  //       final segmentData = await fetchPathData(
+  //         startLatitude: startPoint.latitude,
+  //         startLongitude: startPoint.longitude,
+  //         endLatitude: endPoint.latitude,
+  //         endLongitude: endPoint.longitude,
+  //         choose_route: chooseRoute,
+  //       );
 
-        // 구간 데이터 파싱
-        final parsedSegment = parsePathData(segmentData);
-        final segmentPaths = parsedSegment['paths'] as List<LatLng>;
-        final segmentBranchInfo = parsedSegment['branchInfo'] as List<BranchInfo>;
+  //       // 구간 데이터 파싱
+  //       final parsedSegment = parsePathData(segmentData);
+  //       final segmentPaths = parsedSegment['paths'] as List<LatLng>;
+  //       final segmentBranchInfo = parsedSegment['branchInfo'] as List<BranchInfo>;
 
-        // 구간별 거리 및 시간 정보 추출
-        final segmentStats = _extractSegmentStats(segmentData);
-        totalDistance += segmentStats['distance'] ?? 0.0;
-        totalTime += (segmentStats['time'] as int? ?? 0);
+  //       // 구간별 거리 및 시간 정보 추출
+  //       final segmentStats = _extractSegmentStats(segmentData);
+  //       totalDistance += segmentStats['distance'] ?? 0.0;
+  //       totalTime += (segmentStats['time'] as int? ?? 0);
 
-        // 구간 상세 정보 저장
-        segmentDetails.add({
-          'segmentIndex': i + 1,
-          'startPoint': startPoint,
-          'endPoint': endPoint,
-          'distance': segmentStats['distance'],
-          'time': segmentStats['time'],
-          'pathCount': segmentPaths.length,
-        });
+  //       // 구간 상세 정보 저장
+  //       segmentDetails.add({
+  //         'segmentIndex': i + 1,
+  //         'startPoint': startPoint,
+  //         'endPoint': endPoint,
+  //         'distance': segmentStats['distance'],
+  //         'time': segmentStats['time'],
+  //         'pathCount': segmentPaths.length,
+  //       });
 
-        // 중복 포인트 처리하여 경로 합치기
-        if (i == 0) {
-          // 첫 번째 구간: 모든 포인트 추가
-          allPaths.addAll(segmentPaths);
-          allBranchInfo.addAll(segmentBranchInfo);
-        } else {
-          // 이후 구간: 첫 번째 포인트(경유지) 제외하고 추가
-          if (segmentPaths.isNotEmpty) {
-            allPaths.addAll(segmentPaths.skip(1));
-          }
-          if (segmentBranchInfo.isNotEmpty) {
-            allBranchInfo.addAll(segmentBranchInfo.skip(1));
-          }
-        }
+  //       // 중복 포인트 처리하여 경로 합치기
+  //       if (i == 0) {
+  //         // 첫 번째 구간: 모든 포인트 추가
+  //         allPaths.addAll(segmentPaths);
+  //         allBranchInfo.addAll(segmentBranchInfo);
+  //       } else {
+  //         // 이후 구간: 첫 번째 포인트(경유지) 제외하고 추가
+  //         if (segmentPaths.isNotEmpty) {
+  //           allPaths.addAll(segmentPaths.skip(1));
+  //         }
+  //         if (segmentBranchInfo.isNotEmpty) {
+  //           allBranchInfo.addAll(segmentBranchInfo.skip(1));
+  //         }
+  //       }
 
-        print('구간 ${i + 1} 완료 - 거리: ${segmentStats['distance']}m, 시간: ${segmentStats['time']}초');
+  //       print('구간 ${i + 1} 완료 - 거리: ${segmentStats['distance']}m, 시간: ${segmentStats['time']}초');
 
-      } catch (e) {
-        print('구간 ${i + 1} API 호출 실패: $e');
-        String errorMessage = '구간 ${i + 1} 경로 조회 실패';
+  //     } catch (e) {
+  //       print('구간 ${i + 1} API 호출 실패: $e');
+  //       String errorMessage = '구간 ${i + 1} 경로 조회 실패';
         
-        if (e.toString().contains('SocketException')) {
-          errorMessage += ': 인터넷 연결을 확인해주세요';
-        } else if (e.toString().contains('TimeoutException')) {
-          errorMessage += ': 요청 시간이 초과되었습니다';
-        } else if (e.toString().contains('400')) {
-          errorMessage += ': 잘못된 좌표입니다';
-        } else if (e.toString().contains('401')) {
-          errorMessage += ': API 키가 유효하지 않습니다';
-        } else if (e.toString().contains('500')) {
-          errorMessage += ': 서버 오류입니다';
-        }
+  //       if (e.toString().contains('SocketException')) {
+  //         errorMessage += ': 인터넷 연결을 확인해주세요';
+  //       } else if (e.toString().contains('TimeoutException')) {
+  //         errorMessage += ': 요청 시간이 초과되었습니다';
+  //       } else if (e.toString().contains('400')) {
+  //         errorMessage += ': 잘못된 좌표입니다';
+  //       } else if (e.toString().contains('401')) {
+  //         errorMessage += ': API 키가 유효하지 않습니다';
+  //       } else if (e.toString().contains('500')) {
+  //         errorMessage += ': 서버 오류입니다';
+  //       }
         
-        throw Exception(errorMessage);
-      }
-    }
+  //       throw Exception(errorMessage);
+  //     }
+  //   }
 
-    print('전체 경로 합치기 완료 - 총 거리: ${totalDistance}m, 총 시간: ${totalTime}초, 총 포인트: ${allPaths.length}개');
+  //   print('전체 경로 합치기 완료 - 총 거리: ${totalDistance}m, 총 시간: ${totalTime}초, 총 포인트: ${allPaths.length}개');
 
-    return MultiWaypointPathResult(
-      paths: allPaths,
-      branchInfo: allBranchInfo,
-      totalDistance: totalDistance,
-      totalTime: totalTime,
-      segmentDetails: segmentDetails,
-    );
-  }
+  //   return MultiWaypointPathResult(
+  //     paths: allPaths,
+  //     branchInfo: allBranchInfo,
+  //     totalDistance: totalDistance,
+  //     totalTime: totalTime,
+  //     segmentDetails: segmentDetails,
+  //   );
+  // }
 
-  /// API 응답에서 거리와 시간 정보를 추출하는 헬퍼 메서드
-  Map<String, dynamic> _extractSegmentStats(Map<String, dynamic> responseData) {
-    try {
-      final features = responseData['features'] as List<dynamic>;
-      double distance = 0.0;
-      int time = 0;
+  // /// API 응답에서 거리와 시간 정보를 추출하는 헬퍼 메서드
+  // Map<String, dynamic> _extractSegmentStats(Map<String, dynamic> responseData) {
+  //   try {
+  //     final features = responseData['features'] as List<dynamic>;
+  //     double distance = 0.0;
+  //     int time = 0;
 
-      for (var feature in features) {
-        final properties = feature['properties'] as Map<String, dynamic>?;
-        if (properties != null) {
-          // 거리 정보 (미터 단위)
-          if (properties.containsKey('distance')) {
-            distance += (properties['distance'] as num).toDouble();
-          }
-          // 시간 정보 (초 단위)
-          if (properties.containsKey('time')) {
-            final timeValue = properties['time'] as num;
-            time += timeValue.toInt();
-          }
-        }
-      }
+  //     for (var feature in features) {
+  //       final properties = feature['properties'] as Map<String, dynamic>?;
+  //       if (properties != null) {
+  //         // 거리 정보 (미터 단위)
+  //         if (properties.containsKey('distance')) {
+  //           distance += (properties['distance'] as num).toDouble();
+  //         }
+  //         // 시간 정보 (초 단위)
+  //         if (properties.containsKey('time')) {
+  //           final timeValue = properties['time'] as num;
+  //           time += timeValue.toInt();
+  //         }
+  //       }
+  //     }
 
-      return {
-        'distance': distance,
-        'time': time,
-      };
-    } catch (e) {
-      print('구간 통계 추출 실패: $e');
-      return {
-        'distance': 0.0,
-        'time': 0,
-      };
-    }
-  }
+  //     return {
+  //       'distance': distance,
+  //       'time': time,
+  //     };
+  //   } catch (e) {
+  //     print('구간 통계 추출 실패: $e');
+  //     return {
+  //       'distance': 0.0,
+  //       'time': 0,
+  //     };
+  //   }
+  // }
 
   /// **parsePathData**
   ///
