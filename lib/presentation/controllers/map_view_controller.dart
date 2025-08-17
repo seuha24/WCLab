@@ -1379,6 +1379,29 @@ class NaverMapViewController extends GetxController {
     isNavigating.value = true;
     navigationTimer?.cancel(); // 기존 타이머 제거
     navigationTimer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      // 목적지 도착 체크 (3m 이내)
+      if (branchinfo.isNotEmpty) {
+        // 마지막 브랜치(목적지)와 현재 위치 거리 계산
+        final destinationDistance = calculateDistance(
+          current_latitude.value,
+          current_longitude.value,
+          branchinfo.last.point.latitude,
+          branchinfo.last.point.longitude,
+        );
+        
+        // 목적지 3m(0.003km) 이내 도착 시 자동 종료
+        if (destinationDistance < 0.003) {
+          debugPrint('목적지 도착 감지: ${destinationDistance * 1000}m');
+          
+          // TTS 음성 안내
+          await speakText("목적지에 도착했습니다.");
+          
+          // 경로 안내 자동 종료
+          await stopNavigationTimer();
+          return; // 타이머 콜백 종료
+        }
+      }
+      
       checkBoundary();
       indexUpdate();
       // 출발지(첫 번째 분기점)와 현재 위치 사이 거리 계산
