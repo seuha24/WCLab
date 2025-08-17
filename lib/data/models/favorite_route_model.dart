@@ -30,29 +30,55 @@ class RoutePointModel extends RoutePoint {
 class FavoriteRouteModel extends FavoriteRoute {
   const FavoriteRouteModel({
     required String name,
-    required List<RoutePoint?> points,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
   }) : super(
           name: name,
-          points: points,
+          startPoint: startPoint,
+          finishPoint: finishPoint,
+          stopovers: stopovers,
         );
 
   factory FavoriteRouteModel.fromJson(Map<String, dynamic> json) {
-    final pointsList = json['points'] as List;
-    final points = pointsList.map((point) {
+    final startPoint = json['start_point'] != null
+        ? RoutePointModel.fromJson(json['start_point'])
+        : null;
+    
+    final finishPoint = json['finish_point'] != null
+        ? RoutePointModel.fromJson(json['finish_point'])
+        : null;
+    
+    final stopoversList = json['stopovers'] as List? ?? [];
+    final stopovers = stopoversList.map((point) {
       if (point == null) return null;
       return RoutePointModel.fromJson(point);
     }).toList();
 
     return FavoriteRouteModel(
       name: json['name'],
-      points: points,
+      startPoint: startPoint,
+      finishPoint: finishPoint,
+      stopovers: stopovers,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'points': points.map((point) {
+      'start_point': startPoint != null
+          ? {
+              'lon': startPoint!.longitude,
+              'lat': startPoint!.latitude,
+            }
+          : null,
+      'finish_point': finishPoint != null
+          ? {
+              'lon': finishPoint!.longitude,
+              'lat': finishPoint!.latitude,
+            }
+          : null,
+      'stopovers': stopovers.map((point) {
         if (point == null) return null;
         return {
           'lon': point.longitude,
@@ -65,7 +91,9 @@ class FavoriteRouteModel extends FavoriteRoute {
   FavoriteRoute toEntity() {
     return FavoriteRoute(
       name: name,
-      points: points,
+      startPoint: startPoint,
+      finishPoint: finishPoint,
+      stopovers: stopovers,
     );
   }
 }

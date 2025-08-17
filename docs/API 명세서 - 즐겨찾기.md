@@ -1,17 +1,12 @@
 # API 명세서 - 즐겨찾기 기능
 
-## 사용자별 즐겨찾기 정보 조회 요청 URL
-- **Base URL**: `http://cuksl.xyz:3303/fav_*/$login_method/$ID`
-
 ## 즐겨찾기 API
 
 ### 1. 즐겨찾기 목록 조회 (지점)
 **GET** `/favorites`
 
-#### 요청 유형
-```
-cuksl.xyz:3306/fav_point/google/userID
-```
+## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
+- **Base URL**: `http://cuksl.xyz:3003/fav_point/google/userID`
 
 #### Response
 ```json
@@ -36,10 +31,8 @@ cuksl.xyz:3306/fav_point/google/userID
 ### 2. 즐겨찾기 목록 조회 (경로)
 **GET** `/favorites`
 
-#### Request Headers
-```
-cuksl.xyz:3306/fav_route/google/userID
-```
+## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
+- **Base URL**: `http://cuksl.xyz:3003/fav_route/google/userID`
 
 #### Response
 ```json
@@ -49,22 +42,20 @@ cuksl.xyz:3306/fav_route/google/userID
   "list": [
     {
       "name": "짱구네 가는 길",
-      "points": [
-        { "lon": 126.8015, "lat": 37.4859 },
-        { "lon": 126.8015, "lat": 37.4859 },
-        { "lon": 126.8015, "lat": 37.4859 },
-        null,
-        null
+      "start_point": { "lon": 126.8015, "lat": 37.4859 },
+      "finish_point": { "lon": 126.8015, "lat": 37.4859 },
+      "stopovers": [
+        { "lon": 126.8015, "lat": 37.4859 }
       ]
     },
     {
       "name": "역곡역 가는 길",
-      "points": [
+      "start_point": { "lon": 126.8015, "lat": 37.4859 },
+      "finish_point": { "lon": 126.8015, "lat": 37.4859 },
+      "stopovers": [
         { "lon": 126.8015, "lat": 37.4859 },
         { "lon": 126.8015, "lat": 37.4859 },
         { "lon": 126.8015, "lat": 37.4859 },
-        null,
-        null
       ]
     }
   ]
@@ -84,7 +75,7 @@ cuksl.xyz:3306/fav_route/google/userID
 **POST** `/favorites`
 
 ## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
-- **Base URL**: `http://cuksl.xyz:3303/save/fav/poit`
+- **Base URL**: `http://cuksl.xyz:3003/save/fav/point`
 
 #### Request Body
 ```json
@@ -136,7 +127,7 @@ Content-Type: application/json
 **POST** `/favorites`
 
 ## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
-- **Base URL**: `http://cuksl.xyz:3303/save/fav/route`
+- **Base URL**: `http://cuksl.xyz:3003/save/fav/route`
 
 #### Request Body
 ```json
@@ -146,10 +137,12 @@ Content-Type: application/json
   "list":
     {
       "name": "짱구네 가는 길",
-      "points": [
+      "start_point": { "lon": 126.8015, "lat": 37.4859 },
+      "finish_point": { "lon": 126.8015, "lat": 37.4859 },
+      "stopovers": [
         { "lon": 126.8015, "lat": 37.4859 },
-        { "lon": 126.8015, "lat": 37.4859 },
-        { "lon": 126.8015, "lat": 37.4859 },
+        null,
+        null,
         null,
         null
       ]

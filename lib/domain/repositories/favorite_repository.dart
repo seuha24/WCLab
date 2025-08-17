@@ -26,6 +26,8 @@ abstract class FavoriteRepository {
     required String loginMethod,
     required String userId,
     required String name,
-    required List<RoutePoint?> points,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
   });
 }

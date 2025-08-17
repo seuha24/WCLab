@@ -71,14 +71,18 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
     required String loginMethod,
     required String userId,
     required String name,
-    required List<RoutePoint?> points,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
   }) async {
     try {
       final result = await remoteDataSource.addFavoriteRoute(
         loginMethod: loginMethod,
         userId: userId,
         name: name,
-        points: points,
+        startPoint: startPoint,
+        finishPoint: finishPoint,
+        stopovers: stopovers,
       );
       return Right(result);
     } on ServerException {

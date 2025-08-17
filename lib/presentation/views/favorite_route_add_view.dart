@@ -27,9 +27,13 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
   
   bool _isLoading = false;
   
-  // 최대 5개 포인트 (경유지1-4 + 도착지)
-  final List<RoutePoint?> _routePoints = List.filled(5, null);
-  final List<String> _routeNames = List.filled(5, '');
+  // 출발지, 목적지, 경유지(최대 3개) 분리
+  RoutePoint? _startPoint;
+  String _startName = '';
+  RoutePoint? _finishPoint;
+  String _finishName = '';
+  final List<RoutePoint?> _stopovers = List.filled(3, null);
+  final List<String> _stopoverNames = List.filled(3, '');
   
   @override
   void initState() {
@@ -51,7 +55,7 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
     super.dispose();
   }
   
-  Future<void> _selectLocation(int index) async {
+  Future<void> _selectLocation(String type, [int? index]) async {
     // startspot_search_view.dart를 참고하여 카카오 검색
     final result = await Navigator.push(
       context,
@@ -66,11 +70,25 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
     if (result != null && result is GeoLocation) {
       // GeoLocation만 반환되면 바로 좌표 사용 (출입구 선택 완료 케이스)
       setState(() {
-        _routePoints[index] = RoutePoint(
-          longitude: result.lng,
-          latitude: result.lat,
-        );
-        _routeNames[index] = '선택된 위치';
+        if (type == 'start') {
+          _startPoint = RoutePoint(
+            longitude: result.lng,
+            latitude: result.lat,
+          );
+          _startName = '선택된 위치';
+        } else if (type == 'finish') {
+          _finishPoint = RoutePoint(
+            longitude: result.lng,
+            latitude: result.lat,
+          );
+          _finishName = '선택된 위치';
+        } else if (type == 'stopover' && index != null) {
+          _stopovers[index] = RoutePoint(
+            longitude: result.lng,
+            latitude: result.lat,
+          );
+          _stopoverNames[index] = '선택된 위치';
+        }
       });
     } else if (result != null && result is PlaceResult) {
       // PlaceResult가 반환되면 출입구 선택 필요
@@ -114,32 +132,74 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
             
             if (entranceResult != null && entranceResult is Map) {
               setState(() {
-                _routePoints[index] = RoutePoint(
-                  longitude: entranceResult['lng'],
-                  latitude: entranceResult['lat'],
-                );
-                _routeNames[index] = '${result.name} - ${entranceResult['name']}';
+                if (type == 'start') {
+                  _startPoint = RoutePoint(
+                    longitude: entranceResult['lng'],
+                    latitude: entranceResult['lat'],
+                  );
+                  _startName = '${result.name} - ${entranceResult['name']}';
+                } else if (type == 'finish') {
+                  _finishPoint = RoutePoint(
+                    longitude: entranceResult['lng'],
+                    latitude: entranceResult['lat'],
+                  );
+                  _finishName = '${result.name} - ${entranceResult['name']}';
+                } else if (type == 'stopover' && index != null) {
+                  _stopovers[index] = RoutePoint(
+                    longitude: entranceResult['lng'],
+                    latitude: entranceResult['lat'],
+                  );
+                  _stopoverNames[index] = '${result.name} - ${entranceResult['name']}';
+                }
               });
             }
           } else {
             // 출입구가 없는 경우 카카오 좌표 사용
             setState(() {
-              _routePoints[index] = RoutePoint(
-                longitude: result.geometry.location.lng,
-                latitude: result.geometry.location.lat,
-              );
-              _routeNames[index] = result.name;
+              if (type == 'start') {
+                _startPoint = RoutePoint(
+                  longitude: result.geometry.location.lng,
+                  latitude: result.geometry.location.lat,
+                );
+                _startName = result.name;
+              } else if (type == 'finish') {
+                _finishPoint = RoutePoint(
+                  longitude: result.geometry.location.lng,
+                  latitude: result.geometry.location.lat,
+                );
+                _finishName = result.name;
+              } else if (type == 'stopover' && index != null) {
+                _stopovers[index] = RoutePoint(
+                  longitude: result.geometry.location.lng,
+                  latitude: result.geometry.location.lat,
+                );
+                _stopoverNames[index] = result.name;
+              }
             });
           }
           break;
         } else if (state is EntranceError) {
           // 에러 발생 시 카카오 좌표 사용
           setState(() {
-            _routePoints[index] = RoutePoint(
-              longitude: result.geometry.location.lng,
-              latitude: result.geometry.location.lat,
-            );
-            _routeNames[index] = result.name;
+            if (type == 'start') {
+              _startPoint = RoutePoint(
+                longitude: result.geometry.location.lng,
+                latitude: result.geometry.location.lat,
+              );
+              _startName = result.name;
+            } else if (type == 'finish') {
+              _finishPoint = RoutePoint(
+                longitude: result.geometry.location.lng,
+                latitude: result.geometry.location.lat,
+              );
+              _finishName = result.name;
+            } else if (type == 'stopover' && index != null) {
+              _stopovers[index] = RoutePoint(
+                longitude: result.geometry.location.lng,
+                latitude: result.geometry.location.lat,
+              );
+              _stopoverNames[index] = result.name;
+            }
           });
           break;
         }
@@ -147,10 +207,18 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
     }
   }
   
-  void _removeLocation(int index) {
+  void _removeLocation(String type, [int? index]) {
     setState(() {
-      _routePoints[index] = null;
-      _routeNames[index] = '';
+      if (type == 'start') {
+        _startPoint = null;
+        _startName = '';
+      } else if (type == 'finish') {
+        _finishPoint = null;
+        _finishName = '';
+      } else if (type == 'stopover' && index != null) {
+        _stopovers[index] = null;
+        _stopoverNames[index] = '';
+      }
     });
   }
   
@@ -162,11 +230,10 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
       return;
     }
     
-    // 최소 1개 이상의 포인트가 있어야 함
-    final hasPoints = _routePoints.any((point) => point != null);
-    if (!hasPoints) {
+    // 출발지와 목적지는 필수
+    if (_startPoint == null || _finishPoint == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('최소 하나 이상의 위치를 선택해주세요.')),
+        const SnackBar(content: Text('출발지와 목적지를 모두 선택해주세요.')),
       );
       return;
     }
@@ -187,39 +254,60 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
       
       final authType = await _authService.loadAuthType();
       final loginMethod = authType == AuthType.google ? 'google' : 'apple';
-      final userId = user.uid;
       
-      // 즐겨찾기 경로 추가
+      // 서버 UUID 사용
+      final serverUserId = await _authService.loadServerUserId();
+      if (serverUserId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('사용자 정보를 불러올 수 없습니다.')),
+          );
+        }
+        return;
+      }
+      final userId = serverUserId;
+      
+      // 즐겨찾기 경로 추가 (경유지는 최대 3개)
       final result = await _addFavoriteRoute.call(
         AddFavoriteRouteParams(
           loginMethod: loginMethod,
           userId: userId,
           name: _nameController.text,
-          points: _routePoints,
+          startPoint: _startPoint,
+          finishPoint: _finishPoint,
+          stopovers: _stopovers,
         ),
       );
       
       result.fold(
         (failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('경로 등록에 실패했습니다.')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('경로 등록에 실패했습니다.')),
+            );
+          }
         },
         (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('경로가 등록되었습니다.')),
-          );
-          Navigator.pop(context, true); // 성공 표시와 함께 화면 닫기
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('경로가 등록되었습니다.')),
+            );
+            Navigator.pop(context, true); // 성공 표시와 함께 화면 닫기
+          }
         },
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류가 발생했습니다: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('오류가 발생했습니다: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
   
@@ -295,7 +383,7 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
             ),
             const SizedBox(height: 8),
             const Text(
-              '경유지와 도착지를 순서대로 선택하세요.',
+              '출발지와 목적지를 선택하고, 필요시 경유지를 추가하세요.',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -303,10 +391,141 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
             ),
             const SizedBox(height: 16),
             
-            // 경로 포인트 리스트
-            ...List.generate(5, (index) {
-              final pointName = index < 4 ? '경유지 ${index + 1}' : '도착지';
-              final hasPoint = _routePoints[index] != null;
+            // 출발지
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _startPoint != null ? Colors.green.withValues(alpha: 0.5) : Colors.grey[300]!,
+                  width: 1,
+                ),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: _startPoint != null 
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.1),
+                  child: Icon(
+                    Icons.trip_origin,
+                    color: _startPoint != null ? Colors.green : Colors.grey,
+                    size: 20,
+                  ),
+                ),
+                title: Text(
+                  '출발지',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: _startPoint != null ? Colors.black : Colors.grey,
+                  ),
+                ),
+                subtitle: _startPoint != null
+                  ? Text(
+                      _startName,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  : const Text(
+                      '위치를 선택하세요',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                trailing: _startPoint != null
+                  ? IconButton(
+                      icon: const Icon(Icons.close, color: Colors.red),
+                      onPressed: () => _removeLocation('start'),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.add_circle_outline, color: Colors.blue),
+                      onPressed: () => _selectLocation('start'),
+                    ),
+                onTap: _startPoint != null ? null : () => _selectLocation('start'),
+              ),
+            ),
+            
+            // 목적지
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _finishPoint != null ? Colors.red.withValues(alpha: 0.5) : Colors.grey[300]!,
+                  width: 1,
+                ),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: _finishPoint != null 
+                    ? Colors.red.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.1),
+                  child: Icon(
+                    Icons.flag,
+                    color: _finishPoint != null ? Colors.red : Colors.grey,
+                    size: 20,
+                  ),
+                ),
+                title: Text(
+                  '목적지',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: _finishPoint != null ? Colors.black : Colors.grey,
+                  ),
+                ),
+                subtitle: _finishPoint != null
+                  ? Text(
+                      _finishName,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  : const Text(
+                      '위치를 선택하세요',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                trailing: _finishPoint != null
+                  ? IconButton(
+                      icon: const Icon(Icons.close, color: Colors.red),
+                      onPressed: () => _removeLocation('finish'),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.add_circle_outline, color: Colors.blue),
+                      onPressed: () => _selectLocation('finish'),
+                    ),
+                onTap: _finishPoint != null ? null : () => _selectLocation('finish'),
+              ),
+            ),
+            
+            // 경유지 섹션
+            const SizedBox(height: 16),
+            const Text(
+              '경유지 (선택)',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            // 경유지 리스트
+            ...List.generate(3, (index) {
+              final hasPoint = _stopovers[index] != null;
               
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -321,18 +540,16 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: hasPoint 
-                      ? (index < 4 ? Colors.blue.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1))
+                      ? Colors.blue.withValues(alpha: 0.1)
                       : Colors.grey.withValues(alpha: 0.1),
                     child: Icon(
-                      index < 4 ? Icons.location_on : Icons.flag,
-                      color: hasPoint 
-                        ? (index < 4 ? Colors.blue : Colors.red)
-                        : Colors.grey,
+                      Icons.location_on,
+                      color: hasPoint ? Colors.blue : Colors.grey,
                       size: 20,
                     ),
                   ),
                   title: Text(
-                    pointName,
+                    '경유지 ${index + 1}',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -341,7 +558,7 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
                   ),
                   subtitle: hasPoint
                     ? Text(
-                        _routeNames[index],
+                        _stopoverNames[index],
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -359,13 +576,13 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
                   trailing: hasPoint
                     ? IconButton(
                         icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () => _removeLocation(index),
+                        onPressed: () => _removeLocation('stopover', index),
                       )
                     : IconButton(
                         icon: const Icon(Icons.add_circle_outline, color: Colors.blue),
-                        onPressed: () => _selectLocation(index),
+                        onPressed: () => _selectLocation('stopover', index),
                       ),
-                  onTap: hasPoint ? null : () => _selectLocation(index),
+                  onTap: hasPoint ? null : () => _selectLocation('stopover', index),
                 ),
               );
             }),

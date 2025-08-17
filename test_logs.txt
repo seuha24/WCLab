@@ -6,15 +6,32 @@
 
 [로그 시작]
 
-flutter: URL: http://aws2.cuksl.xyz:3003/save/fav/point
+flutter: === 즐겨찾기 경로 추가 요청 데이터 ===
+flutter: URL: http://aws2.cuksl.xyz:3003/save/fav/route
 flutter: JSON 데이터:
 flutter: {
 flutter:   "login_method": "google",
 flutter:   "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter:   "new_fav_point": {
-flutter:     "name": "카대",
-flutter:     "lon": 126.80472166634472,
-flutter:     "lat": 37.48598076638508
+flutter:   "list": {
+flutter:     "name": "학교가는 길",
+flutter:     "start_point": {
+flutter:       "lon": 126.81194679579276,
+flutter:       "lat": 37.485380633713575
+flutter:     },
+flutter:     "finish_point": {
+flutter:       "lon": 126.80472166634472,
+flutter:       "lat": 37.48598076638508
+flutter:     },
+flutter:     "stopovers": [
+flutter:       {
+flutter:         "lon": 126.80963488665792,
+flutter:         "lat": 37.48510231079268
+flutter:       },
+flutter:       null,
+flutter:       null,
+flutter:       null,
+flutter:       null
+flutter:     ]
 flutter:   }
 flutter: }
 flutter: =====================================
@@ -22,147 +39,26 @@ flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.
 flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
 flutter:
 flutter: ╔╣ Request ║ POST
-flutter: ║  http://aws2.cuksl.xyz:3003/save/fav/point
+flutter: ║  http://aws2.cuksl.xyz:3003/save/fav/route
 flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
 flutter:
-flutter: ╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 34 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/save/fav/point
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "success": true
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 지점 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU0Mjc0ODIsImV4cCI6MTc1NjUwNzQ4MiwiaXNzIjoibG9jYWxob3N0In0.osvykdeSUJLo5OjEvcpd_RlOONAoYkZfuW0n15uOCnnmvRT-sNRb-kAP6V5lH-aT38RZ7z-qTo-nk8cPNQ_d-a6wKv6Kd0F96Y5dNaDHL34IZeLOO9ogRC-V1-ywtLzYS_VCspBYEHtmnSl5Z3T7Xf11PhzWSaUzHHhyhHua1gdIbytinoubVGSgMohYd2Tyr3Tosx8tTYLpz4i-QHC91HsPyCaLspBCu1wOHwLHwCxd6IvGHifH4MHEycNgDxSmN1P2dhh_h6vNMh4dZglgAD7nydZnb76_BCATlt2cB9sVBTglFDljIbMV_c4DHbbsfCzQCgxlfJVNdcBbrF66qg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 7 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [
-flutter: ║          {name: 우리대학교, lon: 126.80472166634472, lat: 37.48598076638508},
-flutter: ║          {name: 카대, lon: 126.80472166634472, lat: 37.48598076638508}
-flutter: ║         ]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: === 즐겨찾기 경로 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU0Mjc0ODIsImV4cCI6MTc1NjUwNzQ4MiwiaXNzIjoibG9jYWxob3N0In0.osvykdeSUJLo5OjEvcpd_RlOONAoYkZfuW0n15uOCnnmvRT-sNRb-kAP6V5lH-aT38RZ7z-qTo-nk8cPNQ_d-a6wKv6Kd0F96Y5dNaDHL34IZeLOO9ogRC-V1-ywtLzYS_VCspBYEHtmnSl5Z3T7Xf11PhzWSaUzHHhyhHua1gdIbytinoubVGSgMohYd2Tyr3Tosx8tTYLpz4i-QHC91HsPyCaLspBCu1wOHwLHwCxd6IvGHifH4MHEycNgDxSmN1P2dhh_h6vNMh4dZglgAD7nydZnb76_BCATlt2cB9sVBTglFDljIbMV_c4DHbbsfCzQCgxlfJVNdcBbrF66qg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ DioError ║ Status: 400 Bad Request ║ Time: 6 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ╔╣ DioError ║ Status: 404 Not Found ║ Time: 19 ms
+flutter: ║  http://aws2.cuksl.xyz:3003/save/fav/route
 flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
 flutter: ╔ DioExceptionType.badResponse
-flutter: ║    {
-flutter: ║         "error": "주소 형식 또는 광역시도명이 유효하지 않습니다"
-flutter: ║    }
+flutter: ║ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head
+flutter: ║ >
+<body>
+<pre>Cannot POST /save/fav/route</pre>
+</body>
+</html>
 flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
 flutter:
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 지점 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU0Mjc0ODIsImV4cCI6MTc1NjUwNzQ4MiwiaXNzIjoibG9jYWxob3N0In0.osvykdeSUJLo5OjEvcpd_RlOONAoYkZfuW0n15uOCnnmvRT-sNRb-kAP6V5lH-aT38RZ7z-qTo-nk8cPNQ_d-a6wKv6Kd0F96Y5dNaDHL34IZeLOO9ogRC-V1-ywtLzYS_VCspBYEHtmnSl5Z3T7Xf11PhzWSaUzHHhyhHua1gdIbytinoubVGSgMohYd2Tyr3Tosx8tTYLpz4i-QHC91HsPyCaLspBCu1wOHwLHwCxd6IvGHifH4MHEycNgDxSmN1P2dhh_h6vNMh4dZglgAD7nydZnb76_BCATlt2cB9sVBTglFDljIbMV_c4DHbbsfCzQCgxlfJVNdcBbrF66qg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 15 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [
-flutter: ║          {name: 우리대학교, lon: 126.80472166634472, lat: 37.48598076638508},
-flutter: ║          {name: 카대, lon: 126.80472166634472, lat: 37.48598076638508}
-flutter: ║         ]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: === 즐겨찾기 경로 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU0Mjc0ODIsImV4cCI6MTc1NjUwNzQ4MiwiaXNzIjoibG9jYWxob3N0In0.osvykdeSUJLo5OjEvcpd_RlOONAoYkZfuW0n15uOCnnmvRT-sNRb-kAP6V5lH-aT38RZ7z-qTo-nk8cPNQ_d-a6wKv6Kd0F96Y5dNaDHL34IZeLOO9ogRC-V1-ywtLzYS_VCspBYEHtmnSl5Z3T7Xf11PhzWSaUzHHhyhHua1gdIbytinoubVGSgMohYd2Tyr3Tosx8tTYLpz4i-QHC91HsPyCaLspBCu1wOHwLHwCxd6IvGHifH4MHEycNgDxSmN1P2dhh_h6vNMh4dZglgAD7nydZnb76_BCATlt2cB9sVBTglFDljIbMV_c4DHbbsfCzQCgxlfJVNdcBbrF66qg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ DioError ║ Status: 400 Bad Request ║ Time: 8 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ DioExceptionType.badResponse
-flutter: ║    {
-flutter: ║         "error": "주소 형식 또는 광역시도명이 유효하지 않습니다"
-flutter: ║    }
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 지점 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU0Mjc0ODIsImV4cCI6MTc1NjUwNzQ4MiwiaXNzIjoibG9jYWxob3N0In0.osvykdeSUJLo5OjEvcpd_RlOONAoYkZfuW0n15uOCnnmvRT-sNRb-kAP6V5lH-aT38RZ7z-qTo-nk8cPNQ_d-a6wKv6Kd0F96Y5dNaDHL34IZeLOO9ogRC-V1-ywtLzYS_VCspBYEHtmnSl5Z3T7Xf11PhzWSaUzHHhyhHua1gdIbytinoubVGSgMohYd2Tyr3Tosx8tTYLpz4i-QHC91HsPyCaLspBCu1wOHwLHwCxd6IvGHifH4MHEycNgDxSmN1P2dhh_h6vNMh4dZglgAD7nydZnb76_BCATlt2cB9sVBTglFDljIbMV_c4DHbbsfCzQCgxlfJVNdcBbrF66qg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 14 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [
-flutter: ║          {name: 우리대학교, lon: 126.80472166634472, lat: 37.48598076638508},
-flutter: ║          {name: 카대, lon: 126.80472166634472, lat: 37.48598076638508}
-flutter: ║         ]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: === 즐겨찾기 경로 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-
 
 [로그 끝]
 

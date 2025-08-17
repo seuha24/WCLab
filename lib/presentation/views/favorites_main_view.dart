@@ -379,7 +379,7 @@ class _FavoritesMainViewState extends State<FavoritesMainView> with SingleTicker
       itemCount: _favoriteRoutes.length,
       itemBuilder: (context, index) {
         final route = _favoriteRoutes[index];
-        final validPoints = route.points.where((p) => p != null).length;
+        final validStopovers = route.stopovers.where((p) => p != null).length;
         
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
@@ -410,7 +410,7 @@ class _FavoritesMainViewState extends State<FavoritesMainView> with SingleTicker
               ),
             ),
             subtitle: Text(
-              '경유지 $validPoints개',
+              validStopovers > 0 ? '경유지 $validStopovers개' : '출발지 → 목적지',
               style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,

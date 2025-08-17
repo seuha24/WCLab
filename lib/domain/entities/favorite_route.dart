@@ -15,13 +15,17 @@ class RoutePoint extends Equatable {
 
 class FavoriteRoute extends Equatable {
   final String name;
-  final List<RoutePoint?> points;
+  final RoutePoint? startPoint;
+  final RoutePoint? finishPoint;
+  final List<RoutePoint?> stopovers;
 
   const FavoriteRoute({
     required this.name,
-    required this.points,
+    required this.startPoint,
+    required this.finishPoint,
+    required this.stopovers,
   });
 
   @override
-  List<Object?> get props => [name, points];
+  List<Object?> get props => [name, startPoint, finishPoint, stopovers];
 }

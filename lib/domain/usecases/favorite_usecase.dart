@@ -99,17 +99,21 @@ class AddFavoriteRouteParams extends Equatable {
   final String loginMethod;
   final String userId;
   final String name;
-  final List<RoutePoint?> points;
+  final RoutePoint? startPoint;
+  final RoutePoint? finishPoint;
+  final List<RoutePoint?> stopovers;
 
   const AddFavoriteRouteParams({
     required this.loginMethod,
     required this.userId,
     required this.name,
-    required this.points,
+    required this.startPoint,
+    required this.finishPoint,
+    required this.stopovers,
   });
 
   @override
-  List<Object?> get props => [loginMethod, userId, name, points];
+  List<Object?> get props => [loginMethod, userId, name, startPoint, finishPoint, stopovers];
 }
 
 class AddFavoriteRoute extends UseCase<bool, AddFavoriteRouteParams> {
@@ -123,7 +127,9 @@ class AddFavoriteRoute extends UseCase<bool, AddFavoriteRouteParams> {
       loginMethod: params.loginMethod,
       userId: params.userId,
       name: params.name,
-      points: params.points,
+      startPoint: params.startPoint,
+      finishPoint: params.finishPoint,
+      stopovers: params.stopovers,
     );
   }
 }

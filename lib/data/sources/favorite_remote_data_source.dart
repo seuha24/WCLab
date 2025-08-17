@@ -31,7 +31,9 @@ abstract class FavoriteRemoteDataSource {
     required String loginMethod,
     required String userId,
     required String name,
-    required List<RoutePoint?> points,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
   });
 }
 
@@ -162,7 +164,9 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
     required String loginMethod,
     required String userId,
     required String name,
-    required List<RoutePoint?> points,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
   }) async {
     try {
       final requestData = {
@@ -170,7 +174,19 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
         'ID': userId,
         'list': {
           'name': name,
-          'points': points.map((point) {
+          'start_point': startPoint != null
+              ? {
+                  'lon': startPoint.longitude,
+                  'lat': startPoint.latitude,
+                }
+              : null,
+          'finish_point': finishPoint != null
+              ? {
+                  'lon': finishPoint.longitude,
+                  'lat': finishPoint.latitude,
+                }
+              : null,
+          'stopovers': stopovers.map((point) {
             if (point == null) return null;
             return {
               'lon': point.longitude,
