@@ -57,6 +57,9 @@ class _FavoritePointAddViewState extends State<FavoritePointAddView> {
         builder: (context) => StartSearch(
           searchValue: '',
           isFavoriteMode: true,  // 즐겨찾기 모드로 설정 (SearchBloc 업데이트 안 함)
+          hintText: '즐겨찾기 지점을 입력하세요.',
+          dialogTitle: '지점 확인',
+          dialogContentSuffix: '을(를) 즐겨찾기에 추가하시나요?',
         ),
       ),
     );

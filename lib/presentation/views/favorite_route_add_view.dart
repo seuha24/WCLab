@@ -56,6 +56,25 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
   }
   
   Future<void> _selectLocation(String type, [int? index]) async {
+    // 타입에 따라 다른 텍스트 설정
+    String hintText = '';
+    String dialogTitle = '';
+    String dialogContentSuffix = '';
+    
+    if (type == 'start') {
+      hintText = '출발지를 입력하세요.';
+      dialogTitle = '출발지 확인';
+      dialogContentSuffix = '에서 출발하시나요?';
+    } else if (type == 'finish') {
+      hintText = '목적지를 입력하세요.';
+      dialogTitle = '목적지 확인';
+      dialogContentSuffix = '(으)로 도착하시나요?';
+    } else if (type == 'stopover' && index != null) {
+      hintText = '경유지 ${index + 1}을 입력하세요.';
+      dialogTitle = '경유지 확인';
+      dialogContentSuffix = '을(를) 경유하시나요?';
+    }
+    
     // startspot_search_view.dart를 참고하여 카카오 검색
     final result = await Navigator.push(
       context,
@@ -63,6 +82,9 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
         builder: (context) => StartSearch(
           searchValue: '',
           isFavoriteMode: true,  // 즐겨찾기 모드로 설정 (SearchBloc 업데이트 안 함)
+          hintText: hintText,
+          dialogTitle: dialogTitle,
+          dialogContentSuffix: dialogContentSuffix,
         ),
       ),
     );

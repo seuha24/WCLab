@@ -5,10 +5,18 @@ class StartSearch extends StatefulWidget {
     super.key,
     required this.searchValue,
     this.isFavoriteMode = false,  // 즐겨찾기 모드 추가
+    this.hintText = '출발지를 입력하세요.',  // 검색창 힌트 텍스트
+    this.dialogTitle = '출발지 확인',  // 다이얼로그 제목
+    this.dialogContentPrefix = '',  // 다이얼로그 내용 앞부분 (예: "")
+    this.dialogContentSuffix = '에서 시작하시나요?',  // 다이얼로그 내용 뒷부분
   });
 
   final String searchValue;
   final bool isFavoriteMode;  // true면 SearchBloc 업데이트 안 함
+  final String hintText;
+  final String dialogTitle;
+  final String dialogContentPrefix;
+  final String dialogContentSuffix;
 
   @override
   State<StartSearch> createState() => _StartSearchState();
@@ -135,9 +143,9 @@ class _StartSearchState extends State<StartSearch> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('출발지 확인',style: TextStyle(color: Colors.black,)),
+          title: Text(widget.dialogTitle,style: TextStyle(color: Colors.black,)),
           content: Text(
-            '${result.name}에서 시작하시나요?',
+            '${widget.dialogContentPrefix}${result.name}${widget.dialogContentSuffix}',
             style: TextStyle(color: Colors.black),
           ),
           actions: <Widget>[
@@ -203,7 +211,7 @@ class _StartSearchState extends State<StartSearch> {
                         filled: true,
                         fillColor: Colors.white,
                         isDense: true,
-                        hintText: '출발지를 입력하세요.',
+                        hintText: widget.hintText,
                         hintStyle: TextStyle(
                           fontSize: AppSizes.scaledFont(20),
                           color: Color(0xff9E9E9E),
