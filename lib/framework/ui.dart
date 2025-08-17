@@ -23,6 +23,8 @@ import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/presentation/views/signup_user_input.dart';
+import 'package:safelight/presentation/views/favorites_main_view.dart';
+import 'package:safelight/domain/entities/favorite_point.dart';
 import 'package:safelight/presentation/widgets/custom_toast.dart';
 import 'package:safelight/presentation/widgets/gap.dart';
 

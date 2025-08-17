@@ -93,7 +93,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           accessToken: authData.accessToken,
           refreshToken: authData.refreshToken,
           userName: authData.userName ?? '',
+          serverUserId: authData.id,
         );
+        
+        // 로그인 타입 저장
+        await _authService.saveAuthType(authType: AuthType.google);
 
         emit(state.copyWith(
           signInStatus: Status.success,
@@ -132,7 +136,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           accessToken: authData.accessToken,
           refreshToken: authData.refreshToken,
           userName: authData.userName ?? '',
+          serverUserId: authData.id,
         );
+        
+        // 로그인 타입 저장
+        await _authService.saveAuthType(authType: AuthType.apple);
 
         emit(state.copyWith(
           signInStatus: Status.success,
@@ -226,10 +234,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       GetUserInfoEvent event, Emitter<AuthState> emit) async {
     emit(state.copyWith(getUserInfoStatus: Status.inProgress));
     final result = await _repository.getUserInfo();
-    result.fold(
-          (failure) => emit(state.copyWith(getUserInfoStatus: Status.failure)),
-          (data) => emit(state.copyWith(
-          getUserInfoStatus: Status.success, userName: data['userName'])),
+    await result.fold(
+          (failure) async => emit(state.copyWith(getUserInfoStatus: Status.failure)),
+          (data) async {
+            // 서버 사용자 ID 저장
+            if (data['id'] != null) {
+              await _authService.saveServerUserId(data['id']);
+            }
+            emit(state.copyWith(
+                getUserInfoStatus: Status.success, userName: data['userName']));
+          },
     );
   }
 }

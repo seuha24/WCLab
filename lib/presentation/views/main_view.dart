@@ -18,6 +18,15 @@ class _MainViewState extends State<MainView> {
 
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // 앱 시작 시 사용자 정보 가져와서 서버 ID 저장
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthBloc>().add(GetUserInfoEvent());
+    });
+  }
+
   void _onItemTapped(int index) {
     DI.get<FlutterTts>().stop();
     setState(() {

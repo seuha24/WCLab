@@ -192,7 +192,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
               return Positioned(
                 top: 122.0,
                 left: 20.0,
-                right: 20.0,
+                right: 75.0,  // star 버튼 공간 확보
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 190, 164, 164),
@@ -304,6 +304,111 @@ class NaverMapView extends GetView<NaverMapViewController> {
                 ),
               );
             }),
+
+            /// 즐겨찾기 버튼
+            Positioned(
+              top: 122.0,
+              right: 20.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.6),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 30,
+                  ),
+                  onPressed: () async {
+                    // 즐겨찾기 화면으로 이동
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FavoritesMainView(),
+                      ),
+                    );
+                    
+                    if (result != null && result is Map) {
+                      if (result['type'] == 'point') {
+                        // 즐겨찾기 지점 선택 시
+                        final favoritePoint = result['data'] as FavoritePoint;
+                        
+                        // 출입구 좌표가 있으면 사용, 없으면 일반 좌표 사용
+                        final lat = favoritePoint.entranceLatitude ?? favoritePoint.latitude;
+                        final lng = favoritePoint.entranceLongitude ?? favoritePoint.longitude;
+                        
+                        // 목적지 설정
+                        controller.handleDestinationLocationSelection(GeoLocation(
+                          lat: lat,
+                          lng: lng,
+                        ));
+                        
+                        // 목적지 텍스트 업데이트
+                        context.read<SearchBloc>().add(
+                          SearchDestinationRequested(
+                            searchDestination: favoritePoint.name,
+                            geoLocation: GeoLocation(lat: lat, lng: lng),
+                          ),
+                        );
+                        
+                        // 경로 선택 BottomSheet 표시
+                        String? selectedRoute = await showModalBottomSheet<String>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "0"),
+                                    child: Text("추천"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "4"),
+                                    child: Text("추천+대로우선"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "10"),
+                                    child: Text("최단"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, "30"),
+                                    child: Text("최단거리+계단제외"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                        
+                        if (selectedRoute != null) {
+                          controller.choose_route.value = selectedRoute;
+                          debugPrint('선택된 경로: ${controller.choose_route.value}');
+                          // 경로 선택 완료 후 경로 탐색 시작
+                          await controller.startNavigation();
+                        }
+                      } else if (result['type'] == 'route') {
+                        // 경로 즐겨찾기는 일단 지점만 처리
+                        // TODO: 추후 경유지 포함 경로 안내 구현
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('경로 즐겨찾기는 준비 중입니다.')),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ),
+            ),
 
             /// 화면 중앙 고정 마커(출발지 설정시 사라짐)
             Stack(

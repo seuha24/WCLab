@@ -1,0 +1,88 @@
+import 'package:dartz/dartz.dart';
+import 'package:safelight/data/sources/favorite_remote_data_source.dart';
+import 'package:safelight/domain/entities/favorite_point.dart';
+import 'package:safelight/domain/entities/favorite_route.dart';
+import 'package:safelight/domain/repositories/favorite_repository.dart';
+import 'package:safelight/framework/core.dart';
+
+class FavoriteRepositoryImpl implements FavoriteRepository {
+  final FavoriteRemoteDataSource remoteDataSource;
+
+  FavoriteRepositoryImpl({
+    required this.remoteDataSource,
+  });
+
+  @override
+  Future<Either<Failure, List<FavoritePoint>>> getFavoritePoints({
+    required String loginMethod,
+    required String userId,
+  }) async {
+    try {
+      final favoritePoints = await remoteDataSource.getFavoritePoints(
+        loginMethod: loginMethod,
+        userId: userId,
+      );
+      return Right(favoritePoints.map((model) => model.toEntity()).toList());
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<FavoriteRoute>>> getFavoriteRoutes({
+    required String loginMethod,
+    required String userId,
+  }) async {
+    try {
+      final favoriteRoutes = await remoteDataSource.getFavoriteRoutes(
+        loginMethod: loginMethod,
+        userId: userId,
+      );
+      return Right(favoriteRoutes.map((model) => model.toEntity()).toList());
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, FavoritePoint>> addFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String name,
+    required double longitude,
+    required double latitude,
+  }) async {
+    try {
+      final favoritePoint = await remoteDataSource.addFavoritePoint(
+        loginMethod: loginMethod,
+        userId: userId,
+        name: name,
+        longitude: longitude,
+        latitude: latitude,
+      );
+      return Right(favoritePoint.toEntity());
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> addFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String name,
+    required List<RoutePoint?> points,
+  }) async {
+    try {
+      final result = await remoteDataSource.addFavoriteRoute(
+        loginMethod: loginMethod,
+        userId: userId,
+        name: name,
+        points: points,
+      );
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+}

@@ -19,15 +19,19 @@ class AuthService {
   /// 사용자 이름 저장을 위한 키 값입니다.
   static const String _userNameKey = 'userName';
 
+  /// 서버 사용자 ID 저장을 위한 키 값입니다.
+  static const String _serverUserIdKey = 'serverUserId';
+
   /// 인증 데이터를 저장합니다.
   ///
   /// [accessToken]과 [refreshToken]은 필수로 저장되며,
-  /// [userName]은 선택적으로 저장됩니다.
-  /// 만약 [userName]이 null인 경우, 저장된 사용자 이름을 삭제합니다.
+  /// [userName]과 [serverUserId]는 선택적으로 저장됩니다.
+  /// 만약 [userName]이나 [serverUserId]가 null인 경우, 저장된 값을 삭제합니다.
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
     String? userName,
+    String? serverUserId,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -39,11 +43,17 @@ class AuthService {
     } else {
       await prefs.remove(_userNameKey);
     }
+
+    if (serverUserId != null) {
+      await prefs.setString(_serverUserIdKey, serverUserId);
+    } else {
+      await prefs.remove(_serverUserIdKey);
+    }
   }
 
   /// 저장된 인증 데이터를 로드합니다.
   ///
-  /// 반환되는 [Map]에는 'accessToken', 'refreshToken', 'userName' 키가 포함되며,
+  /// 반환되는 [Map]에는 'accessToken', 'refreshToken', 'userName', 'serverUserId' 키가 포함되며,
   /// 각 값은 저장된 문자열이나 값이 없을 경우 null입니다.
   Future<Map<String, String?>> loadAuthData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -57,6 +67,7 @@ class AuthService {
       'accessToken': prefs.getString(_accessTokenKey),
       'refreshToken': prefs.getString(_refreshTokenKey),
       'userName': prefs.getString(_userNameKey),
+      'serverUserId': prefs.getString(_serverUserIdKey),
     };
   }
 
@@ -88,5 +99,17 @@ class AuthService {
     debugPrint(
         'prefs.getString(_authTypeTokenKey): ${prefs.getString(_authTypeTokenKey)}');
     return AuthTypeExtension.getType(prefs.getString(_authTypeTokenKey));
+  }
+
+  /// 서버 사용자 ID를 저장합니다.
+  Future<void> saveServerUserId(String serverUserId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_serverUserIdKey, serverUserId);
+  }
+
+  /// 저장된 서버 사용자 ID를 로드합니다.
+  Future<String?> loadServerUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_serverUserIdKey);
   }
 }
