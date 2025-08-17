@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 /// 출입구 등록을 위한 도메인 엔티티
 class SendPointParams {

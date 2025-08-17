@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 사용자 권한 제어와 관련된 [PermissionRepository]의 구현부이다.
 class PermissionRepositoryImpl implements PermissionRepository {

@@ -423,7 +423,7 @@ class NaverMapViewController extends GetxController {
         isGps,
       );
     } catch (e) {
-      print("현위치 수신에러 $e");
+      debugPrint("현위치 수신에러 $e");
       isLoading.value = false;
     }
   }

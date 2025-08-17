@@ -1,4 +1,4 @@
-part of controller;
+part of '../../../framework/controller.dart';
 
 class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
   static Timer timer = Timer(Duration.zero, () {});

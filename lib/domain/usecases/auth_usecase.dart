@@ -1,4 +1,4 @@
-part of usecase;
+part of '../../framework/usecase.dart';
 
 /// 사용자의 인증(Auth)을 제어하는 모든 비즈니스 로직의 상위 개념이다.
 ///

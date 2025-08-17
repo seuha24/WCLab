@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 사용자 인증(Auth)과 관련된 [AuthRepository]의 구현부이다.
 class AuthRepositoryImpl implements AuthRepository {

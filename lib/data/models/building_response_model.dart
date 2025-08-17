@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 /// 서버 응답을 모델 객체로 변환하는 클래스
 class BuildingResponseModel {

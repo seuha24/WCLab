@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 /// 출입구 정보 엔티티
 class Entrance {

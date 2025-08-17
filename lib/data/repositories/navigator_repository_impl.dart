@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 네비게이션(위치 기반 서비스)와 관련된 [NavigatorRepository]의 구현부이다.
 class NavigatorRepositoryImpl implements NavigatorRepository {

@@ -66,8 +66,8 @@ class EntranceRegistrationBloc
   Future<String> _fetchAddress(NLatLng latLng) async {
     final url =
         'https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${latLng.longitude}&y=${latLng.latitude}';
-    print('\n=== 카카오 API 요청 ===');
-    print('요청 URL: $url');
+    debugPrint('\n=== 카카오 API 요청 ===');
+    debugPrint('요청 URL: $url');
 
     final response = await http.get(
       Uri.parse(url),
@@ -75,30 +75,27 @@ class EntranceRegistrationBloc
     );
 
     final jsonResponse = jsonDecode(response.body);
-    print('\n=== 카카오 API 응답 ===');
-    print('전체 응답: ${jsonEncode(jsonResponse)}');
+    debugPrint('\n=== 카카오 API 응답 ===');
+    debugPrint('전체 응답: ${jsonEncode(jsonResponse)}');
 
     final docs = jsonResponse['documents'];
-    print('\n문서 개수: ${docs.length}');
+    debugPrint('\n문서 개수: ${docs.length}');
 
     if (docs.isNotEmpty) {
       final roadAddress = docs[0]['road_address']?['address_name'];
 
       if (roadAddress != null && roadAddress.isNotEmpty) {
-        print('\n도로명 주소 찾음: $roadAddress');
-        print('현재 위치: 위도 ${latLng.latitude}, 경도 ${latLng.longitude}');
+        debugPrint('\n도로명 주소 찾음: $roadAddress');
+        debugPrint('현재 위치: 위도 ${latLng.latitude}, 경도 ${latLng.longitude}');
         return roadAddress;
       }
 
-      print('\n도로명 주소를 찾을 수 없음');
-      print('현재 위치: 위도 ${latLng.latitude}, 경도 ${latLng.longitude}');
-      emit(RegistrationLoaded(address: "도로명 주소 없음", selectedLocation: latLng));
+      debugPrint('\n도로명 주소를 찾을 수 없음');
+      debugPrint('현재 위치: 위도 ${latLng.latitude}, 경도 ${latLng.longitude}');
       return "도로명 주소 없음";
     }
 
-    print('\n문서가 없음');
-    emit(
-        RegistrationLoaded(address: "주소를 찾을 수 없습니다", selectedLocation: latLng));
+    debugPrint('\n문서가 없음');
     return "주소를 찾을 수 없습니다";
   }
 }

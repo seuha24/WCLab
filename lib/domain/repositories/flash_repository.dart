@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 안전 경광등과 관련된 Repository의 Interface이다.
 ///

@@ -30,7 +30,7 @@ Future<void> main() async {
   await NaverMapSdk.instance.initialize(
     clientId: 'pzijwnqrpi',
     onAuthFailed: (ex) {
-      print("********* 네이버맵 인증오류 : $ex *********");
+      debugPrint("********* 네이버맵 인증오류 : $ex *********");
     },
   );
 

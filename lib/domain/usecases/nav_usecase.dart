@@ -1,4 +1,4 @@
-part of usecase;
+part of '../../framework/usecase.dart';
 
 /// 네비게이션(위치)과 완련된 모든 비즈니스 로직의 상위 개념이다.
 ///

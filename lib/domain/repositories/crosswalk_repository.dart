@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 횡단보도 제어와 관련된 Repository의 Interface이다.
 ///

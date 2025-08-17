@@ -301,7 +301,7 @@ class _FavoritesMainViewState extends State<FavoritesMainView> with SingleTicker
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
+                color: Colors.amber.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -393,7 +393,7 @@ class _FavoritesMainViewState extends State<FavoritesMainView> with SingleTicker
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(

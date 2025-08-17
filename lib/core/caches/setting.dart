@@ -1,4 +1,4 @@
-part of core;
+part of '../../framework/core.dart';
 
 @HiveType(typeId: 0)
 class Setting {

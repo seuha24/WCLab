@@ -314,15 +314,15 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: hasPoint ? Colors.blue.withOpacity(0.5) : Colors.grey[300]!,
+                    color: hasPoint ? Colors.blue.withValues(alpha: 0.5) : Colors.grey[300]!,
                     width: 1,
                   ),
                 ),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: hasPoint 
-                      ? (index < 4 ? Colors.blue.withOpacity(0.1) : Colors.red.withOpacity(0.1))
-                      : Colors.grey.withOpacity(0.1),
+                      ? (index < 4 ? Colors.blue.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1))
+                      : Colors.grey.withValues(alpha: 0.1),
                     child: Icon(
                       index < 4 ? Icons.location_on : Icons.flag,
                       color: hasPoint 
@@ -378,7 +378,7 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               spreadRadius: 1,
               blurRadius: 5,
               offset: const Offset(0, -2),

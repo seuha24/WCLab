@@ -1,4 +1,4 @@
-part of usecase;
+part of '../../framework/usecase.dart';
 
 /// 디바이스의 권한 설정과 관련된 모든 비즈니스 로직의 상위 개념이다.
 ///

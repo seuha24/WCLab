@@ -1,4 +1,4 @@
-part of data_source;
+part of '../../framework/data_source.dart';
 
 /// 블루투스 통신을 위한 Interface이다.
 ///

@@ -1,7 +1,6 @@
 library object;
 
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/framework/core.dart';

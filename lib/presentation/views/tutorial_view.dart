@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 /// 도움말 화면
 class TutorialView extends StatefulWidget {

@@ -151,7 +151,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         borderRadius: BorderRadius.circular(8.0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.6),
+                            color: Colors.grey.withValues(alpha: 0.6),
                             spreadRadius: 2,
                             blurRadius: 5,
                             offset: Offset(0, 2),
@@ -271,7 +271,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         borderRadius: BorderRadius.circular(8.0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.6),
+                            color: Colors.grey.withValues(alpha: 0.6),
                             spreadRadius: 2,
                             blurRadius: 5,
                             offset: Offset(0, 2),
@@ -315,7 +315,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                   borderRadius: BorderRadius.circular(8.0),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.6),
+                      color: Colors.grey.withValues(alpha: 0.6),
                       spreadRadius: 2,
                       blurRadius: 5,
                       offset: Offset(0, 2),
@@ -458,7 +458,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
             /// 시스템 상단 바 높이에 따른 패딩 (상단 영역의 색상 처리)
             Container(
               color: isDark
-                  ? Theme.of(context).colorScheme.shadow.withOpacity(0.5)
+                  ? Theme.of(context).colorScheme.shadow.withValues(alpha: 0.5)
                   : null,
               height: MediaQuery.of(context).padding.top,
             ),

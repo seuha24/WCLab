@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 /// [Weather]는 날씨 객체이다.
 ///

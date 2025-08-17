@@ -1,4 +1,4 @@
-part of core;
+part of '../../framework/core.dart';
 
 abstract class Failure extends Equatable {
   @override

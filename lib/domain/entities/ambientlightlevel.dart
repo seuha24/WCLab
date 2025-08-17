@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 class AmbientLightLevel extends Equatable {
   final double? ambientLightLevel;

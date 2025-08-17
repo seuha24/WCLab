@@ -1,4 +1,4 @@
-part of core;
+part of '../../framework/core.dart';
 
 abstract class Validator {}
 
@@ -13,15 +13,15 @@ class WeatherValidator implements Validator {
         lightmode = 'alwayson';
       } else if (flashbox.values.toList()[0] == FlashMode.ALWAYS) {
         lightmode = 'alwayson';
-        print("항상 켜짐");
+        debugPrint("항상 켜짐");
         return const Right(true);
       } else if (flashbox.values.toList()[0] == FlashMode.NEVER_IN_USE) {
         lightmode = 'alwaysoff';
-        print("항상 꺼짐");
+        debugPrint("항상 꺼짐");
         return const Right(false);
       } else if (flashbox.values.toList()[0] == FlashMode.WITH_WEATHER) {
         lightmode = 'weathers';
-        print("날씨, 조도");
+        debugPrint("날씨, 조도");
         if (!(unixTimestamp >= weather.sunrise &&
                 unixTimestamp <= weather.sunset) ||
             (weather.visibility < 500) ||
@@ -33,7 +33,7 @@ class WeatherValidator implements Validator {
           return const Right(true);
         }
       }
-      print(lightmode);
+      debugPrint(lightmode);
       return const Right(false);
     } catch (e) {
       return Left(ValidateFailure());

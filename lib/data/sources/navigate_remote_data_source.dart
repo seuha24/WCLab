@@ -1,4 +1,4 @@
-part of data_source;
+part of '../../framework/data_source.dart';
 
 /// 실제 네트워크 요청(서버 통신)을 담당하는 인터페이스.
 /// RepositoryImpl에서 사용하는 메소드 형태만을 정의한다.
@@ -54,15 +54,15 @@ class NavigateRemoteDataSourceImpl implements NavigateRemoteDataSource {
     required Map<String, double> buildingPoint,
     required List<Map<String, dynamic>> entrances,
   }) async {
-    print("\n=== 출입구 데이터 서버 전송 시작 ===");
-    print("요청 URL: ${ApiEndpoints.saveBuildingEntrance}");
-    print("요청 메서드: POST");
-    print("\n전송할 데이터:");
-    print("1. 도로명 주소: $roadAddress");
-    print("2. 건물명: $buildingName");
-    print("3. 건물 상세: $buildingDetail");
-    print("4. 건물 위치: $buildingPoint");
-    print("5. 출입구 정보: $entrances");
+    debugPrint("\n=== 출입구 데이터 서버 전송 시작 ===");
+    debugPrint("요청 URL: ${ApiEndpoints.saveBuildingEntrance}");
+    debugPrint("요청 메서드: POST");
+    debugPrint("\n전송할 데이터:");
+    debugPrint("1. 도로명 주소: $roadAddress");
+    debugPrint("2. 건물명: $buildingName");
+    debugPrint("3. 건물 상세: $buildingDetail");
+    debugPrint("4. 건물 위치: $buildingPoint");
+    debugPrint("5. 출입구 정보: $entrances");
 
     try {
       final requestData = {
@@ -83,29 +83,29 @@ class NavigateRemoteDataSourceImpl implements NavigateRemoteDataSource {
         data: requestData,
       );
 
-      print("\n=== 서버 응답 ===");
-      print("상태 코드: ${response.statusCode}");
-      print("응답 데이터: ${response.data}");
-      print("===============================\n");
+      debugPrint("\n=== 서버 응답 ===");
+      debugPrint("상태 코드: ${response.statusCode}");
+      debugPrint("응답 데이터: ${response.data}");
+      debugPrint("===============================\n");
 
       if (response.statusCode != 200) {
         throw ServerException();
       }
     } catch (e) {
-      print('\n=== 서버 통신 에러 ===');
-      print('에러 타입: ${e.runtimeType}');
-      print('에러 메시지: $e');
+      debugPrint('\n=== 서버 통신 에러 ===');
+      debugPrint('에러 타입: ${e.runtimeType}');
+      debugPrint('에러 메시지: $e');
 
       if (e is DioException) {
-        print('DioException 상세 정보:');
-        print('statusCode: ${e.response?.statusCode}');
-        print('response data: ${e.response?.data}');
-        print('message: ${e.message}');
-        print('error: ${e.error}');
-        print('type: ${e.type}');
-        print('request options: ${e.requestOptions.uri}');
+        debugPrint('DioException 상세 정보:');
+        debugPrint('statusCode: ${e.response?.statusCode}');
+        debugPrint('response data: ${e.response?.data}');
+        debugPrint('message: ${e.message}');
+        debugPrint('error: ${e.error}');
+        debugPrint('type: ${e.type}');
+        debugPrint('request options: ${e.requestOptions.uri}');
       }
-      print('===============================\n');
+      debugPrint('===============================\n');
 
       throw ServerException();
     }
@@ -124,19 +124,19 @@ class NavigateRemoteDataSourceImpl implements NavigateRemoteDataSource {
       final response = await dio.get(url);
 
       if (response.statusCode == 200) {
-        print('서버 응답 데이터: ${response.data}');
+        debugPrint('서버 응답 데이터: ${response.data}');
         return BuildingResponseModel.fromJson(response.data);
       } else {
         throw ServerException();
       }
     } catch (e) {
       if (e is DioException) {
-        print('DioException 발생');
-        print('statusCode: ${e.response?.statusCode}');
-        print('response data: ${e.response?.data}');
-        print('message: ${e.message}');
+        debugPrint('DioException 발생');
+        debugPrint('statusCode: ${e.response?.statusCode}');
+        debugPrint('response data: ${e.response?.data}');
+        debugPrint('message: ${e.message}');
       } else {
-        print('알 수 없는 에러 발생: $e');
+        debugPrint('알 수 없는 에러 발생: $e');
       }
       throw ServerException();
     }

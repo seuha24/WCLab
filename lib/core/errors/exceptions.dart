@@ -1,4 +1,4 @@
-part of core;
+part of '../../framework/core.dart';
 
 class ServerException implements Exception {}
 

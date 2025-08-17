@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 횡단보도 제어와 관련된 [CrosswalkRepository]의 구현부이다.
 class CrosswalkRepositoryImpl implements CrosswalkRepository {

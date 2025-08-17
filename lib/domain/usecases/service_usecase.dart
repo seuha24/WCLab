@@ -1,4 +1,4 @@
-part of usecase;
+part of '../../framework/usecase.dart';
 
 /// 핵심 기능을 제외한 앱 내 모든 추가 기능(편의 기능)에 대한 비즈니스 로직의 상위 개념이다.
 ///

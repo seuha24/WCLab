@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 /// 블루투스 꺼짐 화면
 class BlueOffView extends StatefulWidget {

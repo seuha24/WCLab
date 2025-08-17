@@ -1,5 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
-part of ui;
+part of '../../framework/ui.dart';
 
 /// 안전 경광등 화면
 class FlashlightView extends StatefulWidget {

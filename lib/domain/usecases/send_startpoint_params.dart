@@ -1,4 +1,4 @@
-part of usecase;
+part of '../../framework/usecase.dart';
 
 class SendStartPointParams {
   final String buildingName;

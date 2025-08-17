@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,7 +8,6 @@ import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/ui.dart';
 import 'package:safelight/data/services/auth_service.dart';
-import 'package:safelight/main.dart';
 
 import '../../framework/controller.dart';
 import '../../injection.dart';
@@ -58,7 +56,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
       previous.patchUserInfoStatus != current.patchUserInfoStatus,
       child: PopScope(
         canPop: true,
-        onPopInvoked: (bool didPop) async {
+        onPopInvokedWithResult: (bool didPop, dynamic result) async {
           if (didPop) {
             debugPrint('didPop : $didPop');
             context.read<AuthBloc>().add(SignOutAllEvent());

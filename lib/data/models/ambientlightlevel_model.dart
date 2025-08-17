@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 class AmbientLightLevelModel extends AmbientLightLevel {
   const AmbientLightLevelModel({

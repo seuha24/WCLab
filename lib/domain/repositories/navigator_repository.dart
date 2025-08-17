@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 네비게이션(위치 기반 기능)과 관련된 Repository의 Interface이다.
 ///

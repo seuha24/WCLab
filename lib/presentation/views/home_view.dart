@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 /// 홈화면
 class HomeView extends StatefulWidget {
@@ -230,7 +230,7 @@ class _HomeViewState extends State<HomeView> {
                               alignment: Alignment.topLeft,
                               child: Chip(
                                 backgroundColor:
-                                    Theme.of(context).colorScheme.background,
+                                    Theme.of(context).colorScheme.surface,
                                 avatar: Padding(
                                   padding: const EdgeInsets.all(2),
                                   child: CupertinoActivityIndicator(
@@ -262,11 +262,11 @@ class _HomeViewState extends State<HomeView> {
                           return Shimmer.fromColors(
                             baseColor: Theme.of(context)
                                 .colorScheme
-                                .onBackground
+                                .onSurface
                                 .withAlpha(80),
                             highlightColor: Theme.of(context)
                                 .colorScheme
-                                .onBackground
+                                .onSurface
                                 .withAlpha(120),
                             child: ListView.builder(
                               shrinkWrap: true,
@@ -375,7 +375,7 @@ class _HomeViewState extends State<HomeView> {
                                     context: context,
                                     backgroundColor: Theme.of(context)
                                         .colorScheme
-                                        .background,
+                                        .surface,
                                     isDismissible: false,
                                     builder: (BuildContext context) {
                                       return SizedBox(
@@ -597,7 +597,7 @@ class _HomeViewState extends State<HomeView> {
           Container(
             constraints: BoxConstraints(maxHeight: 70.h),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(
                 SizeTheme.r_sm,
               ),
@@ -775,7 +775,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               trailing: Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Theme.of(context).colorScheme.onBackground,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               onTap: () {
                 this
@@ -803,7 +803,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               trailing: Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Theme.of(context).colorScheme.onBackground,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               onTap: () async {
                 this

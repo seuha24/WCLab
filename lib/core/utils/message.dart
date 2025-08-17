@@ -1,4 +1,4 @@
-part of core;
+part of '../../framework/core.dart';
 
 class Message {
   void snackbar(

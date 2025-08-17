@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 사용자 권한 제어과 관련된 Repository의 Interface이다.
 ///

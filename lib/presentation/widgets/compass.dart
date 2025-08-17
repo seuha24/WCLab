@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 /// [Compass]는 동적 위젯인 [StatefulWidget]을 상속받는 클래스이다.
 ///

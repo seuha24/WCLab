@@ -1,4 +1,4 @@
-part of ui;
+part of '../../framework/ui.dart';
 
 /// [SingleChildRoundedCard]는 child를 가지는 위젯이다.
 ///

@@ -1,6 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-part of core;
+part of '../../framework/core.dart';
 
 @HiveType(typeId: 2)
 enum FlashMode {

@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 /// SendStartPointParams의 데이터 변환을 담당하는 Model 클래스
 class SendStartPointModel {

@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 안전 경광등과 관련된 [FlashRepository]의 구현부이다.
 class FlashRepositoryImpl implements FlashRepository {

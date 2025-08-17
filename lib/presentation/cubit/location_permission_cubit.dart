@@ -1,4 +1,4 @@
-part of controller;
+part of '../../../framework/controller.dart';
 
 class LocationPermissionCubit extends Cubit<bool> {
   final GetPermission getPermission;

@@ -1,4 +1,4 @@
-part of object;
+part of '../../framework/object.dart';
 
 /// [Crosswalk]는 횡단보도 객체이다.
 ///

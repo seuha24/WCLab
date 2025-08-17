@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safelight/core/utils/app_sizes.dart';
 
 class Gap extends StatelessWidget {

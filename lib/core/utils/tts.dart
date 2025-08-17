@@ -1,4 +1,4 @@
-part of core;
+part of '../../framework/core.dart';
 
 class TTS {
   static bool enable = false;
