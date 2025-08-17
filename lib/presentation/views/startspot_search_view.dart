@@ -4,9 +4,11 @@ class StartSearch extends StatefulWidget {
   const StartSearch({
     super.key,
     required this.searchValue,
+    this.isFavoriteMode = false,  // 즐겨찾기 모드 추가
   });
 
   final String searchValue;
+  final bool isFavoriteMode;  // true면 SearchBloc 업데이트 안 함
 
   @override
   State<StartSearch> createState() => _StartSearchState();
@@ -298,13 +300,15 @@ class _StartSearchState extends State<StartSearch> {
                                       debugPrint('선택된 출입구: ${entrance.entranceName}');
                                       debugPrint('출입구 좌표: ${entrance.location.latitude}, ${entrance.location.longitude}');
                                       
-                                      // 출입구 선택 시 SearchBloc에 이벤트 발생
-                                      context.read<SearchBloc>().add(
-                                        SearchStartLocationRequested(
-                                          searchLocation: result.name,
-                                          entrance: entrance,
-                                        ),
-                                      );
+                                      // 출입구 선택 시 SearchBloc에 이벤트 발생 (즐겨찾기 모드가 아닐 때만)
+                                      if (!widget.isFavoriteMode) {
+                                        context.read<SearchBloc>().add(
+                                          SearchStartLocationRequested(
+                                            searchLocation: result.name,
+                                            entrance: entrance,
+                                          ),
+                                        );
+                                      }
                                       
                                       Future.microtask(() => speakTTS('${entrance.entranceName}으로 안내합니다.'));
                                       Navigator.pop(context); // EntranceSelectionView 닫기
@@ -322,11 +326,14 @@ class _StartSearchState extends State<StartSearch> {
                               debugPrint('장소 좌표: ${result.geometry.location.lat}, ${result.geometry.location.lng}');
                               
                               if (!mounted) return;
-                              context.read<SearchBloc>().add(
-                                SearchStartLocationRequested(
-                                  searchLocation: result.name,
-                                ),
-                              );
+                              // 즐겨찾기 모드가 아닐 때만 SearchBloc 업데이트
+                              if (!widget.isFavoriteMode) {
+                                context.read<SearchBloc>().add(
+                                  SearchStartLocationRequested(
+                                    searchLocation: result.name,
+                                  ),
+                                );
+                              }
                               
                               Future.microtask(() => speakTTS('${result.name}(으)로 안내합니다.'));
                               Navigator.pop(context, result.geometry.location); // StartSearch 닫고 카카오 API 좌표 반환
@@ -339,11 +346,14 @@ class _StartSearchState extends State<StartSearch> {
                             debugPrint('카카오 API 좌표: ${result.geometry.location.lat}, ${result.geometry.location.lng}');
                             
                             if (!mounted) return;
-                            context.read<SearchBloc>().add(
-                              SearchStartLocationRequested(
-                                searchLocation: result.name, // 출입구 정보 없이 이름만 전달
-                              ),
-                            );
+                            // 즐겨찾기 모드가 아닐 때만 SearchBloc 업데이트
+                            if (!widget.isFavoriteMode) {
+                              context.read<SearchBloc>().add(
+                                SearchStartLocationRequested(
+                                  searchLocation: result.name, // 출입구 정보 없이 이름만 전달
+                                ),
+                              );
+                            }
                             
                             Future.microtask(() => speakTTS('${result.name}(으)로 안내합니다.'));
                             Navigator.pop(context, result.geometry.location); // StartSearch 닫고 카카오 API 좌표 반환

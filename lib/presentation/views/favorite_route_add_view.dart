@@ -56,7 +56,10 @@ class _FavoriteRouteAddViewState extends State<FavoriteRouteAddView> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StartSearch(searchValue: ''),
+        builder: (context) => StartSearch(
+          searchValue: '',
+          isFavoriteMode: true,  // 즐겨찾기 모드로 설정 (SearchBloc 업데이트 안 함)
+        ),
       ),
     );
     
