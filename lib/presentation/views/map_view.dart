@@ -192,7 +192,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
               return Positioned(
                 top: 122.0,
                 left: 20.0,
-                right: 75.0,  // star 버튼 공간 확보
+                right: 20.0,  // 전체 넓이 사용
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 190, 164, 164),
@@ -305,9 +305,9 @@ class NaverMapView extends GetView<NaverMapViewController> {
               );
             }),
 
-            /// 즐겨찾기 버튼
+            /// 즐겨찾기 버튼 (목적지 검색창 아래 우측)
             Positioned(
-              top: 122.0,
+              top: 180.0,  // 목적지 검색창 아래로 위치 이동
               right: 20.0,
               child: Container(
                 decoration: BoxDecoration(
