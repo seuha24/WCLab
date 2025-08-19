@@ -158,7 +158,7 @@ class NaverMapViewController extends GetxController {
 
   // 경계 및 재경로 검색 관련 변수들
   bool outOfBound = false;
-  double boundary = 5;
+  double boundary = 1.5;  // 경계 이탈 감지 거리 (1.5미터)
   bool searchNewPath = false;
   double searchNewPathBoundary = 15;
   int searchNewPathTime = 0;
@@ -1411,12 +1411,12 @@ class NaverMapViewController extends GetxController {
         branchinfo[0].point.latitude,
         branchinfo[0].point.longitude,
       );
-      // 출발지와 현재 위치가 70m 이상 차이나면 재검색 준비
-      if (remain_startpoint > 0.070) {
+      // 출발지와 현재 위치가 50m 이상 차이나면 재검색 준비
+      if (remain_startpoint > 0.050) {
         searchStartNewPathTime++;
-        if (searchStartNewPathTime > 14) {
-          // 15초 이상 지속 시 경로 재검색
-          debugPrint('출발지와 너무 멀어짐. 15초 후 자동으로 경로 재검색 수행');
+        if (searchStartNewPathTime > 10) {
+          // 10초 이상 지속 시 경로 재검색
+          debugPrint('출발지와 너무 멀어짐. 10초 후 자동으로 경로 재검색 수행');
 
           // 현재 위치를 새로운 출발지로 설정하고 지도 업데이트
           await loadPathData(
