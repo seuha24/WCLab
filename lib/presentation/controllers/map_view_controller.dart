@@ -431,22 +431,38 @@ class NaverMapViewController extends GetxController {
     }
   }
 
-  // 경로 API 호출
-  Future<void> loadPathData(
-    double startLatitude,
-    double startLongitude,
-    double endLatitude,
-    double endLongitude,
-    String chooseRoute,
-  ) async {
+  // 경로 데이터 로드 핵심 로직 (private)
+  Future<void> _loadPathDataCore({
+    required double startLatitude,
+    required double startLongitude,
+    required double endLatitude,
+    required double endLongitude,
+    required String chooseRoute,
+    List<LatLng> waypoints = const [],
+  }) async {
     try {
-      final responseData = await apiService.fetchPathData(
-        startLatitude: startLatitude,
-        startLongitude: startLongitude,
-        endLatitude: endLatitude,
-        endLongitude: endLongitude,
-        chooseRoute: chooseRoute,
-      );
+      // 경유지 유무에 따라 적절한 API 호출
+      final Map<String, dynamic> responseData;
+      if (waypoints.isEmpty) {
+        responseData = await apiService.fetchPathData(
+          startLatitude: startLatitude,
+          startLongitude: startLongitude,
+          endLatitude: endLatitude,
+          endLongitude: endLongitude,
+          chooseRoute: chooseRoute,
+        );
+        debugPrint('일반 경로 API 호출 완료');
+      } else {
+        responseData = await apiService.fetchPathDataWithWaypoints(
+          startLatitude: startLatitude,
+          startLongitude: startLongitude,
+          endLatitude: endLatitude,
+          endLongitude: endLongitude,
+          waypoints: waypoints,
+          chooseRoute: chooseRoute,
+        );
+        debugPrint('경유지 ${waypoints.length}개 포함 경로 API 호출 완료');
+      }
 
       /// 데이터 파싱
       final parsedData = apiService.parsePathData(responseData);
@@ -454,12 +470,10 @@ class NaverMapViewController extends GetxController {
       final parsedBranchInfos = parsedData['branchInfo'] as List<BranchInfo>;
 
       /// 데이터 로깅
-      debugPrint('paths: $parsedPath');
-      debugPrint('branchInfoList: $parsedBranchInfos');
+      debugPrint('paths: ${parsedPath.length}개 좌표');
+      debugPrint('branchInfo: ${parsedBranchInfos.length}개 분기점');
 
       // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
-      // 주기적으로 Timer를 실행하기 전에 먼저 방향값을 초기화 해준다.
-      // branchinfo 배열을 순회하면서 bearingTobranch 값을 변경합니다.
       for (int i = 0; i < parsedBranchInfos.length - 1; i++) {
         double newBearingValue = calculateBearing(
           parsedBranchInfos[i].point.latitude,
@@ -470,24 +484,44 @@ class NaverMapViewController extends GetxController {
         parsedBranchInfos[i].bearingToPoint = newBearingValue;
       }
 
+      // 멤버 변수 업데이트
       paths = parsedPath;
       branchinfo = parsedBranchInfos;
-
       yawRate2 = turnUpdate2(
               branchinfo[targetIndex].bearingToPoint, compassValue.value) *
           angleToRadian;
 
+      // 지도 업데이트
       await mapController!.clearOverlays(type: NOverlayType.marker);
       addOverlays(paths);
       addBranchMarkers();
-
+      
+      // 네비게이션 시작
       startNavigationTimer();
+      
     } catch (e) {
-      debugPrint('Failed to load path data : $e');
+      debugPrint('경로 데이터 로드 실패: $e');
     }
   }
 
-  // 경유지를 포함한 경로 API 호출
+  // 일반 경로 API 호출 (public)
+  Future<void> loadPathData(
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+    String chooseRoute,
+  ) async {
+    await _loadPathDataCore(
+      startLatitude: startLatitude,
+      startLongitude: startLongitude,
+      endLatitude: endLatitude,
+      endLongitude: endLongitude,
+      chooseRoute: chooseRoute,
+    );
+  }
+
+  // 경유지를 포함한 경로 API 호출 (public)
   Future<void> loadPathDataWithWaypoints(
     double startLatitude,
     double startLongitude,
@@ -496,50 +530,14 @@ class NaverMapViewController extends GetxController {
     List<LatLng> waypoints,
     String chooseRoute,
   ) async {
-    try {
-      final responseData = await apiService.fetchPathDataWithWaypoints(
-        startLatitude: startLatitude,
-        startLongitude: startLongitude,
-        endLatitude: endLatitude,
-        endLongitude: endLongitude,
-        waypoints: waypoints,
-        chooseRoute: chooseRoute,
-      );
-
-      /// 데이터 파싱
-      final parsedData = apiService.parsePathData(responseData);
-      final parsedPath = parsedData['paths'] as List<LatLng>;
-      final parsedBranchInfos = parsedData['branchInfo'] as List<BranchInfo>;
-
-      /// 데이터 로깅
-      debugPrint('paths with waypoints: $parsedPath');
-      debugPrint('branchInfoList with waypoints: $parsedBranchInfos');
-      debugPrint('경유지 개수: ${waypoints.length}');
-
-      // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
-      for (int i = 0; i < parsedBranchInfos.length - 1; i++) {
-        double newBearingValue = calculateBearing(
-          parsedBranchInfos[i].point.latitude,
-          parsedBranchInfos[i].point.longitude,
-          parsedBranchInfos[i + 1].point.latitude,
-          parsedBranchInfos[i + 1].point.longitude,
-        );
-        parsedBranchInfos[i].bearingToPoint = newBearingValue;
-      }
-
-      paths = parsedPath;
-      branchinfo = parsedBranchInfos;
-      yawRate2 = turnUpdate2(
-              branchinfo[targetIndex].bearingToPoint, compassValue.value) *
-          angleToRadian;
-
-      await mapController!.clearOverlays(type: NOverlayType.marker);
-      addOverlays(paths);
-      addBranchMarkers();
-      startNavigationTimer();
-    } catch (e) {
-      debugPrint('Failed to load path data with waypoints: $e');
-    }
+    await _loadPathDataCore(
+      startLatitude: startLatitude,
+      startLongitude: startLongitude,
+      endLatitude: endLatitude,
+      endLongitude: endLongitude,
+      chooseRoute: chooseRoute,
+      waypoints: waypoints,
+    );
   }
 
   /// startNavigationWithRoute: 즐겨찾기 경로를 사용한 경로 안내 시작
