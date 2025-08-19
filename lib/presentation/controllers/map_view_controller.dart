@@ -69,13 +69,16 @@ class NaverMapViewController extends GetxController {
   RxString destinationLocation = ''.obs;
 
   /// 경로선택
-  RxString choose_route = ''.obs;
+  RxString chooseRoute = ''.obs;
 
   /// 경로의 좌표 리스트
   List<LatLng> paths = [];
 
   /// 분기(체크포인트) 정보를 담은 리스트
   List<BranchInfo> branchinfo = [];
+  
+  /// 현재 경로의 경유지 리스트 (재검색시 사용)
+  List<LatLng> currentWaypoints = [];
 
   /// 시작 위치가 설정되었는지 여부
   RxBool isStart = false.obs;
@@ -434,7 +437,7 @@ class NaverMapViewController extends GetxController {
     double startLongitude,
     double endLatitude,
     double endLongitude,
-    String choose_route,
+    String chooseRoute,
   ) async {
     try {
       final responseData = await apiService.fetchPathData(
@@ -442,7 +445,7 @@ class NaverMapViewController extends GetxController {
         startLongitude: startLongitude,
         endLatitude: endLatitude,
         endLongitude: endLongitude,
-        choose_route: choose_route,
+        chooseRoute: chooseRoute,
       );
 
       /// 데이터 파싱
@@ -484,6 +487,102 @@ class NaverMapViewController extends GetxController {
     }
   }
 
+  // 경유지를 포함한 경로 API 호출
+  Future<void> loadPathDataWithWaypoints(
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+    List<LatLng> waypoints,
+    String chooseRoute,
+  ) async {
+    try {
+      final responseData = await apiService.fetchPathDataWithWaypoints(
+        startLatitude: startLatitude,
+        startLongitude: startLongitude,
+        endLatitude: endLatitude,
+        endLongitude: endLongitude,
+        waypoints: waypoints,
+        chooseRoute: chooseRoute,
+      );
+
+      /// 데이터 파싱
+      final parsedData = apiService.parsePathData(responseData);
+      final parsedPath = parsedData['paths'] as List<LatLng>;
+      final parsedBranchInfos = parsedData['branchInfo'] as List<BranchInfo>;
+
+      /// 데이터 로깅
+      debugPrint('paths with waypoints: $parsedPath');
+      debugPrint('branchInfoList with waypoints: $parsedBranchInfos');
+      debugPrint('경유지 개수: ${waypoints.length}');
+
+      // 브랜치 정보 업데이트 (각 브랜치 간의 방향 계산)
+      for (int i = 0; i < parsedBranchInfos.length - 1; i++) {
+        double newBearingValue = calculateBearing(
+          parsedBranchInfos[i].point.latitude,
+          parsedBranchInfos[i].point.longitude,
+          parsedBranchInfos[i + 1].point.latitude,
+          parsedBranchInfos[i + 1].point.longitude,
+        );
+        parsedBranchInfos[i].bearingToPoint = newBearingValue;
+      }
+
+      paths = parsedPath;
+      branchinfo = parsedBranchInfos;
+      yawRate2 = turnUpdate2(
+              branchinfo[targetIndex].bearingToPoint, compassValue.value) *
+          angleToRadian;
+
+      await mapController!.clearOverlays(type: NOverlayType.marker);
+      addOverlays(paths);
+      addBranchMarkers();
+      startNavigationTimer();
+    } catch (e) {
+      debugPrint('Failed to load path data with waypoints: $e');
+    }
+  }
+
+  /// startNavigationWithRoute: 즐겨찾기 경로를 사용한 경로 안내 시작
+  Future<void> startNavigationWithRoute({
+    required double startLatitude,
+    required double startLongitude,
+    required double endLatitude,
+    required double endLongitude,
+    required List<LatLng> waypoints,
+    required String chooseRoute,
+  }) async {
+    debugPrint('경유지 포함 경로 안내 시작');
+    debugPrint('출발지: $startLatitude, $startLongitude');
+    debugPrint('목적지: $endLatitude, $endLongitude');
+    debugPrint('경유지: ${waypoints.length}개');
+    
+    // 출발지, 목적지 설정
+    selectedStartLocation.value = GeoLocation(
+      lat: startLatitude,
+      lng: startLongitude,
+    );
+    selectedDestLocation.value = GeoLocation(
+      lat: endLatitude,
+      lng: endLongitude,
+    );
+    isSetStartLocation.value = true;
+    isSetDestinationLocation.value = true;
+    this.chooseRoute.value = chooseRoute;
+    
+    // 경유지 저장 (재검색시 사용)
+    currentWaypoints = waypoints;
+    
+    // 경유지 포함 경로 로드
+    await loadPathDataWithWaypoints(
+      startLatitude,
+      startLongitude,
+      endLatitude,
+      endLongitude,
+      waypoints,
+      chooseRoute,
+    );
+  }
+
   /// addOverlays: 지도에 경로 오버레이를 추가합니다.
   /// [paths]: 경로를 나타내는 LatLng 리스트.
   void addOverlays(List<LatLng> paths) {
@@ -506,19 +605,49 @@ class NaverMapViewController extends GetxController {
   }
 
   /// addBranchMarkers: 지도에 분기(체크포인트) 마커들을 추가합니다.
+  /// 경유지에 해당하는 분기점은 빨간색으로, 나머지는 초록색으로 표시합니다.
   void addBranchMarkers() async {
     if (mapController == null) return;
     Set<NAddableOverlay> markers = {};
-    final iconImage = await NOverlayImage.fromWidget(
+    
+    // 초록색 마커 이미지 (일반 분기점)
+    final greenIconImage = await NOverlayImage.fromWidget(
       widget: Icon(Icons.circle, color: Colors.green, size: 15),
       size: const Size(15, 15),
       context: navigatorKey.currentContext!,
     );
+    
+    // 빨간색 마커 이미지 (경유지 분기점) - 더 크게 표시
+    final redIconImage = await NOverlayImage.fromWidget(
+      widget: Icon(Icons.place, color: Colors.red, size: 20),
+      size: const Size(20, 20),
+      context: navigatorKey.currentContext!,
+    );
+    
     for (var branch in branchinfo) {
+      // 현재 분기점이 경유지인지 확인
+      bool isWaypoint = false;
+      for (var waypoint in currentWaypoints) {
+        // 경유지와 분기점 사이의 거리 계산 (미터 단위)
+        double distance = calculateDistance(
+          branch.point.latitude,
+          branch.point.longitude,
+          waypoint.latitude,
+          waypoint.longitude,
+        );
+        // 경유지로부터 20m 이내의 분기점은 경유지 마커로 표시
+        if (distance < 0.02) { // 20m = 0.02km
+          isWaypoint = true;
+          debugPrint('경유지 분기점 발견: ${branch.description}, 거리: ${distance * 1000}m');
+          break;
+        }
+      }
+      
+      // 경유지면 빨간색, 아니면 초록색 마커 사용
       _testMarker = NMarker(
         id: 'checkPoint_${branchinfo.indexOf(branch)}',
         position: NLatLng(branch.point.latitude, branch.point.longitude),
-        icon: iconImage,
+        icon: isWaypoint ? redIconImage : greenIconImage,
       );
       markers.add(_testMarker!);
     }
@@ -1106,12 +1235,14 @@ class NaverMapViewController extends GetxController {
   Future<void> startNavigation() async {
     if (isSetStartLocation.value && isSetDestinationLocation.value) {
       debugPrint('경로 선택 완료. 경로 탐색을 시작합니다.');
+      // 일반 경로 안내시에는 경유지 초기화
+      currentWaypoints.clear();
       await loadPathData(
           selectedStartLocation.value!.lat,
           selectedStartLocation.value!.lng,
           selectedDestLocation.value!.lat,
           selectedDestLocation.value!.lng,
-          choose_route.value);
+          chooseRoute.value);
     } else {
       debugPrint('출발지 또는 목적지가 설정되지 않았습니다.');
     }
@@ -1165,13 +1296,26 @@ class NaverMapViewController extends GetxController {
           debugPrint('출발지와 너무 멀어짐. 10초 후 자동으로 경로 재검색 수행');
 
           // 현재 위치를 새로운 출발지로 설정하고 지도 업데이트
-          await loadPathData(
-            current_latitude.value,
-            current_longitude.value,
-            selectedDestLocation.value!.lat,
-            selectedDestLocation.value!.lng,
-            choose_route.value,
-          );
+          // 경유지가 있으면 경유지 포함 경로 재검색
+          if (currentWaypoints.isNotEmpty) {
+            debugPrint('경유지 ${currentWaypoints.length}개를 포함한 경로 재검색');
+            await loadPathDataWithWaypoints(
+              current_latitude.value,
+              current_longitude.value,
+              selectedDestLocation.value!.lat,
+              selectedDestLocation.value!.lng,
+              currentWaypoints,
+              chooseRoute.value,
+            );
+          } else {
+            await loadPathData(
+              current_latitude.value,
+              current_longitude.value,
+              selectedDestLocation.value!.lat,
+              selectedDestLocation.value!.lng,
+              chooseRoute.value,
+            );
+          }
           speakText("출발지에 벗어나 새로운 경로로 안내합니다.");
           debugPrint('출발지를 현재 위치로 변경하고 지도 업데이트 완료');
           searchStartNewPathTime = 0; // 카운트 초기화
@@ -1244,13 +1388,26 @@ class NaverMapViewController extends GetxController {
           if (searchNewPath) {
             searchNewPathTime++;
             if (searchNewPathTime >= 5) {
-              await loadPathData(
-                current_latitude.value,
-                current_longitude.value,
-                selectedDestLocation.value!.lat,
-                selectedDestLocation.value!.lng,
-                choose_route.value,
-              );
+              // 경유지가 있으면 경유지 포함 경로 재검색
+              if (currentWaypoints.isNotEmpty) {
+                debugPrint('경로 이탈 - 경유지 ${currentWaypoints.length}개를 포함한 경로 재검색');
+                await loadPathDataWithWaypoints(
+                  current_latitude.value,
+                  current_longitude.value,
+                  selectedDestLocation.value!.lat,
+                  selectedDestLocation.value!.lng,
+                  currentWaypoints,
+                  chooseRoute.value,
+                );
+              } else {
+                await loadPathData(
+                  current_latitude.value,
+                  current_longitude.value,
+                  selectedDestLocation.value!.lat,
+                  selectedDestLocation.value!.lng,
+                  chooseRoute.value,
+                );
+              }
               speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
               searchNewPathTime = 0;
             }
@@ -1348,6 +1505,7 @@ class NaverMapViewController extends GetxController {
     destinationLocation.value = '';
     paths.clear();
     branchinfo.clear();
+    currentWaypoints.clear(); // 경유지 정보 초기화
   }
 
   /// 경로 안내 종료 및 지도 초기화(비동기식)

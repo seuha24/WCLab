@@ -16,6 +16,39 @@ class NaverMapView extends GetView<NaverMapViewController> {
 
     // 컨트롤러 생성 및 등록 (Get.put()을 통해 NaverMapViewController의 인스턴스를 주입)
     final NaverMapViewController controller = Get.put(NaverMapViewController());
+    
+    // 경로 선택 BottomSheet 표시 함수 (공통)
+    Future<String?> showRouteSelectionBottomSheet() async {
+      return await showModalBottomSheet<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, "0"),
+                  child: Text("추천"),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, "4"),
+                  child: Text("추천+대로우선"),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, "10"),
+                  child: Text("최단"),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, "30"),
+                  child: Text("최단거리+계단제외"),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
     return Scaffold(
         body: Stack(
@@ -227,41 +260,13 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         controller.handleDestinationLocationSelection(newDest);
 
                         // 경로 선택 BottomSheet 표시
-                        String? selectedRoute = await showModalBottomSheet<String>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Container(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "0"),
-                                    child: Text("추천"),
-                                    ),
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "4"),
-                                    child: Text("추천+대로우선"),
-                                    ),
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "10"),
-                                    child: Text("최단"),
-                                    ),
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "30"),
-                                    child: Text("최단거리+계단제외"),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                          if (selectedRoute != null) {
-                          controller.choose_route.value = selectedRoute;
-                          debugPrint('선택된 경로: ${controller.choose_route.value}');
+                        String? selectedRoute = await showRouteSelectionBottomSheet();
+                        if (selectedRoute != null) {
+                          controller.chooseRoute.value = selectedRoute;
+                          debugPrint('선택된 경로: ${controller.chooseRoute.value}');
                           // 경로 선택 완료 후 경로 탐색 시작
                           await controller.startNavigation();
-                          }
+                        }
                       }
                     },
                     child: Container(
@@ -338,6 +343,11 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     );
                     
                     if (result != null && result is Map) {
+                      // 경로 선택 BottomSheet 표시
+                      String? selectedRoute = await showRouteSelectionBottomSheet();
+                      
+                      if (selectedRoute == null) return; // 경로 선택 취소시 종료
+                      
                       if (result['type'] == 'point') {
                         // 즐겨찾기 지점 선택 시
                         final favoritePoint = result['data'] as FavoritePoint;
@@ -360,48 +370,47 @@ class NaverMapView extends GetView<NaverMapViewController> {
                           ),
                         );
                         
-                        // 경로 선택 BottomSheet 표시
-                        String? selectedRoute = await showModalBottomSheet<String>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Container(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "0"),
-                                    child: Text("추천"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "4"),
-                                    child: Text("추천+대로우선"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "10"),
-                                    child: Text("최단"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, "30"),
-                                    child: Text("최단거리+계단제외"),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                        controller.chooseRoute.value = selectedRoute;
+                        debugPrint('선택된 경로: ${controller.chooseRoute.value}');
+                        // 경로 선택 완료 후 경로 탐색 시작
+                        await controller.startNavigation();
+                        
+                      } else if (result['type'] == 'route') {
+                        // 경로 즐겨찾기를 사용한 경유지 포함 경로 안내
+                        final route = result['data'] as FavoriteRoute;
+                        
+                        // 출발지와 목적지가 설정되어 있는지 확인
+                        if (route.startPoint == null || route.finishPoint == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('경로의 출발지 또는 목적지가 설정되지 않았습니다.')),
+                          );
+                          return;
+                        }
+                        
+                        // 경유지 리스트 준비 (null이 아닌 경유지만 포함)
+                        final waypoints = route.stopovers
+                            .where((p) => p != null)
+                            .map((p) => LatLng(p!.latitude, p.longitude))
+                            .toList();
+                        
+                        // 경유지 포함 경로 안내 시작
+                        await controller.startNavigationWithRoute(
+                          startLatitude: route.startPoint!.latitude,
+                          startLongitude: route.startPoint!.longitude,
+                          endLatitude: route.finishPoint!.latitude,
+                          endLongitude: route.finishPoint!.longitude,
+                          waypoints: waypoints,
+                          chooseRoute: selectedRoute,
                         );
                         
-                        if (selectedRoute != null) {
-                          controller.choose_route.value = selectedRoute;
-                          debugPrint('선택된 경로: ${controller.choose_route.value}');
-                          // 경로 선택 완료 후 경로 탐색 시작
-                          await controller.startNavigation();
-                        }
-                      } else if (result['type'] == 'route') {
-                        // 경로 즐겨찾기는 일단 지점만 처리
-                        // TODO: 추후 경유지 포함 경로 안내 구현
+                        final waypointCount = waypoints.length;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('경로 즐겨찾기는 준비 중입니다.')),
+                          SnackBar(
+                            content: Text(waypointCount > 0 
+                              ? '경유지 $waypointCount개를 포함한 경로 안내를 시작합니다.' 
+                              : '경로 안내를 시작합니다.'),
+                            duration: Duration(seconds: 2),
+                          ),
                         );
                       }
                     }

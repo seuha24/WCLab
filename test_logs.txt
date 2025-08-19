@@ -6,59 +6,57 @@
 
 [로그 시작]
 
-flutter: === 즐겨찾기 경로 추가 요청 데이터 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/save/fav/route
-flutter: JSON 데이터:
-flutter: {
-flutter:   "login_method": "google",
-flutter:   "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter:   "list": {
-flutter:     "name": "학교가는 길",
-flutter:     "start_point": {
-flutter:       "lon": 126.81194679579276,
-flutter:       "lat": 37.485380633713575
-flutter:     },
-flutter:     "finish_point": {
-flutter:       "lon": 126.80472166634472,
-flutter:       "lat": 37.48598076638508
-flutter:     },
-flutter:     "stopovers": [
-flutter:       {
-flutter:         "lon": 126.80963488665792,
-flutter:         "lat": 37.48510231079268
-flutter:       },
-flutter:       null,
-flutter:       null,
-flutter:       null,
-flutter:       null
-flutter:     ]
-flutter:   }
-flutter: }
-flutter: =====================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU0Mjc0ODIsImV4cCI6MTc1NjUwNzQ4MiwiaXNzIjoibG9jYWxob3N0In0.osvykdeSUJLo5OjEvcpd_RlOONAoYkZfuW0n15uOCnnmvRT-sNRb-kAP6V5lH-aT38RZ7z-qTo-nk8cPNQ_d-a6wKv6Kd0F96Y5dNaDHL34IZeLOO9ogRC-V1-ywtLzYS_VCspBYEHtmnSl5Z3T7Xf11PhzWSaUzHHhyhHua1gdIbytinoubVGSgMohYd2Tyr3Tosx8tTYLpz4i-QHC91HsPyCaLspBCu1wOHwLHwCxd6IvGHifH4MHEycNgDxSmN1P2dhh_h6vNMh4dZglgAD7nydZnb76_BCATlt2cB9sVBTglFDljIbMV_c4DHbbsfCzQCgxlfJVNdcBbrF66qg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTQyNzQ4MiwiZXhwIjoxNzU4MDE5NDgyLCJpc3MiOiJsb2NhbGhvc3QifQ.BdH9p9tSe-K-xZD82pZZU7du7pi30vK4u6GkpKZgslfMUNuUDPj51KPdDCWm0XD3IaRMNsW8T6sYBMbRo_CbsuUqhvj8O7wO7wJ6NT150H7y3IRxabLpANPQMX0RFiJBVD4WO__g10pw2owTnyV4Sz2c64MuJAfo4bZK8kvqSpFQ3D1XiNYVVAvBG96K543LLT6CxV0OZUjLl1MV2rfLaIFMjyY2m8NNWcnKQ5Ia6l6rSjGYBNBU0GpMeoYeiLAYdByU_LeEkbZCvXldB4EQaAkNM9I39rGUnqKjcB-dJMs7TOIP1QGb4NSicbRGq_DZIWAkfryW39ngbif5OxoVSQ
-flutter:
-flutter: ╔╣ Request ║ POST
-flutter: ║  http://aws2.cuksl.xyz:3003/save/fav/route
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ DioError ║ Status: 404 Not Found ║ Time: 19 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/save/fav/route
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ DioExceptionType.badResponse
-flutter: ║ <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Error</title>
-</head
-flutter: ║ >
-<body>
-<pre>Cannot POST /save/fav/route</pre>
-</body>
-</html>
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
+flutter: 경유지 포함 경로 안내 시작
+flutter: 출발지: 37.50017720642566, 126.90915518822597
+flutter: 목적지: 37.48601525220175, 126.80252003762196
+flutter: 경유지: 1개
+flutter: paths with waypoints: [LatLng(latitude:37.500178, longitude:126.909157), LatLng(latitude:37.500128, longitude:126.909154), LatLng(latitude:37.500128, longitude:126.909154), LatLng(latitude:37.500133, longitude:126.908846), LatLng(latitude:37.500133, longitude:126.908846), LatLng(latitude:37.500236, longitude:126.908843), LatLng(latitude:37.500244, longitude:126.908454), LatLng(latitude:37.500267, longitude:126.908432), LatLng(latitude:37.500267, longitude:126.908432), LatLng(latitude:37.500269, longitude:126.907957), LatLng(latitude:37.500267, longitude:126.907696), LatLng(latitude:37.500278, longitude:126.906585), LatLng(latitude:37.500281, longitude:126.906402), LatLng(latitude:37.500283, longitude:126.906299), LatLng(latitude:37.500292, longitude:126.905993), LatLng(latitude:37.500331, longitude:126.905916), LatLng(latitude:37.500331, longitude:126.905916), LatLng(latitude:37.500386, longitude:126.905807), LatLng(latitude:37.500442, longitude:126.905718), LatLng(latitude:37.500442, <…>
+flutter: branchInfoList with waypoints: [BranchInfo{point: LatLng(latitude:37.500178, longitude:126.909157), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500128, longitude:126.909154), : true, description: 더페이스샵 신풍역점에서 우회전 후 27m 이동, bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500133, longitude:126.908846), : true, description: 신풍역  4번출구에서 우회전 후 49m 이동, bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500236, longitude:126.908843), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500244, longitude:126.908454), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500267, longitude:126.908432), : true, description: 신풍역  3번출구에서 좌회전 후 신풍로를 따라 223m 이동, bearingToBranch: 0.0, crosswal<…>
+flutter: 경유지 개수: 1
+flutter: startNavigationTimer()
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 2
+flutter: 각도 초기화
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: Speaking: 1시 방향
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 4
+flutter: 각도 초기화
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: Speaking: 6시 방향
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 6
+flutter: 각도 초기화
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: Speaking: 5시 방향
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 8
+flutter: 각도 초기화
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: Speaking: 3시 방향
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: 경로 이탈 - 경유지 1개를 포함한 경로 재검색
+flutter: Speaking: 8시 방향
+flutter: paths with waypoints: [LatLng(latitude:37.497278, longitude:126.906791), LatLng(latitude:37.497328, longitude:126.90661), LatLng(latitude:37.497359, longitude:126.906538), LatLng(latitude:37.497495, longitude:126.90621), LatLng(latitude:37.497611, longitude:126.905841), LatLng(latitude:37.497611, longitude:126.905818), LatLng(latitude:37.49762, longitude:126.905519), LatLng(latitude:37.49762, longitude:126.905519), LatLng(latitude:37.497731, longitude:126.905524), LatLng(latitude:37.497839, longitude:126.905518), LatLng(latitude:37.49795, longitude:126.905538), LatLng(latitude:37.498167, longitude:126.905677), LatLng(latitude:37.498167, longitude:126.905677), LatLng(latitude:37.498172, longitude:126.905643), LatLng(latitude:37.498259, longitude:126.905377), LatLng(latitude:37.498261, longitude:126.905363), LatLng(latitude:37.498317, longitude:126.905196), LatLng(latitude:37.498325, longitude:126.90518), LatLng(latitude:37.498478, longitude:126.904852), LatLng(latitude:37.498528, longit<…>
+flutter: branchInfoList with waypoints: [BranchInfo{point: LatLng(latitude:37.497278, longitude:126.906791), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497328, longitude:126.90661), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497359, longitude:126.906538), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497495, longitude:126.90621), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497611, longitude:126.905841), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497611, longitude:126.905818), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.49762, longitude:126.905519), : true, description: 우회전 후 64m 이동, bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point:<…>
+flutter: 경유지 개수: 1
+flutter: startNavigationTimer()
+flutter: Speaking: 경로를 이탈하여 새로운 경로로 안내합니다.
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 6
+flutter: 각도 초기화
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: Speaking: 7시 방향
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 4
+flutter: 각도 초기화
+flutter: 경계이탈
+flutter: searchNewPath : true
+flutter: Speaking: 8시 방향
+flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 2
+flutter: 각도 초기화
+flutter: 경로 안내가 성공적으로 종료되었습니다.
+
 
 [로그 끝]
 

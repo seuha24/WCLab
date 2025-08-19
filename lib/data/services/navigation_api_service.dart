@@ -69,7 +69,7 @@ class NavigationApiService {
     //required double current_longitude,
     required double endLatitude,
     required double endLongitude,
-    required String choose_route,
+    required String chooseRoute,
   }) async {
     final Map<String, dynamic> requestData = {
       //"startX": current_longitude,
@@ -84,10 +84,80 @@ class NavigationApiService {
       "reqCoordType": "WGS84GEO",
       "startName": "%EC%B6%9C%EB%B0%9C",
       "endName": "%EB%8F%84%EC%B0%A9",
-      "searchOption": choose_route,
+      "searchOption": chooseRoute,
       "resCoordType": "WGS84GEO",
       "sort": "index"
     };
+
+    final response = await http.post(
+      Uri.parse(_apiUrl),
+      headers: _headers,
+      body: jsonEncode(requestData),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('API 호출 실패: ${response.statusCode}');
+    }
+  }
+
+  /// **fetchPathDataWithWaypoints**
+  ///
+  /// 경유지를 포함한 경로 데이터를 API를 통해 가져오는 메서드입니다.
+  ///
+  /// - **매개변수**:
+  ///   - `startLatitude` (double): 출발지의 위도.
+  ///   - `startLongitude` (double): 출발지의 경도.
+  ///   - `endLatitude` (double): 목적지의 위도.
+  ///   - `endLongitude` (double): 목적지의 경도.
+  ///   - `waypoints` (List<LatLng>): 경유지 좌표 리스트 (최대 5개).
+  ///   - `chooseRoute` (String): 경로 탐색 옵션.
+  ///
+  /// - **반환값**:
+  ///   - `Future<Map<String, dynamic>>`: API의 JSON 응답 데이터를 반환합니다.
+  ///
+  /// - **예외**:
+  ///   - API 호출 실패 시 `Exception`이 발생합니다.
+  ///   - 경유지가 5개를 초과하면 `Exception`이 발생합니다.
+  Future<Map<String, dynamic>> fetchPathDataWithWaypoints({
+    required double startLatitude,
+    required double startLongitude,
+    required double endLatitude,
+    required double endLongitude,
+    required List<LatLng> waypoints,
+    required String chooseRoute,
+  }) async {
+    // 경유지 최대 5개 제한
+    if (waypoints.length > 5) {
+      throw Exception('경유지는 최대 5개까지 설정할 수 있습니다.');
+    }
+
+    // 경유지를 passList 형식으로 변환 (longitude,latitude_longitude,latitude)
+    String passList = '';
+    if (waypoints.isNotEmpty) {
+      passList = waypoints
+          .map((point) => '${point.longitude},${point.latitude}')
+          .join('_');
+    }
+
+    final Map<String, dynamic> requestData = {
+      "startX": startLongitude,
+      "startY": startLatitude,
+      "endX": endLongitude,
+      "endY": endLatitude,
+      "reqCoordType": "WGS84GEO",
+      "startName": "%EC%B6%9C%EB%B0%9C",
+      "endName": "%EB%8F%84%EC%B0%A9",
+      "searchOption": chooseRoute,
+      "resCoordType": "WGS84GEO",
+      "sort": "index"
+    };
+
+    // 경유지가 있으면 passList 추가
+    if (passList.isNotEmpty) {
+      requestData["passList"] = passList;
+    }
 
     final response = await http.post(
       Uri.parse(_apiUrl),
