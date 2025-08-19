@@ -52,7 +52,6 @@ part '../presentation/views/sign_in_view.dart';
 part '../presentation/views/destination_search_view.dart';
 part '../presentation/views/startspot_search_view.dart';
 part '../presentation/views/test_view.dart';
-//part '../presentation/views/waypoint_navigation_view.dart';
 part '../presentation/views/destination_picker_view.dart';
 part '../presentation/views/entrance_selection_view.dart';
 part '../presentation/views/entrance_registration_view.dart';
