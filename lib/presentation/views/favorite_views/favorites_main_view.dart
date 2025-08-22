@@ -9,10 +9,10 @@ import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:safelight/domain/entities/favorite_point.dart';
 import 'package:safelight/domain/entities/favorite_route.dart';
 import 'package:safelight/domain/usecases/favorite_usecase.dart';
-import 'package:safelight/presentation/views/favorite_point_add_view.dart';
-import 'package:safelight/presentation/views/favorite_point_edit_view.dart';
-import 'package:safelight/presentation/views/favorite_route_add_view.dart';
-import 'package:safelight/presentation/views/favorite_route_edit_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_point_add_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_point_edit_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_route_add_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_route_edit_view.dart';
 import 'package:safelight/framework/controller.dart';
 
 class FavoritesMainView extends StatefulWidget {
@@ -453,8 +453,8 @@ class _FavoritesMainViewState extends State<FavoritesMainView>
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
-                        child:
-                            const Text('삭제', style: TextStyle(color: Colors.red)),
+                        child: const Text('삭제',
+                            style: TextStyle(color: Colors.red)),
                       ),
                     ],
                   );
@@ -619,8 +619,8 @@ class _FavoritesMainViewState extends State<FavoritesMainView>
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
-                        child:
-                            const Text('삭제', style: TextStyle(color: Colors.red)),
+                        child: const Text('삭제',
+                            style: TextStyle(color: Colors.red)),
                       ),
                     ],
                   );

@@ -1,4 +1,4 @@
-part of '../../framework/ui.dart';
+part of '../../../framework/ui.dart';
 
 class EntranceRegistrationView extends StatefulWidget {
   const EntranceRegistrationView({super.key});
