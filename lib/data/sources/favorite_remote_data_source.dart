@@ -35,6 +35,37 @@ abstract class FavoriteRemoteDataSource {
     required RoutePoint? finishPoint,
     required List<RoutePoint?> stopovers,
   });
+
+  Future<bool> deleteFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  });
+
+  Future<bool> deleteFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  });
+
+  Future<bool> updateFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required double longitude,
+    required double latitude,
+  });
+
+  Future<bool> updateFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
+  });
 }
 
 class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
@@ -205,6 +236,153 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
       
       final response = await dioClient.dio.post(
         ApiEndpoints.addFavoriteRoute,
+        data: requestData,
+      );
+
+      return response.data['success'] == true;
+    } on DioException {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<bool> deleteFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  }) async {
+    try {
+      final requestData = {
+        'login_method': loginMethod,
+        'ID': userId,
+        'fav_idx': favIdx,
+      };
+      
+      debugPrint('=== 즐겨찾기 지점 삭제 요청 ===');
+      debugPrint('URL: ${ApiEndpoints.deleteFavoritePoint}');
+      debugPrint('Request: $requestData');
+      
+      final response = await dioClient.dio.post(
+        ApiEndpoints.deleteFavoritePoint,
+        data: requestData,
+      );
+
+      return response.data['success'] == true;
+    } on DioException {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<bool> deleteFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  }) async {
+    try {
+      final requestData = {
+        'login_method': loginMethod,
+        'ID': userId,
+        'fav_idx': favIdx,
+      };
+      
+      debugPrint('=== 즐겨찾기 경로 삭제 요청 ===');
+      debugPrint('URL: ${ApiEndpoints.deleteFavoriteRoute}');
+      debugPrint('Request: $requestData');
+      
+      final response = await dioClient.dio.post(
+        ApiEndpoints.deleteFavoriteRoute,
+        data: requestData,
+      );
+
+      return response.data['success'] == true;
+    } on DioException {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<bool> updateFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required double longitude,
+    required double latitude,
+  }) async {
+    try {
+      final requestData = {
+        'login_method': loginMethod,
+        'ID': userId,
+        'fav_idx': favIdx,
+        'new_fav_point': {
+          'name': name,
+          'lon': longitude,
+          'lat': latitude,
+        },
+      };
+      
+      debugPrint('=== 즐겨찾기 지점 수정 요청 ===');
+      debugPrint('URL: ${ApiEndpoints.updateFavoritePoint}');
+      debugPrint('Request: $requestData');
+      
+      final response = await dioClient.dio.post(
+        ApiEndpoints.updateFavoritePoint,
+        data: requestData,
+      );
+
+      return response.data['success'] == true;
+    } on DioException {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<bool> updateFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
+  }) async {
+    try {
+      final requestData = {
+        'login_method': loginMethod,
+        'ID': userId,
+        'fav_idx': favIdx,
+        'list': {
+          'name': name,
+          'start_point': startPoint != null
+              ? {
+                  'lon': startPoint.longitude,
+                  'lat': startPoint.latitude,
+                }
+              : null,
+          'finish_point': finishPoint != null
+              ? {
+                  'lon': finishPoint.longitude,
+                  'lat': finishPoint.latitude,
+                }
+              : null,
+          'stopovers': stopovers.map((point) {
+            if (point == null) return null;
+            return {
+              'lon': point.longitude,
+              'lat': point.latitude,
+            };
+          }).toList(),
+        },
+      };
+      
+      debugPrint('=== 즐겨찾기 경로 수정 요청 ===');
+      debugPrint('URL: ${ApiEndpoints.updateFavoriteRoute}');
+      debugPrint('JSON 데이터:');
+      debugPrint(const JsonEncoder.withIndent('  ').convert(requestData));
+      
+      final response = await dioClient.dio.post(
+        ApiEndpoints.updateFavoriteRoute,
         data: requestData,
       );
 

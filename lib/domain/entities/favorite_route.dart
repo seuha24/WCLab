@@ -14,12 +14,14 @@ class RoutePoint extends Equatable {
 }
 
 class FavoriteRoute extends Equatable {
+  final String? favIdx;  // 관리용 인덱스 (서버에서 제공)
   final String name;
   final RoutePoint? startPoint;
   final RoutePoint? finishPoint;
   final List<RoutePoint?> stopovers;
 
   const FavoriteRoute({
+    this.favIdx,
     required this.name,
     required this.startPoint,
     required this.finishPoint,
@@ -27,5 +29,5 @@ class FavoriteRoute extends Equatable {
   });
 
   @override
-  List<Object?> get props => [name, startPoint, finishPoint, stopovers];
+  List<Object?> get props => [favIdx, name, startPoint, finishPoint, stopovers];
 }

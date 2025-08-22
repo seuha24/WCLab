@@ -89,4 +89,90 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
       return Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> deleteFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  }) async {
+    try {
+      final result = await remoteDataSource.deleteFavoritePoint(
+        loginMethod: loginMethod,
+        userId: userId,
+        favIdx: favIdx,
+      );
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> deleteFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  }) async {
+    try {
+      final result = await remoteDataSource.deleteFavoriteRoute(
+        loginMethod: loginMethod,
+        userId: userId,
+        favIdx: favIdx,
+      );
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> updateFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required double longitude,
+    required double latitude,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateFavoritePoint(
+        loginMethod: loginMethod,
+        userId: userId,
+        favIdx: favIdx,
+        name: name,
+        longitude: longitude,
+        latitude: latitude,
+      );
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> updateFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateFavoriteRoute(
+        loginMethod: loginMethod,
+        userId: userId,
+        favIdx: favIdx,
+        name: name,
+        startPoint: startPoint,
+        finishPoint: finishPoint,
+        stopovers: stopovers,
+      );
+      return Right(result);
+    } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
 }

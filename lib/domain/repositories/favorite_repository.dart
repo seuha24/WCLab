@@ -30,4 +30,35 @@ abstract class FavoriteRepository {
     required RoutePoint? finishPoint,
     required List<RoutePoint?> stopovers,
   });
+
+  Future<Either<Failure, bool>> deleteFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  });
+
+  Future<Either<Failure, bool>> deleteFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+  });
+
+  Future<Either<Failure, bool>> updateFavoritePoint({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required double longitude,
+    required double latitude,
+  });
+
+  Future<Either<Failure, bool>> updateFavoriteRoute({
+    required String loginMethod,
+    required String userId,
+    required String favIdx,
+    required String name,
+    required RoutePoint? startPoint,
+    required RoutePoint? finishPoint,
+    required List<RoutePoint?> stopovers,
+  });
 }

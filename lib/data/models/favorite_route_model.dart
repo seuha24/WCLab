@@ -29,11 +29,13 @@ class RoutePointModel extends RoutePoint {
 
 class FavoriteRouteModel extends FavoriteRoute {
   const FavoriteRouteModel({
+    String? favIdx,
     required String name,
     required RoutePoint? startPoint,
     required RoutePoint? finishPoint,
     required List<RoutePoint?> stopovers,
   }) : super(
+          favIdx: favIdx,
           name: name,
           startPoint: startPoint,
           finishPoint: finishPoint,
@@ -56,6 +58,7 @@ class FavoriteRouteModel extends FavoriteRoute {
     }).toList();
 
     return FavoriteRouteModel(
+      favIdx: json['fav_idx']?.toString(),
       name: json['name'],
       startPoint: startPoint,
       finishPoint: finishPoint,
@@ -90,6 +93,7 @@ class FavoriteRouteModel extends FavoriteRoute {
 
   FavoriteRoute toEntity() {
     return FavoriteRoute(
+      favIdx: favIdx,
       name: name,
       startPoint: startPoint,
       finishPoint: finishPoint,

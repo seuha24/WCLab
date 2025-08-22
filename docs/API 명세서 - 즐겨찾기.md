@@ -6,7 +6,7 @@
 **GET** `/favorites`
 
 ## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
-- **Base URL**: `http://cuksl.xyz:3003/fav_point/google/userID`
+- **Base URL**: `http://aws2.cuksl.xyz:3003/fav_point/google/userID`
 
 #### Response
 ```json
@@ -15,12 +15,14 @@
   "ID": "userID",
   "list": [
     {
+      "fav_idx": "idx", //관리용 인덱스
       "name": "우리집",
       "lon": 126.8015, //출입구 좌표
       "lat": 37.4859
     },
     {
-      "name": "짱구네",
+      "fav_idx": "idx", //관리용 인덱스
+      "name": "짱구네",   
       "lon": 126.8015, //출입구 좌표
       "lat": 37.4859
     }
@@ -31,8 +33,8 @@
 ### 2. 즐겨찾기 목록 조회 (경로)
 **GET** `/favorites`
 
-## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
-- **Base URL**: `http://cuksl.xyz:3003/fav_route/google/userID`
+## 사용자별 즐겨찾기 정보 등록 (경로) 요청 URL
+- **Base URL**: `http://aws2.cuksl.xyz:3003/fav_route/google/userID`
 
 #### Response
 ```json
@@ -41,6 +43,7 @@
   "ID": "userID",
   "list": [
     {
+      "fav_idx": "idx", //관리용 인덱스
       "name": "짱구네 가는 길",
       "start_point": { "lon": 126.8015, "lat": 37.4859 },
       "finish_point": { "lon": 126.8015, "lat": 37.4859 },
@@ -49,6 +52,7 @@
       ]
     },
     {
+      "fav_idx": "idx", //관리용 인덱스
       "name": "역곡역 가는 길",
       "start_point": { "lon": 126.8015, "lat": 37.4859 },
       "finish_point": { "lon": 126.8015, "lat": 37.4859 },
@@ -75,7 +79,7 @@
 **POST** `/favorites`
 
 ## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
-- **Base URL**: `http://cuksl.xyz:3003/save/fav/point`
+- **Base URL**: `http://aws2.cuksl.xyz:3003/save/fav/point`
 
 #### Request Body
 ```json
@@ -97,7 +101,7 @@
 HTTP/1.1 200 OK
 Content-Type: application/json
 {
-  "success": true
+  "success": true,
   "entrance_point":
     {
       "lon": 126.8015, //출입구 좌표 반환
@@ -126,13 +130,188 @@ Content-Type: application/json
 ### 4. 즐겨찾기 정보 등록 (경로)
 **POST** `/favorites`
 
-## 사용자별 즐겨찾기 정보 등록 (지점) 요청 URL
-- **Base URL**: `http://cuksl.xyz:3003/save/fav/route`
+## 사용자별 즐겨찾기 정보 등록 (경로) 요청 URL
+- **Base URL**: `http://aws2.cuksl.xyz:3003/save/fav/route`
 
 #### Request Body
 ```json
 {
   "login_method": "Google",
+  "ID": "userID",
+  "list":
+    {
+      "name": "짱구네 가는 길",
+      "start_point": { "lon": 126.8015, "lat": 37.4859 },
+      "finish_point": { "lon": 126.8015, "lat": 37.4859 },
+      "stopovers": [
+        { "lon": 126.8015, "lat": 37.4859 },
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+}
+```
+
+[성공]
+HTTP/1.1 200 OK
+Content-Type: application/
+```json
+{
+  "success": true
+}
+```
+
+[파라미터누락]
+HTTP/1.1 400 Bad Request
+Content-Type: application/
+```json
+{
+  "success": false,
+  "잘못된 요청입니다."
+}
+```
+
+[서버 다운 등 서버측 문제 발생]
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+
+
+### 5. 즐겨찾기 정보 삭제 (지점)
+**POST** `/favorites`
+
+## 사용자별 즐겨찾기 정보 삭제 (지점) 요청 URL
+- **Base URL**: `http://aws2.cuksl.xyz:3003/delete/fav/point`
+
+#### Request Body
+```json
+{
+  "login_method": "Google", 
+  "ID": "userID", 
+  "fav_idx": "idx", //관리용 인덱스
+}
+```
+
+[성공]
+HTTP/1.1 200 OK
+Content-Type: application/
+```json
+{
+  "success": true
+}
+```
+
+[파라미터누락]
+HTTP/1.1 400 Bad Request
+Content-Type: application/
+```json
+{
+  "success": false,
+  "잘못된 요청입니다."
+}
+```
+
+[서버 다운 등 서버측 문제 발생]
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+
+
+### 6. 즐겨찾기 정보 삭제 (경로)
+**POST** `/favorites`
+
+## 사용자별 즐겨찾기 정보 삭제 (경로) 요청 URL
+- **Base URL**: `http://aws2.cuksl.xyz:3003/delete/fav/route`
+
+#### Request Body
+```json
+{
+  "login_method": "Google", 
+  "ID": "userID", 
+  "fav_idx": "idx", //관리용 인덱스
+}
+```
+
+[성공]
+HTTP/1.1 200 OK
+Content-Type: application/
+```json
+{
+  "success": true
+}
+```
+
+[파라미터누락]
+HTTP/1.1 400 Bad Request
+Content-Type: application/
+```json
+{
+  "success": false,
+  "잘못된 요청입니다."
+}
+```
+
+[서버 다운 등 서버측 문제 발생]
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+
+
+### 7. 즐겨찾기 정보 수정 (지점)
+**POST** `/favorites`
+
+## 사용자별 즐겨찾기 정보 수정 (지점) 요청 URL
+- **Base URL**: `http://aws2.cuksl.xyz:3003/alter/fav/point`
+
+#### Request Body
+```json
+{
+  "login_method": "Google",
+  "fav_idx": "idx", //관리용 인덱스
+  "ID": "userID",
+  "new_fav_point":
+    {
+      "name": "우리집",
+      "lon": 126.8015, //건물 중심점 좌표
+      "lat": 37.4859
+    }
+}
+```
+
+[성공]
+HTTP/1.1 200 OK
+Content-Type: application/
+```json
+{
+  "success": true
+}
+```
+
+[파라미터누락]
+HTTP/1.1 400 Bad Request
+Content-Type: application/
+```json
+{
+  "success": false,
+  "잘못된 요청입니다."
+}
+```
+
+[서버 다운 등 서버측 문제 발생]
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+
+
+### 8. 즐겨찾기 정보 수정 (경로)
+**POST** `/favorites`
+
+## 사용자별 즐겨찾기 정보 수정 (경로) 요청 URL
+- **Base URL**: `http://aws2.cuksl.xyz:3003/alter/fav/route`
+
+#### Request Body
+```json
+{
+  "login_method": "Google",
+  "fav_idx": "idx", //관리용 인덱스
   "ID": "userID",
   "list":
     {
