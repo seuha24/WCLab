@@ -76,7 +76,7 @@ class NaverMapViewController extends GetxController {
 
   /// 분기(체크포인트) 정보를 담은 리스트
   List<BranchInfo> branchinfo = [];
-  
+
   /// 현재 경로의 경유지 리스트 (재검색시 사용)
   List<LatLng> currentWaypoints = [];
 
@@ -161,7 +161,7 @@ class NaverMapViewController extends GetxController {
 
   // 경계 및 재경로 검색 관련 변수들
   bool outOfBound = false;
-  double boundary = 1.5;  // 경계 이탈 감지 거리 (1.5미터)
+  double boundary = 1.5; // 경계 이탈 감지 거리 (1.5미터)
   bool searchNewPath = false;
   double searchNewPathBoundary = 15;
   int searchNewPathTime = 0;
@@ -495,10 +495,9 @@ class NaverMapViewController extends GetxController {
       await mapController!.clearOverlays(type: NOverlayType.marker);
       addOverlays(paths);
       addBranchMarkers();
-      
+
       // 네비게이션 시작
       startNavigationTimer();
-      
     } catch (e) {
       debugPrint('경로 데이터 로드 실패: $e');
     }
@@ -553,7 +552,7 @@ class NaverMapViewController extends GetxController {
     debugPrint('출발지: $startLatitude, $startLongitude');
     debugPrint('목적지: $endLatitude, $endLongitude');
     debugPrint('경유지: ${waypoints.length}개');
-    
+
     // 출발지, 목적지 설정
     selectedStartLocation.value = GeoLocation(
       lat: startLatitude,
@@ -566,10 +565,10 @@ class NaverMapViewController extends GetxController {
     isSetStartLocation.value = true;
     isSetDestinationLocation.value = true;
     this.chooseRoute.value = chooseRoute;
-    
+
     // 경유지 저장 (재검색시 사용)
     currentWaypoints = waypoints;
-    
+
     // 경유지 포함 경로 로드
     await loadPathDataWithWaypoints(
       startLatitude,
@@ -603,49 +602,83 @@ class NaverMapViewController extends GetxController {
   }
 
   /// addBranchMarkers: 지도에 분기(체크포인트) 마커들을 추가합니다.
-  /// 경유지에 해당하는 분기점은 빨간색으로, 나머지는 초록색으로 표시합니다.
+  /// 출발지: 파란색, 목적지: 빨간색, 경유지: 회색, 일반: 초록색으로 표시합니다.
   void addBranchMarkers() async {
     if (mapController == null) return;
     Set<NAddableOverlay> markers = {};
-    
+
+    // 파란색 마커 이미지 (출발지 분기점)
+    final blueIconImage = await NOverlayImage.fromWidget(
+      widget: Icon(Icons.circle, color: Colors.blue, size: 15),
+      size: const Size(15, 15),
+      context: navigatorKey.currentContext!,
+    );
+
+    // 빨간색 마커 이미지 (목적지 분기점)
+    final redIconImage = await NOverlayImage.fromWidget(
+      widget: Icon(Icons.circle, color: Colors.red, size: 15),
+      size: const Size(15, 15),
+      context: navigatorKey.currentContext!,
+    );
+
+    // 회색 마커 이미지 (경유지 분기점)
+    final greyIconImage = await NOverlayImage.fromWidget(
+      widget: Icon(Icons.circle, color: Colors.grey, size: 15),
+      size: const Size(15, 15),
+      context: navigatorKey.currentContext!,
+    );
+
     // 초록색 마커 이미지 (일반 분기점)
     final greenIconImage = await NOverlayImage.fromWidget(
       widget: Icon(Icons.circle, color: Colors.green, size: 15),
       size: const Size(15, 15),
       context: navigatorKey.currentContext!,
     );
-    
-    // 빨간색 마커 이미지 (경유지 분기점) - 더 크게 표시
-    final redIconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.place, color: Colors.red, size: 20),
-      size: const Size(20, 20),
-      context: navigatorKey.currentContext!,
-    );
-    
-    for (var branch in branchinfo) {
-      // 현재 분기점이 경유지인지 확인
-      bool isWaypoint = false;
-      for (var waypoint in currentWaypoints) {
-        // 경유지와 분기점 사이의 거리 계산 (미터 단위)
-        double distance = calculateDistance(
-          branch.point.latitude,
-          branch.point.longitude,
-          waypoint.latitude,
-          waypoint.longitude,
-        );
-        // 경유지로부터 20m 이내의 분기점은 경유지 마커로 표시
-        if (distance < 0.02) { // 20m = 0.02km
-          isWaypoint = true;
-          debugPrint('경유지 분기점 발견: ${branch.description}, 거리: ${distance * 1000}m');
-          break;
-        }
-      }
+
+    for (int i = 0; i < branchinfo.length; i++) {
+      var branch = branchinfo[i];
+      NOverlayImage iconToUse;
       
-      // 경유지면 빨간색, 아니면 초록색 마커 사용
+      // 출발지 분기점 확인 (첫 번째 분기점)
+      if (i == 0) {
+        iconToUse = blueIconImage;
+        debugPrint('출발지 분기점: ${branch.description}');
+      }
+      // 목적지 분기점 확인 (마지막 분기점)
+      else if (i == branchinfo.length - 1) {
+        iconToUse = redIconImage;
+        debugPrint('목적지 분기점: ${branch.description}');
+      }
+      // 경유지 분기점 확인
+      else {
+        bool isWaypoint = false;
+        for (var waypoint in currentWaypoints) {
+          // 경유지와 분기점 사이의 거리 계산 (미터 단위)
+          double distance = calculateDistance(
+            branch.point.latitude,
+            branch.point.longitude,
+            waypoint.latitude,
+            waypoint.longitude,
+          );
+          // 경유지로부터 20m 이내의 분기점은 경유지 마커로 표시
+          if (distance < 0.02) {
+            // 20m = 0.02km
+            isWaypoint = true;
+            debugPrint(
+                '경유지 분기점 발견: ${branch.description}, 거리: ${distance * 1000}m');
+            break;
+          }
+        }
+        
+        // 경유지면 회색, 아니면 일반 분기점은 초록색
+        iconToUse = isWaypoint ? greyIconImage : greenIconImage;
+      }
+
+      // 마커 생성 및 추가
       _testMarker = NMarker(
-        id: 'checkPoint_${branchinfo.indexOf(branch)}',
+        id: 'checkPoint_$i',
         position: NLatLng(branch.point.latitude, branch.point.longitude),
-        icon: isWaypoint ? redIconImage : greenIconImage,
+        icon: iconToUse,
       );
       markers.add(_testMarker!);
     }
@@ -1263,20 +1296,20 @@ class NaverMapViewController extends GetxController {
           branchinfo.last.point.latitude,
           branchinfo.last.point.longitude,
         );
-        
+
         // 목적지 3m(0.003km) 이내 도착 시 자동 종료
         if (destinationDistance < 0.003) {
           debugPrint('목적지 도착 감지: ${destinationDistance * 1000}m');
-          
+
           // TTS 음성 안내
           await speakText("목적지에 도착했습니다.");
-          
+
           // 경로 안내 자동 종료
           await stopNavigationTimer();
           return; // 타이머 콜백 종료
         }
       }
-      
+
       checkBoundary();
       indexUpdate();
       // 출발지(첫 번째 분기점)와 현재 위치 사이 거리 계산
@@ -1388,7 +1421,8 @@ class NaverMapViewController extends GetxController {
             if (searchNewPathTime >= 5) {
               // 경유지가 있으면 경유지 포함 경로 재검색
               if (currentWaypoints.isNotEmpty) {
-                debugPrint('경로 이탈 - 경유지 ${currentWaypoints.length}개를 포함한 경로 재검색');
+                debugPrint(
+                    '경로 이탈 - 경유지 ${currentWaypoints.length}개를 포함한 경로 재검색');
                 await loadPathDataWithWaypoints(
                   current_latitude.value,
                   current_longitude.value,
@@ -1492,6 +1526,7 @@ class NaverMapViewController extends GetxController {
       mapMode.value = MapControlMode.off;
     }
   }
+
   /// 경로안내 종료 메서드
   ///상태 초기화 메서드
   void resetStateVariables() {
