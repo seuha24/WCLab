@@ -253,10 +253,54 @@ class _StartSearchState extends State<StartSearch> {
             color: Colors.grey,
           ),
           Expanded(
-            child: ListView.builder(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
+            child: Column(
+              children: [
+                // 검색 결과가 없을 경우 표시할 '지도에서 직접 선택' 버튼
+                if (_searchResults.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: ElevatedButton.icon(
+                      icon: Icon(Icons.map),
+                      label: Text('지도에서 직접 선택'),
+                      onPressed: () async {
+                        // 출발지 선택 지도 화면으로 이동
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DestinationPickerView(),
+                          ),
+                        );
+
+                        // 선택 완료 후 결과 처리
+                        if (result != null && result is Map) {
+                          final GeoLocation pickedLocation = result['location'];
+                          final String pickedAddress = result['address'];
+
+                          _searchController.text = pickedAddress;
+                          speakTTS('$pickedAddress 위치를 선택하셨습니다.');
+
+                          // 선택된 위치를 검색창에서 반환
+                          Navigator.pop(context, pickedLocation);
+
+                          // 즐겨찾기 모드가 아닐 때만 SearchBloc 업데이트
+                          if (!widget.isFavoriteMode) {
+                            context.read<SearchBloc>().add(
+                              SearchStartLocationRequested(
+                                searchLocation: pickedAddress,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+
+                // 검색 결과 리스트 표시
+                Expanded(
+                  child: ListView.builder(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
                 final result = _searchResults[index];
                 return Card(
                   elevation: 4,
@@ -375,6 +419,9 @@ class _StartSearchState extends State<StartSearch> {
                   ),
                 );
               },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
