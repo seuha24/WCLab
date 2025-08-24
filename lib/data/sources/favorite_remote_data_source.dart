@@ -264,7 +264,7 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
       debugPrint('URL: $url');
       debugPrint('Request: $requestData');
       
-      final response = await dioClient.dio.post(
+      final response = await dioClient.dio.delete(
         url,
         data: requestData,
       );
@@ -294,7 +294,7 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
       debugPrint('URL: $url');
       debugPrint('Request: $requestData');
       
-      final response = await dioClient.dio.post(
+      final response = await dioClient.dio.delete(
         url,
         data: requestData,
       );

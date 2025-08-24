@@ -6,57 +6,159 @@
 
 [로그 시작]
 
-flutter: 경유지 포함 경로 안내 시작
-flutter: 출발지: 37.50017720642566, 126.90915518822597
-flutter: 목적지: 37.48601525220175, 126.80252003762196
-flutter: 경유지: 1개
-flutter: paths with waypoints: [LatLng(latitude:37.500178, longitude:126.909157), LatLng(latitude:37.500128, longitude:126.909154), LatLng(latitude:37.500128, longitude:126.909154), LatLng(latitude:37.500133, longitude:126.908846), LatLng(latitude:37.500133, longitude:126.908846), LatLng(latitude:37.500236, longitude:126.908843), LatLng(latitude:37.500244, longitude:126.908454), LatLng(latitude:37.500267, longitude:126.908432), LatLng(latitude:37.500267, longitude:126.908432), LatLng(latitude:37.500269, longitude:126.907957), LatLng(latitude:37.500267, longitude:126.907696), LatLng(latitude:37.500278, longitude:126.906585), LatLng(latitude:37.500281, longitude:126.906402), LatLng(latitude:37.500283, longitude:126.906299), LatLng(latitude:37.500292, longitude:126.905993), LatLng(latitude:37.500331, longitude:126.905916), LatLng(latitude:37.500331, longitude:126.905916), LatLng(latitude:37.500386, longitude:126.905807), LatLng(latitude:37.500442, longitude:126.905718), LatLng(latitude:37.500442, <…>
-flutter: branchInfoList with waypoints: [BranchInfo{point: LatLng(latitude:37.500178, longitude:126.909157), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500128, longitude:126.909154), : true, description: 더페이스샵 신풍역점에서 우회전 후 27m 이동, bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500133, longitude:126.908846), : true, description: 신풍역  4번출구에서 우회전 후 49m 이동, bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500236, longitude:126.908843), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500244, longitude:126.908454), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.500267, longitude:126.908432), : true, description: 신풍역  3번출구에서 좌회전 후 신풍로를 따라 223m 이동, bearingToBranch: 0.0, crosswal<…>
-flutter: 경유지 개수: 1
-flutter: startNavigationTimer()
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 2
-flutter: 각도 초기화
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: Speaking: 1시 방향
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 4
-flutter: 각도 초기화
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: Speaking: 6시 방향
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 6
-flutter: 각도 초기화
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: Speaking: 5시 방향
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 8
-flutter: 각도 초기화
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: Speaking: 3시 방향
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: 경로 이탈 - 경유지 1개를 포함한 경로 재검색
-flutter: Speaking: 8시 방향
-flutter: paths with waypoints: [LatLng(latitude:37.497278, longitude:126.906791), LatLng(latitude:37.497328, longitude:126.90661), LatLng(latitude:37.497359, longitude:126.906538), LatLng(latitude:37.497495, longitude:126.90621), LatLng(latitude:37.497611, longitude:126.905841), LatLng(latitude:37.497611, longitude:126.905818), LatLng(latitude:37.49762, longitude:126.905519), LatLng(latitude:37.49762, longitude:126.905519), LatLng(latitude:37.497731, longitude:126.905524), LatLng(latitude:37.497839, longitude:126.905518), LatLng(latitude:37.49795, longitude:126.905538), LatLng(latitude:37.498167, longitude:126.905677), LatLng(latitude:37.498167, longitude:126.905677), LatLng(latitude:37.498172, longitude:126.905643), LatLng(latitude:37.498259, longitude:126.905377), LatLng(latitude:37.498261, longitude:126.905363), LatLng(latitude:37.498317, longitude:126.905196), LatLng(latitude:37.498325, longitude:126.90518), LatLng(latitude:37.498478, longitude:126.904852), LatLng(latitude:37.498528, longit<…>
-flutter: branchInfoList with waypoints: [BranchInfo{point: LatLng(latitude:37.497278, longitude:126.906791), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497328, longitude:126.90661), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497359, longitude:126.906538), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497495, longitude:126.90621), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497611, longitude:126.905841), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.497611, longitude:126.905818), : false, description: , bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point: LatLng(latitude:37.49762, longitude:126.905519), : true, description: 우회전 후 64m 이동, bearingToBranch: 0.0, crosswalk: false}, BranchInfo{point:<…>
-flutter: 경유지 개수: 1
-flutter: startNavigationTimer()
-flutter: Speaking: 경로를 이탈하여 새로운 경로로 안내합니다.
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 6
-flutter: 각도 초기화
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: Speaking: 7시 방향
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 4
-flutter: 각도 초기화
-flutter: 경계이탈
-flutter: searchNewPath : true
-flutter: Speaking: 8시 방향
-flutter: 인덱스가 변경되었습니다. 새로운 인덱스: 2
-flutter: 각도 초기화
-flutter: 경로 안내가 성공적으로 종료되었습니다.
-
+flutter: prefs.getString(_authTypeTokenKey): google
+flutter: === 즐겨찾기 지점 조회 요청 ===
+flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: Login Method: google
+flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ===================================
+flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU4Nzg1NDcsImV4cCI6MTc1Njk1ODU0NywiaXNzIjoibG9jYWxob3N0In0.pOwcGdD8fXuDoIYo4lgawC-jMjjRe9ltu2hE82pihkbFDWb1Z4TFfhHUX4lSuaHmcn6_4mPThKnZBYdjFV5BcTZhpGn1buLHCtBVe0CiRxvdK1H6D4V27GrIWKYcy3bLGlqp-W-zKXxLbHNhCmx9XVa4xnYdEvmoobU7SQl4L5ejRA97y25VLeLN8G7J3jsTGvHPCj6xJFETFgITxaJTAXAdpKyPZN3HE9NV7fvHj16QLfu8H36iEPb62lYaIS5usMFQDCDmhp_7SMW6znC5ixisY1RCGfq8U-BNYyh0chc2SprReEgcEh9_6ooUnQwMACoqODwlYZPKDQdVqqcBSw
+flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTg3ODU0NywiZXhwIjoxNzU4NDcwNTQ3LCJpc3MiOiJsb2NhbGhvc3QifQ.GcL3Db_Oi1JeCT50TKxUvMZWKgOkg5MCD7KzTJDPT8LjRF6mVy4ZQ64_BaVDb5aPXVJlGR2cf7PmVBDwZanrwZ8MRRPfh1uUWUqamZFaYHItGqg_TR355jYypW3rkpyXzmwhs95hJ9OfJUZyppOMmEfcAk-mxAfpbL7ZhB8chnmPNFW4yzEmfUNXOaMHVxbrlb7577QUIMjwroQzC3ZN1LabFRan78r8d5jZOnmvVJvedez8jaTLxI4oiMNRktVSlgKztw77OEvoMOQsLDFdgfN1Jt_So892mO3QnpA9wjRp6EunLEjkwqpth2dJhroMwIf6tCVxTZb7dsgIaRLbzw
+flutter:
+flutter: ╔╣ Request ║ GET
+flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter:
+flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 27 ms
+flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter: ╔ Body
+flutter: ║
+flutter: ║    {
+flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
+flutter: ║         "list": [
+flutter: ║          {name: 어디게용?, lon: 126.81194679579276, lat: 37.485380633713575},
+flutter: ║          {name: ㅇㅇㅇㅇ, lon: 126.91086924781855, lat: 37.50619545167192}
+flutter: ║         ]
+flutter: ║    }
+flutter: ║
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter: 지점 조회 응답: {ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b, list: [{name: 어디게용?, lon: 126.81194679579276, lat: 37.485380633713575}, {name: ㅇㅇㅇㅇ, lon: 126.91086924781855, lat: 37.50619545167192}]}
+flutter: 즐겨찾기 지점 개수: 2
+flutter: === 즐겨찾기 경로 조회 요청 ===
+flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: Login Method: google
+flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ===================================
+flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU4Nzg1NDcsImV4cCI6MTc1Njk1ODU0NywiaXNzIjoibG9jYWxob3N0In0.pOwcGdD8fXuDoIYo4lgawC-jMjjRe9ltu2hE82pihkbFDWb1Z4TFfhHUX4lSuaHmcn6_4mPThKnZBYdjFV5BcTZhpGn1buLHCtBVe0CiRxvdK1H6D4V27GrIWKYcy3bLGlqp-W-zKXxLbHNhCmx9XVa4xnYdEvmoobU7SQl4L5ejRA97y25VLeLN8G7J3jsTGvHPCj6xJFETFgITxaJTAXAdpKyPZN3HE9NV7fvHj16QLfu8H36iEPb62lYaIS5usMFQDCDmhp_7SMW6znC5ixisY1RCGfq8U-BNYyh0chc2SprReEgcEh9_6ooUnQwMACoqODwlYZPKDQdVqqcBSw
+flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTg3ODU0NywiZXhwIjoxNzU4NDcwNTQ3LCJpc3MiOiJsb2NhbGhvc3QifQ.GcL3Db_Oi1JeCT50TKxUvMZWKgOkg5MCD7KzTJDPT8LjRF6mVy4ZQ64_BaVDb5aPXVJlGR2cf7PmVBDwZanrwZ8MRRPfh1uUWUqamZFaYHItGqg_TR355jYypW3rkpyXzmwhs95hJ9OfJUZyppOMmEfcAk-mxAfpbL7ZhB8chnmPNFW4yzEmfUNXOaMHVxbrlb7577QUIMjwroQzC3ZN1LabFRan78r8d5jZOnmvVJvedez8jaTLxI4oiMNRktVSlgKztw77OEvoMOQsLDFdgfN1Jt_So892mO3QnpA9wjRp6EunLEjkwqpth2dJhroMwIf6tCVxTZb7dsgIaRLbzw
+flutter:
+flutter: ╔╣ Request ║ GET
+flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter:
+flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 10 ms
+flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter: ╔ Body
+flutter: ║
+flutter: ║    {
+flutter: ║         "login_method": "google",
+flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
+flutter: ║         "list": [
+flutter: ║            {
+flutter: ║                 "name": "나 오늘 학교 안가도되나",
+flutter: ║                 "start_point": {lon: 126.90915518822597, lat: 37.50017720642566},
+flutter: ║                 "finish_point": {lon: 126.80252003762196, lat: 37.48601525220175},
+flutter: ║                 "stopovers": [{lon: 126.89128740749982, lat: 37.50912867123615}]
+flutter: ║            },
+flutter: ║            {
+flutter: ║                 "name": "오늘밤은 삐딱하게",
+flutter: ║                 "start_point": {lon: 126.92347353128882, lat: 37.556551024049725},
+flutter: ║                 "finish_point": {lon: 126.9810555142183, lat: 37.47661983663746},
+flutter: ║                 "stopovers": [
+flutter: ║                  {lon: 126.9372795022893, lat: 37.55556133493906},
+flutter: ║                  {lon: 127.02851492472752, lat: 37.49814290097112}
+flutter: ║                 ]
+flutter: ║            },
+flutter: ║            {
+flutter: ║                 "name": "학교 나들이",
+flutter: ║                 "start_point": {lon: 126.80472166634472, lat: 37.48598076638508},
+flutter: ║                 "finish_point": {lon: 126.81194679579276, lat: 37.485380633713575},
+flutter: ║                 "stopovers": [
+flutter: ║                  {lon: 126.80472166634472, lat: 37.48598076638508},
+flutter: ║                  {lon: 126.79938610654978, lat: 37.48686571272948}
+flutter: ║                 ]
+flutter: ║            },
+flutter: ║            {
+flutter: ║                 "name": "역곡역-온수역-오류동역-유한대",
+flutter: ║                 "start_point": {lon: 126.81194679579276, lat: 37.485380633713575},
+flutter: ║                 "finish_point": {lon: 126.82015077709472, lat: 37.48759726577593},
+flutter: ║                 "stopovers": [
+flutter: ║                  {lon: 126.82393100940128, lat: 37.49183940963348},
+flutter: ║                  {lon: 126.8442343614771, lat: 37.4947787640268}
+flutter: ║                 ]
+flutter: ║            }
+flutter: ║         ]
+flutter: ║    }
+flutter: ║
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter: === 삭제 시도 ===
+flutter: Point Name: 어디게용?
+flutter: Point favIdx: null
+flutter: Point index: 0
+flutter: prefs.getString(_authTypeTokenKey): google
+flutter: === 즐겨찾기 지점 삭제 요청 ===
+flutter: URL: http://aws2.cuksl.xyz:3003/delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/0
+flutter: Request: {login_method: google, ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b, fav_idx: 0}
+flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU4Nzg1NDcsImV4cCI6MTc1Njk1ODU0NywiaXNzIjoibG9jYWxob3N0In0.pOwcGdD8fXuDoIYo4lgawC-jMjjRe9ltu2hE82pihkbFDWb1Z4TFfhHUX4lSuaHmcn6_4mPThKnZBYdjFV5BcTZhpGn1buLHCtBVe0CiRxvdK1H6D4V27GrIWKYcy3bLGlqp-W-zKXxLbHNhCmx9XVa4xnYdEvmoobU7SQl4L5ejRA97y25VLeLN8G7J3jsTGvHPCj6xJFETFgITxaJTAXAdpKyPZN3HE9NV7fvHj16QLfu8H36iEPb62lYaIS5usMFQDCDmhp_7SMW6znC5ixisY1RCGfq8U-BNYyh0chc2SprReEgcEh9_6ooUnQwMACoqODwlYZPKDQdVqqcBSw
+flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTg3ODU0NywiZXhwIjoxNzU4NDcwNTQ3LCJpc3MiOiJsb2NhbGhvc3QifQ.GcL3Db_Oi1JeCT50TKxUvMZWKgOkg5MCD7KzTJDPT8LjRF6mVy4ZQ64_BaVDb5aPXVJlGR2cf7PmVBDwZanrwZ8MRRPfh1uUWUqamZFaYHItGqg_TR355jYypW3rkpyXzmwhs95hJ9OfJUZyppOMmEfcAk-mxAfpbL7ZhB8chnmPNFW4yzEmfUNXOaMHVxbrlb7577QUIMjwroQzC3ZN1LabFRan78r8d5jZOnmvVJvedez8jaTLxI4oiMNRktVSlgKztw77OEvoMOQsLDFdgfN1Jt_So892mO3QnpA9wjRp6EunLEjkwqpth2dJhroMwIf6tCVxTZb7dsgIaRLbzw
+flutter:
+flutter: ╔╣ Request ║ POST
+flutter: ║  http://aws2.cuksl.xyz:3003/delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/0
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter:
+flutter: ╔╣ DioError ║ Status: 404 Not Found ║ Time: 30 ms
+flutter: ║  http://aws2.cuksl.xyz:3003/delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/0
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter: ╔ DioExceptionType.badResponse
+flutter: ║ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head
+flutter: ║ >
+<body>
+<pre>Cannot POST /delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/0</pre>
+<
+flutter: ║ /body>
+</html>
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter:
+flutter: === 삭제 시도 ===
+flutter: Point Name: ㅇㅇㅇㅇ
+flutter: Point favIdx: null
+flutter: Point index: 1
+flutter: prefs.getString(_authTypeTokenKey): google
+flutter: === 즐겨찾기 지점 삭제 요청 ===
+flutter: URL: http://aws2.cuksl.xyz:3003/delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/1
+flutter: Request: {login_method: google, ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b, fav_idx: 1}
+flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NTU4Nzg1NDcsImV4cCI6MTc1Njk1ODU0NywiaXNzIjoibG9jYWxob3N0In0.pOwcGdD8fXuDoIYo4lgawC-jMjjRe9ltu2hE82pihkbFDWb1Z4TFfhHUX4lSuaHmcn6_4mPThKnZBYdjFV5BcTZhpGn1buLHCtBVe0CiRxvdK1H6D4V27GrIWKYcy3bLGlqp-W-zKXxLbHNhCmx9XVa4xnYdEvmoobU7SQl4L5ejRA97y25VLeLN8G7J3jsTGvHPCj6xJFETFgITxaJTAXAdpKyPZN3HE9NV7fvHj16QLfu8H36iEPb62lYaIS5usMFQDCDmhp_7SMW6znC5ixisY1RCGfq8U-BNYyh0chc2SprReEgcEh9_6ooUnQwMACoqODwlYZPKDQdVqqcBSw
+flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc1NTg3ODU0NywiZXhwIjoxNzU4NDcwNTQ3LCJpc3MiOiJsb2NhbGhvc3QifQ.GcL3Db_Oi1JeCT50TKxUvMZWKgOkg5MCD7KzTJDPT8LjRF6mVy4ZQ64_BaVDb5aPXVJlGR2cf7PmVBDwZanrwZ8MRRPfh1uUWUqamZFaYHItGqg_TR355jYypW3rkpyXzmwhs95hJ9OfJUZyppOMmEfcAk-mxAfpbL7ZhB8chnmPNFW4yzEmfUNXOaMHVxbrlb7577QUIMjwroQzC3ZN1LabFRan78r8d5jZOnmvVJvedez8jaTLxI4oiMNRktVSlgKztw77OEvoMOQsLDFdgfN1Jt_So892mO3QnpA9wjRp6EunLEjkwqpth2dJhroMwIf6tCVxTZb7dsgIaRLbzw
+flutter:
+flutter: ╔╣ Request ║ POST
+flutter: ║  http://aws2.cuksl.xyz:3003/delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/1
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter:
+flutter: ╔╣ DioError ║ Status: 404 Not Found ║ Time: 21 ms
+flutter: ║  http://aws2.cuksl.xyz:3003/delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/1
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter: ╔ DioExceptionType.badResponse
+flutter: ║ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head
+flutter: ║ >
+<body>
+<pre>Cannot POST /delete/fav/point/9494d9fb-1a32-4d8c-9267-125ce4dba65b/1</pre>
+<
+flutter: ║ /body>
+</html>
+flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
+flutter:
 
 [로그 끝]
 
