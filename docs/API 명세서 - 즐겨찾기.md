@@ -182,7 +182,7 @@ Content-Type: application/json
 **POST** `/favorites`
 
 ## 사용자별 즐겨찾기 정보 삭제 (지점) 요청 URL
-- **Base URL**: `http://aws2.cuksl.xyz:3003/delete/fav/point`
+- **Base URL**: `http://aws2.cuksl.xyz:3003/delete/fav/point/$UUID/&idx`
 
 #### Request Body
 ```json
@@ -221,7 +221,7 @@ Content-Type: application/json
 **POST** `/favorites`
 
 ## 사용자별 즐겨찾기 정보 삭제 (경로) 요청 URL
-- **Base URL**: `http://aws2.cuksl.xyz:3003/delete/fav/route`
+- **Base URL**: `http://aws2.cuksl.xyz:3003/delete/fav/route/$UUID/&idx`
 
 #### Request Body
 ```json

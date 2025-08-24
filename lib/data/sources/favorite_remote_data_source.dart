@@ -258,12 +258,14 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
         'fav_idx': favIdx,
       };
       
+      final url = ApiEndpoints.deleteFavoritePoint(userId, favIdx);
+      
       debugPrint('=== 즐겨찾기 지점 삭제 요청 ===');
-      debugPrint('URL: ${ApiEndpoints.deleteFavoritePoint}');
+      debugPrint('URL: $url');
       debugPrint('Request: $requestData');
       
       final response = await dioClient.dio.post(
-        ApiEndpoints.deleteFavoritePoint,
+        url,
         data: requestData,
       );
 
@@ -286,12 +288,14 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
         'fav_idx': favIdx,
       };
       
+      final url = ApiEndpoints.deleteFavoriteRoute(userId, favIdx);
+      
       debugPrint('=== 즐겨찾기 경로 삭제 요청 ===');
-      debugPrint('URL: ${ApiEndpoints.deleteFavoriteRoute}');
+      debugPrint('URL: $url');
       debugPrint('Request: $requestData');
       
       final response = await dioClient.dio.post(
-        ApiEndpoints.deleteFavoriteRoute,
+        url,
         data: requestData,
       );
 
