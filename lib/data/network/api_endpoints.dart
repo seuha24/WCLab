@@ -40,10 +40,14 @@ class ApiEndpoints {
   static const String addFavoriteRoute = '$favBaseUrl/save/fav/route';
 
   // 즐겨찾기 지점 삭제
-  static const String deleteFavoritePoint = '$favBaseUrl/delete/fav/point';
+  static String deleteFavoritePoint(String userId, String favIdx) {
+    return '$favBaseUrl/delete/fav/point/$userId/$favIdx';
+  }
 
   // 즐겨찾기 경로 삭제
-  static const String deleteFavoriteRoute = '$favBaseUrl/delete/fav/route';
+  static String deleteFavoriteRoute(String userId, String favIdx) {
+    return '$favBaseUrl/delete/fav/route/$userId/$favIdx';
+  }
 
   // 즐겨찾기 지점 수정
   static const String updateFavoritePoint = '$favBaseUrl/alter/fav/point';
