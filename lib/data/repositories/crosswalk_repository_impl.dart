@@ -69,8 +69,18 @@ class CrosswalkRepositoryImpl implements CrosswalkRepository {
       );
 
       return Right(results);
+    } on BlueScanException {
+      return const Left(BlueScanFailure());
+    } on BlueConnectionException {
+      return const Left(BlueConnectionFailure());
+    } on BlueTimeoutException {
+      return const Left(BlueTimeoutFailure());
+    } on BlueNakException {
+      return const Left(BlueNakFailure());
+    } on BlueInvalidDeviceException {
+      return const Left(BlueInvalidDeviceFailure());
     } on BlueException {
-      return Left(BlueFailure());
+      return const Left(BlueScanFailure());
     } on ServerException {
       return Left(ServerFailure());
     }
@@ -83,8 +93,18 @@ class CrosswalkRepositoryImpl implements CrosswalkRepository {
       for (DiscoveredDevice result in blueResults) {
         await blueDataSource.send(result);
       }
+    } on BlueScanException {
+      return const Left(BlueScanFailure());
+    } on BlueConnectionException {
+      return const Left(BlueConnectionFailure());
+    } on BlueTimeoutException {
+      return const Left(BlueTimeoutFailure());
+    } on BlueNakException {
+      return const Left(BlueNakFailure());
+    } on BlueInvalidDeviceException {
+      return const Left(BlueInvalidDeviceFailure());
     } on BlueException {
-      return Left(BlueFailure());
+      return const Left(BlueConnectionFailure());
     }
     return const Right(null);
   }
@@ -97,8 +117,18 @@ class CrosswalkRepositoryImpl implements CrosswalkRepository {
     try {
       await blueDataSource.send(crosswalk.post, command: command);
       return Right(Void());
+    } on BlueScanException {
+      return const Left(BlueScanFailure());
+    } on BlueConnectionException {
+      return const Left(BlueConnectionFailure());
+    } on BlueTimeoutException {
+      return const Left(BlueTimeoutFailure());
+    } on BlueNakException {
+      return const Left(BlueNakFailure());
+    } on BlueInvalidDeviceException {
+      return const Left(BlueInvalidDeviceFailure());
     } on BlueException {
-      return Left(BlueFailure());
+      return const Left(BlueConnectionFailure());
     }
   }
 }

@@ -181,6 +181,23 @@ abstract class BlueNativeDataSource {
   /// 추가적인 음성 안내를 받기 위해 사용
   Future<void> sendVoiceGuide(DiscoveredDevice post);
   
+  /// 응답을 기다리며 명령을 전송하는 메소드
+  /// ACK/NAK 응답을 수신하여 성공 여부를 반환
+  Future<ResponseData?> sendWithResponse(
+    DiscoveredDevice post, {
+    List<int> command,
+  });
+  
+  /// BLE 특성으로부터 응답을 수신하는 스트림
+  Stream<List<int>> receiveResponse(DiscoveredDevice post);
+  
+  /// 디바이스 연결 상태를 모니터링하는 스트림
+  /// 실시간으로 연결 상태 변화를 추적
+  Stream<DeviceConnectionState> monitorConnection(String deviceId);
+  
+  /// 현재 연결 상태를 가져오는 메소드
+  DeviceConnectionState? getCurrentConnectionState(String deviceId);
+  
   Future<void> disconnect();
 }
 
@@ -188,6 +205,10 @@ abstract class BlueNativeDataSource {
 class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   static StreamSubscription? subscription;
   static StreamSubscription<ConnectionStateUpdate>? connection;
+  
+  // 연결 상태 추적을 위한 맵
+  final Map<String, StreamSubscription<ConnectionStateUpdate>> _connectionStreams = {};
+  final Map<String, DeviceConnectionState> _connectionStates = {};
 
   static const Duration duration = Duration(seconds: 1);
   final FlutterReactiveBle bluetooth;
@@ -212,7 +233,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
           }
         }
       }, onError: (e) {
-        throw BlueException();
+        throw BlueScanException('스캔 중 오류 발생');
       });
 
       await Future.delayed(duration);
@@ -220,7 +241,8 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
 
       return results;
     } catch (e) {
-      throw BlueException();
+      if (e is BlueException) rethrow;
+      throw BlueScanException('BLE 스캔 실패');
     }
   }
 
@@ -230,23 +252,31 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
     List<int> command = Bluetooth.CMD_SIGNAL,  // 기본값: 신호안내
   }) async {
     try {
+      // DEVICE NAME 재검증
+      if (!Bluetooth.validateDeviceName(post.name)) {
+        throw BlueInvalidDeviceException('유효하지 않은 음향신호기');
+      }
+      
       connection = bluetooth.connectToDevice(id: post.id).listen(
         (update) async {
           if (update.connectionState == DeviceConnectionState.connected) {
-            List<DiscoveredService> services =
-                await bluetooth.discoverServices(post.id);
+            List<DiscoveredService> services;
+            try {
+              services = await bluetooth.discoverServices(post.id);
+            } catch (e) {
+              throw BlueConnectionException('서비스 탐색 실패');
+            }
 
-            final characteristic = services
-                .firstWhere(
-                  (service) =>
-                      service.serviceId == Uuid.parse(Bluetooth.SERVICE_UUID),
-                )
-                .characteristics
-                .firstWhere(
-                  (characteristic) =>
-                      characteristic.characteristicId ==
-                      Uuid.parse(Bluetooth.CHAR_UUID),
-                );
+            final service = services.firstWhere(
+              (service) => service.serviceId == Uuid.parse(Bluetooth.SERVICE_UUID),
+              orElse: () => throw BlueConnectionException('UART 서비스를 찾을 수 없음'),
+            );
+            
+            final characteristic = service.characteristics.firstWhere(
+              (characteristic) =>
+                  characteristic.characteristicId == Uuid.parse(Bluetooth.CHAR_UUID),
+              orElse: () => throw BlueConnectionException('UART RX 특성을 찾을 수 없음'),
+            );
 
             final qualifiedCharacteristic = QualifiedCharacteristic(
               characteristicId: characteristic.characteristicId,
@@ -268,11 +298,12 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
           }
         },
         onError: (Object e) {
-          throw BlueException();
+          throw BlueConnectionException('연결 중 오류 발생');
         },
       );
     } catch (e) {
-      throw BlueException();
+      if (e is BlueException) rethrow;
+      throw BlueConnectionException('BLE 연결 실패');
     }
   }
 
@@ -294,5 +325,96 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   @override
   Future<void> sendVoiceGuide(DiscoveredDevice post) async {
     await send(post, command: Bluetooth.CMD_VOICE);
+  }
+  
+  @override
+  Stream<List<int>> receiveResponse(DiscoveredDevice post) {
+    final characteristic = QualifiedCharacteristic(
+      characteristicId: Uuid.parse(Bluetooth.CHAR_TX_UUID),
+      serviceId: Uuid.parse(Bluetooth.SERVICE_UUID),
+      deviceId: post.id,
+    );
+    
+    return bluetooth.subscribeToCharacteristic(characteristic);
+  }
+  
+  @override
+  Future<ResponseData?> sendWithResponse(
+    DiscoveredDevice post, {
+    List<int> command = Bluetooth.CMD_SIGNAL,
+  }) async {
+    try {
+      // DEVICE NAME 재검증
+      if (!Bluetooth.validateDeviceName(post.name)) {
+        throw BlueInvalidDeviceException('유효하지 않은 음향신호기');
+      }
+      
+      // 응답 수신 스트림 준비
+      final responseStream = receiveResponse(post);
+      StreamSubscription<List<int>>? responseSubscription;
+      ResponseData? responseData;
+      
+      // 응답 수신 리스너 등록
+      responseSubscription = responseStream.listen(
+        (data) {
+          responseData = ResponseParser.parse(data);
+          responseSubscription?.cancel();
+        },
+        onError: (e) {
+          throw BlueConnectionException('응답 수신 중 오류');
+        },
+      );
+      
+      // 명령 전송
+      await send(post, command: command);
+      
+      // 응답 대기 (최대 3초)
+      int waitCount = 0;
+      while (responseData == null && waitCount < 30) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        waitCount++;
+      }
+      
+      // 응답 수신 리스너 정리
+      await responseSubscription.cancel();
+      
+      // 타임아웃 체크
+      if (responseData == null) {
+        throw BlueTimeoutException('음향신호기 응답 시간 초과');
+      }
+      
+      // NAK 응답 체크
+      if (responseData?.isNak == true) {
+        throw BlueNakException('음향신호기가 명령을 거부했습니다');
+      }
+      
+      return responseData;
+    } catch (e) {
+      if (e is BlueException) rethrow;
+      throw BlueConnectionException('응답 처리 실패');
+    }
+  }
+  
+  @override
+  Stream<DeviceConnectionState> monitorConnection(String deviceId) {
+    // 기존 스트림이 있으면 취소
+    _connectionStreams[deviceId]?.cancel();
+    
+    // 새로운 연결 상태 스트림 생성
+    final stream = bluetooth.connectToDevice(id: deviceId).listen((update) {
+      _connectionStates[deviceId] = update.connectionState;
+    });
+    
+    _connectionStreams[deviceId] = stream;
+    
+    // 연결 상태 스트림 반환
+    return bluetooth
+        .connectToDevice(id: deviceId)
+        .map((update) => update.connectionState);
+  }
+  
+  @override
+  DeviceConnectionState? getCurrentConnectionState(String deviceId) {
+    return _connectionStates[deviceId];
   }
 }

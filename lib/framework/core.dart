@@ -14,6 +14,7 @@ part '../core/utils/assets.dart';
 part '../core/utils/bluetooth.dart';
 part '../core/utils/enums.dart';
 part '../core/utils/message.dart';
+part '../core/utils/response_parser.dart';
 part '../core/utils/themes.dart';
 part '../core/utils/tts.dart';
 part '../core/utils/validators.dart';
