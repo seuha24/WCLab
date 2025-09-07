@@ -168,6 +168,19 @@ abstract class BlueNativeDataSource {
     DiscoveredDevice post, {
     List<int> command = const [0x31, 0x00, 0x02],
   });
+  
+  /// 위치안내 요청을 전송하는 메소드
+  /// 횡단보도의 위치 정보를 음성으로 안내받기 위해 사용
+  Future<void> sendLocationGuide(DiscoveredDevice post);
+  
+  /// 신호안내 요청을 전송하는 메소드  
+  /// 현재 신호등 상태를 음성으로 안내받기 위해 사용
+  Future<void> sendSignalGuide(DiscoveredDevice post);
+  
+  /// 음성안내 요청을 전송하는 메소드
+  /// 추가적인 음성 안내를 받기 위해 사용
+  Future<void> sendVoiceGuide(DiscoveredDevice post);
+  
   Future<void> disconnect();
 }
 
@@ -188,11 +201,15 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
       subscription = bluetooth.scanForDevices(
         withServices: [Uuid.parse(Bluetooth.SERVICE_UUID)],
       ).listen((device) {
-        final knownDeviceIndex = results.indexWhere((d) => d.id == device.id);
-        if (knownDeviceIndex >= 0) {
-          results[knownDeviceIndex] = device;
-        } else {
-          results.add(device);
+        // DEVICE NAME 형식 검증 (경찰청 규격서 준수)
+        // 유효하지 않은 장치는 필터링
+        if (Bluetooth.validateDeviceName(device.name)) {
+          final knownDeviceIndex = results.indexWhere((d) => d.id == device.id);
+          if (knownDeviceIndex >= 0) {
+            results[knownDeviceIndex] = device;
+          } else {
+            results.add(device);
+          }
         }
       }, onError: (e) {
         throw BlueException();
@@ -210,7 +227,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   @override
   Future<void> send(
     DiscoveredDevice post, {
-    List<int> command = Bluetooth.CMD_VOICE,
+    List<int> command = Bluetooth.CMD_SIGNAL,  // 기본값: 신호안내
   }) async {
     try {
       connection = bluetooth.connectToDevice(id: post.id).listen(
@@ -262,5 +279,20 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   @override
   Future<void> disconnect() async {
     await connection!.cancel();
+  }
+  
+  @override
+  Future<void> sendLocationGuide(DiscoveredDevice post) async {
+    await send(post, command: Bluetooth.CMD_LOCATION);
+  }
+  
+  @override
+  Future<void> sendSignalGuide(DiscoveredDevice post) async {
+    await send(post, command: Bluetooth.CMD_SIGNAL);
+  }
+  
+  @override
+  Future<void> sendVoiceGuide(DiscoveredDevice post) async {
+    await send(post, command: Bluetooth.CMD_VOICE);
   }
 }
