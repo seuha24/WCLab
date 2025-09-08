@@ -2,12 +2,9 @@ import 'package:safelight/domain/entities/favorite_route.dart';
 
 class RoutePointModel extends RoutePoint {
   const RoutePointModel({
-    required double longitude,
-    required double latitude,
-  }) : super(
-          longitude: longitude,
-          latitude: latitude,
-        );
+    required super.longitude,
+    required super.latitude,
+  });
 
   factory RoutePointModel.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
@@ -29,18 +26,12 @@ class RoutePointModel extends RoutePoint {
 
 class FavoriteRouteModel extends FavoriteRoute {
   const FavoriteRouteModel({
-    String? favIdx,
-    required String name,
-    required RoutePoint? startPoint,
-    required RoutePoint? finishPoint,
-    required List<RoutePoint?> stopovers,
-  }) : super(
-          favIdx: favIdx,
-          name: name,
-          startPoint: startPoint,
-          finishPoint: finishPoint,
-          stopovers: stopovers,
-        );
+    super.favIdx,
+    required super.name,
+    required super.startPoint,
+    required super.finishPoint,
+    required super.stopovers,
+  });
 
   factory FavoriteRouteModel.fromJson(Map<String, dynamic> json) {
     final startPoint = json['start_point'] != null

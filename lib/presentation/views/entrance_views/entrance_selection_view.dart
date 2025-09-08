@@ -6,10 +6,10 @@ class EntranceSelectionView extends StatelessWidget {
   final Function(Entrance) onEntranceSelected;
 
   const EntranceSelectionView({
-    Key? key,
+    super.key,
     required this.buildingResponse,
     required this.onEntranceSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

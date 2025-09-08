@@ -2,20 +2,13 @@ import 'package:safelight/domain/entities/favorite_point.dart';
 
 class FavoritePointModel extends FavoritePoint {
   const FavoritePointModel({
-    String? favIdx,
-    required String name,
-    required double longitude,
-    required double latitude,
-    double? entranceLongitude,
-    double? entranceLatitude,
-  }) : super(
-          favIdx: favIdx,
-          name: name,
-          longitude: longitude,
-          latitude: latitude,
-          entranceLongitude: entranceLongitude,
-          entranceLatitude: entranceLatitude,
-        );
+    super.favIdx,
+    required super.name,
+    required super.longitude,
+    required super.latitude,
+    super.entranceLongitude,
+    super.entranceLatitude,
+  });
 
   factory FavoritePointModel.fromJson(Map<String, dynamic> json) {
     return FavoritePointModel(

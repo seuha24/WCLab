@@ -17,23 +17,23 @@ abstract class BlueException implements Exception {
 }
 
 class BlueScanException extends BlueException {
-  BlueScanException([String? message]) : super(message);
+  BlueScanException([super.message]);
 }
 
 class BlueConnectionException extends BlueException {
-  BlueConnectionException([String? message]) : super(message);
+  BlueConnectionException([super.message]);
 }
 
 class BlueTimeoutException extends BlueException {
-  BlueTimeoutException([String? message]) : super(message);
+  BlueTimeoutException([super.message]);
 }
 
 class BlueNakException extends BlueException {
-  BlueNakException([String? message]) : super(message);
+  BlueNakException([super.message]);
 }
 
 class BlueInvalidDeviceException extends BlueException {
-  BlueInvalidDeviceException([String? message]) : super(message);
+  BlueInvalidDeviceException([super.message]);
 }
 
 class PermissionException implements Exception {

@@ -10,16 +10,16 @@ abstract class Failure extends Equatable {
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure([String message = '서버 연결 오류']) : super(message);
+  const ServerFailure([super.message = '서버 연결 오류']);
 }
 
 class CacheFailure extends Failure {
-  const CacheFailure([String message = '캐시 오류']) : super(message);
+  const CacheFailure([super.message = '캐시 오류']);
 }
 
 // BLE 관련 에러 세분화
 abstract class BlueFailure extends Failure {
-  const BlueFailure(String message) : super(message);
+  const BlueFailure(super.message);
 }
 
 class BlueScanFailure extends BlueFailure {
@@ -47,13 +47,13 @@ class BluePermissionFailure extends BlueFailure {
 }
 
 class PermissionFailure extends Failure {
-  const PermissionFailure([String message = '권한이 필요합니다']) : super(message);
+  const PermissionFailure([super.message = '권한이 필요합니다']);
 }
 
 class FlashFailure extends Failure {
-  const FlashFailure([String message = '플래시 오류']) : super(message);
+  const FlashFailure([super.message = '플래시 오류']);
 }
 
 class ValidateFailure extends Failure {
-  const ValidateFailure([String message = '유효성 검사 실패']) : super(message);
+  const ValidateFailure([super.message = '유효성 검사 실패']);
 }

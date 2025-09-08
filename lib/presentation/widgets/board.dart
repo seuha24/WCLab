@@ -94,7 +94,7 @@ class Board extends StatelessWidget {
   final double? height;
 
   const Board({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.backgroundColor,
@@ -104,7 +104,7 @@ class Board extends StatelessWidget {
     this.titleStyle,
     this.height,
     this.headerColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +118,7 @@ class Board extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              color: headerColor ?? Theme.of(context).colorScheme.background,
+              color: headerColor ?? Theme.of(context).colorScheme.surface,
               child: Padding(
                 padding: headerPadding ??
                     EdgeInsets.symmetric(

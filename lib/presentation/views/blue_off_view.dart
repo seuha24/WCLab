@@ -4,7 +4,7 @@ part of '../../framework/ui.dart';
 class BlueOffView extends StatefulWidget {
   final BleStatus state;
 
-  const BlueOffView({Key? key, required this.state}) : super(key: key);
+  const BlueOffView({super.key, required this.state});
 
   @override
   State<BlueOffView> createState() => _BlueOffViewState();

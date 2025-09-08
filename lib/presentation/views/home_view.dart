@@ -2,7 +2,7 @@ part of '../../framework/ui.dart';
 
 /// 홈화면
 class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   State<HomeView> createState() => _HomeViewState();

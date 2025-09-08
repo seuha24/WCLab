@@ -108,14 +108,14 @@ class SingleChildRoundedCard extends StatelessWidget {
   ///   backgroundColor : Colors.red),);
   /// ```
   const SingleChildRoundedCard({
-    Key? key,
+    super.key,
     required this.child,
     this.backgroundColor,
     this.padding,
     this.width,
     this.height,
     this.radius,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +123,7 @@ class SingleChildRoundedCard extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: backgroundColor ?? Theme.of(context).colorScheme.background,
+        color: backgroundColor ?? Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(radius ?? SizeTheme.r_sm),
       ),
       padding: padding ?? EdgeInsets.all(SizeTheme.w_sm / 2),

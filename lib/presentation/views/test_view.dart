@@ -1,7 +1,7 @@
 part of '../../framework/ui.dart';
 
 class TestView extends StatefulWidget {
-  const TestView({Key? key}) : super(key: key);
+  const TestView({super.key});
 
   @override
   _TestViewState createState() => _TestViewState();
@@ -81,6 +81,8 @@ class _TestViewState extends State<TestView> {
 }
 
 class NavigationGuideView extends StatelessWidget {
+  const NavigationGuideView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +93,8 @@ class NavigationGuideView extends StatelessWidget {
 }
 
 class BleView extends StatelessWidget {
+  const BleView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +105,8 @@ class BleView extends StatelessWidget {
 }
 
 class FlashLightView extends StatelessWidget {
+  const FlashLightView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,6 +117,8 @@ class FlashLightView extends StatelessWidget {
 }
 
 class SettingsView extends StatelessWidget {
+  const SettingsView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
