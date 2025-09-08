@@ -1,6 +1,8 @@
 part of '../../framework/ui.dart';
 
 class DestinationPickerView extends StatefulWidget {
+  const DestinationPickerView({super.key});
+
   @override
   State<DestinationPickerView> createState() => _DestinationPickerViewState();
 }
