@@ -61,8 +61,8 @@ static const List<int> CMD_VOICE = [0x31, 0x00, 0x03];     // 음성안내 (신�
 ### ✅ TASK-002: 음성안내 기능 추가 구현 [완료]
 **담당**: 개발팀  
 **예상 시간**: 4시간  
-**실제 소요**: 3시간  
-**완료일**: 2025-09-07  
+**실제 소요**: 5시간  
+**완료일**: 2025-09-08  
 **완료 기준**: 음성안내 명령(0x03) 전송 가능  
 
 #### 작업 내용
@@ -121,13 +121,20 @@ on<SendVoiceGuideEvent>((event, emit) async {
 // 파일: lib/presentation/views/home_view.dart
 
 // 안전 리모콘 모달에 버튼 추가
-ListTile(
-  leading: Icon(Icons.record_voice_over),
-  title: Text('음성 안내'),
-  subtitle: Text('음향신호기 설치 위치 정보 안내'),
+FlatCard(
+  title: '음성 안내',
+  titleOnly: true,
+  leading: const Icon(
+    Icons.record_voice_over,
+    color: ColorTheme.highlight1,
+  ),
+  trailing: Icon(
+    Icons.arrow_forward_ios_rounded,
+    color: Theme.of(context).colorScheme.onSurface,
+  ),
   onTap: () {
     context.read<CrosswalkBloc>().add(
-      SendVoiceGuideEvent(widget.crosswalk),
+      SendVoiceGuideEvent(crosswalk: crosswalk),
     );
   },
 )
@@ -136,6 +143,10 @@ ListTile(
 #### 테스트 항목
 - [✓] 음성안내 메소드가 추가되었는지 확인
 - [✓] [0x31, 0x00, 0x03] 명령 코드 정의 확인
+- [✓] SendVoiceGuide UseCase 구현 확인
+- [✓] Bloc 이벤트 핸들러 추가 확인
+- [✓] UI 버튼 추가 및 이벤트 연결 확인
+- [✓] Flutter 빌드 성공 확인
 - [ ] 음향신호기 실제 음성안내 동작 확인
 
 ---
@@ -427,105 +438,7 @@ Widget _buildConnectionStatus(DeviceConnectionState state) {
 
 ---
 
-## 🆕 Priority 3.5: 규격서 추가 요구사항 (신규)
 
-### 🆕 TASK-013: BLE 버전 및 주파수 대역 검증
-**담당**: 개발팀  
-**예상 시간**: 4시간  
-**규격서 요구사항**: BLE 3.0 이상, 2.4~2.5GHz
-
-```dart
-// lib/core/utils/bluetooth_spec_validator.dart
-class BluetoothSpecValidator {
-  // BLE 버전 확인
-  static bool validateBleVersion() {
-    // BLE 3.0 이상 지원 확인
-    // 플랫폼별 구현 필요
-    return true; // TODO: 실제 구현
-  }
-  
-  // 주파수 대역 확인 (2.4~2.5GHz)
-  static bool validateFrequencyBand() {
-    // BLE는 기본적으로 2.4GHz ISM 대역 사용
-    return true;
-  }
-  
-  // 작동 거리 설정 (15m)
-  static const double OPERATION_DISTANCE = 15.0; // meters
-}
-```
-
-### 🆕 TASK-014: 애플리케이션 필수 기능 구현 확인
-**담당**: 개발팀  
-**예상 시간**: 8시간  
-**규격서 요구사항**: 3가지 필수 기능
-
-```dart
-// lib/presentation/features/required_features.dart
-
-/// 규격서 551번 줄 명시 필수 기능
-class RequiredFeatures {
-  /// 1. 시각장애인용 음향신호기를 검색하는 기능
-  static Widget searchFeature() {
-    return BleScanner(
-      filter: (device) => device.name?.startsWith('AHG001+') ?? false,
-      maxDistance: 15.0, // 15m 제한
-    );
-  }
-  
-  /// 2. 횡단보도 위치로 유도하는 기능
-  static Widget navigationFeature() {
-    return CrosswalkNavigator(
-      useLocationGuidance: true,
-      guidanceCommand: Bluetooth.CMD_LOCATION,
-    );
-  }
-  
-  /// 3. 음향신호기 신호버튼 기능
-  static Widget signalButtonFeature() {
-    return SignalButton(
-      commands: {
-        'location': Bluetooth.CMD_LOCATION,
-        'signal': Bluetooth.CMD_SIGNAL,
-        'voice': Bluetooth.CMD_VOICE,
-      },
-    );
-  }
-}
-```
-
-### 🆕 TASK-015: 지속적 업데이트 시스템 구현
-**담당**: 개발팀  
-**예상 시간**: 12시간  
-**규격서 요구사항**: 지속적 업데이트 의무 (551번 줄)
-
-```dart
-// lib/services/update_service.dart
-class UpdateService {
-  /// 규격서 개정 확인
-  Future<bool> checkSpecificationUpdate() async {
-    // 경찰청 규격서 버전 확인
-    // 현재: 2022.4.27
-    return false;
-  }
-  
-  /// 앱 업데이트 확인
-  Future<bool> checkAppUpdate() async {
-    // Play Store / App Store 버전 확인
-    return false;
-  }
-  
-  /// 자동 업데이트 알림
-  void scheduleUpdateCheck() {
-    // 주기적 업데이트 확인 (주 1회)
-    Timer.periodic(Duration(days: 7), (timer) {
-      checkForUpdates();
-    });
-  }
-}
-```
-
----
 
 ## 📋 Priority 3: 중기 (1-2개월)
 
@@ -748,9 +661,107 @@ class CrossingScenario {
 
 ---
 
+## 🆕 Priority 3.5: 규격서 추가 요구사항 (신규)
+
+### 🆕 TASK-010: BLE 버전 및 주파수 대역 검증
+**담당**: 개발팀  
+**예상 시간**: 4시간  
+**규격서 요구사항**: BLE 3.0 이상, 2.4~2.5GHz
+
+```dart
+// lib/core/utils/bluetooth_spec_validator.dart
+class BluetoothSpecValidator {
+  // BLE 버전 확인
+  static bool validateBleVersion() {
+    // BLE 3.0 이상 지원 확인
+    // 플랫폼별 구현 필요
+    return true; // TODO: 실제 구현
+  }
+  
+  // 주파수 대역 확인 (2.4~2.5GHz)
+  static bool validateFrequencyBand() {
+    // BLE는 기본적으로 2.4GHz ISM 대역 사용
+    return true;
+  }
+  
+  // 작동 거리 설정 (15m)
+  static const double OPERATION_DISTANCE = 15.0; // meters
+}
+```
+
+### 🆕 TASK-011: 애플리케이션 필수 기능 구현 확인
+**담당**: 개발팀  
+**예상 시간**: 8시간  
+**규격서 요구사항**: 3가지 필수 기능
+
+```dart
+// lib/presentation/features/required_features.dart
+
+/// 규격서 551번 줄 명시 필수 기능
+class RequiredFeatures {
+  /// 1. 시각장애인용 음향신호기를 검색하는 기능
+  static Widget searchFeature() {
+    return BleScanner(
+      filter: (device) => device.name?.startsWith('AHG001+') ?? false,
+      maxDistance: 15.0, // 15m 제한
+    );
+  }
+  
+  /// 2. 횡단보도 위치로 유도하는 기능
+  static Widget navigationFeature() {
+    return CrosswalkNavigator(
+      useLocationGuidance: true,
+      guidanceCommand: Bluetooth.CMD_LOCATION,
+    );
+  }
+  
+  /// 3. 음향신호기 신호버튼 기능
+  static Widget signalButtonFeature() {
+    return SignalButton(
+      commands: {
+        'location': Bluetooth.CMD_LOCATION,
+        'signal': Bluetooth.CMD_SIGNAL,
+        'voice': Bluetooth.CMD_VOICE,
+      },
+    );
+  }
+}
+```
+
+### 🆕 TASK-012: 지속적 업데이트 시스템 구현
+**담당**: 개발팀  
+**예상 시간**: 12시간  
+**규격서 요구사항**: 지속적 업데이트 의무 (551번 줄)
+
+```dart
+// lib/services/update_service.dart
+class UpdateService {
+  /// 규격서 개정 확인
+  Future<bool> checkSpecificationUpdate() async {
+    // 경찰청 규격서 버전 확인
+    // 현재: 2022.4.27
+    return false;
+  }
+  
+  /// 앱 업데이트 확인
+  Future<bool> checkAppUpdate() async {
+    // Play Store / App Store 버전 확인
+    return false;
+  }
+  
+  /// 자동 업데이트 알림
+  void scheduleUpdateCheck() {
+    // 주기적 업데이트 확인 (주 1회)
+    Timer.periodic(Duration(days: 7), (timer) {
+      checkForUpdates();
+    });
+  }
+}
+```
+
 ## 🧪 Priority 4: 테스트 및 검증
 
-### ✅ TASK-010: 단위 테스트 작성
+### ✅ TASK-013: 단위 테스트 작성
 **담당**: QA팀  
 **예상 시간**: 8시간  
 **완료 기준**: 코드 커버리지 80% 이상  
@@ -771,7 +782,7 @@ class CrossingScenario {
 
 ---
 
-### ✅ TASK-011: 통합 테스트
+### ✅ TASK-014: 통합 테스트
 **담당**: QA팀  
 **예상 시간**: 16시간  
 **완료 기준**: 실제 음향신호기와 연동 성공  
@@ -791,7 +802,7 @@ class CrossingScenario {
 
 ---
 
-### ✅ TASK-012: 성능 최적화
+### ✅ TASK-015: 성능 최적화
 **담당**: 개발팀  
 **예상 시간**: 20시간  
 **완료 기준**: 배터리 소모 20% 감소  
