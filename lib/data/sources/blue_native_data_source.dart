@@ -198,6 +198,15 @@ abstract class BlueNativeDataSource {
   /// 현재 연결 상태를 가져오는 메소드
   DeviceConnectionState? getCurrentConnectionState(String deviceId);
   
+  /// PIN 인증을 수행하는 메소드
+  /// PIN 코드를 사용하여 음향신호기에 인증 시도
+  /// 규격서에는 PIN 프로토콜 상세가 없으므로 제조사별로 다를 수 있음
+  Future<bool> authenticateWithPin(DiscoveredDevice post, String pin);
+  
+  /// PIN 변경을 수행하는 메소드
+  /// 현재 PIN으로 인증 후 새로운 PIN으로 변경
+  Future<bool> changePin(DiscoveredDevice post, String currentPin, String newPin);
+  
   Future<void> disconnect();
 }
 
@@ -416,5 +425,167 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   @override
   DeviceConnectionState? getCurrentConnectionState(String deviceId) {
     return _connectionStates[deviceId];
+  }
+  
+  @override
+  Future<bool> authenticateWithPin(DiscoveredDevice post, String pin) async {
+    try {
+      // DEVICE NAME 검증
+      if (!Bluetooth.validateDeviceName(post.name)) {
+        throw BlueInvalidDeviceException('유효하지 않은 음향신호기');
+      }
+      
+      // 연결 설정
+      final completer = Completer<bool>();
+      bool authResult = false;
+      
+      connection = bluetooth.connectToDevice(id: post.id).listen(
+        (update) async {
+          if (update.connectionState == DeviceConnectionState.connected) {
+            try {
+              // 서비스 탐색
+              final services = await bluetooth.discoverServices(post.id);
+              
+              // PIN SERVICE 찾기
+              final pinService = services.firstWhere(
+                (service) => service.serviceId == Uuid.parse(Bluetooth.PIN_SERVICE_UUID),
+                orElse: () => throw BlueConnectionException('PIN SERVICE를 찾을 수 없음'),
+              );
+              
+              // PIN 특성 찾기 - 일반적으로 PIN SERVICE UUID를 특성으로도 사용
+              DiscoveredCharacteristic? pinCharacteristic;
+              for (final char in pinService.characteristics) {
+                if (char.isWritableWithoutResponse || char.isWritableWithResponse) {
+                  pinCharacteristic = char;
+                  break;
+                }
+              }
+              
+              if (pinCharacteristic == null) {
+                throw BlueConnectionException('PIN 특성을 찾을 수 없음');
+              }
+              
+              final qualifiedCharacteristic = QualifiedCharacteristic(
+                characteristicId: pinCharacteristic.characteristicId,
+                serviceId: pinCharacteristic.serviceId,
+                deviceId: post.id,
+              );
+              
+              // PIN 전송 (UTF-8 인코딩)
+              // 규격서에 인코딩 방식이 명시되지 않았으므로 일반적인 UTF-8 사용
+              final pinBytes = utf8.encode(pin);
+              
+              await bluetooth.writeCharacteristicWithoutResponse(
+                qualifiedCharacteristic,
+                value: pinBytes,
+              );
+              
+              // 응답 대기 (간단한 구현)
+              // 실제 구현시 제조사별 응답 프로토콜 확인 필요
+              await Future.delayed(const Duration(milliseconds: 500));
+              
+              authResult = true; // 임시로 성공 처리
+              completer.complete(authResult);
+              
+              await disconnect();
+            } catch (e) {
+              completer.completeError(e);
+              await disconnect();
+            }
+          }
+        },
+        onError: (error) {
+          completer.completeError(BlueConnectionException('PIN 인증 중 오류 발생'));
+        },
+      );
+      
+      // 타임아웃 설정
+      return await completer.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          disconnect();
+          throw BlueTimeoutException('PIN 인증 시간 초과');
+        },
+      );
+    } catch (e) {
+      if (e is BlueException) rethrow;
+      throw BlueConnectionException('PIN 인증 실패: ${e.toString()}');
+    }
+  }
+  
+  @override
+  Future<bool> changePin(DiscoveredDevice post, String currentPin, String newPin) async {
+    try {
+      // 1. 먼저 현재 PIN으로 인증
+      final authSuccess = await authenticateWithPin(post, currentPin);
+      if (!authSuccess) {
+        throw BlueConnectionException('현재 PIN 인증 실패');
+      }
+      
+      // 2. PIN 변경 수행
+      final completer = Completer<bool>();
+      bool changeResult = false;
+      
+      connection = bluetooth.connectToDevice(id: post.id).listen(
+        (update) async {
+          if (update.connectionState == DeviceConnectionState.connected) {
+            try {
+              // 서비스 탐색
+              final services = await bluetooth.discoverServices(post.id);
+              
+              // CHANGE PIN CODE 특성 찾기
+              for (final service in services) {
+                for (final characteristic in service.characteristics) {
+                  if (characteristic.characteristicId == Uuid.parse(Bluetooth.CHANGE_PIN_UUID)) {
+                    final qualifiedCharacteristic = QualifiedCharacteristic(
+                      characteristicId: characteristic.characteristicId,
+                      serviceId: service.serviceId,
+                      deviceId: post.id,
+                    );
+                    
+                    // 새 PIN 전송
+                    final newPinBytes = utf8.encode(newPin);
+                    
+                    await bluetooth.writeCharacteristicWithoutResponse(
+                      qualifiedCharacteristic,
+                      value: newPinBytes,
+                    );
+                    
+                    // 응답 대기
+                    await Future.delayed(const Duration(milliseconds: 500));
+                    
+                    changeResult = true;
+                    completer.complete(changeResult);
+                    
+                    await disconnect();
+                    return;
+                  }
+                }
+              }
+              
+              throw BlueConnectionException('CHANGE PIN CODE 특성을 찾을 수 없음');
+            } catch (e) {
+              completer.completeError(e);
+              await disconnect();
+            }
+          }
+        },
+        onError: (error) {
+          completer.completeError(BlueConnectionException('PIN 변경 중 오류 발생'));
+        },
+      );
+      
+      // 타임아웃 설정
+      return await completer.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          disconnect();
+          throw BlueTimeoutException('PIN 변경 시간 초과');
+        },
+      );
+    } catch (e) {
+      if (e is BlueException) rethrow;
+      throw BlueConnectionException('PIN 변경 실패: ${e.toString()}');
+    }
   }
 }

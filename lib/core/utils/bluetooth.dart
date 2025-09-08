@@ -2,9 +2,14 @@
 part of '../../framework/core.dart';
 
 class Bluetooth {
+  // UART 서비스 UUID (규격서 준수)
   static const String SERVICE_UUID = '0003cdd0-0000-1000-8000-00805f9b0131';
   static const String CHAR_UUID = '0003cdd2-0000-1000-8000-00805f9b0131';  // RX (송신용)
   static const String CHAR_TX_UUID = '0003cdd1-0000-1000-8000-00805f9b0131'; // TX (수신용)
+  
+  // PIN 관련 UUID (규격서 준수)
+  static const String PIN_SERVICE_UUID = '0003cde0-0000-1000-8000-00805f9b0131';
+  static const String CHANGE_PIN_UUID = '0003cde1-0000-1000-8000-00805f9b0131';
   
   // 경찰청 규격서에 따른 명령 코드 (2022.4.27 개정)
   static const List<int> CMD_LOCATION = [0x31, 0x00, 0x01];  // 위치안내
