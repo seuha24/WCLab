@@ -103,7 +103,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
               /// 사용자가 지도를 탭하면 호출되며, 탭한 위치와 관련된 안내 메시지를 음성으로 전달합니다.
               onMapTapped: (NPoint point, NLatLng latLng) {
                 int meters = (controller.remain_distance.value * 1000).round();
-                controller.speakText('다음 안내까지 ${meters}미터 남았습니다.');
+                controller.speakText('다음 안내까지 $meters미터 남았습니다.');
                 // 필요 시 추가 처리...
               },
             ),

@@ -367,7 +367,9 @@ class NaverMapViewController extends GetxController {
   @override
   void onClose() {
     _locationUpdateTimer?.cancel();
-    _streamSubscriptions.forEach((subscription) => subscription.cancel());
+    for (var subscription in _streamSubscriptions) {
+subscription.cancel();
+    }
     super.onClose();
   }
 
@@ -1414,7 +1416,7 @@ class NaverMapViewController extends GetxController {
         if (outOfBound) {
           Vibration.vibrate(duration: 100);
           debugPrint('경계이탈');
-          debugPrint('searchNewPath : ${searchNewPath}');
+          debugPrint('searchNewPath : $searchNewPath');
           speakText(clock);
           if (searchNewPath) {
             searchNewPathTime++;
