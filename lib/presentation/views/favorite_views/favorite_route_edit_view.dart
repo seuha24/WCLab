@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/data/repositories/favorite_repository_impl.dart';
 import 'package:safelight/data/services/auth_service.dart';
@@ -9,8 +8,6 @@ import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:safelight/domain/entities/favorite_route.dart';
 import 'package:safelight/domain/usecases/favorite_usecase.dart';
 import 'package:safelight/framework/ui.dart';
-import 'package:safelight/framework/object.dart';
-import 'package:safelight/framework/controller.dart';
 
 class FavoriteRouteEditView extends StatefulWidget {
   final FavoriteRoute favoriteRoute;
