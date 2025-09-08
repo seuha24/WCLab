@@ -410,3 +410,96 @@ class SendVoiceInductor implements ConnectCrosswalk {
     return await repository.sendCommand2Crosswalk(params, _command);
   }
 }
+
+/// 검색된 횡단보도(비콘 포스트)에 연결 후 음성안내 신호를 보내는 비즈니스 로직이다.
+///
+/// SendVoiceGuide는 음성안내 신호 전송에 사용된다.
+/// 해당 로직은 연결 및 데이터 전송을 수행하기 때문에 사용자 권한(블루투스) 설정이 선행되어야 한다.
+///
+/// 선택된 횡단보도 하나에 음성안내 신호를 보내기 때문에 사용 시 [call]의 parameter에 [Crosswalk] 객체를 Argument로 넘겨주어야 한다.
+///
+/// ```dart
+/// Crosswalk crosswalk = Crosswalk(...);
+///
+/// ConnectCrosswalk connectCrosswalk = SendVoiceGuide(); // Create usecase object.
+/// connectCrosswalk(crosswalk); // Use call method.
+/// ```
+///
+/// [call] 메소드를 통해 [CrosswalkRepository.sendCommand2Crosswalk]를 호출하여
+/// 연결하고자 하는 신호등에 음성안내 커맨드([0x31, 0x00, 0x03])를 보내게 된다.
+///
+/// 해당 메소드를 수행하면 아래와 같이 결과가 반환된다.
+///
+///   - **[Void] :**
+///   비콘 포스트 연결 및 음성안내 커맨드 발송 성공
+///
+///   - **[BlueFailure] :**
+///   블루투스 연결 및 데이터 전송 실패
+///
+/// **Summary :**
+///
+///   {@macro usecase_part3}
+///
+///   - **DO**
+///   특정 횡단보도에 대한 음성안내 커맨드 발송 시, SendVoiceGuide를 사용해야 한다. 이때 연결하고자 하는 횡단보도의 비콘 포스트 정보가 있어야 한다.
+///
+///   - **DON'T**
+///   `블루투스 권한 허가`가 선행되어 있지 않다면 SendVoiceGuide를 사용할 수 없다.
+class SendVoiceGuide implements ConnectCrosswalk {
+  /// 스마트 압버튼에 전송하는 음성안내 커맨드이다.
+  ///
+  /// 해당 커맨드를 전송하여 시각장애인에게 음향신호기 설치 위치 정보를 안내하는 음성안내 기능을 수행할 수 있다.
+  ///
+  /// **See also :**
+  ///
+  ///   - 블루투스 압버튼의 데이터 통신과 관련된 경찰청 제공 프로토콜(2022년 개정)을 따른다.
+  static const List<int> _command = [0x31, 0x00, 0x03];
+
+  /// 횡단보도 음성안내를 위한 Repository를 담는 변수로서 외부에서 DI되어 사용된다.
+  ///
+  /// [call] 메소드 내에서 [CrosswalkRepository.sendCommand2Crosswalk]를 사용되며 음성안내 신호 발송을 시도한다.
+  ///
+  /// {@macro usecase_part2}
+  CrosswalkRepository repository;
+
+  /// 블루투스를 통한 횡단보도 음성안내 신호 발송 Usecase를 생성한다.
+  ///
+  /// 아래와 같이 직접 클래스를 생성하고 의존성을 주입하여 객체를 생성할 수 있다.
+  ///
+  /// ```dart
+  /// SendVoiceGuide sendVoiceGuide = SendVoiceGuide(repository);
+  /// ```
+  ///
+  /// 단, [ConnectCrosswalk]을 변수형으로 선언하고, 되도록 외부에서 의존성을 주입하는 방식을 권장한다.
+  ///
+  /// ```dart
+  /// // Use ConnectCrosswalk Type.
+  /// ConnectCrosswalk sendVoiceGuide = SendVoiceGuide(repository);
+  ///
+  /// // Use DI.
+  /// ConnectCrosswalk sendVoiceGuide = DI.get<ConnectCrosswalk>();
+  /// ```
+  ///
+  /// 객체의 생성이 끝난 경우 아래의 방법으로 [call] 메소드를 호출한다.
+  /// 이때 argument는 [Crosswalk]이므로 아래와 같이 사용한다.
+  ///
+  /// ```dart
+  /// sendVoiceGuide(Crosswalk(...)); // Use call method.
+  /// ```
+  ///
+  /// **Example :**
+  ///
+  /// ```dart
+  /// SendVoiceGuide sendVoiceGuide = SendVoiceGuide(repository); // Do not use this.
+  /// ConnectCrosswalk sendVoiceGuide = SendVoiceGuide(repository);
+  /// ConnectCrosswalk sendVoiceGuide = DI.get<ConnectCrosswalk>(); // Best Practice.
+  ///
+  /// sendVoiceGuide(Crosswalk(...)); // Use call method.
+  /// ```
+  SendVoiceGuide({required this.repository});
+
+  @override
+  Future<Either<Failure, Void>> call(Crosswalk params) async {
+    return await repository.sendCommand2Crosswalk(params, _command);
+  }
+}

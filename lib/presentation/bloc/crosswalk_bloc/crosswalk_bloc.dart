@@ -7,6 +7,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
   final SearchCrosswalk search2InfiniteTimes;
   final ConnectCrosswalk sendAcousticSignal;
   final ConnectCrosswalk sendVoiceInductor;
+  final ConnectCrosswalk sendVoiceGuide;
   final GetPosition getCurrentPosition;
   final ControlFlash controlFlashOnWithWeather;
 
@@ -15,6 +16,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     required this.search2InfiniteTimes,
     required this.sendAcousticSignal,
     required this.sendVoiceInductor,
+    required this.sendVoiceGuide,
     required this.getCurrentPosition,
     required this.controlFlashOnWithWeather,
   }) : super(SearchOff(results: const [])) {
@@ -22,6 +24,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     on<SearchInfiniteCrosswalkEvent>(_searchInfiniteCrosswalkEvent);
     on<SendAcousticSignalEvent>(_sendAcousticSignalEvent);
     on<SendVoiceInductorEvent>(_sendVoiceInductorEvent);
+    on<SendVoiceGuideEvent>(_sendVoiceGuideEvent);
   }
 
   Future _searchInfiniteCrosswalkEvent(
@@ -139,6 +142,40 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
         emit(ConnectOff(enableCompass: false));
       }
       await sendVoiceInductor(event.crosswalk);
+    } catch (e) {
+      emit(CrosswalkError(message: 'connect failure'));
+    }
+  }
+
+  Future _sendVoiceGuideEvent(
+    SendVoiceGuideEvent event,
+    Emitter<CrosswalkState> emit,
+  ) async {
+    try {
+      tts('${event.crosswalk.name}에 음성안내를 요청합니다.');
+      emit(ConnectOn());
+      if (!Platform.isAndroid) {
+        await controlFlashOnWithWeather(NoParams());
+      }
+      if (event.crosswalk.pos != null) {
+        final results = await getCurrentPosition(NoParams());
+        results.fold(
+          (failure) {
+            emit(ConnectOff(enableCompass: false));
+          },
+          (latLng) async {
+            tts('음향신호기 설치 위치 정보를 안내합니다.');
+            bool enableCompass = true;
+            if (Platform.isAndroid) {
+              enableCompass = false;
+            }
+            emit(ConnectOff(enableCompass: enableCompass, latLng: latLng));
+          },
+        );
+      } else {
+        emit(ConnectOff(enableCompass: false));
+      }
+      await sendVoiceGuide(event.crosswalk);
     } catch (e) {
       emit(CrosswalkError(message: 'connect failure'));
     }

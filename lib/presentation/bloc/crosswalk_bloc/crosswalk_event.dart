@@ -20,3 +20,9 @@ class SendVoiceInductorEvent extends CrosswalkEvent {
 
   SendVoiceInductorEvent({required this.crosswalk});
 }
+
+class SendVoiceGuideEvent extends CrosswalkEvent {
+  final Crosswalk crosswalk;
+
+  SendVoiceGuideEvent({required this.crosswalk});
+}

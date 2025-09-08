@@ -36,6 +36,7 @@ const String USECASE_CONTROL_FLASH_ON = 'USECASE_CONTROL_FLASH_ON';
 const String USECASE_CONTROL_FLASH_OFF = 'USECASE_CONTROL_FLASH_OFF';
 const String USECASE_SEND_ACOUSTIC_SIGNAL = 'USECASE_SEND_ACOUSTIC_SIGNAL';
 const String USECASE_SEND_VOICE_INDUCTOR = 'USECASE_SEND_VOICE_INDUCTOR';
+const String USECASE_SEND_VOICE_GUIDE = 'USECASE_SEND_VOICE_GUIDE';
 const String USECASE_SIGN_IN_ANONYMOUSLY = 'USECASE_SIGN_IN_ANONYMOUSLY';
 const String USECASE_SIGN_OUT_ANONYMOUSLY = 'USECASE_SIGN_OUT_ANONYMOUSLY';
 
@@ -79,6 +80,7 @@ Future<void> init() async {
       search2InfiniteTimes: DI(instanceName: USECASE_SEARCH_CROSSWALK_INFINITE),
       sendAcousticSignal: DI(instanceName: USECASE_SEND_ACOUSTIC_SIGNAL),
       sendVoiceInductor: DI(instanceName: USECASE_SEND_VOICE_INDUCTOR),
+      sendVoiceGuide: DI(instanceName: USECASE_SEND_VOICE_GUIDE),
       getCurrentPosition: DI(),
       controlFlashOnWithWeather:
           DI(instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER),
@@ -135,6 +137,10 @@ Future<void> init() async {
   DI.registerLazySingleton<ConnectCrosswalk>(
     () => SendVoiceInductor(repository: DI()),
     instanceName: USECASE_SEND_VOICE_INDUCTOR,
+  );
+  DI.registerLazySingleton<ConnectCrosswalk>(
+    () => SendVoiceGuide(repository: DI()),
+    instanceName: USECASE_SEND_VOICE_GUIDE,
   );
   DI.registerLazySingleton<ControlFlash>(
     () => ControlFlashOn(repository: DI()),

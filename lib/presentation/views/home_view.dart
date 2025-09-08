@@ -818,6 +818,34 @@ class _HomeViewState extends State<HomeView> {
               },
             ),
           ),
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: SizeTheme.h_md,
+            ),
+            child: FlatCard(
+              title: '음성 안내',
+              titleOnly: true,
+              leading: const Icon(
+                Icons.record_voice_over,
+                color: ColorTheme.highlight1,
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              onTap: () {
+                this
+                    .context
+                    .read<CrosswalkBloc>()
+                    .add(SendVoiceGuideEvent(crosswalk: crosswalk));
+                Scrollable.ensureVisible(
+                  keys[1].currentContext!,
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeInOut,
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
