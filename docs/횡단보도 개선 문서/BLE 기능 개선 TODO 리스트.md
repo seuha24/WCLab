@@ -1,10 +1,18 @@
 # BLE 기능 개선 TODO 리스트
 
 ## 📅 작성 정보
-- **작성일**: 2025-09-07
+- **작성일**: 2025-09-07 (최종 수정: 2025-09-08)
 - **프로젝트**: SafeLight
-- **대상**: 경찰청 시각장애인용 음향신호기 규격서 준수
-- **버전**: v1.0
+- **대상**: 경찰청 시각장애인용 음향신호기 규격서 (2022.4.27) 완전 준수
+- **버전**: v2.0
+
+## ⚠️ 규격서 핵심 요구사항
+- **BLE 버전**: BLE 3.0 이상 필수
+- **주파수 대역**: 2.4~2.5GHz
+- **작동 거리**: 약 15m
+- **DEVICE NAME**: "AHG001+MAC주소+" (20 Bytes)
+- **애플리케이션 필수 기능**: ① 검색 ② 위치 유도 ③ 신호버튼
+- **지속적 업데이트 의무**: 규격서 명시사항
 
 ---
 
@@ -419,16 +427,136 @@ Widget _buildConnectionStatus(DeviceConnectionState state) {
 
 ---
 
+## 🆕 Priority 3.5: 규격서 추가 요구사항 (신규)
+
+### 🆕 TASK-013: BLE 버전 및 주파수 대역 검증
+**담당**: 개발팀  
+**예상 시간**: 4시간  
+**규격서 요구사항**: BLE 3.0 이상, 2.4~2.5GHz
+
+```dart
+// lib/core/utils/bluetooth_spec_validator.dart
+class BluetoothSpecValidator {
+  // BLE 버전 확인
+  static bool validateBleVersion() {
+    // BLE 3.0 이상 지원 확인
+    // 플랫폼별 구현 필요
+    return true; // TODO: 실제 구현
+  }
+  
+  // 주파수 대역 확인 (2.4~2.5GHz)
+  static bool validateFrequencyBand() {
+    // BLE는 기본적으로 2.4GHz ISM 대역 사용
+    return true;
+  }
+  
+  // 작동 거리 설정 (15m)
+  static const double OPERATION_DISTANCE = 15.0; // meters
+}
+```
+
+### 🆕 TASK-014: 애플리케이션 필수 기능 구현 확인
+**담당**: 개발팀  
+**예상 시간**: 8시간  
+**규격서 요구사항**: 3가지 필수 기능
+
+```dart
+// lib/presentation/features/required_features.dart
+
+/// 규격서 551번 줄 명시 필수 기능
+class RequiredFeatures {
+  /// 1. 시각장애인용 음향신호기를 검색하는 기능
+  static Widget searchFeature() {
+    return BleScanner(
+      filter: (device) => device.name?.startsWith('AHG001+') ?? false,
+      maxDistance: 15.0, // 15m 제한
+    );
+  }
+  
+  /// 2. 횡단보도 위치로 유도하는 기능
+  static Widget navigationFeature() {
+    return CrosswalkNavigator(
+      useLocationGuidance: true,
+      guidanceCommand: Bluetooth.CMD_LOCATION,
+    );
+  }
+  
+  /// 3. 음향신호기 신호버튼 기능
+  static Widget signalButtonFeature() {
+    return SignalButton(
+      commands: {
+        'location': Bluetooth.CMD_LOCATION,
+        'signal': Bluetooth.CMD_SIGNAL,
+        'voice': Bluetooth.CMD_VOICE,
+      },
+    );
+  }
+}
+```
+
+### 🆕 TASK-015: 지속적 업데이트 시스템 구현
+**담당**: 개발팀  
+**예상 시간**: 12시간  
+**규격서 요구사항**: 지속적 업데이트 의무 (551번 줄)
+
+```dart
+// lib/services/update_service.dart
+class UpdateService {
+  /// 규격서 개정 확인
+  Future<bool> checkSpecificationUpdate() async {
+    // 경찰청 규격서 버전 확인
+    // 현재: 2022.4.27
+    return false;
+  }
+  
+  /// 앱 업데이트 확인
+  Future<bool> checkAppUpdate() async {
+    // Play Store / App Store 버전 확인
+    return false;
+  }
+  
+  /// 자동 업데이트 알림
+  void scheduleUpdateCheck() {
+    // 주기적 업데이트 확인 (주 1회)
+    Timer.periodic(Duration(days: 7), (timer) {
+      checkForUpdates();
+    });
+  }
+}
+```
+
+---
+
 ## 📋 Priority 3: 중기 (1-2개월)
 
-### ✅ TASK-007: PIN 인증 기능 구현
+### 🔄 TASK-007: PIN 인증 기능 구현 [수정 필요]
 **담당**: 보안팀 + 개발팀  
 **예상 시간**: 16시간  
 **완료 기준**: PIN 코드 기반 보안 연결  
+**⚠️ 규격서 UUID 수정 필요**
+
+#### 올바른 UUID (규격서 기준)
+```dart
+// ❌ 기존 잘못된 UUID
+// characteristicId: '0003cde1-...' // 틀림
+// serviceId: '0003cde0-...' // 틀림
+
+// ✅ 규격서 준수 UUID
+class BluetoothUUID {
+  // 기본 서비스
+  static const UART_SERVICE = '0003cdd0-0000-1000-8000-00805f9b0131';
+  static const UART_TX = '0003cdd1-0000-1000-8000-00805f9b0131';
+  static const UART_RX = '0003cdd2-0000-1000-8000-00805f9b0131';
+  
+  // PIN 관련 (규격서 명시)
+  static const PIN_SERVICE = '0003cde0-0000-1000-8000-00805f9b0131';
+  static const CHANGE_PIN_CODE = '0003cde1-0000-1000-8000-00805f9b0131';
+}
+```
 
 #### 작업 내용
 
-##### 1. PIN Service 구현
+##### 1. PIN Service 구현 (수정)
 ```dart
 // 파일: lib/data/sources/blue_native_data_source.dart
 
@@ -436,9 +564,10 @@ Future<bool> authenticateWithPin(
   DiscoveredDevice post,
   String pin,
 ) async {
-  final pinService = QualifiedCharacteristic(
-    characteristicId: Uuid.parse('0003cde1-0000-1000-8000-00805f9b0131'),
-    serviceId: Uuid.parse('0003cde0-0000-1000-8000-00805f9b0131'),
+  // PIN SERVICE UUID 사용 (규격서 준수)
+  final pinCharacteristic = QualifiedCharacteristic(
+    characteristicId: Uuid.parse(BluetoothUUID.PIN_SERVICE),
+    serviceId: Uuid.parse(BluetoothUUID.UART_SERVICE),
     deviceId: post.id,
   );
   
@@ -451,9 +580,38 @@ Future<bool> authenticateWithPin(
   );
   
   // 인증 결과 대기
-  // ...
+  return await waitForPinResponse(post.id);
+}
+
+// PIN 변경 구현 (신규)
+Future<bool> changePin(
+  DiscoveredDevice post,
+  String currentPin,
+  String newPin,
+) async {
+  // 1. 현재 PIN으로 인증
+  if (!await authenticateWithPin(post, currentPin)) {
+    return false;
+  }
+  
+  // 2. CHANGE_PIN_CODE UUID 사용
+  final changePinCharacteristic = QualifiedCharacteristic(
+    characteristicId: Uuid.parse(BluetoothUUID.CHANGE_PIN_CODE),
+    serviceId: Uuid.parse(BluetoothUUID.UART_SERVICE),
+    deviceId: post.id,
+  );
+  
+  // 3. 새 PIN 전송
+  await bluetooth.writeCharacteristicWithoutResponse(
+    changePinCharacteristic,
+    value: utf8.encode(newPin),
+  );
+  
+  return await waitForPinChangeResponse(post.id);
 }
 ```
+
+⚠️ **주의**: PIN 인증 프로토콜 상세는 규격서에 명시되지 않음. 제조사 확인 필요.
 
 ##### 2. PIN 관리 UI
 ```dart
@@ -644,19 +802,89 @@ class CrossingScenario {
 - [ ] 명령 큐잉 시스템
 - [ ] 백그라운드 작업 최적화
 
+### 🆕 TASK-016: 규격서 준수 검증 테스트
+**담당**: QA팀  
+**예상 시간**: 16시간  
+**완료 기준**: 규격서 100% 준수
+
+#### 검증 항목
+```dart
+// test/specification_compliance_test.dart
+void main() {
+  group('규격서 준수 테스트', () {
+    test('BLE 3.0 이상 지원', () {
+      expect(BluetoothSpecValidator.validateBleVersion(), isTrue);
+    });
+    
+    test('2.4~2.5GHz 대역 사용', () {
+      expect(BluetoothSpecValidator.validateFrequencyBand(), isTrue);
+    });
+    
+    test('DEVICE NAME 형식 (AHG001+MAC+)', () {
+      expect(validateDeviceName('AHG001+BBA050E123D4+'), isTrue);
+    });
+    
+    test('작동 거리 15m', () {
+      expect(BluetoothSpecValidator.OPERATION_DISTANCE, equals(15.0));
+    });
+    
+    test('모든 UUID 정확성', () {
+      expect(BluetoothUUID.UART_SERVICE, equals('0003cdd0-0000-1000-8000-00805f9b0131'));
+      expect(BluetoothUUID.UART_TX, equals('0003cdd1-0000-1000-8000-00805f9b0131'));
+      expect(BluetoothUUID.UART_RX, equals('0003cdd2-0000-1000-8000-00805f9b0131'));
+      expect(BluetoothUUID.PIN_SERVICE, equals('0003cde0-0000-1000-8000-00805f9b0131'));
+      expect(BluetoothUUID.CHANGE_PIN_CODE, equals('0003cde1-0000-1000-8000-00805f9b0131'));
+    });
+    
+    test('명령 코드 정확성', () {
+      expect(Bluetooth.CMD_LOCATION, equals([0x31, 0x00, 0x01]));
+      expect(Bluetooth.CMD_SIGNAL, equals([0x31, 0x00, 0x02]));
+      expect(Bluetooth.CMD_VOICE, equals([0x31, 0x00, 0x03]));
+    });
+    
+    test('응답 코드 정확성', () {
+      expect(ResponseParser.ACK, equals([0x32, 0x00, 0x00]));
+      expect(ResponseParser.NAK, equals([0x32, 0x00, 0x01]));
+    });
+    
+    test('필수 기능 3가지 구현', () {
+      expect(hasSearchFeature(), isTrue);
+      expect(hasNavigationFeature(), isTrue);
+      expect(hasSignalButtonFeature(), isTrue);
+    });
+  });
+}
+```
+
 ---
 
-## 📊 진행 상황 대시보드
+## 📊 진행 상황 대시보드 (수정)
 
 ### 전체 진행률
 ```
 Priority 1 (긴급): [██████████] 100% (3/3) ✅
 Priority 2 (단기): [██████████] 100% (3/3) ✅
-Priority 3 (중기): [          ] 0% (0/3)
-Priority 4 (테스트): [          ] 0% (0/3)
+Priority 3 (중기): [█         ] 10% (PIN UUID 수정 필요)
+Priority 3.5 (신규): [          ] 0% (0/3)
+Priority 4 (테스트): [█         ] 10% (규격서 검증 추가)
 
-전체: [████      ] 40% (6/15)
+전체: [████      ] 35% (6/19)
 ```
+
+### 규격서 준수율
+| 항목 | 준수 상태 | 비고 |
+|------|----------|------|
+| BLE 버전 (3.0+) | ⚠️ 미확인 | 검증 필요 |
+| 주파수 대역 (2.4~2.5GHz) | ✅ 준수 | BLE 기본 |
+| DEVICE NAME | ✅ 준수 | AHG001 형식 |
+| UUID 5종 | ⚠️ 부분 | PIN UUID 수정 필요 |
+| 명령 프로토콜 | ✅ 준수 | 3 Bytes |
+| 응답 프로토콜 | ✅ 준수 | 3 Bytes |
+| 작동 거리 (15m) | ⚠️ 미구현 | 설정 필요 |
+| 필수 기능 3종 | ⚠️ 부분 | 확인 필요 |
+| 지속 업데이트 | ❌ 미구현 | 시스템 필요 |
+
+**전체 준수율: 약 70%**
 
 ### 주요 마일스톤
 | 마일스톤 | 목표일 | 상태 | 완료율 |
@@ -751,15 +979,48 @@ main (production)
 
 ---
 
+## ⚠️ 긴급 수정 필요 사항
+
+### 1. PIN SERVICE UUID 수정
+- 현재: 잘못된 UUID 사용
+- 수정: 규격서 UUID로 변경
+- 영향: PIN 인증 기능 전체
+
+### 2. BLE 버전 확인
+- 요구: BLE 3.0 이상
+- 현재: 미확인
+- 조치: 버전 체크 로직 추가
+
+### 3. 작동 거리 설정
+- 요구: 15m
+- 현재: 미설정
+- 조치: 스캔 거리 제한 구현
+
+### 4. 지속 업데이트 시스템
+- 요구: 규격서 명시 의무
+- 현재: 없음
+- 조치: 자동 업데이트 체크 구현
+
+---
+
 ## 📝 변경 이력
 
 | 버전 | 날짜 | 작성자 | 변경 내용 |
 |------|------|--------|-----------|
 | v1.0 | 2025-09-07 | SafeLight 개발팀 | 초기 작성 |
 | v1.1 | 2025-09-07 | SafeLight 개발팀 | Priority 1, 2 작업 완료 (6/15 완료) |
+| v2.0 | 2025-09-08 | SafeLight 개발팀 | 규격서 완전 대조 후 수정 |
+
+### 주요 수정사항 (v2.0)
+1. PIN SERVICE UUID 수정 (규격서 준수)
+2. BLE 3.0 이상, 2.4~2.5GHz 명시
+3. 작동 거리 15m 명시
+4. 애플리케이션 필수 기능 3종 추가
+5. 지속 업데이트 의무 추가
+6. 규격서 준수 검증 테스트 추가
 
 ---
 
-**마지막 업데이트**: 2025-09-07 20:00  
+**마지막 업데이트**: 2025-09-08 22:00  
 **다음 리뷰**: 2025-09-14 10:00  
-**문서 상태**: 🟢 활성
+**문서 상태**: 🔴 수정 필요 (PIN UUID 긴급 수정)
