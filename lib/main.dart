@@ -12,7 +12,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/injection.dart' as injection;
