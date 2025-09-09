@@ -1,4 +1,4 @@
-library safelight;
+library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -86,7 +86,8 @@ class SafeLight extends StatelessWidget {
               ),
               BlocProvider(
                 create: (context) => EntranceBloc(
-                  getBuildingEntrancesUseCase: DI.get<GetBuildingEntrancesUseCase>(),
+                  getBuildingEntrancesUseCase:
+                      DI.get<GetBuildingEntrancesUseCase>(),
                 ),
               ),
               // BlocProvider(

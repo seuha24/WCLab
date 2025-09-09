@@ -1,4 +1,4 @@
-library usecase;
+library;
 
 import 'package:dartz/dartz.dart';
 import 'package:latlong2/latlong.dart';

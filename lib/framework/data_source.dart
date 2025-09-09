@@ -1,4 +1,4 @@
-library data_source;
+library;
 
 import 'dart:async';
 import 'dart:convert';

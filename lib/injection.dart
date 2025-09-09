@@ -1,6 +1,6 @@
 
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
-library injection;
+library;
 
 import 'dart:io';
 import 'package:dio/dio.dart';

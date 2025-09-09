@@ -1,4 +1,4 @@
-library core;
+library;
 
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';

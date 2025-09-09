@@ -1,4 +1,4 @@
-library controller;
+library;
 
 import 'dart:async';
 import 'dart:io' show Platform;
