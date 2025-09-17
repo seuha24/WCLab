@@ -292,7 +292,7 @@ class NaverMapViewController extends GetxController {
     yawRateTurn2 = yawRate2 * radianToAngle;
   }
 
-  /// positionUpdate: 가속도 이벤트를 기반으로 속도와 위치를 업데이트합니다.
+  /// positionUpdate: 가속도 이벤트를 기반으로 속도와 위치를 업데이트합
   /// [event]: UserAccelerometerEvent 데이터.
   /// [sensorInterval]: 센서 업데이트 간격.
   void positionUpdate(UserAccelerometerEvent event, Duration sensorInterval) {
