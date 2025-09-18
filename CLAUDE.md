@@ -1,202 +1,313 @@
 # CLAUDE.md - SafeLight 프로젝트 지침
 
-## 프로젝트 개요
-SafeLight - Flutter 기반 시각 장애인 안전 경로 안내 애플리케이션
+## 📑 목차 (Table of Contents)
+- [🚀 빠른 시작](#-빠른-시작-quick-start)
+- [1. 프로젝트 정보](#1-프로젝트-정보)
+- [2. 개발 규칙](#2-개발-규칙)
+- [3. 아키텍처](#3-아키텍처)
+- [4. 기술 스택](#4-기술-스택)
+- [5. 핵심 기능](#5-핵심-기능)
+- [6. 빌드 및 배포](#6-빌드-및-배포)
+- [7. 성능 기준](#7-성능-기준)
+- [8. 문서 및 리소스](#8-문서-및-리소스)
 
-## 기술 스택
+---
 
-### Core Framework
-- **Flutter**: 3.22.3 (Dart SDK ^3.2.6)
-- **Architecture**: Clean Architecture + BLoC Pattern
-- **State Management**: flutter_bloc (^9.1.0), get_it (^8.0.3)
-- **Dependency Injection**: get_it, injection.dart
+## 🚀 빠른 시작 (Quick Start)
 
-### Backend & Authentication
-- **Firebase**: Core (^3.8.1), Auth (^5.5.1), Firestore (^5.5.1)
-- **OAuth**: Google Sign In (^6.2.2), Sign in with Apple (^6.1.4)
+### 🔴 필수 확인 사항
+```bash
+# 1. 의존성 설치
+flutter pub get
 
-### Maps & Navigation
-- **Map SDK**: flutter_naver_map (^1.4.0)
-- **Location**: geolocator (^14.0.0), flutter_compass (^0.8.0)
-- **Routing**: Custom navigation API service
+# 2. 빌드 테스트
+flutter build apk  # Android
+flutter build ios  # iOS
 
-### Device Features
-- **Sensors**: sensors_plus (^6.1.1), camera (^0.11.1)
-- **TTS/STT**: flutter_tts (^4.2.2), speech_to_text (^7.0.0)
-- **Flash/Torch**: torch_light (^1.0.0)
-- **Notifications**: flutter_local_notifications (^18.0.1)
-- **Permissions**: permission_handler (^11.1.0)
-- **Haptic**: vibration (^3.1.3)
+# 3. 개발 서버 실행
+flutter run
+```
 
-### Data & Network
-- **HTTP Client**: dio (^5.7.0), pretty_dio_logger (^1.4.0)
-- **Local Storage**: hive (^2.2.3), shared_preferences
-- **Serialization**: Equatable, dartz
+### ⚠️ 절대 금지 사항
+- ❌ `Future.delayed()` 사용
+- ❌ `debugPrint` 사용 (프로덕션)
+- ❌ try-catch 빈 블록
+- ❌ View에서 Repository 직접 호출
+- ❌ Global 변수 사용
 
-## 프로젝트 구조
+### ✅ 필수 준수 사항
+- ✔️ DI 사용 (get_it)
+- ✔️ BLoC 패턴
+- ✔️ Clean Architecture
+- ✔️ 에러 처리
+- ✔️ const 위젯 사용
 
+---
+
+## 1. 프로젝트 정보
+
+### 1.1 개요
+- **프로젝트명**: SafeLight
+- **설명**: Flutter 기반 시각 장애인 안전 경로 안내 애플리케이션
+- **버전**: iOS 2.0.1+21 | Android 1.1.1+4
+- **최소 지원**: iOS 14.0+ | Android API 21+
+
+### 1.2 브랜치 전략
+| 브랜치 | 용도 | PR 타겟 |
+|--------|------|---------|
+| master | 프로덕션 | - |
+| hojung_develop | 개발 브랜치 (현재) | master |
+
+---
+
+## 2. 개발 규칙
+
+### 2.1 코딩 컨벤션 🔴 필수
+
+#### 네이밍 규칙
+| 구분 | 규칙 | 예시 |
+|------|------|------|
+| 파일명 | snake_case | `auth_service.dart` |
+| 클래스명 | PascalCase | `AuthService` |
+| 변수/메서드 | camelCase | `getUserData` |
+| 상수 | SCREAMING_SNAKE | `MAX_RETRY_COUNT` |
+| Private | _ prefix | `_privateMethod` |
+
+#### 우선순위별 규칙
+
+##### 🔴 필수 규칙
+```dart
+// DRY 원칙 - 코드 중복 금지
+// SSOT - 상태는 한 곳에서만
+// 에러 처리 - 모든 비동기 작업
+// DI 사용 - get_it 활용
+```
+
+##### 🟡 권장 규칙
+```dart
+// const 위젯 활용
+// RepaintBoundary 사용
+// 적절한 주석
+```
+
+##### 🟢 선택 규칙
+```dart
+// 테스트 코드 (요청 시)
+// TODO 주석 (최소화)
+// ListView itemExtent
+```
+
+---
+
+## 3. 아키텍처
+
+### 3.1 Clean Architecture 계층 구조
+
+```
+┌─────────────────────────────────────┐
+│        Presentation Layer           │
+│    (Views, BLoC, Controllers)       │
+├─────────────────────────────────────┤
+│          Domain Layer               │
+│   (Entities, UseCases, Repos)       │
+├─────────────────────────────────────┤
+│           Data Layer                │
+│  (Models, Sources, Implementations) │
+└─────────────────────────────────────┘
+```
+
+### 3.2 프로젝트 구조
 ```
 lib/
-├── core/                 # 핵심 비즈니스 로직
-│   ├── caches/          # 로컬 캐시 (color_mode, flash_mode, setting)
-│   ├── errors/          # 에러 처리
-│   ├── usecases/        # UseCase 인터페이스
-│   └── utils/           # 유틸리티 (validators, apis, enums, tts)
-├── data/                # 데이터 레이어
-│   ├── models/          # 데이터 모델 (DTO)
-│   ├── network/         # 네트워크 설정 (dio_client, interceptor)
-│   ├── repositories/    # Repository 구현체
-│   ├── services/        # 외부 서비스 (auth, tts, navigation_api)
-│   └── sources/         # 데이터 소스 (remote, native, cache)
-├── domain/              # 도메인 레이어
-│   ├── entities/        # 비즈니스 엔티티
-│   ├── repositories/    # Repository 인터페이스
-│   └── usecases/       # 비즈니스 로직
-├── framework/           # 프레임워크 추상화
-│   ├── controller.dart
-│   ├── core.dart
-│   ├── data_source.dart
-│   ├── repository.dart
-│   ├── ui.dart
-│   └── usecase.dart
-├── presentation/        # 프레젠테이션 레이어
-│   ├── bloc/           # BLoC (auth, crosswalk, entrance, registration, search)
-│   ├── controllers/    # 컨트롤러
-│   ├── cubit/          # Cubit (bluetooth, location permissions)
-│   ├── views/          # 화면 (UI)
-│   └── widgets/        # 재사용 위젯
-├── firebase_options.dart
-├── initializer.dart    # 앱 초기화
-├── injection.dart      # DI 설정
-└── main.dart          # 엔트리 포인트
+├── 📁 core/                 # 핵심 유틸리티
+│   ├── caches/             # 로컬 캐시
+│   ├── errors/             # 에러 처리
+│   ├── usecases/           # UseCase 인터페이스
+│   └── utils/              # 유틸리티
+│
+├── 📁 data/                 # 데이터 레이어
+│   ├── models/             # DTO
+│   ├── network/            # 네트워크
+│   ├── repositories/       # Repository 구현
+│   ├── services/           # 외부 서비스
+│   └── sources/            # 데이터 소스
+│
+├── 📁 domain/               # 비즈니스 로직
+│   ├── entities/           # 엔티티
+│   ├── repositories/       # Repository 인터페이스
+│   └── usecases/          # UseCase
+│
+├── 📁 presentation/         # UI 레이어
+│   ├── bloc/              # BLoC
+│   ├── cubit/             # Cubit
+│   ├── views/             # 화면
+│   └── widgets/           # 위젯
+│
+└── 📄 main.dart            # 진입점
 ```
 
-## 코딩 컨벤션
+### 3.3 BLoC 패턴 규칙
+| 요소 | 네이밍 | 상속 |
+|------|--------|------|
+| Event | ~Event | Equatable |
+| State | ~State | Equatable |
+| BLoC | ~Bloc | Bloc |
+| Cubit | ~Cubit | Cubit |
 
-### 네이밍 규칙
-- **파일명**: snake_case (예: auth_service.dart)
-- **클래스명**: PascalCase (예: AuthService)
-- **변수/메서드**: camelCase (예: getUserData)
-- **상수**: SCREAMING_SNAKE_CASE (API 엔드포인트 등)
-- **Private**: 언더스코어 prefix (예: _privateMethod)
+---
 
-### Clean Architecture 규칙
-1. **의존성 방향**: Presentation → Domain ← Data
-2. **Domain 독립성**: Domain 레이어는 Flutter에 의존하지 않음
-3. **Repository Pattern**: 인터페이스는 Domain, 구현은 Data
-4. **UseCase**: 하나의 비즈니스 로직만 담당 (단일 책임)
+## 4. 기술 스택
 
-### BLoC 패턴 규칙
-- **Event**: ~Event 접미사 (예: AuthEvent)
-- **State**: ~State 접미사 (예: AuthState)
-- **BLoC**: ~Bloc 접미사 (예: AuthBloc)
-- **Equatable**: 모든 Event/State는 Equatable 상속
+### 4.1 Core Dependencies
+| 카테고리 | 패키지 | 버전 | 용도 |
+|----------|--------|------|------|
+| **Framework** | Flutter | 3.22.3 | Core |
+| **State** | flutter_bloc | ^9.1.0 | 상태관리 |
+| **DI** | get_it | ^8.0.3 | 의존성 주입 |
+| **Firebase** | firebase_core | ^3.8.1 | 백엔드 |
 
-### 필수 준수 사항
-1. **DRY 원칙**: 코드 중복 절대 금지
-2. **SSOT**: 상태는 한 곳에서만 관리 (BLoC/Cubit)
-3. **에러 처리**: 모든 비동기 작업에 에러 처리 필수
-4. **빌드 검증**: 코드 수정 후 빌드 필수
-5. **DI 사용**: 직접 인스턴스 생성 대신 get_it 사용
+### 4.2 주요 라이브러리
+| 기능 | 패키지 | 담당 모듈 |
+|------|--------|-----------|
+| Maps | flutter_naver_map | NavigatorRepository |
+| TTS | flutter_tts | TtsService |
+| BLE | flutter_reactive_ble | BlueDataSource |
+| Sensors | sensors_plus | AccelerometerRepository |
+| Network | dio | DioClient |
 
-### 금지 패턴
-- `Future.delayed()` 사용 금지
-- `debugPrint` 사용 금지 (프로덕션 코드)
-- try-catch로 에러 무시 금지
-- 테스트 코드 작성 금지 (별도 요청 시에만)
-- View에서 직접 Repository/DataSource 호출 금지
-- Global 변수 사용 금지 (DI로 대체)
+---
 
-## 빌드 및 실행 명령어
+## 5. 핵심 기능
 
+### 5.1 기능별 모듈 매핑
+| 기능 | BLoC/Cubit | Repository | UseCase | 상태 |
+|------|------------|------------|---------|------|
+| 인증 | AuthBloc | AuthRepository | AuthUseCase | ✅ |
+| 횡단보도 | CrosswalkBloc | CrosswalkRepository | CrosswalkUseCase | ✅ |
+| 경로탐색 | SearchBloc | NavigatorRepository | NavUseCase | ✅ |
+| BLE 통신 | - | - | - | 🔨 |
+| IMU 센서 | - | AccelerometerRepository | - | ✅ |
+
+### 5.2 BLE 음향신호기 연동
+```dart
+// 🔴 경찰청 규격서(2022.4.27) 준수
+const DEVICE_NAME = "AHG001+MAC+";  // 20 Bytes
+const BLE_VERSION = "3.0+";         // 필수
+const DISTANCE = 15;                // meters
+
+// 명령 코드
+CMD_LOCATION: [0x31, 0x00, 0x01]   // 위치안내
+CMD_SIGNAL: [0x31, 0x00, 0x02]     // 신호안내
+CMD_VOICE: [0x31, 0x00, 0x03]      // 음성안내
+```
+
+### 5.3 IMU 센서 기반 위치 추적
+- **알고리즘**: SmartPDR, BVI 센서 융합
+- **필터**: WeightedAverageFilter
+- **모드**: 주머니 모드 지원
+- **센서**: Accelerometer, Gyroscope, Magnetometer
+
+---
+
+## 6. 빌드 및 배포
+
+### 6.1 빌드 명령어
+
+#### 개발 환경
 ```bash
 # 의존성 설치
 flutter pub get
 
-# 코드 생성 (Hive 등)
+# 코드 생성
 flutter pub run build_runner build --delete-conflicting-outputs
 
-# 개발 서버 실행
+# 개발 서버
 flutter run
-
-# iOS 빌드
-flutter build ios
-
-# Android 빌드
-flutter build apk
-flutter build appbundle  # Play Store용
-
-# 빌드 클린
-flutter clean
-flutter pub get
-
-# 네이티브 스플래시 생성
-flutter pub run flutter_native_splash:create
 ```
 
-## API & 서비스 정보
-
-### Naver Map
-- **Client ID**: pzijwnqrpi
-- **인증 타입**: Public
-
-### Firebase 프로젝트
-- Firebase 옵션: firebase_options.dart
-- 지원 플랫폼: iOS, Android
-
-## 주요 기능별 담당 모듈
-
-| 기능 | BLoC/Cubit | Repository | UseCase |
-|-----|-----------|------------|---------|
-| 인증 | AuthBloc | AuthRepository | AuthUseCase |
-| 횡단보도 | CrosswalkBloc | CrosswalkRepository | CrosswalkUseCase |
-| 즐겨찾기 | - | FavoriteRepository | FavoriteUseCase |
-| 경로탐색 | SearchBloc | NavigatorRepository | NavUseCase |
-| 권한관리 | LocationPermissionCubit | PermissionRepository | PermissionUseCase |
-| 플래시 | - | FlashRepository | - |
-
-## 브랜치 정보
-- **현재 브랜치**: hojung_develop
-- **메인 브랜치**: master (PR 타겟)
-
-## 버전 정보
-- **iOS**: 2.0.1+21 (최소 지원: iOS 14.0)
-- **Android**: 1.1.1+4
-
-## 성능 기준
-
-### Flutter Performance 기준 (필수 달성)
-- **Frame Rendering**: 60 FPS 유지 (16ms/frame)
-- **Jank Rate**: < 5% (스킵된 프레임 비율)
-- **앱 시작 시간**: < 2초 (Cold Start)
-- **메모리 사용량**: < 150MB (일반 사용 시)
-- **배터리 소모**: 시간당 < 5%
-
-### Performance Monitoring
+#### 프로덕션 빌드
 ```bash
-# Flutter DevTools 실행
+# Android
+flutter build apk --release
+flutter build appbundle  # Play Store
+
+# iOS
+flutter build ios --release
+
+# 클린 빌드
+flutter clean && flutter pub get
+```
+
+### 6.2 API Keys
+| 서비스 | Key | 환경 |
+|--------|-----|------|
+| Naver Map | pzijwnqrpi | Public |
+| Firebase | firebase_options.dart | iOS/Android |
+
+---
+
+## 7. 성능 기준
+
+### 7.1 필수 달성 기준 🔴
+| 지표 | 목표 | 측정 방법 |
+|------|------|-----------|
+| FPS | 60 FPS | DevTools |
+| Jank Rate | < 5% | flutter run --profile |
+| 시작 시간 | < 2초 | Cold Start |
+| 메모리 | < 150MB | DevTools |
+| 배터리 | < 5%/h | Device Monitor |
+
+### 7.2 성능 모니터링
+```bash
+# DevTools 실행
 flutter pub global activate devtools
 flutter pub global run devtools
 
-# Performance 프로파일링
+# 프로파일링
 flutter run --profile
-
-# 성능 측정
-flutter test --profile
 ```
 
-### 성능 최적화 체크리스트
-- [ ] 불필요한 rebuild 제거 (const 위젯 사용)
-- [ ] 큰 이미지 최적화 (압축, 캐싱)
-- [ ] ListView에 itemExtent 설정
-- [ ] 애니메이션 최적화 (RepaintBoundary)
-- [ ] 비동기 작업 최적화 (compute 함수)
+---
 
-## 작업 시 주의사항
-1. DI 컨테이너(injection.dart) 수정 시 앱 재시작 필수
-2. Firebase 관련 수정 시 firebase_options.dart 확인
-3. 권한 요청 로직은 PermissionUseCase 통해서만 처리
-4. TTS 서비스는 TtsService 싱글톤 사용
-5. 네트워크 요청은 반드시 DioClient 사용
-6. BLoC 이벤트 처리 시 동시성 문제 주의
-7. **성능 기준 미달 시 PR 불가**
+## 8. 문서 및 리소스
+
+### 8.1 작업 시 체크리스트 ✅
+- [ ] DI 컨테이너 수정 → 앱 재시작
+- [ ] Firebase 수정 → firebase_options.dart 확인
+- [ ] 권한 요청 → PermissionUseCase 사용
+- [ ] TTS → TtsService 싱글톤
+- [ ] 네트워크 → DioClient 사용
+- [ ] BLE → 경찰청 규격서 준수
+- [ ] IMU 센서 → WeightedAverageFilter
+- [ ] 성능 기준 → 60 FPS 유지
+
+### 8.2 프로젝트 문서 위치
+| 문서 | 경로 | 설명 |
+|------|------|------|
+| API 문서 | `docs/API/` | API 명세 |
+| 기능 명세서 | `docs/기능 명세서/` | 상세 기능 |
+| BVI 센서 | `docs/BVI 센서/` | 센서 융합 |
+| IMU 논문 | `docs/IMU 센서 기반 논문/` | 연구 자료 |
+| 방향 알고리즘 | `docs/방향 알고리즘/` | 알고리즘 |
+| BLE TODO | `docs/횡단보도 개선 문서/` | 개선 사항 |
+
+### 8.3 문제 해결
+| 문제 | 해결 방법 |
+|------|-----------|
+| 빌드 실패 | `flutter clean && flutter pub get` |
+| DI 오류 | 앱 재시작 |
+| 성능 이슈 | DevTools 프로파일링 |
+| BLE 연결 실패 | 규격서 확인 |
+
+---
+
+## 📌 Quick Links
+- [Flutter Docs](https://flutter.dev/docs)
+- [BLoC Library](https://bloclibrary.dev)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- 프로젝트 이슈: GitHub Issues
+
+---
+
+*Last Updated: 2025-09-18*
+*Version: 2.0*
