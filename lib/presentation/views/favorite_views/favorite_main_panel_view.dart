@@ -26,10 +26,10 @@ import 'package:safelight/presentation/widgets/gap.dart';
 import 'package:safelight/core/utils/app_sizes.dart';
 
 // Presentation
-import 'package:safelight/presentation/views/favorite_panel_views/favorite_point_add_panel_view.dart';
-import 'package:safelight/presentation/views/favorite_panel_views/favorite_point_edit_panel_view.dart';
-import 'package:safelight/presentation/views/favorite_panel_views/favorite_route_add_panel_view.dart';
-import 'package:safelight/presentation/views/favorite_panel_views/favorite_route_edit_panel_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_point_add_panel_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_point_edit_panel_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_route_add_panel_view.dart';
+import 'package:safelight/presentation/views/favorite_views/favorite_route_edit_panel_view.dart';
 
 // 즐겨찾기 패널 상태 enum
 enum FavoritePanelState {

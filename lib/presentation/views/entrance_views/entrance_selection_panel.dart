@@ -1,4 +1,4 @@
-part of '../../framework/ui.dart';
+part of '../../../framework/ui.dart';
 
 // 출입구 선택 화면
 class EntranceSelectionView extends StatelessWidget {
