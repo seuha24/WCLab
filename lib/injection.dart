@@ -1,11 +1,10 @@
-
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 library;
 
 import 'dart:io';
 import 'package:dio/dio.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Firebase Firestore 제거 - BLE 직접 연결
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -168,12 +167,12 @@ Future<void> init() async {
     () => GetCurrentPosition(repository: DI()),
   );
 
-    DI.registerLazySingleton<SendCustomStartPointUseCase>(
+  DI.registerLazySingleton<SendCustomStartPointUseCase>(
     () => SendCustomStartPoint(repository: DI()),
   );
 
   DI.registerLazySingleton<GetBuildingEntrancesUseCase>(
-  () => GetBuildingEntrancesUseCase(repository: DI()),
+    () => GetBuildingEntrancesUseCase(repository: DI()),
   );
 
   // repository injection area
@@ -220,7 +219,7 @@ Future<void> init() async {
       ),
     ),
   );
-  
+
   DI.registerLazySingleton<FlashNativeDataSource>(
     () => FlashNativeDataSourceImpl(),
   );
@@ -231,10 +230,10 @@ Future<void> init() async {
     () => PermissionNativeDataSourceImpl(),
   );
   DI.registerLazySingleton<NavigateRemoteDataSource>(
-    () => NavigateRemoteDataSourceImpl(geolocator: DI(),dio: DI()),
+    () => NavigateRemoteDataSourceImpl(geolocator: DI(), dio: DI()),
   );
   DI.registerLazySingleton<CrosswalkRemoteDataSource>(
-    () => CrosswalkRemoteDataSourceImpl(firestore: DI(), distance: DI()),
+    () => CrosswalkRemoteDataSourceImpl(distance: DI()),
   );
   DI.registerLazySingleton<WeatherRemoteDataSource>(
     () => WeatherRemoteDataSourceImpl(),
@@ -242,7 +241,6 @@ Future<void> init() async {
   DI.registerLazySingleton<AmbientLightLevelDataSource>(
     () => AmbientLightLevelDataSourceImpl(),
   );
-  
 
   // core injection area
   final GeolocatorPlatform geolocator = GeolocatorPlatform.instance;
@@ -251,14 +249,13 @@ Future<void> init() async {
   const Distance distance = Distance();
   DI.registerLazySingleton(() => distance);
 
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  DI.registerLazySingleton(() => firestore);
+  // FirebaseFirestore 제거 - BLE 직접 연결로 변경
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   DI.registerLazySingleton(() => auth);
 
   DI.registerLazySingleton<Dio>(() => Dio()); // 추가
-  
+
   // TTS
   DI.registerLazySingleton(() => FlutterTts());
 

@@ -18,12 +18,9 @@ Future<void> init() async {
   await Hive.openBox(SystemTheme.themeBox);
   await Hive.openBox<FlashMode>('flashmode');
 
-  final firestore = DI.get<FirebaseFirestore>();
-  CollectionReference collectionRef = firestore.collection('safelight_db');
-  QuerySnapshot querySnapshot = await collectionRef.get();
-  CrosswalkAPI.map = querySnapshot.docs
-      .map((doc) => doc.data() as Map<String, dynamic>)
-      .toList();
+  // Firebase Firestore 초기화 제거 - BLE 직접 연결로 변경
+  // CrosswalkAPI.map 초기화 필요 없음
+  CrosswalkAPI.map = [];
 
   FlutterTts flutterTts = DI.get<FlutterTts>();
   await flutterTts.awaitSpeakCompletion(true);
