@@ -27,7 +27,7 @@ class NaverMapViewController extends GetxController {
   }
 
   /// 네이버 맵 컨트롤러 (지도 업데이트 및 오버레이 추가에 사용)
-  late NaverMapController? mapController;
+  NaverMapController? mapController;
 
   /// 현재 지도 모드를 Reactive 변수로 관리합니다.
   Rx<MapControlMode> mapMode = MapControlMode.idle.obs;
@@ -507,9 +507,13 @@ class NaverMapViewController extends GetxController {
           angleToRadian;
 
       // 지도 업데이트
-      await mapController!.clearOverlays(type: NOverlayType.marker);
-      addOverlays(paths);
-      addBranchMarkers();
+      if (mapController != null) {
+        await mapController!.clearOverlays(type: NOverlayType.marker);
+        addOverlays(paths);
+        addBranchMarkers();
+      } else {
+        debugPrint('mapController가 아직 초기화되지 않았습니다.');
+      }
 
       // 네비게이션 시작
       startNavigationTimer();
@@ -1215,6 +1219,12 @@ class NaverMapViewController extends GetxController {
       // GPS 신호 불량일 때만 활성화
       isCustomStartPoint.value = true; // 커스텀 출발지 플래그 설정
 
+      // mapController null 체크 추가
+      if (mapController == null) {
+        debugPrint('mapController가 아직 초기화되지 않았습니다.');
+        return;
+      }
+
       // 현재 카메라 중심을 바로 가져와서 저장
       final cameraPosition = await mapController!.getCameraPosition();
       final double targetLat = cameraPosition.target.latitude;
@@ -1507,14 +1517,12 @@ class NaverMapViewController extends GetxController {
 
         /// on1 모드에서는 지도 회전을 유지하고 마커만 회전
         /// 지도를 회전시키기 않기 위해 마지막 bearing 값으로 map을 업데이트
-        if (mapController != null) {
-          mapController!.getCameraPosition().then((position) {
-            _currentBearing = position.bearing;
-          });
-        }
+        mapController!.getCameraPosition().then((position) {
+          _currentBearing = position.bearing;
+        });
         await updateCurrentLocationMarker(
             latitude, longitude, compassValue, isGps);
-        updateMapPosition(latitude, longitude, _currentBearing!);
+        updateMapPosition(latitude, longitude, _currentBearing ?? 0.0);
         break;
       case MapControlMode.on2:
 

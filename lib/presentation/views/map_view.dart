@@ -41,14 +41,12 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     ),
                     onMapReady: (naverMapController) {
                       controller.mapController = naverMapController;
-                      // 초기 로딩 시에만 카메라 위치 업데이트
-                      if (controller.isLoading.value) {
-                        controller.updateMapPosition(
-                          controller.current_latitude.value,
-                          controller.current_longitude.value,
-                          controller.compassValue.value,
-                        );
-                      }
+                      // 맵이 준비되면 항상 초기 카메라 위치 업데이트
+                      controller.updateMapPosition(
+                        controller.current_latitude.value,
+                        controller.current_longitude.value,
+                        controller.compassValue.value,
+                      );
                     },
                     onCameraChange: (reason, animated) {
                       if (reason == NCameraUpdateReason.gesture) {
