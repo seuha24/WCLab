@@ -155,249 +155,241 @@ class _DesSearchState extends State<DesSearch> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final mediaQuery = MediaQuery.of(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // 상단 검색 입력창
-          Container(
-            color: Colors.white,
-            padding: EdgeInsets.only(top: 50, left: 20, right: 20),
-            child: Row(
-              children: [
-                // 뒤로가기 버튼
-                IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('목적지 검색하기'),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xffF5F5F5),
+                  borderRadius: BorderRadius.circular(28.0),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _focusNode,
+                  style: const TextStyle(color: Colors.black),
+                  onChanged: (query) {
+                    if (query.isNotEmpty) _onSearchChanged();
                   },
-                  icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-                ),
-                // 검색 입력창
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+                  decoration: InputDecoration(
+                    hintText: '도착지 장소 및 주소 검색',
+                    hintStyle: TextStyle(
+                      fontSize: AppSizes.scaledFont(20),
+                      color: const Color(0xff9E9E9E),
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: TextField(
-                      controller: _searchController,
-                      focusNode: _focusNode,
-                      style: TextStyle(color: Colors.black),
-                      onChanged: (query) {
-                        if (query.isNotEmpty) {
-                          _onSearchChanged();
-                        } else {
-                          setState(() {
-                            _searchResults = [];
-                          });
-                        }
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        isDense: true,
-                        hintText: '목적지를 입력하세요.',
-                        hintStyle: TextStyle(
-                          fontSize: AppSizes.scaledFont(20),
-                          color: Color(0xff9E9E9E),
-                          fontWeight: FontWeight.bold,
-                        ),
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: Icon(
-                                  Icons.close,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  _searchResults.clear();
-                                  setState(() {});
-                                },
-                              )
-                            : null,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 구분선
-          Container(
-            height: 1.0,
-            width: double.infinity,
-            color: Colors.grey,
-          ),
-
-          // 검색 결과 영역
-          Expanded(
-            child: Column(
-              children: [
-                // 검색 결과가 없을 경우 표시할 '지도에서 직접 선택' 버튼
-                if (_searchResults.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: ElevatedButton.icon(
-                      icon: Icon(Icons.map),
-                      label: Text('지도에서 직접 선택'),
-                      onPressed: () async {
-                        // 목적지 선택 지도 화면으로 이동
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DestinationPickerView(),
-                          ),
-                        );
-
-                        // 선택 완료 후 결과 처리
-                        if (result != null && result is Map) {
-                          final GeoLocation pickedLocation = result['location'];
-                          final String pickedAddress = result['address'];
-
-                          _searchController.text = pickedAddress;
-                          speakTTS('$pickedAddress 위치를 선택하셨습니다.');
-
-                          // 선택된 위치를 검색창에서 반환
-                          Navigator.pop(context, pickedLocation);
-
-                          // Bloc 이벤트로 목적지 반영
-                          context.read<SearchBloc>().add(
-                            SearchDestinationRequested(
-                              searchDestination: pickedAddress,
-                              geoLocation: pickedLocation,
+                    border: InputBorder.none,
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                          );
-                        }
-                      },
-                    ),
+                            onPressed: () {
+                              _searchController.clear();
+                              _searchResults.clear();
+                              setState(() {});
+                            },
+                          )
+                        : null,
                   ),
-
-                // 검색 결과 리스트 표시
-                Expanded(
-                  child: ListView.builder(
-                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                    itemCount: _searchResults.length,
-                    itemBuilder: (context, index) {
-                      final result = _searchResults[index];
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        margin: EdgeInsets.all(8.0),
-                        child: ListTile(
-                          tileColor: Colors.white,
-                          title: Text(result.name),
-                          subtitle: Text(result.address),
-                          onTap: () async {
-                            FocusScope.of(context).unfocus();
-                            _searchController.text = result.name;
-                            Future.microtask(() => speakTTS('${result.name}을 선택하셨습니다.'));
-
-                            bool? results =
-                                await showConfirmationDialog(context, result);
-
-                            // result 값에 따라 확인 또는 취소에 따른 작업을 수행할 수 있습니다.
-                            if (results != null && results) {
-                              debugPrint('=== 출입구 정보 요청 시작 ===');
-                              // EntranceBloc에 이벤트 발생
-                              context.read<EntranceBloc>().add(
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final result = _searchResults[index];
+                  return Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    margin: EdgeInsets.all(8.0),
+                    child: ListTile(
+                      tileColor: Colors.white,
+                      title: Text(result.name),
+                      subtitle: Text(result.address),
+                      onTap: () async {
+                        FocusScope.of(context).unfocus();
+                        _searchController.text = result.name;
+                        Future.microtask(
+                            () => speakTTS('${result.name}을 선택하셨습니다.'));
+                        bool? confirmed =
+                            await showConfirmationDialog(context, result);
+                        if (confirmed == true) {
+                          debugPrint('=== 출입구 정보 요청 시작 ===');
+                          final stopwatch = Stopwatch()..start();
+                          context.read<EntranceBloc>().add(
                                 FetchBuildingEntrances(
                                   address: result.address,
                                   longitude: result.geometry.location.lng,
                                   latitude: result.geometry.location.lat,
                                 ),
                               );
-
-                              // EntranceBloc의 상태 변화를 기다림
-                              await for (final entranceState in context.read<EntranceBloc>().stream) {
-                                debugPrint('=== EntranceBloc 상태 변화 감지 ===');
-                                debugPrint('현재 상태: ${entranceState.runtimeType}');
-                                
-                                if (entranceState is EntranceLoaded) {
-                                  debugPrint('출입구 개수: ${entranceState.buildingResponse.entrances.length}');
-                                  if (entranceState.buildingResponse.entrances.isNotEmpty) {
-                                    debugPrint('출입구 선택 화면으로 이동');
-                                    // 출입구가 있는 경우 EntranceSelectionView로 전환
-                                    if (!mounted) return;
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => EntranceSelectionView(
-                                          buildingResponse: entranceState.buildingResponse,
-                                          onEntranceSelected: (entrance) {
-                                            debugPrint('선택된 출입구: ${entrance.entranceName}');
-                                            debugPrint('출입구 좌표: ${entrance.location.latitude}, ${entrance.location.longitude}');
-                                            
-                                            // 출입구 선택 시 SearchBloc에 이벤트 발생 (목적지용)
-                                            context.read<SearchBloc>().add(
+                          await for (final entranceState
+                              in context.read<EntranceBloc>().stream.timeout(
+                            const Duration(seconds: 10),
+                            onTimeout: (sink) {
+                              stopwatch.stop();
+                              debugPrint(
+                                  '[Entrance Lookup] 타임아웃 발생 (조회 시간: ${stopwatch.elapsedMilliseconds} ms)');
+                              if (!mounted) return;
+                              context.read<SearchBloc>().add(
+                                    SearchDestinationRequested(
+                                      searchDestination: result.name,
+                                      geoLocation: result.geometry.location,
+                                    ),
+                                  );
+                              Future.microtask(
+                                  () => speakTTS('${result.name}(으)로 안내합니다.'));
+                              Navigator.pop(context, result.geometry.location);
+                              sink.close();
+                            },
+                          )) {
+                            stopwatch.stop();
+                            debugPrint(
+                                '[Entrance Lookup] 성공 (소요 시간: ${stopwatch.elapsedMilliseconds} ms)');
+                            debugPrint('=== EntranceBloc 상태 변화 감지 ===');
+                            if (entranceState is EntranceLoaded) {
+                              if (entranceState
+                                  .buildingResponse.entrances.isNotEmpty) {
+                                if (!mounted) return;
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => EntranceSelectionView(
+                                      buildingResponse:
+                                          entranceState.buildingResponse,
+                                      onEntranceSelected: (entrance) {
+                                        context.read<SearchBloc>().add(
                                               SearchDestinationRequested(
                                                 searchDestination: result.name,
                                                 entrance: entrance,
                                               ),
                                             );
-                                            
-                                            Future.microtask(() => speakTTS('${entrance.entranceName}으로 안내합니다.'));
-                                            Navigator.pop(context); // EntranceSelectionView 닫기
-                                            Navigator.pop(context, GeoLocation(
-                                              lat: entrance.location.latitude,  // 위도
-                                              lng: entrance.location.longitude, // 경도
-                                            )); // DesSearch 닫기
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    // 출입구가 없는 경우 (API는 성공했으나 출입구 목록이 비어있는 경우-null)
-                                    debugPrint('출입구가 없어 바로 SearchBloc으로 진행 (EntranceLoaded, entrances empty)');
-                                    debugPrint('장소 좌표: ${result.geometry.location.lat}, ${result.geometry.location.lng}');
-                                    
-                                    if (!mounted) return;
-                                    context.read<SearchBloc>().add(
+                                        Future.microtask(() => speakTTS(
+                                            '${entrance.entranceName}으로 안내합니다.'));
+                                        Navigator.pop(context);
+                                        Navigator.pop(
+                                          context,
+                                          GeoLocation(
+                                            lat: entrance.location.latitude,
+                                            lng: entrance.location.longitude,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                if (!mounted) return;
+                                context.read<SearchBloc>().add(
                                       SearchDestinationRequested(
                                         searchDestination: result.name,
+                                        geoLocation: result.geometry.location,
                                       ),
                                     );
-                                    
-                                    Future.microtask(() => speakTTS('${result.name}으로 안내합니다.'));
-                                    Navigator.pop(context, result.geometry.location); // DesSearch 닫기
-                                  }
-                                  break; // 상태 처리 후 스트림 구독 종료
-                                } else if (entranceState is EntranceError) {
-                                  // 서버 연결 실패 또는 출입구 정보 로드 실패 시 카카오 API 좌표 사용
-                                  debugPrint('에러 발생: EntranceError. 카카오 API 좌표로 경로 탐색합니다.');
-                                  debugPrint('장소 이름: ${result.name}');
-                                  debugPrint('카카오 API 좌표: ${result.geometry.location.lat}, ${result.geometry.location.lng}');
-                                  
-                                  if (!mounted) return;
-                                  context.read<SearchBloc>().add(
+                                Future.microtask(() =>
+                                    speakTTS('${result.name}(으)로 안내합니다.'));
+                                Navigator.pop(
+                                    context, result.geometry.location);
+                              }
+                            } else if (entranceState is EntranceError) {
+                              if (!mounted) return;
+                              context.read<SearchBloc>().add(
                                     SearchDestinationRequested(
-                                      searchDestination: result.name, // 출입구 정보 없이 이름만 전달
+                                      searchDestination: result.name,
+                                      geoLocation: result.geometry.location,
                                     ),
                                   );
-                                  
-                                  Future.microtask(() => speakTTS('${result.name}(으)로 안내합니다.'));
-                                  Navigator.pop(context, result.geometry.location); // DesSearch 닫고 카카오 API 좌표 반환
-                                  break; // 상태 처리 후 스트림 구독 종료
-                                }
-                              }
-                            } else {
-                              speakTTS('취소');
+                              Future.microtask(
+                                  () => speakTTS('${result.name}(으)로 안내합니다.'));
+                              Navigator.pop(context, result.geometry.location);
                             }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                          }
+                        } else {
+                          speakTTS('취소');
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+
+            // 버튼 영역 (키보드 바로 위)
+            Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(children: [
+                  // 지도에서 직접 검색 버튼
+                  Container(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DestinationPickerView(),
+                          ),
+                        );
+                        // 선택 완료 후 결과 처리
+                        if (result != null && result is Map) {
+                          final GeoLocation pickedLocation = result['location'];
+                          final String pickedAddress = result['address'];
+                          _searchController.text = pickedAddress;
+                          speakTTS('$pickedAddress 위치를 선택하셨습니다.');
+                          Navigator.pop(context, pickedLocation);
+                          context.read<SearchBloc>().add(
+                                SearchDestinationRequested(
+                                  searchDestination: pickedAddress,
+                                  geoLocation: pickedLocation,
+                                ),
+                              );
+                        }
+                      },
+                      icon: Icon(Icons.map, color: Colors.white, size: 20),
+                      label: Text(
+                        '지도에서 직접 검색',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                      ),
+                    ),
+                  ),
+                ]))
+          ],
+        ),
       ),
     );
   }

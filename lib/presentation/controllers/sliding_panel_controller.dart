@@ -81,13 +81,11 @@ class SlidingPanelController extends GetxController {
         try {
           // 컨트롤러가 여전히 유효한지 재확인
           if (_controllers[panelId] != null) {
-            controller
-                .animateTo(
+            controller.animateTo(
               clampedHeight,
               duration: config.animationDuration,
               curve: config.animationCurve,
-            )
-                .catchError((error) {
+            ).catchError((error) {
               // animateTo가 실패하면 로그만 남기고 앱이 크래시되지 않도록 함
               print('Failed to show panel $panelId: $error');
               return 0.0;
@@ -111,13 +109,11 @@ class SlidingPanelController extends GetxController {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
           if (_controllers[screenTag] != null) {
-            controller
-                .animateTo(
+            controller.animateTo(
               targetHeight,
               duration: config.animationDuration,
               curve: config.animationCurve,
-            )
-                .catchError((error) {
+            ).catchError((error) {
               print('Failed to animate panel $screenTag: $error');
               return 0.0;
             });
@@ -153,13 +149,11 @@ class SlidingPanelController extends GetxController {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
           if (_controllers[screenTag] != null) {
-            controller
-                .animateTo(
+            controller.animateTo(
               config.minHeight,
               duration: config.animationDuration,
               curve: config.animationCurve,
-            )
-                .catchError((error) {
+            ).catchError((error) {
               print('Failed to collapse panel $screenTag: $error');
               return 0.0;
             });

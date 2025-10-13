@@ -62,21 +62,21 @@ class _SignInViewState extends State<SignInView> {
               // 현재 기기의 밝기 설정에 따라 다른 배경 애니메이션을 표시합니다.
               MediaQuery.of(context).platformBrightness == Brightness.light
                   ? Semantics(
-                label: '로그인 화면 배경',
-                child: Lottie.asset(
-                  Gif.LOTTIE_ENTER_BACKGROUND_LIGHT,
-                  fit: BoxFit.fill,
-                  repeat: false,
-                ),
-              )
+                      label: '로그인 화면 배경',
+                      child: Lottie.asset(
+                        Gif.LOTTIE_ENTER_BACKGROUND_LIGHT,
+                        fit: BoxFit.fill,
+                        repeat: false,
+                      ),
+                    )
                   : Semantics(
-                label: '로그인 화면 배경',
-                child: Lottie.asset(
-                  Gif.LOTTIE_ENTER_BACKGROUND_DARK,
-                  fit: BoxFit.fill,
-                  repeat: false,
-                ),
-              ),
+                      label: '로그인 화면 배경',
+                      child: Lottie.asset(
+                        Gif.LOTTIE_ENTER_BACKGROUND_DARK,
+                        fit: BoxFit.fill,
+                        repeat: false,
+                      ),
+                    ),
               Column(
                 children: [
                   // '처음 사용하시나요?' 버튼을 눌러 튜토리얼 화면으로 이동합니다.
@@ -103,9 +103,7 @@ class _SignInViewState extends State<SignInView> {
                       // 애플 로그인 버튼
                       GestureDetector(
                         onTap: () {
-                          context
-                              .read<AuthBloc>()
-                              .add(SignInWithAppleEvent());
+                          context.read<AuthBloc>().add(SignInWithAppleEvent());
                           debugPrint("애플로그인하기");
                         },
                         child: Container(
@@ -123,9 +121,7 @@ class _SignInViewState extends State<SignInView> {
                       // 구글 로그인 버튼
                       GestureDetector(
                         onTap: () {
-                          context
-                              .read<AuthBloc>()
-                              .add(SignInWithGoogleEvent());
+                          context.read<AuthBloc>().add(SignInWithGoogleEvent());
                         },
                         child: Container(
                           padding: EdgeInsets.all(2.sp),
@@ -167,17 +163,17 @@ class _SignInViewState extends State<SignInView> {
                               // 로그인 진행 중에는 로딩 인디케이터를 표시합니다.
                               child: (state.signInStatus == Status.inProgress)
                                   ? CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimary,
-                              )
+                                      strokeWidth: 2,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    )
                                   : Text(
-                                '로그인 없이 이용하기',
-                                style: TextStyle(
-                                  fontSize: AppSizes.scaledFont(18),
-                                ),
-                              ),
+                                      '로그인 없이 이용하기',
+                                      style: TextStyle(
+                                        fontSize: AppSizes.scaledFont(18),
+                                      ),
+                                    ),
                             ),
                           ),
                         ],

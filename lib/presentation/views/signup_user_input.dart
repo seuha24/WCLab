@@ -34,7 +34,6 @@ class _SignupUserInputState extends State<SignupUserInput> {
       listener: (context, state) async {
         if (state.patchUserInfoStatus == Status.success ||
             state.patchUserInfoStatus == Status.success) {
-
           final loadedAuthData = await _authService.loadAuthData();
 
           await _authService.saveAuthData(
@@ -53,7 +52,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
         }
       },
       listenWhen: (previous, current) =>
-      previous.patchUserInfoStatus != current.patchUserInfoStatus,
+          previous.patchUserInfoStatus != current.patchUserInfoStatus,
       child: PopScope(
         canPop: true,
         onPopInvokedWithResult: (bool didPop, dynamic result) async {
@@ -68,10 +67,7 @@ class _SignupUserInputState extends State<SignupUserInput> {
           }
         },
         child: Scaffold(
-          backgroundColor: Theme
-              .of(context)
-              .colorScheme
-              .secondary,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
           appBar: AppBar(
             centerTitle: true,
             title: Text(
@@ -119,19 +115,18 @@ class _SignupUserInputState extends State<SignupUserInput> {
                                     .add(PatchUserInfoEvent(userName));
                               },
                               child: (state.patchUserInfoStatus ==
-                                  Status.inProgress)
+                                      Status.inProgress)
                                   ? CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .onPrimary,
-                              )
+                                      strokeWidth: 2,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    )
                                   : Text(
-                                '닉네임 변경하기',
-                                style: TextStyle(
-                                    fontSize: AppSizes.scaledFont(18)),
-                              ),
+                                      '닉네임 변경하기',
+                                      style: TextStyle(
+                                          fontSize: AppSizes.scaledFont(18)),
+                                    ),
                             ),
                           ),
                         ],
@@ -159,20 +154,14 @@ class _SignupUserInputState extends State<SignupUserInput> {
                         Container(
                           padding: EdgeInsets.all(AppSizes.scaledWidth(6)),
                           decoration: BoxDecoration(
-                            color: Theme
-                                .of(context)
-                                .colorScheme
-                                .surface,
-                            borderRadius: BorderRadius.circular(
-                                AppSizes.scaledRadius(8)),
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius:
+                                BorderRadius.circular(AppSizes.scaledRadius(8)),
                           ),
                           child: Icon(
                             Icons.person,
                             size: AppSizes.scaledWidth(30),
-                            color: Theme
-                                .of(context)
-                                .colorScheme
-                                .primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         Gap(),
@@ -180,17 +169,16 @@ class _SignupUserInputState extends State<SignupUserInput> {
                           '이름 입력',
                           style: TextStyle(
                             fontSize: AppSizes.scaledFont(18),
-                            color: Theme
-                                .of(context)
-                                .colorScheme
-                                .onSecondary,
+                            color: Theme.of(context).colorScheme.onSecondary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Gap(height: 10,),
+                  Gap(
+                    height: 10,
+                  ),
                   TextField(
                     controller: _userNameTextController,
                     focusNode: _focusNode,

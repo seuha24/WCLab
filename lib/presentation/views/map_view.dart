@@ -1,550 +1,372 @@
 part of '../../framework/ui.dart';
 
-/// [NaverMapView]는 네이버 지도를 화면에 표시하는 GetX View입니다.
-/// 지도, 검색 입력창, 모드 토글 버튼 등을 포함합니다.
 class NaverMapView extends GetView<NaverMapViewController> {
   const NaverMapView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 시스템 테마 모드 확인
     final box = Hive.box(SystemTheme.themeBox);
     final mode = box.get(SystemTheme.mode);
     final systemBright = MediaQuery.of(context).platformBrightness;
     bool isDark = (mode == 'dark') ||
         (mode == 'system' && systemBright == Brightness.dark);
 
-    // 컨트롤러 생성 및 등록 (Get.put()을 통해 NaverMapViewController의 인스턴스를 주입)
-    final NaverMapViewController controller = Get.put(NaverMapViewController());
-    
-    // 경로 선택 BottomSheet 표시 함수 (공통)
-    Future<String?> showRouteSelectionBottomSheet() async {
-      return await showModalBottomSheet<String>(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, "0"),
-                  child: Text("추천"),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, "4"),
-                  child: Text("추천+대로우선"),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, "10"),
-                  child: Text("최단"),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, "30"),
-                  child: Text("최단거리+계단제외"),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-
     return Scaffold(
-        body: Stack(
-          children: [
-            Obx(() {
-              /// 로딩 중이면 CircularProgressIndicator를 표시합니다.
-              return controller.isLoading.value
-                  ? Center(child: CircularProgressIndicator())
-                  : SizedBox.shrink();
-            }),
-            NaverMap(
-              options: NaverMapViewOptions(
-                indoorEnable: true,
-                initialCameraPosition: NCameraPosition(
-                  target: NLatLng(
-                    controller.current_latitude.value,
-                    controller.current_longitude.value,
-                  ),
-                  zoom: 18.5,
-                  bearing: controller.compassValue.value,
-                  tilt: 0,
-                ),
-                mapType: NMapType.basic,
-                activeLayerGroups: [
-                  NLayerGroup.building,
-                  NLayerGroup.transit,
-                ],
-                locationButtonEnable: false,
-                // scrollGesturesEnable: true,
-                // zoomGesturesEnable: true,
-                // rotationGesturesEnable: true,
-              ),
-
-              /// 지도 로딩이 완료되면 호출됩니다.
-              onMapReady: (naverMapController) {
-                debugPrint('네이버 맵 로딩됨');
-                controller.mapController = naverMapController;
-                controller.updateMapPosition(
-                  controller.current_latitude.value,
-                  controller.current_longitude.value,
-                  controller.compassValue.value,
-                );
-              },
-
-              /// 사용자가 제스처(드래그 등)로 카메라를 이동할 때 호출됩니다.
-              onCameraChange: (reason, animated) {
-                if (reason == NCameraUpdateReason.gesture) {
-                  controller.handleMapDrag();
-                }
-              },
-
-              /// 사용자가 지도를 탭하면 호출되며, 탭한 위치와 관련된 안내 메시지를 음성으로 전달합니다.
-              onMapTapped: (NPoint point, NLatLng latLng) {
-                int meters = (controller.remain_distance.value * 1000).round();
-                controller.speakText('다음 안내까지 $meters미터 남았습니다.');
-                // 필요 시 추가 처리...
-              },
-            ),
-            
-            /// 앱 실행 후 GPS 수신도 낮을때 출발지 위치 조정 멘트(한번만)
-            Obx(() {
-              if (controller.showLowAccuracyDialog.value) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: Text("알림"),
-                      content: Text("초기 위치 확인 시 GPS 정확도가 낮습니다.\n출발지 입력 또는 마커로 위치 조정하세요."),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            controller.showLowAccuracyDialog.value = false;
-                            Navigator.of(context).pop(); // 팝업 닫기
-                            },
-                            child: Text("확인"),
-                          ),
-                        ],
-                      )
-                    );
-                  });
-                }
-              return SizedBox.shrink(); // UI를 무언가 반환해야 하니까 빈 위젯
-            }),
-
-            /// 출발지 검색 입력창 (상단 위치에 고정)
-            Obx(() {
-              // SearchBloc에서 제공하는 검색 시작 위치를 controller의 Rx 변수에 업데이트
-              controller.searchLocation.value =
-                  context.watch<SearchBloc>().state.searchStartLocation ?? '';
-
-              return Positioned(
-                top: 65.0,
-                left: 20.0,
-                right: 20.0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 190, 164, 164),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: GestureDetector(
-                    onTap: () async {
-                      /// 사용자가 입력창을 탭하면 출발지 검색 페이지로 이동합니다.
-                      GeoLocation? newStart = await Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation,
-                                  secondaryAnimation) =>
-                              StartSearch(
-                                  searchValue: controller.searchLocation.value),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            const begin = 0.0;
-                            const end = 1.0;
-                            const curve = Curves.easeInOutQuart;
-                            var tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-                            var fadeAnimation = animation.drive(tween);
-                            return FadeTransition(
-                                opacity: fadeAnimation, child: child);
-                          },
+      backgroundColor: Colors.grey[300],
+      body: Stack(
+        children: [
+          /// (1)지도 또는 로딩 표시
+          /// 출입구 등록 패널이 활성화되어도 현위치 동적 마커는 계속 표시됨
+          Obx(() {
+            return controller.isLoading.value
+                ? Center(child: CircularProgressIndicator())
+                : NaverMap(
+                    options: NaverMapViewOptions(
+                      indoorEnable: true,
+                      initialCameraPosition: NCameraPosition(
+                        target: NLatLng(
+                          controller.current_latitude.value,
+                          controller.current_longitude.value,
                         ),
-                      );
-                      
-                      if (newStart != null) {
-                        debugPrint('출발지 좌표: ${newStart.lat}, ${newStart.lng}');
-                        controller.handleStartLocationSelection(newStart);
+                        zoom: 18.5,
+                        bearing: controller.compassValue.value,
+                        tilt: 0,
+                      ),
+                      mapType: NMapType.basic,
+                      activeLayerGroups: [
+                        NLayerGroup.building,
+                        NLayerGroup.transit
+                      ],
+                      locationButtonEnable: false,
+                    ),
+                    onMapReady: (naverMapController) {
+                      controller.mapController = naverMapController;
+                      // 초기 로딩 시에만 카메라 위치 업데이트
+                      if (controller.isLoading.value) {
+                        controller.updateMapPosition(
+                          controller.current_latitude.value,
+                          controller.current_longitude.value,
+                          controller.compassValue.value,
+                        );
                       }
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.6),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          controller.searchLocation.value.isEmpty
-                              ? Text(
-                                  '출발지를 입력하세요.',
-                                  style: TextStyle(
-                                      fontSize: AppSizes.scaledFont(18),
-                                      color: Colors.grey),
-                                )
-                              : Text(
-                                  controller.searchLocation.value,
-                                  style: TextStyle(
-                                      fontSize: AppSizes.scaledFont(18),
-                                      color: Colors.black),
-                                ),
-                          Spacer(),
-                          Icon(Icons.search),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-
-            /// 목적지 검색 입력창 (출발지 아래에 위치)
-            Obx(() {
-              controller.destinationLocation.value =
-                  context.watch<SearchBloc>().state.searchDestinationLocation ??
-                      '';
-
-              return Positioned(
-                top: 122.0,
-                left: 20.0,
-                right: 20.0,  // 전체 넓이 사용
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 190, 164, 164),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: GestureDetector(
-                    /// 사용자가 입력창을 탭하면 목적지 검색 페이지로 이동합니다.
-                    onTap: () async {
-                      GeoLocation? newDest = await Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  DesSearch(
-                                      destinationValue:
-                                          controller.destinationLocation.value),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            const begin = 0.0;
-                            const end = 1.0;
-                            const curve = Curves.easeInOutQuart;
-                            var tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-                            var fadeAnimation = animation.drive(tween);
-                            return FadeTransition(
-                                opacity: fadeAnimation, child: child);
-                          },
-                        ),
-                      );
-
-                      if (newDest != null) {
-                        controller.handleDestinationLocationSelection(newDest);
-
-                        // 경로 선택 BottomSheet 표시
-                        String? selectedRoute = await showRouteSelectionBottomSheet();
-                        if (selectedRoute != null) {
-                          controller.chooseRoute.value = selectedRoute;
-                          debugPrint('선택된 경로: ${controller.chooseRoute.value}');
-                          // 경로 선택 완료 후 경로 탐색 시작
-                          await controller.startNavigation();
-                        }
+                    onCameraChange: (reason, animated) {
+                      if (reason == NCameraUpdateReason.gesture) {
+                        controller.handleMapDrag();
                       }
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.6),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          controller.destinationLocation.value.isEmpty
-                              ? Text(
-                                  '목적지를 입력하세요.',
-                                  style: TextStyle(
-                                    fontSize: AppSizes.scaledFont(18),
-                                    color: Colors.grey,
-                                  ),
-                                )
-                              : Text(
-                                  controller.destinationLocation.value,
-                                  style: TextStyle(
-                                    fontSize: AppSizes.scaledFont(18),
-                                    color: Colors.black,
-                                  ),
-                                ),
-                          Spacer(),
-                          Icon(Icons.search),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
+                    onCameraIdle: () async {
+                      // 출입구 등록 패널이 활성화되었을 때만 위치 업데이트
+                      final slidingController =
+                          Get.find<SlidingPanelController>();
+                      if (slidingController.activePanelId.value ==
+                          'entrance_panel') {
+                        if (controller.mapController != null) {
+                          final pos = await controller.mapController!
+                              .getCameraPosition();
+                          final latLng = pos.target;
 
-            /// 즐겨찾기 버튼 (목적지 검색창 아래 우측)
-            Positioned(
-              top: 180.0,  // 목적지 검색창 아래로 위치 이동
-              right: 20.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.6),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                    size: 30,
-                  ),
-                  onPressed: () async {
-                    // 즐겨찾기 화면으로 이동
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FavoritesMainView(),
-                      ),
-                    );
-                    
-                    if (result != null && result is Map) {
-                      // 경로 선택 BottomSheet 표시
-                      String? selectedRoute = await showRouteSelectionBottomSheet();
-                      
-                      if (selectedRoute == null) return; // 경로 선택 취소시 종료
-                      
-                      if (result['type'] == 'point') {
-                        // 즐겨찾기 지점 선택 시
-                        final favoritePoint = result['data'] as FavoritePoint;
-                        
-                        // 출입구 좌표가 있으면 사용, 없으면 일반 좌표 사용
-                        final lat = favoritePoint.entranceLatitude ?? favoritePoint.latitude;
-                        final lng = favoritePoint.entranceLongitude ?? favoritePoint.longitude;
-                        
-                        // 목적지 설정
-                        controller.handleDestinationLocationSelection(GeoLocation(
-                          lat: lat,
-                          lng: lng,
-                        ));
-                        
-                        // 목적지 텍스트 업데이트
-                        context.read<SearchBloc>().add(
-                          SearchDestinationRequested(
-                            searchDestination: favoritePoint.name,
-                            geoLocation: GeoLocation(lat: lat, lng: lng),
-                          ),
-                        );
-                        
-                        controller.chooseRoute.value = selectedRoute;
-                        debugPrint('선택된 경로: ${controller.chooseRoute.value}');
-                        // 경로 선택 완료 후 경로 탐색 시작
-                        await controller.startNavigation();
-                        
-                      } else if (result['type'] == 'route') {
-                        // 경로 즐겨찾기를 사용한 경유지 포함 경로 안내
-                        final route = result['data'] as FavoriteRoute;
-                        
-                        // 출발지와 목적지가 설정되어 있는지 확인
-                        if (route.startPoint == null || route.finishPoint == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('경로의 출발지 또는 목적지가 설정되지 않았습니다.')),
-                          );
-                          return;
+                          // 출입구 등록 패널의 bloc에 직접 AddressUpdated 이벤트 전송
+                          try {
+                            final entranceBloc =
+                                Get.find<EntranceRegistrationBloc>();
+                            if (!entranceBloc.isClosed) {
+                              entranceBloc.add(AddressUpdated(latLng));
+                            }
+                          } catch (e) {
+                            // bloc을 찾을 수 없는 경우 무시 (아직 초기화되지 않았을 수 있음)
+                            debugPrint(
+                                'EntranceRegistrationBloc not found: $e');
+                          }
                         }
-                        
-                        // 경유지 리스트 준비 (null이 아닌 경유지만 포함)
-                        final waypoints = route.stopovers
-                            .where((p) => p != null)
-                            .map((p) => LatLng(p!.latitude, p.longitude))
-                            .toList();
-                        
-                        // 경유지 포함 경로 안내 시작
-                        await controller.startNavigationWithRoute(
-                          startLatitude: route.startPoint!.latitude,
-                          startLongitude: route.startPoint!.longitude,
-                          endLatitude: route.finishPoint!.latitude,
-                          endLongitude: route.finishPoint!.longitude,
-                          waypoints: waypoints,
-                          chooseRoute: selectedRoute,
-                        );
-                        
-                        final waypointCount = waypoints.length;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(waypointCount > 0 
-                              ? '경유지 $waypointCount개를 포함한 경로 안내를 시작합니다.' 
-                              : '경로 안내를 시작합니다.'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
                       }
-                    }
-                  },
-                ),
-              ),
-            ),
 
-            /// 화면 중앙 고정 마커(출발지 설정시 사라짐)
-            Stack(
-              children: [
-                Obx(() {
-                  final isSet = controller.isSetStartLocation.value;
-                   if (isSet) return SizedBox.shrink(); // 숨김 처리
-                return Center(
-                  child: Icon(Icons.place, color: Colors.red, size: 40),
-                );
-              }),
-
-            /// 커스텀 출발지 설정 버튼
-            Obx(() {
-              final isSet = controller.isSetStartLocation.value;
-
-              // 이미 설정되면 버튼 제거
-              if (isSet) return SizedBox.shrink();
-              
-            return Positioned(
-              bottom: 100.0,
-              left: 20.0,
-              right: 20.0,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  await controller.setCustomStartLocationFromCamera(); // 카메라 중심을 출발지로 설정
-                  },
-                  icon: Icon(Icons.add_location_alt, color: Colors.white),
-                  label: Text(
-                    "현재 위치 설정",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-                  style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 5,
-                ),
-              ),
-            );
+                      // 출입구 등록 패널이 활성화되어도 현위치 마커는 계속 업데이트되어야 함
+                      // 센서 데이터가 계속 업데이트되므로 현위치 마커도 자동으로 업데이트됨
+                    },
+                    onMapTapped: (NPoint point, NLatLng latLng) {
+                      int meters =
+                          (controller.remain_distance.value * 1000).round();
+                      controller.speakText('다음 안내까지 ${meters}미터 남았습니다.');
+                    },
+                  );
           }),
-        ],
-      ),
 
-            /// 시스템 상단 바 높이에 따른 패딩 (상단 영역의 색상 처리)
-            Container(
-              color: isDark
-                  ? Theme.of(context).colorScheme.shadow.withValues(alpha: 0.5)
-                  : null,
-              height: MediaQuery.of(context).padding.top,
-            ),
+          /// 화면 중앙 고정 마커
 
-            /// 지도 모드 버튼 (우측 하단)
-            Positioned(
-              right: 20.0,
-              bottom: 20.0,
-              child: Obx(() {
-                return FloatingActionButton(
-                  onPressed: () {
-                    controller.toggleMapMode();
-
-                    /// 모드 변경 시 시각적 피드백 추가
-                    HapticFeedback.mediumImpact();
-                  },
-                  backgroundColor: _getButtonColor(),
-                  child: AnimatedRotation(
-                    duration: Duration(milliseconds: 300),
-                    turns: controller.mapMode.value == MapControlMode.on2 ? 0.5 : 0,
-                    child: Icon(_getButtonIcon()),
-                  ),
-                );
-              }),
-            ),
-
-            /// 경로 안내 종료 버튼 (하단 중앙)
-            Positioned(
-              bottom: 20.0,
-              left: 0,
-              right: 0,
-              child: Obx(() {
-                if (controller.isNavigating.value) {
-                  return Center(
-                    child: FloatingActionButton.extended(
-                      onPressed: () {
-                        controller.stopNavigationTimer();
-                        // 검색 상태 초기화 추가
-                        context.read<SearchBloc>().add(SearchResetRequested());
-                        // 검색창 텍스트도 초기화
-                        controller.searchLocation.value = '';
-                        controller.destinationLocation.value = '';
-                      },
-                      backgroundColor: Colors.red,
-                      icon: Icon(Icons.stop, color: Colors.white),
-                      label: Text(
-                        '경로 안내 종료',
-                        style: TextStyle(color: Colors.white),
-                      ),
+          /// (2)항상 표시되는 고정 버튼들 (지도 모드 변경, 경광등, 즐겨찾기)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 20,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // 지도 모드 변경 FAB
+                Obx(() {
+                  return FloatingActionButton(
+                    onPressed: () {
+                      controller.toggleMapMode();
+                      HapticFeedback.mediumImpact();
+                    },
+                    backgroundColor: _getButtonColor(controller),
+                    child: AnimatedRotation(
+                      duration: Duration(milliseconds: 300),
+                      turns: controller.mapMode.value == MapControlMode.on2
+                          ? 0.5
+                          : 0,
+                      child: Icon(_getButtonIcon(controller)),
                     ),
                   );
-                }
-                return SizedBox.shrink();
-              }),
+                }),
+
+                // 경광등 토글 FAB
+                SizedBox(height: 16),
+                Obx(() {
+                  return FloatingActionButton(
+                    onPressed: () {
+                      controller.toggleFlashlight();
+                      HapticFeedback.mediumImpact();
+                    },
+                    backgroundColor: controller.isFlashOn.value
+                        ? Colors.orange
+                        : Colors.grey,
+                    child: Icon(
+                      controller.isFlashOn.value
+                          ? Icons.flashlight_on
+                          : Icons.flashlight_off,
+                      color: Colors.white,
+                    ),
+                  );
+                }),
+              ],
             ),
+          ),
+
+          /// (3)출입구 등록 패널 활성화 시 검색창
+          Obx(() {
+            final slidingController = Get.find<SlidingPanelController>();
+            final isEntrancePanelActive =
+                slidingController.activePanelId.value == 'entrance_panel';
+
+            if (isEntrancePanelActive) {
+              return Positioned(
+                top: MediaQuery.of(context).padding.top + 20,
+                left: 20,
+                right: 80, // 오른쪽 버튼들을 위한 공간 확보 (20 -> 80으로 변경)
+                child: _buildSearchBar(context),
+              );
+            }
+            return SizedBox.shrink();
+          }),
+
+          /// (4)출입구 등록 마커 (현위치 마커와 함께 표시)
+          /// 출입구 등록 패널이 활성화되어도 현위치 동적 마커는 계속 업데이트되어 표시됨
+          /// - 빨간색 핀: 출입구 등록용 (화면 중앙 고정)
+          /// - 파란색/빨간색 마커: 현위치 표시 (컨트롤러에서 지속 업데이트)
+          Obx(() {
+            final slidingController = Get.find<SlidingPanelController>();
+            final isEntrancePanelActive =
+                slidingController.activePanelId.value == 'entrance_panel';
+
+            if (isEntrancePanelActive) {
+              return Stack(
+                children: [
+                  // 출입구 등록용 빨간색 핀 (화면 중앙 고정)
+                  Center(
+                    child: Icon(
+                      Icons.location_pin,
+                      color: Colors.red,
+                      size: 40,
+                    ),
+                  ),
+                  // 현위치 동적 마커는 계속 표시되어야 함 (컨트롤러에서 관리)
+                  // 센서 데이터가 계속 업데이트되므로 현위치 마커도 자동으로 업데이트됨
+                ],
+              );
+            }
+            return SizedBox.shrink();
+          }),
+
+          /// 화면 중앙 고정 마커(출발지 설정 시 사라짐)
+          Stack(
+            children: [
+              Obx(() {
+                final isSet = controller.isSetStartLocation.value;
+                if (isSet) return SizedBox.shrink();
+                return Center(
+                  child: Icon(
+                    Icons.location_pin,
+                    color: Colors.red,
+                    size: 40,
+                  ),
+                );
+              }),
+
+              /// (4)현재 위치 설정 버튼 (지도 기능 사용 시에만 표시)
+              /// 커스텀 출발지 설정 버튼
+              Obx(() {
+                final slidingController = Get.find<SlidingPanelController>();
+                final isMapFunctionActive =
+                    slidingController.activePanelId.value == 'map_panel';
+                final isSet = controller.isSetStartLocation.value;
+
+                // 지도 기능이 활성화되지 않았거나 이미 출발지가 설정되면 버튼 숨김
+                if (!isMapFunctionActive || isSet) return SizedBox.shrink();
+
+                return Positioned(
+                  bottom: 50.0,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await controller
+                            .setCustomStartLocationFromCamera(); // 카메라 중심을 출발지로 설정
+                      },
+                      icon: Icon(Icons.add_location_alt, color: Colors.white),
+                      label: Text(
+                        "현재 위치 설정",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16.0, horizontal: 24.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 5,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+
+          /// (5)경로 안내 종료 버튼
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Obx(() {
+              if (controller.isNavigating.value) {
+                return Center(
+                  child: FloatingActionButton.extended(
+                    onPressed: () {
+                      controller.stopNavigationTimer();
+                      context.read<SearchBloc>().add(SearchResetRequested());
+                      controller.searchLocation.value = '';
+                      controller.destinationLocation.value = '';
+                    },
+                    backgroundColor: Colors.red,
+                    icon: Icon(Icons.stop, color: Colors.white),
+                    label:
+                        Text('경로 안내 종료', style: TextStyle(color: Colors.white)),
+                  ),
+                );
+              }
+              return SizedBox.shrink();
+            }),
+          ),
+
+          /// (5)상태바 색상 처리
+          Container(
+            height: MediaQuery.of(context).padding.top,
+            color: isDark
+                ? Theme.of(context).colorScheme.shadow.withOpacity(0.5)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 검색 입력창 위젯 생성
+  Widget _buildSearchInput({
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                blurRadius: 4,
+                offset: Offset(0, 2))
           ],
-        ));
-      }
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value.isEmpty ? label : value,
+                style: TextStyle(
+                  fontSize: AppSizes.scaledFont(18),
+                  color: value.isEmpty ? Colors.grey : Colors.black,
+                ),
+              ),
+            ),
+            Icon(Icons.search),
+          ],
+        ),
+      ),
+    );
+  }
 
-        //// 주석처리 확인하기 - 연주
-        //   ],
-        // ),
-        // /// 모드 토글 FloatingActionButton (맵 모드를 전환합니다.)
-        // floatingActionButton: Obx(() {
-        //   return FloatingActionButton(
-        //     onPressed: controller.toggleMapMode,
-        //     backgroundColor: _getButtonColor(),
-        //     child: Icon(_getButtonIcon()),
-        //   );
-        // }));
-        //}
+  /// 안내 콘텐츠 카드 위젯
+  Widget _buildContentCard(String title, String subtitle) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.info_outline, color: Colors.grey[600], size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                        color: Colors.grey[800],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(subtitle,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+        ],
+      ),
+    );
+  }
 
-  /// 모드 토글 버튼의 아이콘을 결정합니다.
-  IconData _getButtonIcon() {
+  IconData _getButtonIcon(NaverMapViewController controller) {
     switch (controller.mapMode.value) {
       case MapControlMode.idle:
-        return Icons.location_disabled;
       case MapControlMode.off:
         return Icons.location_disabled;
       case MapControlMode.on1:
@@ -554,11 +376,9 @@ class NaverMapView extends GetView<NaverMapViewController> {
     }
   }
 
-  /// 모드 토글 버튼의 배경 색상을 결정합니다.
-  Color _getButtonColor() {
+  Color _getButtonColor(NaverMapViewController controller) {
     switch (controller.mapMode.value) {
       case MapControlMode.idle:
-        return Colors.grey;
       case MapControlMode.off:
         return Colors.grey;
       case MapControlMode.on1:
@@ -566,5 +386,324 @@ class NaverMapView extends GetView<NaverMapViewController> {
       case MapControlMode.on2:
         return Colors.green;
     }
+  }
+
+  /// 하단 탭 위젯 생성
+  Widget _buildBottomTab({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        // 탭 클릭 시 처리 로직
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.grey[600], size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 출입구 등록 패널 활성화 시 표시할 검색창 위젯
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.search, color: Colors.grey[600], size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _showLocationSearch(context),
+              child: Text(
+                '장소를 검색하세요',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 경로 선택 BottomSheet를 표시하는 메서드
+  Future<String?> _showRouteSelectionBottomSheet() async {
+    return await showModalBottomSheet<String>(
+      context: Get.context!,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(Get.context!, "0"),
+              child: const Text("추천"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(Get.context!, "4"),
+              child: const Text("추천+대로우선"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(Get.context!, "10"),
+              child: const Text("최단"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(Get.context!, "30"),
+              child: const Text("최단+계단제외"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 장소 검색 화면을 표시하는 메서드
+  void _showLocationSearch(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _LocationSearchSheet(
+        onLocationSelected: (latLng, address) {
+          // 선택된 위치로 지도 줌인
+          final mapController = Get.find<NaverMapViewController>();
+          if (mapController.mapController != null) {
+            final cameraUpdate = NCameraUpdate.withParams(
+              target: NLatLng(latLng.latitude, latLng.longitude),
+              zoom: 18.5,
+            )..setAnimation(animation: NCameraAnimation.easing);
+            mapController.mapController!.updateCamera(cameraUpdate);
+          }
+
+          // 출입구 등록 패널의 bloc에 위치 업데이트
+          try {
+            final entranceBloc = Get.find<EntranceRegistrationBloc>();
+            if (!entranceBloc.isClosed) {
+              entranceBloc.add(
+                  AddressUpdated(NLatLng(latLng.latitude, latLng.longitude)));
+            }
+          } catch (e) {
+            debugPrint('EntranceRegistrationBloc not found: $e');
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// 장소 검색을 위한 모달 시트
+class _LocationSearchSheet extends StatefulWidget {
+  final Function(NLatLng latLng, String address) onLocationSelected;
+
+  const _LocationSearchSheet({required this.onLocationSelected});
+
+  @override
+  State<_LocationSearchSheet> createState() => _LocationSearchSheetState();
+}
+
+class _LocationSearchSheetState extends State<_LocationSearchSheet> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  List<PlaceResult> _searchResults = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final query = _searchController.text.trim();
+      if (query.isNotEmpty) {
+        _performSearch(query);
+      } else {
+        setState(() {
+          _searchResults.clear();
+        });
+      }
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final results = await _placeSearch(query);
+      setState(() {
+        _searchResults = results;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _searchResults = [];
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<List<PlaceResult>> _placeSearch(String query) async {
+    const String apiKey = '93848fcc11798c6f48099dd2e2373263';
+    final String apiUrl =
+        'https://dapi.kakao.com/v2/local/search/keyword.json?query=$query';
+
+    final headers = {'Authorization': 'KakaoAK $apiKey'};
+    final response = await http.get(Uri.parse(apiUrl), headers: headers);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final documents = jsonResponse['documents'];
+
+      if (documents.isNotEmpty) {
+        return documents.map<PlaceResult>((doc) {
+          final addressName = doc['road_address_name']?.isNotEmpty == true
+              ? doc['road_address_name']
+              : doc['address_name'];
+          return PlaceResult(
+            name: doc['place_name'],
+            address: addressName,
+            geometry: LatLngGeometry(
+              location: GeoLocation(
+                lat: double.parse(doc['y']),
+                lng: double.parse(doc['x']),
+              ),
+            ),
+          );
+        }).toList();
+      }
+    }
+    return [];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // 드래그 핸들
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // 제목
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              '장소 검색',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // 검색창
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '장소명을 입력하세요',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 검색 결과
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _searchResults.isEmpty
+                    ? Center(
+                        child: Text(
+                          '검색어를 입력하세요',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) {
+                          final result = _searchResults[index];
+                          return ListTile(
+                            leading: Icon(Icons.location_on, color: Colors.red),
+                            title: Text(
+                              result.name,
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Text(result.address),
+                            onTap: () {
+                              final latLng = NLatLng(
+                                result.geometry.location.lat,
+                                result.geometry.location.lng,
+                              );
+                              widget.onLocationSelected(latLng, result.address);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
   }
 }

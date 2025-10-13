@@ -107,6 +107,19 @@ class NaverMapViewController extends GetxController {
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
 
+  /// Flash 제어 서비스 (수동 경광등 켜기)
+  final ControlFlash flashOn = DI.get<ControlFlash>(
+    instanceName: USECASE_CONTROL_FLASH_ON,
+  );
+
+  /// Flash 제어 서비스 (수동 경광등 끄기)
+  final ControlFlash flashOff = DI.get<ControlFlash>(
+    instanceName: USECASE_CONTROL_FLASH_OFF,
+  );
+
+  /// 경광등 상태를 나타내는 Reactive 변수
+  RxBool isFlashOn = false.obs;
+
   /// 위치 업데이트 타이머
   Timer? _locationUpdateTimer;
 
@@ -292,7 +305,7 @@ class NaverMapViewController extends GetxController {
     yawRateTurn2 = yawRate2 * radianToAngle;
   }
 
-  /// positionUpdate: 가속도 이벤트를 기반으로 속도와 위치를 업데이트합
+  /// positionUpdate: 가속도 이벤트를 기반으로 속도와 위치를 업데이트합니다.
   /// [event]: UserAccelerometerEvent 데이터.
   /// [sensorInterval]: 센서 업데이트 간격.
   void positionUpdate(UserAccelerometerEvent event, Duration sensorInterval) {
@@ -368,7 +381,7 @@ class NaverMapViewController extends GetxController {
   void onClose() {
     _locationUpdateTimer?.cancel();
     for (var subscription in _streamSubscriptions) {
-subscription.cancel();
+      subscription.cancel();
     }
     super.onClose();
   }
@@ -640,7 +653,7 @@ subscription.cancel();
     for (int i = 0; i < branchinfo.length; i++) {
       var branch = branchinfo[i];
       NOverlayImage iconToUse;
-      
+
       // 출발지 분기점 확인 (첫 번째 분기점)
       if (i == 0) {
         iconToUse = blueIconImage;
@@ -671,7 +684,7 @@ subscription.cancel();
             break;
           }
         }
-        
+
         // 경유지면 회색, 아니면 일반 분기점은 초록색
         iconToUse = isWaypoint ? greyIconImage : greenIconImage;
       }
@@ -1579,6 +1592,34 @@ subscription.cancel();
       debugPrint('경로 안내가 성공적으로 종료되었습니다.');
     } catch (e) {
       debugPrint('경로 안내 종료 중 오류 발생: $e');
+    }
+  }
+
+  /// 경광등 토글 메서드
+  Future<void> toggleFlashlight() async {
+    try {
+      if (isFlashOn.value) {
+        // 경광등이 켜져 있으면 끄기
+        final result = await flashOff(NoParams());
+        if (result.isLeft()) {
+          speakText('안전 경광등을 끌 수 없습니다.');
+        } else {
+          isFlashOn.value = false;
+          speakText('안전 경광등이 꺼졌습니다.');
+        }
+      } else {
+        // 경광등이 꺼져 있으면 켜기
+        final result = await flashOn(NoParams());
+        if (result.isLeft()) {
+          speakText('안전 경광등을 켤 수 없습니다.');
+        } else {
+          isFlashOn.value = true;
+          speakText('안전 경광등이 켜졌습니다.');
+        }
+      }
+    } catch (e) {
+      debugPrint('경광등 제어 중 오류 발생: $e');
+      speakText('안전 경광등 제어 중 오류가 발생했습니다.');
     }
   }
 }

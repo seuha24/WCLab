@@ -1,14 +1,13 @@
 part of '../../framework/ui.dart';
 
 class DestinationPickerView extends StatefulWidget {
-  const DestinationPickerView({super.key});
-
   @override
   State<DestinationPickerView> createState() => _DestinationPickerViewState();
 }
 
 class _DestinationPickerViewState extends State<DestinationPickerView> {
-  final DestinationPickerController controller = Get.put(DestinationPickerController());
+  final DestinationPickerController controller =
+      Get.put(DestinationPickerController());
 
   final RxString _address = ''.obs;
   NCameraPosition? _currentCameraPosition;
@@ -26,7 +25,8 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
   Future<void> _setInitialPosition() async {
     try {
       LocationPermission permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) {
+      if (permission == LocationPermission.deniedForever ||
+          permission == LocationPermission.denied) {
         // 권한 거부 시 기본 위치로 설정 (가톨릭대학교)
         setState(() {
           _currentCameraPosition = const NCameraPosition(
@@ -38,9 +38,9 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
       }
 
       final position = await Geolocator.getCurrentPosition(
-       locationSettings: const LocationSettings(
-         accuracy: LocationAccuracy.high,
-       ),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       setState(() {
@@ -81,9 +81,9 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
 
         if (documents.isNotEmpty) {
           // 도로명 주소가 있으면 우선 사용, 없으면 지번 주소 사용
-          final addressName = documents[0]['road_address']?['address_name']
-            ?? documents[0]['address']['address_name'];
-            
+          final addressName = documents[0]['road_address']?['address_name'] ??
+              documents[0]['address']['address_name'];
+
           _address.value = addressName;
           controller.updateAddress(addressName); // 컨트롤러에 주소 업데이트
         } else {
@@ -132,8 +132,10 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
 
               // 일정 거리 이상 이동한 경우에만 주소 요청
               if (_lastQueriedLatLng != null) {
-                final dx = (_lastQueriedLatLng!.latitude - newTarget.latitude).abs();
-                final dy = (_lastQueriedLatLng!.longitude - newTarget.longitude).abs();
+                final dx =
+                    (_lastQueriedLatLng!.latitude - newTarget.latitude).abs();
+                final dy =
+                    (_lastQueriedLatLng!.longitude - newTarget.longitude).abs();
                 if (dx < _distanceThreshold && dy < _distanceThreshold) return;
               }
 
@@ -157,17 +159,17 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
             left: 20,
             right: 20,
             child: Obx(() => Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                _address.value,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              ),
-            )),
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _address.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                )),
           ),
         ],
       ),
