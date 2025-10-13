@@ -32,7 +32,6 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:get/get.dart';
 import 'package:vibration/vibration.dart';
 
-
 part '../presentation/bloc/auth/auth_bloc.dart';
 part '../presentation/bloc/auth/auth_event.dart';
 part '../presentation/bloc/auth/auth_state.dart';
@@ -44,11 +43,14 @@ part '../presentation/cubit/location_permission_cubit.dart';
 part '../presentation/bloc/search_bloc/search_bloc.dart';
 part '../presentation/bloc/search_bloc/search_event.dart';
 part '../presentation/bloc/search_bloc/search_state.dart';
-part '../presentation/bloc/entrance_bloc/entrance_bloc.dart';  
+part '../presentation/bloc/entrance_bloc/entrance_bloc.dart';
 part '../presentation/bloc/entrance_bloc/entrance_event.dart';
 part '../presentation/bloc/entrance_bloc/entrance_state.dart';
-part '../presentation/bloc/registration_bloc/registration_bloc.dart';  
+part '../presentation/bloc/registration_bloc/registration_bloc.dart';
 part '../presentation/bloc/registration_bloc/registration_event.dart';
 part '../presentation/bloc/registration_bloc/registration_state.dart';
 part '../presentation/controllers/map_view_controller.dart';
 part '../presentation/controllers/destination_picker_controller.dart';
+part '../presentation/controllers/sliding_panel_controller.dart';
+part '../presentation/controllers/entrance_selection_controller.dart';
+part '../presentation/controllers/map_panel_controller.dart';
