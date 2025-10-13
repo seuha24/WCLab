@@ -168,45 +168,46 @@ abstract class BlueNativeDataSource {
     DiscoveredDevice post, {
     List<int> command = const [0x31, 0x00, 0x02],
   });
-  
+
   /// 위치안내 요청을 전송하는 메소드
   /// 횡단보도의 위치 정보를 음성으로 안내받기 위해 사용
   Future<void> sendLocationGuide(DiscoveredDevice post);
-  
-  /// 신호안내 요청을 전송하는 메소드  
+
+  /// 신호안내 요청을 전송하는 메소드
   /// 현재 신호등 상태를 음성으로 안내받기 위해 사용
   Future<void> sendSignalGuide(DiscoveredDevice post);
-  
+
   /// 음성안내 요청을 전송하는 메소드
   /// 추가적인 음성 안내를 받기 위해 사용
   Future<void> sendVoiceGuide(DiscoveredDevice post);
-  
+
   /// 응답을 기다리며 명령을 전송하는 메소드
   /// ACK/NAK 응답을 수신하여 성공 여부를 반환
   Future<ResponseData?> sendWithResponse(
     DiscoveredDevice post, {
     List<int> command,
   });
-  
+
   /// BLE 특성으로부터 응답을 수신하는 스트림
   Stream<List<int>> receiveResponse(DiscoveredDevice post);
-  
+
   /// 디바이스 연결 상태를 모니터링하는 스트림
   /// 실시간으로 연결 상태 변화를 추적
   Stream<DeviceConnectionState> monitorConnection(String deviceId);
-  
+
   /// 현재 연결 상태를 가져오는 메소드
   DeviceConnectionState? getCurrentConnectionState(String deviceId);
-  
+
   /// PIN 인증을 수행하는 메소드
   /// PIN 코드를 사용하여 음향신호기에 인증 시도
   /// 규격서에는 PIN 프로토콜 상세가 없으므로 제조사별로 다를 수 있음
   Future<bool> authenticateWithPin(DiscoveredDevice post, String pin);
-  
+
   /// PIN 변경을 수행하는 메소드
   /// 현재 PIN으로 인증 후 새로운 PIN으로 변경
-  Future<bool> changePin(DiscoveredDevice post, String currentPin, String newPin);
-  
+  Future<bool> changePin(
+      DiscoveredDevice post, String currentPin, String newPin);
+
   Future<void> disconnect();
 }
 
@@ -214,9 +215,10 @@ abstract class BlueNativeDataSource {
 class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   static StreamSubscription? subscription;
   static StreamSubscription<ConnectionStateUpdate>? connection;
-  
+
   // 연결 상태 추적을 위한 맵
-  final Map<String, StreamSubscription<ConnectionStateUpdate>> _connectionStreams = {};
+  final Map<String, StreamSubscription<ConnectionStateUpdate>>
+      _connectionStreams = {};
   final Map<String, DeviceConnectionState> _connectionStates = {};
 
   static const Duration duration = Duration(seconds: 1);
@@ -242,7 +244,9 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
           }
         }
       }, onError: (e) {
-        throw BlueScanException('스캔 중 오류 발생');
+        debugPrint('⚠️ BLE 스캔 에러: $e');
+        // 에러를 throw하지 않고 로그만 출력
+        // 스캔이 이미 진행 중이거나 Bluetooth가 꺼진 경우 발생 가능
       });
 
       await Future.delayed(duration);
@@ -258,17 +262,26 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
   @override
   Future<void> send(
     DiscoveredDevice post, {
-    List<int> command = Bluetooth.CMD_SIGNAL,  // 기본값: 신호안내
+    List<int> command = Bluetooth.CMD_SIGNAL, // 기본값: 신호안내
   }) async {
     try {
       // DEVICE NAME 재검증
       if (!Bluetooth.validateDeviceName(post.name)) {
         throw BlueInvalidDeviceException('유효하지 않은 음향신호기');
       }
-      
+
+      // 연결 로그
+      debugPrint('========== BLE 통신 시작 ==========');
+      debugPrint('기기명: ${post.name}');
+      debugPrint('기기 ID: ${post.id}');
+      debugPrint('명령: ${_getCommandName(command)}');
+
       connection = bluetooth.connectToDevice(id: post.id).listen(
         (update) async {
+          debugPrint('연결 상태: ${update.connectionState}');
+
           if (update.connectionState == DeviceConnectionState.connected) {
+            debugPrint('✅ BLE 연결 성공');
             List<DiscoveredService> services;
             try {
               services = await bluetooth.discoverServices(post.id);
@@ -277,14 +290,17 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
             }
 
             final service = services.firstWhere(
-              (service) => service.serviceId == Uuid.parse(Bluetooth.SERVICE_UUID),
+              (service) =>
+                  service.serviceId == Uuid.parse(Bluetooth.SERVICE_UUID),
               orElse: () => throw BlueConnectionException('UART 서비스를 찾을 수 없음'),
             );
-            
+
             final characteristic = service.characteristics.firstWhere(
               (characteristic) =>
-                  characteristic.characteristicId == Uuid.parse(Bluetooth.CHAR_UUID),
-              orElse: () => throw BlueConnectionException('UART RX 특성을 찾을 수 없음'),
+                  characteristic.characteristicId ==
+                  Uuid.parse(Bluetooth.CHAR_UUID),
+              orElse: () =>
+                  throw BlueConnectionException('UART RX 특성을 찾을 수 없음'),
             );
 
             final qualifiedCharacteristic = QualifiedCharacteristic(
@@ -293,6 +309,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
               deviceId: post.id,
             );
 
+            debugPrint('📤 명령 전송 중...');
             await bluetooth
                 .writeCharacteristicWithoutResponse(
               qualifiedCharacteristic,
@@ -300,6 +317,8 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
             )
                 .then(
               (value) async {
+                debugPrint('✅ 명령 전송 성공');
+                debugPrint('========== BLE 통신 완료 ==========\n');
                 await Future.delayed(const Duration(milliseconds: 500));
                 await disconnect();
               },
@@ -307,35 +326,56 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
           }
         },
         onError: (Object e) {
+          debugPrint('❌ BLE 연결 오류: $e');
           throw BlueConnectionException('연결 중 오류 발생');
         },
       );
     } catch (e) {
+      debugPrint('❌ BLE 통신 실패: $e');
       if (e is BlueException) rethrow;
       throw BlueConnectionException('BLE 연결 실패');
     }
+  }
+
+  // 명령 이름 반환 헬퍼 메서드
+  String _getCommandName(List<int> command) {
+    // List 비교를 위해 문자열로 변환하여 비교
+    final cmdStr = command.toString();
+    if (cmdStr == Bluetooth.CMD_LOCATION.toString()) return '위치안내';
+    if (cmdStr == Bluetooth.CMD_SIGNAL.toString()) return '신호안내';
+    if (cmdStr == Bluetooth.CMD_VOICE.toString()) return '음성안내';
+
+    // 바이트 값으로도 체크
+    if (command.length == 3) {
+      if (command[0] == 0x31 && command[1] == 0x00) {
+        if (command[2] == 0x01) return '위치안내';
+        if (command[2] == 0x02) return '신호안내';
+        if (command[2] == 0x03) return '음성안내';
+      }
+    }
+    return '알 수 없는 명령 $command';
   }
 
   @override
   Future<void> disconnect() async {
     await connection!.cancel();
   }
-  
+
   @override
   Future<void> sendLocationGuide(DiscoveredDevice post) async {
     await send(post, command: Bluetooth.CMD_LOCATION);
   }
-  
+
   @override
   Future<void> sendSignalGuide(DiscoveredDevice post) async {
     await send(post, command: Bluetooth.CMD_SIGNAL);
   }
-  
+
   @override
   Future<void> sendVoiceGuide(DiscoveredDevice post) async {
     await send(post, command: Bluetooth.CMD_VOICE);
   }
-  
+
   @override
   Stream<List<int>> receiveResponse(DiscoveredDevice post) {
     final characteristic = QualifiedCharacteristic(
@@ -343,10 +383,10 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
       serviceId: Uuid.parse(Bluetooth.SERVICE_UUID),
       deviceId: post.id,
     );
-    
+
     return bluetooth.subscribeToCharacteristic(characteristic);
   }
-  
+
   @override
   Future<ResponseData?> sendWithResponse(
     DiscoveredDevice post, {
@@ -357,76 +397,88 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
       if (!Bluetooth.validateDeviceName(post.name)) {
         throw BlueInvalidDeviceException('유효하지 않은 음향신호기');
       }
-      
+
+      debugPrint('========== BLE 응답 대기 통신 시작 ==========');
+      debugPrint('기기명: ${post.name}');
+      debugPrint('명령: ${_getCommandName(command)}');
+
       // 응답 수신 스트림 준비
       final responseStream = receiveResponse(post);
       StreamSubscription<List<int>>? responseSubscription;
       ResponseData? responseData;
-      
+
       // 응답 수신 리스너 등록
       responseSubscription = responseStream.listen(
         (data) {
+          debugPrint('📥 응답 수신: $data');
           responseData = ResponseParser.parse(data);
           responseSubscription?.cancel();
         },
         onError: (e) {
+          debugPrint('❌ 응답 수신 에러: $e');
           throw BlueConnectionException('응답 수신 중 오류');
         },
       );
-      
+
       // 명령 전송
       await send(post, command: command);
-      
+
       // 응답 대기 (최대 3초)
+      debugPrint('⏳ 응답 대기 중 (최대 3초)...');
       int waitCount = 0;
       while (responseData == null && waitCount < 30) {
         await Future.delayed(const Duration(milliseconds: 100));
         waitCount++;
       }
-      
+
       // 응답 수신 리스너 정리
       await responseSubscription.cancel();
-      
+
       // 타임아웃 체크
       if (responseData == null) {
+        debugPrint('⚠️ 응답 없음 (음향신호기가 응답하지 않음)');
         throw BlueTimeoutException('음향신호기 응답 시간 초과');
       }
-      
+
       // NAK 응답 체크
       if (responseData?.isNak == true) {
+        debugPrint('❌ NAK 응답 수신');
         throw BlueNakException('음향신호기가 명령을 거부했습니다');
       }
-      
+
+      debugPrint('✅ 응답 수신 완료');
+      debugPrint('========== BLE 응답 대기 통신 종료 ==========\n');
+
       return responseData;
     } catch (e) {
       if (e is BlueException) rethrow;
       throw BlueConnectionException('응답 처리 실패');
     }
   }
-  
+
   @override
   Stream<DeviceConnectionState> monitorConnection(String deviceId) {
     // 기존 스트림이 있으면 취소
     _connectionStreams[deviceId]?.cancel();
-    
+
     // 새로운 연결 상태 스트림 생성
     final stream = bluetooth.connectToDevice(id: deviceId).listen((update) {
       _connectionStates[deviceId] = update.connectionState;
     });
-    
+
     _connectionStreams[deviceId] = stream;
-    
+
     // 연결 상태 스트림 반환
     return bluetooth
         .connectToDevice(id: deviceId)
         .map((update) => update.connectionState);
   }
-  
+
   @override
   DeviceConnectionState? getCurrentConnectionState(String deviceId) {
     return _connectionStates[deviceId];
   }
-  
+
   @override
   Future<bool> authenticateWithPin(DiscoveredDevice post, String pin) async {
     try {
@@ -434,59 +486,62 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
       if (!Bluetooth.validateDeviceName(post.name)) {
         throw BlueInvalidDeviceException('유효하지 않은 음향신호기');
       }
-      
+
       // 연결 설정
       final completer = Completer<bool>();
       bool authResult = false;
-      
+
       connection = bluetooth.connectToDevice(id: post.id).listen(
         (update) async {
           if (update.connectionState == DeviceConnectionState.connected) {
             try {
               // 서비스 탐색
               final services = await bluetooth.discoverServices(post.id);
-              
+
               // PIN SERVICE 찾기
               final pinService = services.firstWhere(
-                (service) => service.serviceId == Uuid.parse(Bluetooth.PIN_SERVICE_UUID),
-                orElse: () => throw BlueConnectionException('PIN SERVICE를 찾을 수 없음'),
+                (service) =>
+                    service.serviceId == Uuid.parse(Bluetooth.PIN_SERVICE_UUID),
+                orElse: () =>
+                    throw BlueConnectionException('PIN SERVICE를 찾을 수 없음'),
               );
-              
+
               // PIN 특성 찾기 - 일반적으로 PIN SERVICE UUID를 특성으로도 사용
               DiscoveredCharacteristic? pinCharacteristic;
               for (final char in pinService.characteristics) {
-                if (char.isWritableWithoutResponse || char.isWritableWithResponse) {
+                if (char.isWritableWithoutResponse ||
+                    char.isWritableWithResponse) {
                   pinCharacteristic = char;
                   break;
                 }
               }
-              
+
               if (pinCharacteristic == null) {
                 throw BlueConnectionException('PIN 특성을 찾을 수 없음');
               }
-              
+
               final qualifiedCharacteristic = QualifiedCharacteristic(
                 characteristicId: pinCharacteristic.characteristicId,
                 serviceId: pinCharacteristic.serviceId,
                 deviceId: post.id,
               );
-              
+
               // PIN 전송 (UTF-8 인코딩)
               // 규격서에 인코딩 방식이 명시되지 않았으므로 일반적인 UTF-8 사용
               final pinBytes = utf8.encode(pin);
-              
+
               await bluetooth.writeCharacteristicWithoutResponse(
                 qualifiedCharacteristic,
                 value: pinBytes,
               );
-              
+
               // 응답 대기 (간단한 구현)
               // 실제 구현시 제조사별 응답 프로토콜 확인 필요
               await Future.delayed(const Duration(milliseconds: 500));
-              
+
               authResult = true; // 임시로 성공 처리
               completer.complete(authResult);
-              
+
               await disconnect();
             } catch (e) {
               completer.completeError(e);
@@ -498,7 +553,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
           completer.completeError(BlueConnectionException('PIN 인증 중 오류 발생'));
         },
       );
-      
+
       // 타임아웃 설정
       return await completer.future.timeout(
         const Duration(seconds: 5),
@@ -512,57 +567,59 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
       throw BlueConnectionException('PIN 인증 실패: ${e.toString()}');
     }
   }
-  
+
   @override
-  Future<bool> changePin(DiscoveredDevice post, String currentPin, String newPin) async {
+  Future<bool> changePin(
+      DiscoveredDevice post, String currentPin, String newPin) async {
     try {
       // 1. 먼저 현재 PIN으로 인증
       final authSuccess = await authenticateWithPin(post, currentPin);
       if (!authSuccess) {
         throw BlueConnectionException('현재 PIN 인증 실패');
       }
-      
+
       // 2. PIN 변경 수행
       final completer = Completer<bool>();
       bool changeResult = false;
-      
+
       connection = bluetooth.connectToDevice(id: post.id).listen(
         (update) async {
           if (update.connectionState == DeviceConnectionState.connected) {
             try {
               // 서비스 탐색
               final services = await bluetooth.discoverServices(post.id);
-              
+
               // CHANGE PIN CODE 특성 찾기
               for (final service in services) {
                 for (final characteristic in service.characteristics) {
-                  if (characteristic.characteristicId == Uuid.parse(Bluetooth.CHANGE_PIN_UUID)) {
+                  if (characteristic.characteristicId ==
+                      Uuid.parse(Bluetooth.CHANGE_PIN_UUID)) {
                     final qualifiedCharacteristic = QualifiedCharacteristic(
                       characteristicId: characteristic.characteristicId,
                       serviceId: service.serviceId,
                       deviceId: post.id,
                     );
-                    
+
                     // 새 PIN 전송
                     final newPinBytes = utf8.encode(newPin);
-                    
+
                     await bluetooth.writeCharacteristicWithoutResponse(
                       qualifiedCharacteristic,
                       value: newPinBytes,
                     );
-                    
+
                     // 응답 대기
                     await Future.delayed(const Duration(milliseconds: 500));
-                    
+
                     changeResult = true;
                     completer.complete(changeResult);
-                    
+
                     await disconnect();
                     return;
                   }
                 }
               }
-              
+
               throw BlueConnectionException('CHANGE PIN CODE 특성을 찾을 수 없음');
             } catch (e) {
               completer.completeError(e);
@@ -574,7 +631,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
           completer.completeError(BlueConnectionException('PIN 변경 중 오류 발생'));
         },
       );
-      
+
       // 타임아웃 설정
       return await completer.future.timeout(
         const Duration(seconds: 5),

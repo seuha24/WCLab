@@ -133,6 +133,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                             bottom: 90.h,
                           ),
                         );
+                        // 횡단보도 목록이 있으면 현재 위치 유지 (목록이 이미 표시됨)
                       }
                     } else if (state is ConnectOn) {
                       // 연결 중일 때 - 이미 연결 시도 중이므로 추가 메시지는 표시하지 않음
@@ -319,6 +320,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
   Widget _buildSearchResultsUI(List<Crosswalk> results) {
     return ListView.separated(
       shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(
         horizontal: SizeTheme.w_md,
       ),
@@ -464,7 +466,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
       isScrollControlled: true,
       barrierColor: Theme.of(context).colorScheme.onSecondary.withAlpha(100),
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       isDismissible: false,
       builder: (BuildContext context) {
         return SizedBox(
@@ -666,7 +668,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               bottom: SizeTheme.h_md,
             ),
             child: FlatCard(
-              title: '음성 안내 (실험적)',
+              title: '위치 안내',
               titleOnly: true,
               leading: const Icon(
                 Icons.volume_up,
@@ -680,11 +682,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                 context
                     .read<CrosswalkBloc>()
                     .add(SendVoiceGuideEvent(crosswalk: crosswalk));
-                Scrollable.ensureVisible(
-                  keys[1].currentContext!,
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeInOut,
-                );
+                // 스크롤 제거 - 현재 화면 유지
               },
             ),
           ),
@@ -693,7 +691,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               bottom: SizeTheme.h_md,
             ),
             child: FlatCard(
-              title: '신호 안내 (기본)',
+              title: '신호 안내',
               titleOnly: true,
               leading: const Icon(
                 Icons.traffic,
@@ -707,11 +705,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                 context
                     .read<CrosswalkBloc>()
                     .add(SendAcousticSignalEvent(crosswalk: crosswalk));
-                Scrollable.ensureVisible(
-                  keys[1].currentContext!,
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeInOut,
-                );
+                // 스크롤 제거 - 현재 화면 유지
               },
             ),
           ),
@@ -720,7 +714,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               bottom: SizeTheme.h_md,
             ),
             child: FlatCard(
-              title: '압버튼 누르기',
+              title: '음성 안내',
               titleOnly: true,
               leading: const Icon(
                 Icons.directions_walk_rounded,
@@ -734,11 +728,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                 context
                     .read<CrosswalkBloc>()
                     .add(SendVoiceInductorEvent(crosswalk: crosswalk));
-                Scrollable.ensureVisible(
-                  keys[1].currentContext!,
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeInOut,
-                );
+                // 스크롤 제거 - 현재 화면 유지
               },
             ),
           ),

@@ -69,8 +69,10 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
           }
         },
         (results) {
-          tts('${results!.length} 개의 스마트 압버튼을 찾았습니다.');
+          debugPrint('📍 횡단보도 스캔 완료: ${results!.length}개 발견');
+          tts('${results.length} 개의 스마트 압버튼을 찾았습니다.');
           emit(SearchOff(results: results));
+          debugPrint('📍 SearchOff 상태로 전환 완료');
         },
       );
     } catch (e) {
@@ -83,11 +85,16 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts('${event.crosswalk.name}에 연결합니다.');
+      tts('${event.crosswalk.name}에 신호안내를 요청합니다.');
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
       }
+
+      // 명령 전송
+      await sendAcousticSignal(event.crosswalk);
+
+      // 명령 전송 후 상태 유지 (화면 전환 방지)
       if (event.crosswalk.pos != null) {
         final results = await getCurrentPosition(NoParams());
         results.fold(
@@ -95,7 +102,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts('진동이 울리지 않는 방향으로 보행하세요.');
+            tts('명령이 전송되었습니다.');
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;
@@ -104,11 +111,11 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
           },
         );
       } else {
+        tts('명령이 전송되었습니다.');
         emit(ConnectOff(enableCompass: false));
       }
-
-      await sendAcousticSignal(event.crosswalk);
     } catch (e) {
+      tts('연결 실패했습니다.');
       emit(CrosswalkError(message: 'connect failure'));
     }
   }
