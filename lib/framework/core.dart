@@ -18,6 +18,7 @@ part '../core/utils/response_parser.dart';
 part '../core/utils/themes.dart';
 part '../core/utils/tts.dart';
 part '../core/utils/validators.dart';
+part '../core/utils/calculators.dart';
 part '../core/usecases/usecase.dart';
 part '../core/errors/exceptions.dart';
 part '../core/errors/failures.dart';
