@@ -1172,6 +1172,16 @@ class NaverMapViewController extends GetxController {
   Future<void> updateCurrentLocationMarker(double current_latitude,
       double current_longitude, double compassValue, bool isGps) async {
     if (mapController == null) return;
+
+    // 기존 마커가 있으면 먼저 삭제 (중복 마커 방지)
+    if (_currentLocationMarker != null) {
+      try {
+        await mapController!.deleteOverlay(_currentLocationMarker!.info);
+      } catch (e) {
+        // 마커가 이미 삭제되었거나 없는 경우 무시
+      }
+    }
+
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
     double adjustedAngle = compassValue - mapBearing;
@@ -1192,6 +1202,8 @@ class NaverMapViewController extends GetxController {
         ),
         size: const Size(25, 25),
         context: navigatorKey.currentContext!);
+
+    // 새 마커 생성 및 추가
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(current_latitude, current_longitude),
