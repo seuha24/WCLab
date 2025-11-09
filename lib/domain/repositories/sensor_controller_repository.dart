@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 센서 컨트롤러의 역할(추상화)
 abstract class SensorController {

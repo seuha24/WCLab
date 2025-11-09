@@ -3,6 +3,8 @@ library;
 
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
 
 // Firebase Firestore 제거 - BLE 직접 연결
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +24,7 @@ import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/data/services/auth_service.dart';
+import 'package:safelight/core/utils/weighted_average_filter.dart';
 
 final DI = GetIt.instance;
 
@@ -52,6 +55,10 @@ const String USECASE_GET_BLUETOOTH_PERMISSION =
     'USECASE_GET_BLUETOOTH_PERMISSION';
 const String USECASE_GET_LOCATION_PERMISSION =
     'USECASE_GET_LOCATION_PERMISSION';
+const String PDR_WEIGTHED_AVERAGE_FILTER_X = 
+    'PDR_WEIGTHED_AVERAGE_FILTER_X';
+const String PDR_WEIGTHED_AVERAGE_FILTER_Y = 
+    'PDR_WEIGTHED_AVERAGE_FILTER_Y';
 
 Future<void> init() async {
   // bloc injection area

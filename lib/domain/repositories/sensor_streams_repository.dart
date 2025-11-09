@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// 센서 데이터 이벤트 허브의 역할을 추상화
 abstract class SensorStreams {

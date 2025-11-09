@@ -1,6 +1,7 @@
-library;
+library repository;
 
 import 'dart:math' as math;
+import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -12,6 +13,7 @@ import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:safelight/core/utils/weighted_average_filter.dart';
 
 part '../domain/repositories/auth_repository.dart';

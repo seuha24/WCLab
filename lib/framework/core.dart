@@ -1,5 +1,7 @@
 library;
 
+import 'dart:math' as math;
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';

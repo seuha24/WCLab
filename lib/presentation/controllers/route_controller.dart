@@ -31,7 +31,7 @@ class RouteController {
       startLongitude: startLongitude,
       endLatitude: endLatitude,
       endLongitude: endLongitude,
-      choose_route: chooseRoute,
+      chooseRoute: chooseRoute,
     );
   }
 

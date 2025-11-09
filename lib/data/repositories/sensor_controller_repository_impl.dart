@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 class SensorControllerImpl implements SensorController {
   final List<StreamSubscription<dynamic>> _streamSubscriptions = [];
