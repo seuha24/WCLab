@@ -23,8 +23,8 @@ class MapOverlayController {
   /// 현재 위치 마커 Getter
   NMarker? get currentLocationMarker => _currentLocationMarker;
 
-  /// addOverlays: 경로 오버레이를 지도에 추가
-  void addOverlays(List<LatLng> paths) {
+  /// addPathOverlays: 경로 오버레이를 지도에 추가
+  void addPathOverlays(List<LatLng> paths) {
     if (mapController == null) return;
     final overlays = {
       NMultipartPathOverlay(
@@ -46,93 +46,91 @@ class MapOverlayController {
   // /// map_overlay_controller.dart로
   // /// addBranchMarkers: 지도에 분기(체크포인트) 마커들을 추가합니다.
   // /// 출발지: 파란색, 목적지: 빨간색, 경유지: 회색, 일반: 초록색으로 표시합니다.
-Future<void> addBranchMarkers() async {
-  if (mapController == null) {
-    debugPrint("🚫 mapController가 없습니다. 마커 추가 불가");
-    return;
+  Future<void> addBranchMarkers() async {
+    if (mapController == null) {
+      debugPrint("mapController가 없습니다. 마커 추가 불가");
+      return;
+    }
+
+    final context = navigatorKey.currentContext!;
+    final markersCache = <String, NMarker>{};
+    final markersSet = <NAddableOverlay>{};
+
+    // 1️⃣ 타입별 색상 정의
+    final Map<BranchType, Color> branchColors = {
+      BranchType.start: Colors.blue,
+      BranchType.destination: Colors.red,
+      BranchType.waypoint: Colors.grey,
+      BranchType.normal: Colors.green,
+    };
+
+    // 2️⃣ 아이콘 생성 (1회만)
+    final iconMap = await _createBranchMarkerIcons(branchColors, context);
+
+    // 3️⃣ 분기점 반복 처리
+    for (int i = 0; i < routeController.branchinfo.length; i++) {
+      final branch = routeController.branchinfo[i];
+      final id = 'checkPoint_$i';
+
+      // 타입 판정
+      final type = _getBranchType(
+        i,
+        routeController.branchinfo.length,
+        branch,
+      );
+
+      // 중복 방지
+      if (markersCache.containsKey(id)) continue;
+
+      final marker = NMarker(
+        id: id,
+        position: NLatLng(branch.point.latitude, branch.point.longitude),
+        icon: iconMap[type]!,
+      );
+
+      markersCache[id] = marker;
+    }
+
+    markersSet.addAll(markersCache.values);
+    await mapController!.addOverlayAll(markersSet);
+
+    debugPrint("📍 addBranchMarkers() 완료됨 — ${markersSet.length}개 추가됨");
   }
 
-  final context = navigatorKey.currentContext!;
-  final markersCache = <String, NMarker>{};
-  final markersSet = <NAddableOverlay>{};
 
-  // 1️⃣ 타입별 색상 정의
-  final Map<BranchType, Color> branchColors = {
-    BranchType.start: Colors.blue,
-    BranchType.destination: Colors.red,
-    BranchType.waypoint: Colors.grey,
-    BranchType.normal: Colors.green,
-  };
+  /// _createBranchMarkerIcons: 분기점 타입별 아이콘 생성
+  Future<Map<BranchType, NOverlayImage>> _createBranchMarkerIcons(
+    Map<BranchType, Color> branchColors,
+    BuildContext context,
+  ) async {
+    const double branchIconSize = 15;
+    final Map<BranchType, NOverlayImage> icons = {};
 
-  // 2️⃣ 아이콘 생성 (1회만)
-  final iconMap = await _createMarkerIcons(branchColors, context);
+    for (final entry in branchColors.entries) {
+      icons[entry.key] = await NOverlayImage.fromWidget(
+        widget: Icon(Icons.circle, color: entry.value, size: branchIconSize),
+        size: const Size(branchIconSize, branchIconSize),
+        context: context,
+      );
+    }
 
-  // 3️⃣ 분기점 반복 처리
-  for (int i = 0; i < routeController.branchinfo.length; i++) {
-    final branch = routeController.branchinfo[i];
-    final id = 'checkPoint_$i';
-
-    // 타입 판정
-    final type = _getBranchType(
-      i,
-      routeController.branchinfo.length,
-      branch,
-    );
-
-    // 중복 방지
-    if (markersCache.containsKey(id)) continue;
-
-    final marker = NMarker(
-      id: id,
-      position: NLatLng(branch.point.latitude, branch.point.longitude),
-      icon: iconMap[type]!,
-    );
-
-    markersCache[id] = marker;
+    return icons;
   }
 
-  markersSet.addAll(markersCache.values);
-  await mapController!.addOverlayAll(markersSet);
-
-  debugPrint("📍 addBranchMarkers() 완료됨 — ${markersSet.length}개 추가됨");
-}
-
-
-
-Future<Map<BranchType, NOverlayImage>> _createMarkerIcons(
-  Map<BranchType, Color> branchColors,
-  BuildContext context,
-) async {
-  const double iconSize = 15;
-  final Map<BranchType, NOverlayImage> icons = {};
-
-  for (final entry in branchColors.entries) {
-    icons[entry.key] = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: entry.value, size: iconSize),
-      size: const Size(iconSize, iconSize),
-      context: context,
-    );
+  /// _getBranchType: 분기점의 타입을 판정하는 헬퍼 메서드
+  BranchType _getBranchType(
+    int index,
+    int totalLength,
+    BranchInfo branch,
+  ) {
+    if (index == 0) return BranchType.start;
+    if (index == totalLength - 1) return BranchType.destination;
+    if (branch.waypoint) return BranchType.waypoint;
+    return BranchType.normal;
   }
 
-  return icons;
-}
 
-
-BranchType _getBranchType(
-  int index,
-  int totalLength,
-  BranchInfo branch,
-) {
-  if (index == 0) return BranchType.start;
-  if (index == totalLength - 1) return BranchType.destination;
-  if (branch.waypoint) return BranchType.waypoint;
-  return BranchType.normal;
-}
-
-
-
-
-
+  MapControlMode _previousMapmode = MapControlMode.idle;
 
   /// updateCurrentLocationMarker: 현재 위치 마커 업데이트
   Future<void> updateCurrentLocationMarker(
@@ -143,51 +141,94 @@ BranchType _getBranchType(
     MapControlMode mapMode,
   ) async {
     if (mapController == null) return;
-
-    if (_currentLocationMarker == null) {
-     
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
-
-    // 기기 나침반 각도와 지도 각도를 보정
-    double adjustedAngle = compassValue - mapBearing;
-    if (adjustedAngle < 0) adjustedAngle += 360;
-
-    final IconData icon = mapMode == MapControlMode.idle ||
-            mapMode == MapControlMode.off
-        ? Icons.circle
-        : Icons.navigation;
-
-    final Color markerColor = isGps ? Colors.blue : Colors.red;
     
-
-    final iconImage = await NOverlayImage.fromWidget(
-      widget: Transform.rotate(
-        angle: adjustedAngle * (math.pi / 180),
-        child: Icon(icon, color: markerColor, size: 25),
-      ),
-      size: const Size(25, 25),
-      context: navigatorKey.currentContext!,
+    final icon = await _createLocationMarkerIcon(
+      compassValue: compassValue,
+      mapBearing: mapBearing,
+      isGps: isGps,
+      mapMode: mapMode,
     );
 
+    if (_currentLocationMarker == null) {
+      
+
+    // 마커가 없으면 새로 생성
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(currentLatitude, currentLongitude),
-      icon: iconImage,
+      icon: icon,
     );
-
+    // 지도에 마커 추가
     mapController!.addOverlay(_currentLocationMarker!);
-  }
-  else {
-    // 이미 존재하면 위치만 갱신
-    _currentLocationMarker!.setPosition(
-      NLatLng(currentLatitude, currentLongitude),
-    );
-
+    }
+    else {
+      // 마커가 이미 존재하면 아이콘 갱신
+      _currentLocationMarker!.setIcon(icon);
+      // 이미 존재하면 위치만 갱신
+      _currentLocationMarker!.setPosition(
+        NLatLng(currentLatitude, currentLongitude),
+      );
+      
 
     }
+    _previousMapmode = mapMode;
   }
 
+  
+  /// 아이콘 생성 로직 (형태/색상 분리)
+  Future<NOverlayImage> _createLocationMarkerIcon({
+    required double compassValue,
+    required double mapBearing,
+    required bool isGps,
+    required MapControlMode mapMode,
+  }) async {
+    // 기기 나침반 각도와 지도 각도를 보정
+    final double adjustedAngle = _adjustAngleForIconBearing(compassValue, mapBearing);
+    // mapMode에 따라 아이콘 선택
+    final iconImage = _selectIconByMapMode(mapMode);
+    // 센서 기반 아이콘 색상 선택
+    final color = _selectColorBySource(isGps);
+
+    const locationMarkerSize = 25.0;
+
+    
+    return NOverlayImage.fromWidget(
+      widget: Transform.rotate(
+        angle: Calculators.deg2rad(adjustedAngle),
+        child: Icon(iconImage, color: color, size: locationMarkerSize),
+      ),
+      size: const Size(locationMarkerSize, locationMarkerSize),
+      context: navigatorKey.currentContext!,
+    );
+  }
+
+  /// 아이콘 각도 보정 로직 (나침반 값과 지도 방향값 기반)
+  /// 단위는 도입니다.
+  double _adjustAngleForIconBearing(double compassValue, double mapBearing) {
+    double adjustedAngle = compassValue - mapBearing;
+    if (adjustedAngle < 0) adjustedAngle += 360;
+    return adjustedAngle;
+  }
+
+  /// 아이콘 이미지 선택 로직 (지도 모드 기반)
+  IconData _selectIconByMapMode(MapControlMode mapMode){
+    final IconData iconImage = mapMode == MapControlMode.idle ||
+            mapMode == MapControlMode.off
+        ? Icons.circle
+        : Icons.navigation;
+    
+    return iconImage;
+  }
+
+  /// 색상 선택 (GPS 기반)
+  Color _selectColorBySource(bool isGps) {
+    return isGps ? Colors.blue : Colors.red;
+  }
+
+
+  /// clearOverlays: 지도에서 모든 오버레이 제거
   void clearOverlays() {
     if (mapController == null) return;
     mapController!.clearOverlays();

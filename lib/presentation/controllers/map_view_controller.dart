@@ -351,7 +351,7 @@ class NaverMapViewController extends GetxController {
     routeController.resetDeviationYaw(targetIndex, compass);
     // 7️⃣ 지도 오버레이 추가
     overlayController
-      ..addOverlays(routeController.paths)
+      ..addPathOverlays(routeController.paths)
       ..addBranchMarkers();
     // 8️⃣ 네비게이션 시작
     startNavigationTimer();
@@ -761,14 +761,14 @@ void checkBoundary() {
     mapMode.value = MapControlMode.values[nextIndex];
     debugPrint("모드 전환: ${mapMode.value}");
 
-    // 모드 변경 시 즉시 마커 모양(circle ↔ navigation) 업데이트
-    await overlayController.updateCurrentLocationMarker(
-      current_latitude.value,
-      current_longitude.value,
-      compassValue.value,
-      isGps,
-      mapMode.value,
-    );
+    // // 모드 변경 시 즉시 마커 모양(circle ↔ navigation) 업데이트
+    // await overlayController.updateCurrentLocationMarker(
+    //   current_latitude.value,
+    //   current_longitude.value,
+    //   compassValue.value,
+    //   isGps,
+    //   mapMode.value,
+    // );
   }
 
   /// updateMapByMode: 현재 지도 모드에 따라 지도와 마커를 업데이트합니다.
