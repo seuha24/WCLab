@@ -11,8 +11,6 @@ class MapOverlayController {
     required this.routeController,
   });
 
-
-
   RouteController routeController;
   /// 네이버 지도 컨트롤러 (지도 조작 및 오버레이 추가/삭제에 사용)
   NaverMapController? mapController;
@@ -130,7 +128,7 @@ class MapOverlayController {
   }
 
 
-  MapControlMode _previousMapmode = MapControlMode.idle;
+ 
 
   /// updateCurrentLocationMarker: 현재 위치 마커 업데이트
   Future<void> updateCurrentLocationMarker(
@@ -144,6 +142,7 @@ class MapOverlayController {
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
     
+    // 아이콘 속성 생성
     final icon = await _createLocationMarkerIcon(
       compassValue: compassValue,
       mapBearing: mapBearing,
@@ -152,14 +151,14 @@ class MapOverlayController {
     );
 
     if (_currentLocationMarker == null) {
-      
-
+    
     // 마커가 없으면 새로 생성
     _currentLocationMarker = NMarker(
       id: 'current_location',
       position: NLatLng(currentLatitude, currentLongitude),
       icon: icon,
     );
+
     // 지도에 마커 추가
     mapController!.addOverlay(_currentLocationMarker!);
     }
@@ -170,10 +169,8 @@ class MapOverlayController {
       _currentLocationMarker!.setPosition(
         NLatLng(currentLatitude, currentLongitude),
       );
-      
-
     }
-    _previousMapmode = mapMode;
+    debugPrint("현재 위치 마커가 업데이트되었습니다.");
   }
 
   
@@ -187,11 +184,11 @@ class MapOverlayController {
     // 기기 나침반 각도와 지도 각도를 보정
     final double adjustedAngle = _adjustAngleForIconBearing(compassValue, mapBearing);
     // mapMode에 따라 아이콘 선택
-    final iconImage = _selectIconByMapMode(mapMode);
+    final IconData iconImage = _selectIconByMapMode(mapMode);
     // 센서 기반 아이콘 색상 선택
-    final color = _selectColorBySource(isGps);
-
-    const locationMarkerSize = 25.0;
+    final Color color = _selectColorBySource(isGps);
+    // 아이콘 크기 정의
+    const double locationMarkerSize = 25.0;
 
     
     return NOverlayImage.fromWidget(
