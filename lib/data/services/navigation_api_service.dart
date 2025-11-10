@@ -219,6 +219,7 @@ class NavigationApiService {
             0.0, // `bearingToPoint`는 항상 0.0으로 설정
             int.parse(feature['properties']['facilityType']) == 15,
             false, // `branch`는 기본적으로 false로 설정
+            false, // `waypoint`는 기본적으로 false로 설정
           ));
         }
       }

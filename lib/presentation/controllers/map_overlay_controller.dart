@@ -1,5 +1,8 @@
 part of '../../framework/controller.dart';
 
+
+enum BranchType { start, waypoint, normal, destination }
+
 /// 지도 위 오버레이(경로, 마커 등)를 관리하는 컨트롤러
 class MapOverlayController {
   /// 생성자: NaverMapController를 주입받음
@@ -40,36 +43,96 @@ class MapOverlayController {
     mapController!.addOverlayAll(overlays);
   }
 
-  /// addBranchMarkers: 분기점(체크포인트) 마커를 지도에 추가
-  Future<void> addBranchMarkers(
-    bool isWaypoint,
-  ) async {
-    if (routeController.branchinfo.isEmpty || routeController.paths.isEmpty || mapController == null) {
-      debugPrint("분기점 마커 추가 불가: 데이터 부족 또는 mapController 없음");
-      return;
-    }
-    final Color markerColor = isWaypoint? Colors.grey: Colors.green;
+  // /// map_overlay_controller.dart로
+  // /// addBranchMarkers: 지도에 분기(체크포인트) 마커들을 추가합니다.
+  // /// 출발지: 파란색, 목적지: 빨간색, 경유지: 회색, 일반: 초록색으로 표시합니다.
+Future<void> addBranchMarkers() async {
+  if (mapController == null) {
+    debugPrint("🚫 mapController가 없습니다. 마커 추가 불가");
+    return;
+  }
 
-    Set<NAddableOverlay> markers = {};
-    final iconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: markerColor, size: 15),
-      size: const Size(15, 15),
-      context: navigatorKey.currentContext!,
+  final context = navigatorKey.currentContext!;
+  final markersCache = <String, NMarker>{};
+  final markersSet = <NAddableOverlay>{};
+
+  // 1️⃣ 타입별 색상 정의
+  final Map<BranchType, Color> branchColors = {
+    BranchType.start: Colors.blue,
+    BranchType.destination: Colors.red,
+    BranchType.waypoint: Colors.grey,
+    BranchType.normal: Colors.green,
+  };
+
+  // 2️⃣ 아이콘 생성 (1회만)
+  final iconMap = await _createMarkerIcons(branchColors, context);
+
+  // 3️⃣ 분기점 반복 처리
+  for (int i = 0; i < routeController.branchinfo.length; i++) {
+    final branch = routeController.branchinfo[i];
+    final id = 'checkPoint_$i';
+
+    // 타입 판정
+    final type = _getBranchType(
+      i,
+      routeController.branchinfo.length,
+      branch,
     );
 
-    for (int i = 0; i < routeController.branchinfo.length; i++) {
-      final branch = routeController.branchinfo[i];
-      final marker = NMarker(
-        id: 'checkPoint_$i',
-        position: NLatLng(branch.point.latitude, branch.point.longitude),
-        icon: iconImage,
-      );
-      markers.add(marker);
-    }
+    // 중복 방지
+    if (markersCache.containsKey(id)) continue;
 
-    mapController!.addOverlayAll(markers);
-    debugPrint("📍 addBranchMarkers() 완료됨");
+    final marker = NMarker(
+      id: id,
+      position: NLatLng(branch.point.latitude, branch.point.longitude),
+      icon: iconMap[type]!,
+    );
+
+    markersCache[id] = marker;
   }
+
+  markersSet.addAll(markersCache.values);
+  await mapController!.addOverlayAll(markersSet);
+
+  debugPrint("📍 addBranchMarkers() 완료됨 — ${markersSet.length}개 추가됨");
+}
+
+
+
+Future<Map<BranchType, NOverlayImage>> _createMarkerIcons(
+  Map<BranchType, Color> branchColors,
+  BuildContext context,
+) async {
+  const double iconSize = 15;
+  final Map<BranchType, NOverlayImage> icons = {};
+
+  for (final entry in branchColors.entries) {
+    icons[entry.key] = await NOverlayImage.fromWidget(
+      widget: Icon(Icons.circle, color: entry.value, size: iconSize),
+      size: const Size(iconSize, iconSize),
+      context: context,
+    );
+  }
+
+  return icons;
+}
+
+
+BranchType _getBranchType(
+  int index,
+  int totalLength,
+  BranchInfo branch,
+) {
+  if (index == 0) return BranchType.start;
+  if (index == totalLength - 1) return BranchType.destination;
+  if (branch.waypoint) return BranchType.waypoint;
+  return BranchType.normal;
+}
+
+
+
+
+
 
   /// updateCurrentLocationMarker: 현재 위치 마커 업데이트
   Future<void> updateCurrentLocationMarker(

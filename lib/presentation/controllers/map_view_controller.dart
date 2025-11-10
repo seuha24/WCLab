@@ -119,9 +119,8 @@ class NaverMapViewController extends GetxController {
 
   /// 위치 업데이트 타이머
   Timer? _locationUpdateTimer;
+  Timer? navigationTimer;
 
-  /// 테스트용 마커 (분기/체크포인트 디버깅용)
-  NMarker? _testMarker;
 
   /// 나침반 데이터 수신 완료 여부를 판단하기 위한 Completer
   Completer<void> compassReady = Completer<void>();
@@ -333,12 +332,17 @@ class NaverMapViewController extends GetxController {
 
     // 2️⃣ 파싱 및 상태 반영
     routeController.applyParsePathData(response);
-    // 3️⃣ 로깅 (waypoint 유무에 따라 다른 로그)
-    if (waypoints.isEmpty) {
-      routeController.logLoadPathData();
-    } else {
-      routeController.logLoadPathDataWithWayPoint();
+
+    // 경유지 정보가 있으면 branchInfo에 waypoint 플래그 설정
+    if(waypoints.isNotEmpty){
+      routeController.checkWaypointsInBranchInfo(waypoints);
     }
+    
+    // 3️⃣ 로깅 (waypoint 유무에 따라 다른 로그)
+    waypoints.isEmpty
+      ? routeController.logLoadPathData()
+      : routeController.logLoadPathDataWithWayPoint();
+
     // 4️⃣ 분기점 방향 계산
     routeController.calculatePathBearing();
     // 5️⃣ 인덱스 초기화
@@ -348,7 +352,7 @@ class NaverMapViewController extends GetxController {
     // 7️⃣ 지도 오버레이 추가
     overlayController
       ..addOverlays(routeController.paths)
-      ..addBranchMarkers(waypoints.isNotEmpty);
+      ..addBranchMarkers();
     // 8️⃣ 네비게이션 시작
     startNavigationTimer();
 
@@ -399,90 +403,6 @@ class NaverMapViewController extends GetxController {
   }
 
 
-  /// addBranchMarkers: 지도에 분기(체크포인트) 마커들을 추가합니다.
-  /// 출발지: 파란색, 목적지: 빨간색, 경유지: 회색, 일반: 초록색으로 표시합니다.
-  void addBranchMarkers() async {
-    if (mapController == null) return;
-    Set<NAddableOverlay> markers = {};
-
-    // 파란색 마커 이미지 (출발지 분기점)
-    final blueIconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: Colors.blue, size: 15),
-      size: const Size(15, 15),
-      context: navigatorKey.currentContext!,
-    );
-
-    // 빨간색 마커 이미지 (목적지 분기점)
-    final redIconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: Colors.red, size: 15),
-      size: const Size(15, 15),
-      context: navigatorKey.currentContext!,
-    );
-
-    // 회색 마커 이미지 (경유지 분기점)
-    final greyIconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: Colors.grey, size: 15),
-      size: const Size(15, 15),
-      context: navigatorKey.currentContext!,
-    );
-
-    // 초록색 마커 이미지 (일반 분기점)
-    final greenIconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: Colors.green, size: 15),
-      size: const Size(15, 15),
-      context: navigatorKey.currentContext!,
-    );
-
-    for (int i = 0; i < routeController.branchinfo.length; i++) {
-      var branch = routeController.branchinfo[i];
-      NOverlayImage iconToUse;
-
-      // 출발지 분기점 확인 (첫 번째 분기점)
-      if (i == 0) {
-        iconToUse = blueIconImage;
-        debugPrint('출발지 분기점: ${branch.description}');
-      }
-      // 목적지 분기점 확인 (마지막 분기점)
-      else if (i == routeController.branchinfo.length - 1) {
-        iconToUse = redIconImage;
-        debugPrint('목적지 분기점: ${branch.description}');
-      }
-      // 경유지 분기점 확인
-      else {
-        bool isWaypoint = false;
-        for (var waypoint in currentWaypoints) {
-          // 경유지와 분기점 사이의 거리 계산 (미터 단위)
-          double distance = Calculators.calculateDistance(
-            branch.point.latitude,
-            branch.point.longitude,
-            waypoint.latitude,
-            waypoint.longitude,
-          );
-          // 경유지로부터 20m 이내의 분기점은 경유지 마커로 표시
-          if (distance < 0.02) {
-            // 20m = 0.02km
-            isWaypoint = true;
-            debugPrint(
-                '경유지 분기점 발견: ${branch.description}, 거리: ${distance * 1000}m');
-            break;
-          }
-        }
-
-        // 경유지면 회색, 아니면 일반 분기점은 초록색
-        iconToUse = isWaypoint ? greyIconImage : greenIconImage;
-      }
-
-      // 마커 생성 및 추가
-      _testMarker = NMarker(
-        id: 'checkPoint_$i',
-        position: NLatLng(branch.point.latitude, branch.point.longitude),
-        icon: iconToUse,
-      );
-      markers.add(_testMarker!);
-    }
-    mapController!.addOverlayAll(markers);
-  }
-
 
   void _initSensorStreams(){
     _compassSub = sensorStreams.compass.listen((headingVal) {
@@ -500,9 +420,9 @@ class NaverMapViewController extends GetxController {
     });
     
   }
+  
   /// checkBoundary: 현재 위치가 경로(분기)로부터 얼마나 벗어났는지 확인합니다.
   /// 경로 이탈, 재경로 탐색 등의 조건을 판단합니다.
-  
 void checkBoundary() {
   final currentWindow = indexController.getCurrentWindowRecords(
     routeController.branchinfo,
@@ -606,7 +526,7 @@ void checkBoundary() {
       debugPrint("GPS 사용 중이므로 수동 위치 설정 차단됨");
     }
   }
-
+  ///
   /// handleStartLocationSelection: 시작 위치를 설정하고, 목적지가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
     selectedStartLocation.value = newStart;
@@ -655,7 +575,7 @@ void checkBoundary() {
     }
   }
 
-  Timer? navigationTimer;
+  
 
   /// startNavigationTimer: 경로 안내를 위한 타이머를 시작합니다.
   void startNavigationTimer() {

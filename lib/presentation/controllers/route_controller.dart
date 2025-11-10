@@ -87,6 +87,23 @@ class RouteController {
     }
   }
 
+  void checkWaypointsInBranchInfo(List<LatLng> waypoints){
+    for (final branch in branchinfo) {
+      for (final waypoint in waypoints) {
+        final distance = Calculators.calculateDistance(
+          branch.point.latitude,
+          branch.point.longitude,
+          waypoint.latitude,
+          waypoint.longitude,
+        );
+        if (distance < 20.0) { // 20m 이내면 경유지로 판단
+          branch.waypoint = true;
+          break;
+        }
+      }
+    }
+  }
+
   void resetDeviationYaw(int targetIndex, double compassValue) {
     pdrCalculator.setDeviationYaw(
       Calculators.deg2rad(
