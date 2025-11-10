@@ -136,23 +136,16 @@ BranchType _getBranchType(
 
   /// updateCurrentLocationMarker: 현재 위치 마커 업데이트
   Future<void> updateCurrentLocationMarker(
-    double current_latitude,
-    double current_longitude,
+    double currentLatitude,
+    double currentLongitude,
     double compassValue,
     bool isGps,
     MapControlMode mapMode,
   ) async {
     if (mapController == null) return;
 
-    // 기존 마커가 있으면 먼저 삭제 (중복 마커 방지)
-    if (_currentLocationMarker != null) {
-      try {
-        await mapController!.deleteOverlay(_currentLocationMarker!.info);
-      } catch (e) {
-        // 마커가 이미 삭제되었거나 없는 경우 무시
-      }
-    }
-
+    if (_currentLocationMarker == null) {
+     
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
 
@@ -179,11 +172,20 @@ BranchType _getBranchType(
 
     _currentLocationMarker = NMarker(
       id: 'current_location',
-      position: NLatLng(current_latitude, current_longitude),
+      position: NLatLng(currentLatitude, currentLongitude),
       icon: iconImage,
     );
 
     mapController!.addOverlay(_currentLocationMarker!);
+  }
+  else {
+    // 이미 존재하면 위치만 갱신
+    _currentLocationMarker!.setPosition(
+      NLatLng(currentLatitude, currentLongitude),
+    );
+
+
+    }
   }
 
   void clearOverlays() {

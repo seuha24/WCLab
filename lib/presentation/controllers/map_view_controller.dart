@@ -281,12 +281,12 @@ class NaverMapViewController extends GetxController {
       );
 
       // GPS 정확도에 따라 출발지 안내 멘트 유/무
-      if (!ShowLowGpsAlertOnce && position.accuracy >= 15) {
+      if (!ShowLowGpsAlertOnce && position.accuracy >= 1) {
         ShowLowGpsAlertOnce = true; // 중복 표시 방지 플래그
         showLowAccuracyDialog.value = true; // 알림 다이얼로그 표시 신호
       }
 
-      if (position.accuracy >= 15) {
+      if (position.accuracy >= 1) {
         isGps = false; // GPS 신호 불량
         pdrCalculator.setVelocityValue(_filteringX.calculateWeightedAverage(), _filteringY.calculateWeightedAverage());
         current_latitude.value = pdrCalculator.newlatitude; // 센서 계산 위도
