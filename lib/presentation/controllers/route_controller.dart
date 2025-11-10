@@ -11,6 +11,9 @@ class RouteController {
   /// 분기(체크포인트) 정보를 담은 리스트
   List<BranchInfo> branchinfo = [];
 
+  // List<LatLng> waypoints = [];
+
+
   
   RouteController({
     required this.mapController,
@@ -35,6 +38,25 @@ class RouteController {
     );
   }
 
+    // 경유지를 포함한 경로 API 호출 (public)
+  Future<dynamic> loadPathDataWithWaypoints(
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+    List<LatLng> waypoints,
+    String chooseRoute,
+  ) async {
+    return await apiService.fetchPathDataWithWaypoints(
+      startLatitude: startLatitude,
+      startLongitude: startLongitude,
+      endLatitude: endLatitude,
+      endLongitude: endLongitude,
+      chooseRoute: chooseRoute,
+      waypoints: waypoints,
+    );
+  }
+  
   /// 응답 데이터를 파싱하고 상태에 반영
   void applyParsePathData(dynamic responseData) {
     final parsed = apiService.parsePathData(responseData);
@@ -46,7 +68,10 @@ class RouteController {
     debugPrint('paths: $paths');
     debugPrint('branchInfoList: $branchinfo');
   }
-
+  void logLoadPathDataWithWayPoint(){
+    debugPrint('paths: $paths');
+    debugPrint('branchInfoList: $branchinfo');
+  }
   void calculatePathBearing() {
     if (branchinfo.isEmpty) {
       debugPrint('분기점 정보가 없습니다.');

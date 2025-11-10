@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 
 

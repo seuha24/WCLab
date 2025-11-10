@@ -1,4 +1,4 @@
-part of repository;
+part of '../../framework/repository.dart';
 
 /// PositionCalculator의 실제 구현체
 class PdrCalculatorImpl implements PdrCalculator{

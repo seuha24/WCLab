@@ -2,21 +2,17 @@ part of '../../framework/controller.dart';
 
 /// 지도 위 오버레이(경로, 마커 등)를 관리하는 컨트롤러
 class MapOverlayController {
-  /// 생성자: NaverMapController와 지도 모드 상태를 주입받음
+  /// 생성자: NaverMapController를 주입받음
   MapOverlayController({
     required this.mapController,
-    required this.mapMode,
     required this.routeController,
   });
 
 
-  
+
   RouteController routeController;
   /// 네이버 지도 컨트롤러 (지도 조작 및 오버레이 추가/삭제에 사용)
   NaverMapController? mapController;
-
-  /// 지도 모드 상태 (idle / off / on1 / on2)
-  final ValueNotifier<MapControlMode> mapMode;
 
   /// 현재 위치 마커
   NMarker? _currentLocationMarker;
@@ -45,15 +41,18 @@ class MapOverlayController {
   }
 
   /// addBranchMarkers: 분기점(체크포인트) 마커를 지도에 추가
-  Future<void> addBranchMarkers() async {
+  Future<void> addBranchMarkers(
+    bool isWaypoint,
+  ) async {
     if (routeController.branchinfo.isEmpty || routeController.paths.isEmpty || mapController == null) {
       debugPrint("분기점 마커 추가 불가: 데이터 부족 또는 mapController 없음");
       return;
     }
+    final Color markerColor = isWaypoint? Colors.grey: Colors.green;
 
     Set<NAddableOverlay> markers = {};
     final iconImage = await NOverlayImage.fromWidget(
-      widget: Icon(Icons.circle, color: Colors.green, size: 15),
+      widget: Icon(Icons.circle, color: markerColor, size: 15),
       size: const Size(15, 15),
       context: navigatorKey.currentContext!,
     );
@@ -78,8 +77,18 @@ class MapOverlayController {
     double current_longitude,
     double compassValue,
     bool isGps,
+    MapControlMode mapMode,
   ) async {
     if (mapController == null) return;
+
+    // 기존 마커가 있으면 먼저 삭제 (중복 마커 방지)
+    if (_currentLocationMarker != null) {
+      try {
+        await mapController!.deleteOverlay(_currentLocationMarker!.info);
+      } catch (e) {
+        // 마커가 이미 삭제되었거나 없는 경우 무시
+      }
+    }
 
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
@@ -88,12 +97,13 @@ class MapOverlayController {
     double adjustedAngle = compassValue - mapBearing;
     if (adjustedAngle < 0) adjustedAngle += 360;
 
-    final IconData icon = mapMode.value == MapControlMode.idle ||
-            mapMode.value == MapControlMode.off
+    final IconData icon = mapMode == MapControlMode.idle ||
+            mapMode == MapControlMode.off
         ? Icons.circle
         : Icons.navigation;
 
     final Color markerColor = isGps ? Colors.blue : Colors.red;
+    
 
     final iconImage = await NOverlayImage.fromWidget(
       widget: Transform.rotate(

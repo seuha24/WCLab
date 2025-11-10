@@ -249,7 +249,6 @@ Future<void> init() async {
   DI.registerLazySingleton<MapOverlayController>(
       () => MapOverlayController(
         mapController: null, // 초기에는 null (onMapReady에서 주입)
-        mapMode: ValueNotifier(MapControlMode.off),
         routeController: DI<RouteController>(),
       ),
     );

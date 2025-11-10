@@ -15,81 +15,79 @@ class NaverMapView extends GetView<NaverMapViewController> {
       backgroundColor: Colors.grey[300],
       body: Stack(
         children: [
-          /// (1)지도 - 항상 표시됨 (재생성 방지)
+          /// (1)지도 또는 로딩 표시
           /// 출입구 등록 패널이 활성화되어도 현위치 동적 마커는 계속 표시됨
           NaverMap(
-            options: NaverMapViewOptions(
-              indoorEnable: true,
-              initialCameraPosition: NCameraPosition(
-                target: NLatLng(
-                  controller.current_latitude.value,
-                  controller.current_longitude.value,
-                ),
-                zoom: 18.5,
-                bearing: controller.compassValue.value,
-                tilt: 0,
-              ),
-              mapType: NMapType.basic,
-              activeLayerGroups: [
-                NLayerGroup.building,
-                NLayerGroup.transit
-              ],
-              locationButtonEnable: false,
-            ),
-            onMapReady: (naverMapController) {
-              controller.mapController = naverMapController;
-              // 맵이 준비되면 항상 초기 카메라 위치 업데이트
-              controller.updateMapPosition(
-                controller.current_latitude.value,
-                controller.current_longitude.value,
-                controller.compassValue.value,
-              );
-            },
-            onCameraChange: (reason, animated) {
-              if (reason == NCameraUpdateReason.gesture) {
-                controller.handleMapDrag();
-              }
-            },
-            onCameraIdle: () async {
-              // 출입구 등록 패널이 활성화되었을 때만 위치 업데이트
-              final slidingController = Get.find<SlidingPanelController>();
-              if (slidingController.activePanelId.value == 'entrance_panel') {
-                if (controller.mapController != null) {
-                  final pos =
-                      await controller.mapController!.getCameraPosition();
-                  final latLng = pos.target;
+                    options: NaverMapViewOptions(
+                      indoorEnable: true,
+                      initialCameraPosition: NCameraPosition(
+                        target: NLatLng(
+                          controller.current_latitude.value,
+                          controller.current_longitude.value,
+                        ),
+                        zoom: 18.5,
+                        bearing: controller.compassValue.value,
+                        tilt: 0,
+                      ),
+                      mapType: NMapType.basic,
+                      activeLayerGroups: [
+                        NLayerGroup.building,
+                        NLayerGroup.transit
+                      ],
+                      locationButtonEnable: false,
+                    ),
+                    onMapReady: (naverMapController) {
+                      controller.mapController = naverMapController;
+                      controller.routeController.mapController = naverMapController;
+                      controller.overlayController.mapController = naverMapController;
+                      // 맵이 준비되면 항상 초기 카메라 위치 업데이트
+                      controller.updateMapPosition(
+                        controller.current_latitude.value,
+                        controller.current_longitude.value,
+                        controller.compassValue.value,
+                      );
+                    },
+                    onCameraChange: (reason, animated) {
+                      if (reason == NCameraUpdateReason.gesture) {
+                        controller.handleMapDrag();
+                      }
+                    },
+                    onCameraIdle: () async {
+                      // 출입구 등록 패널이 활성화되었을 때만 위치 업데이트
+                      final slidingController =
+                          Get.find<SlidingPanelController>();
+                      if (slidingController.activePanelId.value ==
+                          'entrance_panel') {
+                        if (controller.mapController != null) {
+                          final pos = await controller.mapController!
+                              .getCameraPosition();
+                          final latLng = pos.target;
 
-                  // 출입구 등록 패널의 bloc에 직접 AddressUpdated 이벤트 전송
-                  try {
-                    final entranceBloc = Get.find<EntranceRegistrationBloc>();
-                    if (!entranceBloc.isClosed) {
-                      entranceBloc.add(AddressUpdated(latLng));
-                    }
-                  } catch (e) {
-                    // bloc을 찾을 수 없는 경우 무시 (아직 초기화되지 않았을 수 있음)
-                    debugPrint('EntranceRegistrationBloc not found: $e');
-                  }
-                }
-              }
+                          // 출입구 등록 패널의 bloc에 직접 AddressUpdated 이벤트 전송
+                          try {
+                            final entranceBloc =
+                                Get.find<EntranceRegistrationBloc>();
+                            if (!entranceBloc.isClosed) {
+                              entranceBloc.add(AddressUpdated(latLng));
+                            }
+                          } catch (e) {
+                            // bloc을 찾을 수 없는 경우 무시 (아직 초기화되지 않았을 수 있음)
+                            debugPrint(
+                                'EntranceRegistrationBloc not found: $e');
+                          }
+                        }
+                      }
 
-              // 출입구 등록 패널이 활성화되어도 현위치 마커는 계속 업데이트되어야 함
-              // 센서 데이터가 계속 업데이트되므로 현위치 마커도 자동으로 업데이트됨
-            },
-            onMapTapped: (NPoint point, NLatLng latLng) {
-              int meters = (controller.remain_distance.value * 1000).round();
-              controller.speakText('다음 안내까지 ${meters}미터 남았습니다.');
-            },
-          ),
-
-          /// (2)로딩 인디케이터 - 조건부 표시
-          Obx(() {
-            if (controller.isLoading.value) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            return SizedBox.shrink();
-          }),
+                      // 출입구 등록 패널이 활성화되어도 현위치 마커는 계속 업데이트되어야 함
+                      // 센서 데이터가 계속 업데이트되므로 현위치 마커도 자동으로 업데이트됨
+                    },
+                    onMapTapped: (NPoint point, NLatLng latLng) {
+                      int meters =
+                          (controller.remain_distance.value * 1000).round();
+                      controller.speakText('다음 안내까지 ${meters}미터 남았습니다.');
+                    },
+                  ),
+       
 
           /// 화면 중앙 고정 마커
 
@@ -103,8 +101,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
                 // 지도 모드 변경 FAB
                 Obx(() {
                   return FloatingActionButton(
-                    onPressed: () {
-                      controller.toggleMapMode();
+                    onPressed: () async {
+                      await controller.toggleMapMode();
                       HapticFeedback.mediumImpact();
                     },
                     backgroundColor: _getButtonColor(controller),
@@ -363,7 +361,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
     );
   }
 
-  IconData _getButtonIcon(NaverMapViewController controller) {
+  IconData _getButtonIcon(NaverMapViewController controldler) {
     switch (controller.mapMode.value) {
       case MapControlMode.idle:
       case MapControlMode.off:
@@ -577,7 +575,8 @@ class _LocationSearchSheetState extends State<_LocationSearchSheet> {
       });
     }
   }
-
+  
+  //여기에있으면 안됨
   Future<List<PlaceResult>> _placeSearch(String query) async {
     const String apiKey = '93848fcc11798c6f48099dd2e2373263';
     final String apiUrl =
