@@ -1,5 +1,7 @@
 library;
 
+import 'dart:math' as math;
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,7 @@ part '../core/utils/response_parser.dart';
 part '../core/utils/themes.dart';
 part '../core/utils/tts.dart';
 part '../core/utils/validators.dart';
+part '../core/utils/calculators.dart';
 part '../core/usecases/usecase.dart';
 part '../core/errors/exceptions.dart';
 part '../core/errors/failures.dart';

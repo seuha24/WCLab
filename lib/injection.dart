@@ -3,6 +3,8 @@ library;
 
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
 
 // Firebase Firestore 제거 - BLE 직접 연결
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +24,7 @@ import 'package:safelight/framework/repository.dart';
 import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/data/services/auth_service.dart';
+import 'package:safelight/core/utils/weighted_average_filter.dart';
 
 final DI = GetIt.instance;
 
@@ -52,6 +55,10 @@ const String USECASE_GET_BLUETOOTH_PERMISSION =
     'USECASE_GET_BLUETOOTH_PERMISSION';
 const String USECASE_GET_LOCATION_PERMISSION =
     'USECASE_GET_LOCATION_PERMISSION';
+const String PDR_WEIGTHED_AVERAGE_FILTER_X = 
+    'PDR_WEIGTHED_AVERAGE_FILTER_X';
+const String PDR_WEIGTHED_AVERAGE_FILTER_Y = 
+    'PDR_WEIGTHED_AVERAGE_FILTER_Y';
 
 Future<void> init() async {
   // bloc injection area
@@ -205,6 +212,64 @@ Future<void> init() async {
   DI.registerLazySingleton<NavigatorRepository>(
     () => NavigatorRepositoryImpl(navDataSource: DI()),
   );
+
+
+  DI.registerLazySingleton<SensorStreams>(() => SensorStreamsImpl());
+    
+  DI.registerLazySingleton<SensorController>(
+    () => SensorControllerImpl(DI<SensorStreams>()),
+  );
+
+  DI.registerLazySingleton<RouteController>(() => RouteController(
+  mapController: null, // onMapReady에서 주입
+  apiService: DI<NavigationApiService>(),
+  pdrCalculator: DI<PdrCalculator>(),
+  ));
+
+  DI.registerLazySingleton<WeightedAverageFilter>(
+  () => WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]),
+  instanceName: PDR_WEIGTHED_AVERAGE_FILTER_X,
+  );
+  DI.registerLazySingleton<WeightedAverageFilter>(
+  () => WeightedAverageFilter(5, [0.1, 0.2, 0.3, 0.4, 0.5]),
+  instanceName: PDR_WEIGTHED_AVERAGE_FILTER_Y,
+  );
+
+  DI.registerLazySingleton<PdrCalculator>(
+  () => PdrCalculatorImpl(
+      filteringX: DI<WeightedAverageFilter>(instanceName: PDR_WEIGTHED_AVERAGE_FILTER_X),
+      filteringY: DI<WeightedAverageFilter>(instanceName: PDR_WEIGTHED_AVERAGE_FILTER_Y),
+      yawRateAccFilteringValue: 0.3,
+      accFilteringValue: 0.06,
+      initialLatitude: 37.4865,
+      initialLongitude: 126.8018,
+    ),
+  );
+
+  DI.registerLazySingleton<MapOverlayController>(
+      () => MapOverlayController(
+        mapController: null, // 초기에는 null (onMapReady에서 주입)
+        routeController: DI<RouteController>(),
+      ),
+    );
+  DI.registerLazySingleton<IndexController>(() {
+    final routeController  = DI<RouteController>();
+    final pdrCalculator    = DI<PdrCalculator>();
+    final sensorStreams = DI<SensorStreams>();
+
+    return IndexController(
+      routeController: routeController,
+      pdrCalculator: pdrCalculator,
+      sensorStreams: sensorStreams,
+      getCurrentLatitude:  () => pdrCalculator.newlatitude,
+      getCurrentLongitude: () => pdrCalculator.newlongitude,
+      getCompassDeg:       () => sensorStreams.lastCompassDeg ?? 0.0,
+      progressGuardFactor: 0.95,
+      debug: true,
+    );
+  });
+    
+  DI.registerLazySingleton(() => GuidanceCalculator());
 
   // datasource injection area
   DI.registerLazySingleton<AuthRemoteDataSource>(

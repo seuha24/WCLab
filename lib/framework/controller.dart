@@ -54,3 +54,7 @@ part '../presentation/controllers/destination_picker_controller.dart';
 part '../presentation/controllers/sliding_panel_controller.dart';
 part '../presentation/controllers/entrance_selection_controller.dart';
 part '../presentation/controllers/map_panel_controller.dart';
+part '../presentation/controllers/route_controller.dart';
+part '../presentation/controllers/map_overlay_controller.dart';
+part '../presentation/controllers/index_controller.dart';
+part '../presentation/controllers/navigate_controller.dart';
