@@ -1,8 +1,10 @@
 # 카카오 보행자 길찾기 API 명세서
 
 > **작성일**: 2025-11-09
+> **최종 업데이트**: 2025-11-11
 > **API 버전**: v1
 > **문서 목적**: TMAP 보행자 길찾기 API를 카카오 보행자 길찾기 API로 전환
+> **프로젝트**: SafeLight (App ID: 1328836)
 
 ---
 
@@ -14,6 +16,9 @@
 5. [에러 처리](#5-에러-처리)
 6. [TMAP과의 비교](#6-tmap과의-비교)
 7. [구현 가이드](#7-구현-가이드)
+8. [주의사항](#8-주의사항)
+9. [참고 자료](#9-참고-자료)
+10. [프로젝트 정보 요약](#10-프로젝트-정보-요약)
 
 ---
 
@@ -28,10 +33,25 @@
 | **HTTP Method** | GET |
 | **Content-Type** | application/json |
 
-### 1.2 API 키 발급
-- 카카오 개발자 센터: https://developers.kakao.com
-- REST API 키 발급 필요
-- 제휴 신청 필수 (affiliate API)
+### 1.2 계정 정보
+| 항목 | 내용 |
+|------|------|
+| **App 이름** | safelight |
+| **App ID** | 1328836 |
+| **개발자 계정** | snyfromwcl25@gmail.com |
+| **카카오 개발자 센터** | https://developers.kakao.com |
+
+### 1.3 API 키
+> ⚠️ **보안 주의**: 이 키들은 절대 공개 저장소에 커밋하지 마세요. 환경 변수로 관리하세요.
+
+| 키 타입 | 키 값 | 용도 |
+|--------|------|------|
+| **네이티브 앱 키** | 30a78c461fe23564318ea0e7ec732454 | Android/iOS 네이티브 앱 |
+| **REST API 키** | 1cdd32ab3a57b7a5c671f3dd43cb097e | 서버 및 API 호출 |
+| **JavaScript 키** | fc82dd479a82783af5865513061ff522 | 웹 애플리케이션 |
+| **Admin 키** | 0b31744a302bddd4f90215cb2fda8dcb | 관리자 기능 |
+
+**사용할 키**: REST API 키 (`1cdd32ab3a57b7a5c671f3dd43cb097e`)
 
 ---
 
@@ -57,10 +77,24 @@ accept: application/json
 
 ## 3. API 명세
 
-### 3.1 요청 URL
+### 3.1 API 엔드포인트
+
+#### 기본 길찾기 API
 ```
 GET https://apis-navi.kakaomobility.com/affiliate/walking/v1/directions
 ```
+
+#### Delivery 전용 API (추가 엔드포인트)
+카카오모빌리티에서 제공하는 배달/물류 전용 도보 길찾기 API:
+
+| 엔드포인트 | 설명 |
+|-----------|------|
+| `/v1/api/navi-affiliate/walking/delivery` | 기본 배달 경로 탐색 |
+| `/v1/api/navi-affiliate/walking/origins/delivery` | 다중 출발지 경로 탐색 |
+| `/v1/api/navi-affiliate/walking/destinations/delivery` | 다중 도착지 경로 탐색 |
+| `/v1/api/navi-affiliate/walking/waypoints/delivery` | 경유지 포함 배달 경로 |
+
+> 📌 **참고**: SafeLight 프로젝트에서는 기본 길찾기 API를 사용합니다. Delivery API는 배달/물류 서비스에 특화된 기능입니다.
 
 ### 3.2 Query Parameters
 
@@ -89,7 +123,7 @@ GET https://apis-navi.kakaomobility.com/affiliate/walking/v1/directions
 #### cURL
 ```bash
 curl -X GET "https://apis-navi.kakaomobility.com/affiliate/walking/v1/directions?origin=127.110,37.395&destination=127.108,37.402&priority=DISTANCE&summary=false" \
-  -H "Authorization: KakaoAK YOUR_REST_API_KEY" \
+  -H "Authorization: KakaoAK 1cdd32ab3a57b7a5c671f3dd43cb097e" \
   -H "service: SafeLight" \
   -H "accept: application/json"
 ```
@@ -352,7 +386,7 @@ class NavigatorRepositoryImpl implements NavigatorRepository {
 class KakaoNavigatorDataSource {
   final Dio _dio;
   static const String _baseUrl = 'https://apis-navi.kakaomobility.com';
-  static const String _apiKey = 'YOUR_KAKAO_REST_API_KEY'; // 환경 변수로 관리
+  static const String _apiKey = '1cdd32ab3a57b7a5c671f3dd43cb097e'; // SafeLight REST API 키
 
   Future<Map<String, dynamic>> getWalkingDirections({
     required String origin,
@@ -477,12 +511,65 @@ class Env {
 - ⚠️ 경유지는 최대 5개까지
 - ⚠️ 일일 호출 제한이 있을 수 있음 (제휴 조건 확인)
 
-### 8.2 시각장애인 특화 고려사항
+### 8.2 🚨 **시각장애인 앱 사용 불가 사유** (중요!)
+
+**카카오 보행자 길찾기 API는 SafeLight 같은 시각장애인 앱에 사용할 수 없습니다.**
+
+#### 제공되지 않는 필수 정보:
+
+| 정보 | 시각장애인 필수도 | TMAP 제공 여부 | 카카오 제공 여부 |
+|------|------------------|----------------|-----------------|
+| **턴바이턴 안내** (좌회전, 우회전) | 🔴 필수 | ✅ | ❌ |
+| **건물명/랜드마크** | 🔴 필수 | ✅ | ❌ |
+| **안내 문구** (description) | 🔴 필수 | ✅ | ❌ |
+| **횡단보도 정보** | 🔴 필수 | ✅ | ❌ |
+| **분기점 정보** (isBranch) | 🔴 필수 | ✅ | ❌ |
+
+#### 카카오 API가 제공하는 것:
+- ✅ 좌표 배열 (vertexes)
+- ✅ 거리/시간 (distance, duration)
+- ❌ 방향 안내 없음
+- ❌ 랜드마크 없음
+- ❌ 횡단보도 정보 없음
+
+#### 실제 응답 예시 (공식 문서):
+```json
+{
+  "routes": [{
+    "sections": [{
+      "roads": [{
+        "distance": 20,
+        "duration": 18,
+        "vertexes": [126.992, 37.564, 126.993, 37.565]
+        // ❌ description 없음
+        // ❌ turn_type 없음
+        // ❌ landmark 없음
+        // ❌ crosswalk 없음
+      }]
+    }]
+  }]
+}
+```
+
+#### TMAP API 응답 비교 (SafeLight 실제 사용):
+```dart
+BranchInfo{
+  point: LatLng(37.497223, 126.906985),
+  isBranch: true,  // ✅ 분기점
+  description: "대흥인테리어에서 좌회전 후 108m 이동",  // ✅ 턴바이턴
+  crosswalk: false,  // ✅ 횡단보도
+  waypoint: false
+}
+```
+
+> 📌 **상세 비교 분석**: `docs/API/카카오 vs TMAP 비교 분석 - 시각장애인 앱 적합성.md` 참고
+
+### 8.3 일반 보행자 앱 고려사항
 - ✅ default_speed를 3.5~4.0km/h로 설정 (시각장애인 평균 보행 속도)
 - ✅ priority를 MAIN_STREET로 설정하여 안전한 큰 도로 우선
-- ✅ 횡단보도 위치 별도 처리 필요 (카카오 API는 횡단보도 정보 미제공)
+- ⚠️ 턴바이턴 안내는 좌표로 직접 계산 필요 (정확도 낮음)
 
-### 8.3 마이그레이션 시 검증 항목
+### 8.4 마이그레이션 시 검증 항목
 1. 경로 거리/시간 정확도 비교
 2. 좌표 배열 순서 검증 (경도→위도)
 3. TTS 음성 안내와의 호환성
@@ -498,7 +585,23 @@ class Env {
 
 ---
 
-*Last Updated: 2025-11-09*
+## 10. 프로젝트 정보 요약
+
+### 카카오 계정
+- **App 이름**: safelight
+- **App ID**: 1328836
+- **개발자 계정**: snyfromwcl25@gmail.com
+
+### 사용 API 키
+- **REST API 키**: `1cdd32ab3a57b7a5c671f3dd43cb097e`
+
+### API 엔드포인트
+- **기본 길찾기**: `/affiliate/walking/v1/directions`
+- **Delivery API**: `/v1/api/navi-affiliate/walking/delivery` (추가 옵션)
+
+---
+
+*Last Updated: 2025-11-11*
 *Author: SafeLight Development Team*
 
 
