@@ -55,10 +55,12 @@ class NaverMapViewController extends GetxController {
   final ControlFlash flashOff = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_OFF,
   );
+
   /// 경로 안내 계산
   /// 상태가 없는 클래스라 DI가 불필요 할 수 도 있음.
   final GuidanceCalculator guidanceCalculator = DI.get<GuidanceCalculator>();
-
+  /// 사용자 인터랙션 서비스
+  late final UserInteraction userInteraction;
   // ============================================================
   // 2. 상태 변수들
   // ============================================================
@@ -118,7 +120,7 @@ class NaverMapViewController extends GetxController {
   bool isGps = true;
 
   /// 앱 실행 후 GPS 수신도 낮을때 출발지 위치 조정 멘트(한번만)
-  bool ShowLowGpsAlertOnce = false;
+  bool showLowGpsAlrertOnce = false;
   RxBool showLowAccuracyDialog = false.obs;
 
   // 지도 고정 시 현재 지도 방향을 저장하는 변수
@@ -162,9 +164,6 @@ class NaverMapViewController extends GetxController {
   int searchNewPathTime = 0;
   int searchStartNewPathTime = 0; //검색시작 새로운경로시간
 
-  /// 경계 조건 문자열 (디버깅용)
-  String checkBoudaryCondition = "";
-
   /// 현재 BuildContext
   BuildContext? _context;
 
@@ -181,7 +180,26 @@ class NaverMapViewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
+    userInteraction = UserInteraction(
+      // 상태 Rx들
+      currentLatitude: currentLatitude,
+      currentLongitude: currentLongitude,
+      cameraStartLat: cameraStartLat,
+      cameraStartLng: cameraStartLng,
+      selectedStartLocation: selectedStartLocation,
+      selectedDestLocation: selectedDestLocation,
+      isStart: isStart,
+      isSetStartLocation: isSetStartLocation,
+      isSetDestinationLocation: isSetDestinationLocation,
+      isCustomStartPoint: isCustomStartPoint,
+      mapMode: mapMode,
+      isFlashOn: isFlashOn,
+      // 의존성
+      overlayController: overlayController,
+      pdrCalculator: pdrCalculator,
+      flashOn: flashOn,
+      flashOff: flashOff,
+    );
     sensorController.start();
     _initSensorStreams();
     _initializeLocationServices();
@@ -262,7 +280,7 @@ class NaverMapViewController extends GetxController {
     // 초기 yawRate 설정
     pdrCalculator.setPdrYaw(Calculators.deg2rad(compassValue.value));
 
-    Timer.periodic(Duration(milliseconds: 100), (timer) {
+    _locationUpdateTimer =Timer.periodic(Duration(milliseconds: 100), (timer) {
       sAccuracy = position.accuracy;
       _getLocation();
     });
@@ -320,8 +338,8 @@ class NaverMapViewController extends GetxController {
       );
 
       // GPS 정확도에 따라 출발지 안내 멘트 유/무
-      if (!ShowLowGpsAlertOnce && position.accuracy >= 1) {
-        ShowLowGpsAlertOnce = true; // 중복 표시 방지 플래그
+      if (!showLowGpsAlrertOnce && position.accuracy >= 1) {
+        showLowGpsAlrertOnce = true; // 중복 표시 방지 플래그
         showLowAccuracyDialog.value = true; // 알림 다이얼로그 표시 신호
       }
 
@@ -657,7 +675,7 @@ class NaverMapViewController extends GetxController {
         return;
       }
       // 3. 모든 오버레이 제거
-      await mapController!.clearOverlays();
+      await overlayController.clearOverlays();
       // 4. 위치 서비스 초기화
       await _initializeLocationServices();
       // 5. 상태 변수 초기화
@@ -714,8 +732,7 @@ class NaverMapViewController extends GetxController {
     selectedDestLocation.value = null;
     searchLocation.value = '';
     destinationLocation.value = '';
-    routeController.paths.clear();
-    routeController.branchinfo.clear();
+    routeController.clearPathData();
     currentWaypoints.clear(); // 경유지 정보 초기화
   }
 
@@ -794,127 +811,34 @@ class NaverMapViewController extends GetxController {
   // 10. 사용자 인터랙션 메서드
   // ============================================================
 
-  /// handleStartLocationSelection: 시작 위치를 설정하고, 목적지가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
-    selectedStartLocation.value = newStart;
-    isStart.value = true;
-    isSetStartLocation.value = true;
-    // 출발지만 설정하고 경로 요청은 하지 않음
-    debugPrint('출발지가 설정되었습니다.');
+    userInteraction.handleStartLocationSelection(newStart);
   }
 
-  /// handleDestinationLocationSelection: 목적지 위치를 설정하고, 시작 위치가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleDestinationLocationSelection(GeoLocation newDest) async {
-    selectedDestLocation.value = newDest;
-    isSetDestinationLocation.value = true;
-
-    // 출발지가 설정되지 않은 경우 현재 위치를 출발지로 자동 설정
-    if (!isSetStartLocation.value) {
-      selectedStartLocation.value = GeoLocation(
-        lat: currentLatitude.value, // 현재 GPS 위도
-        lng: currentLongitude.value, // 현재 GPS 경도
-      );
-      isSetStartLocation.value = true;
-      debugPrint(
-          '출발지가 설정되지 않아 현위치를 출발지로 자동 설정됨: ${selectedStartLocation.value!.lat}, ${selectedStartLocation.value!.lng}');
-    }
-    // 경로 요청은 하지 않고 목적지만 설정
-    debugPrint('목적지가 설정되었습니다. 경로 선택을 기다립니다.');
+    userInteraction.handleDestinationLocationSelection(newDest);
   }
 
-  /// setCustomStartLocationFromCamera: 지도 중심 좌표를 즉시 읽어와서 현재 위치 마커로 고정 설정 (IMU 기반일 때만)
   Future<void> setCustomStartLocationFromCamera() async {
-    if (!isGps) {
-      // GPS 신호 불량일 때만 활성화
-      isCustomStartPoint.value = true; // 커스텀 출발지 플래그 설정
-
-      // mapController null 체크 추가
-      if (mapController == null) {
-        debugPrint('mapController가 아직 초기화되지 않았습니다.');
-        return;
-      }
-
-      // 현재 카메라 중심을 바로 가져와서 저장
-      final cameraPosition = await mapController!.getCameraPosition();
-      final double targetLat = cameraPosition.target.latitude;
-      final double targetLng = cameraPosition.target.longitude;
-
-      cameraStartLat.value = targetLat; // 카메라 중심 위도
-      cameraStartLng.value = targetLng; // 카메라 중심 경도
-
-      // // 기준 좌표 = 기존 위치 (IMU 기준)
-      // final double baseLat = currentLatitude.value;
-      // final double baseLng = currentLongitude.value;
-
-      // 상대좌표 계산 (IMU 위치 기준 → 사용자 선택 위치로 보정)
-      pdrCalculator.updateRelativeCoordinates(currentLatitude.value, currentLongitude.value,
-          cameraStartLat.value, cameraStartLng.value);
-
-      // 현재 위치를 카메라 중심값으로 갱신
-      currentLatitude.value = targetLat;
-      currentLongitude.value = targetLng;
-
-      // 출발지로 고정
-      selectedStartLocation.value = GeoLocation(lat: targetLat, lng: targetLng);
-      isSetStartLocation.value = true;
-
-      // 마커도 즉시 지도에 반영
-      await overlayController.updateCurrentLocationMarker(
-          targetLat, targetLng, compassValue.value, false, mapMode.value);
-
-      debugPrint("출발지 위치 수동 고정 완료: ($targetLat, $targetLng)");
-    } else {
-      debugPrint("GPS 사용 중이므로 수동 위치 설정 차단됨");
-    }
+    await userInteraction.setCustomStartLocationFromCamera(
+      isGps: isGps,
+      mapController: mapController,
+      compassDeg: compassValue.value,
+    );
   }
 
-  /// toggleMapMode: 지도 모드를 토글합니다.
   Future<void> toggleMapMode() async {
-    if (mapMode.value == MapControlMode.idle) {
-      mapMode.value = MapControlMode.off;
-    }
-    int nextIndex = (mapMode.value.index + 1) % MapControlMode.values.length;
-    if (MapControlMode.values[nextIndex] == MapControlMode.idle) {
-      nextIndex = (nextIndex + 1) % MapControlMode.values.length;
-    }
-    mapMode.value = MapControlMode.values[nextIndex];
-    debugPrint("모드 전환: ${mapMode.value}");
+    userInteraction.toggleMapMode();
   }
 
-  /// handleMapDrag: 사용자가 지도를 드래그하면 지도 모드를 'off'로 전환합니다.
   void handleMapDrag() {
-    if (mapMode.value != MapControlMode.off) {
-      mapMode.value = MapControlMode.off;
-    }
+    userInteraction.handleMapDrag();
   }
 
-  /// toggleFlashlight: 경광등 토글 메서드
   Future<void> toggleFlashlight() async {
-    try {
-      if (isFlashOn.value) {
-        // 경광등이 켜져 있으면 끄기
-        final result = await flashOff(NoParams());
-        if (result.isLeft()) {
-          speakText('안전 경광등을 끌 수 없습니다.');
-        } else {
-          isFlashOn.value = false;
-          speakText('안전 경광등이 꺼졌습니다.');
-        }
-      } else {
-        // 경광등이 꺼져 있으면 켜기
-        final result = await flashOn(NoParams());
-        if (result.isLeft()) {
-          speakText('안전 경광등을 켤 수 없습니다.');
-        } else {
-          isFlashOn.value = true;
-          speakText('안전 경광등이 켜졌습니다.');
-        }
-      }
-    } catch (e) {
-      debugPrint('경광등 제어 중 오류 발생: $e');
-      speakText('안전 경광등 제어 중 오류가 발생했습니다.');
-    }
+    await userInteraction.toggleFlashlight(speakText: speakText);
   }
+
 
   // ============================================================
   // 11. 유틸리티 메서드

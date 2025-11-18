@@ -268,7 +268,20 @@ Future<void> init() async {
       debug: true,
     );
   });
-    
+  
+    DI.registerLazySingleton<UserInteraction>(
+    () => UserInteraction(
+      overlayController: DI<MapOverlayController>(),
+      pdrCalculator: DI<PdrCalculator>(),
+      flashOn: DI<ControlFlash>(
+        instanceName: USECASE_CONTROL_FLASH_ON,
+      ),
+      flashOff: DI<ControlFlash>(
+        instanceName: USECASE_CONTROL_FLASH_OFF,
+      ),
+    ),
+  );
+
   DI.registerLazySingleton(() => GuidanceCalculator());
 
   // datasource injection area
