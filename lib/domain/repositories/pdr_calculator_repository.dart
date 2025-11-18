@@ -20,6 +20,7 @@ abstract class PdrCalculator{
   void setInitialPosition(double lat, double lng);
   void resetValue(double yawRatePerDt, double yawRate,double px, double py);
   void setRelativePositionValue(double px, double py);
+  void updateRelativeCoordinates(double baseLat, double baseLng, double targetLat, double targetLng);
   void setVelocityValue(double velocityX, double velocityY);
   void setPdrYaw(double yawRate);
   void setDeviationYaw(double deviationYaw);

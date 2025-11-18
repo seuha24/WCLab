@@ -150,7 +150,18 @@ class PdrCalculatorImpl implements PdrCalculator{
     return {'latitude': newLat, 'longitude': newLng};
   }
 
-  
+  @override
+  /// 출발지를 조정하기 위해 절대 좌표를 상대 좌표로 변환하여 px, py를 업데이트합니다.
+  /// [baseLat], [baseLng]는 기준 좌표 (현재 위치), [targetLat], [targetLng]는 조정하려는 목표 좌표
+  void updateRelativeCoordinates(
+      double baseLat, double baseLng, double targetLat, double targetLng) {
+    Map<String, double> relativePosition =
+        Calculators.latLonToXY(baseLat, baseLng, targetLat, targetLng);
+    moveRelativePosition(relativePosition['y']!, relativePosition['x']!);
+    debugPrint('기준 좌표: ($baseLat, $baseLng)');
+    debugPrint('목표 좌표: ($targetLat, $targetLng)');
+    debugPrint('Relative Coordinates: px = $px, py = $py');
+  }
   
 
   /// (선택) 초기 좌표 재설정

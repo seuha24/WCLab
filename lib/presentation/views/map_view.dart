@@ -22,8 +22,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       indoorEnable: true,
                       initialCameraPosition: NCameraPosition(
                         target: NLatLng(
-                          controller.current_latitude.value,
-                          controller.current_longitude.value,
+                          controller.currentLatitude.value,
+                          controller.currentLongitude.value,
                         ),
                         zoom: 18.5,
                         bearing: controller.compassValue.value,
@@ -42,8 +42,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       controller.overlayController.mapController = naverMapController;
                       // 맵이 준비되면 항상 초기 카메라 위치 업데이트
                       controller.updateMapPosition(
-                        controller.current_latitude.value,
-                        controller.current_longitude.value,
+                        controller.currentLatitude.value,
+                        controller.currentLongitude.value,
                         controller.compassValue.value,
                       );
                     },
@@ -83,7 +83,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     },
                     onMapTapped: (NPoint point, NLatLng latLng) {
                       int meters =
-                          (controller.remain_distance.value * 1000).round();
+                          (controller.remainDistance.value * 1000).round();
                       controller.speakText('다음 안내까지 ${meters}미터 남았습니다.');
                     },
                   ),

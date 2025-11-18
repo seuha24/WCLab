@@ -58,11 +58,11 @@ class _EntrancePanelViewState extends State<EntrancePanelView> {
     final mapController = Get.find<NaverMapViewController>();
 
     // 초기 위치 설정
-    if (mapController.current_latitude.value != null &&
-        mapController.current_longitude.value != null) {
+    if (mapController.currentLatitude.value != null &&
+        mapController.currentLongitude.value != null) {
       final initialLatLng = NLatLng(
-        mapController.current_latitude.value,
-        mapController.current_longitude.value,
+        mapController.currentLatitude.value,
+        mapController.currentLongitude.value,
       );
       _selectedLocation.value = initialLatLng;
       _lastProcessedLocation = initialLatLng;
