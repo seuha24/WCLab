@@ -17,89 +17,118 @@ enum MapControlMode {
 class NaverMapViewController extends GetxController {
   /// API 서비스 (경로 데이터 요청 등)
   final NavigationApiService apiService = DI.get<NavigationApiService>();
+
   /// TTS 서비스 (텍스트를 음성으로 변환)
   final TtsService ttsService = DI.get<TtsService>();
+
   /// 센서 컨트롤러 (센서 데이터 수집 및 처리)
   final SensorController sensorController = DI<SensorController>();
   //센서 허브
   final SensorStreams sensorStreams = DI<SensorStreams>();
+
   /// PDR 모듈 (위치 계산 및 이동 거리 계산)
   final PdrCalculator pdrCalculator = DI<PdrCalculator>();
+
   /// 가중 이동평균 필터 인스턴스 (X축)
   final WeightedAverageFilter _filteringX = DI<WeightedAverageFilter>(
     instanceName: PDR_WEIGTHED_AVERAGE_FILTER_X,
   );
+
   /// 가중 이동평균 필터 인스턴스 (Y축)
   final WeightedAverageFilter _filteringY = DI<WeightedAverageFilter>(
     instanceName: PDR_WEIGTHED_AVERAGE_FILTER_Y,
   );
+
   /// 경로 컨트롤러 (경로 데이터 요청 및 오버레이 추가)
   final RouteController routeController = DI<RouteController>();
+
   /// 오버레이 컨트롤러 (지도 위 오버레이 관리)
   final MapOverlayController overlayController = DI<MapOverlayController>();
+
   /// 인덱스 컨트롤러 (분기점 인덱스 관리)
   final IndexController indexController = DI<IndexController>();
-    /// Flash 제어 서비스 (외부 플래시 장치 제어)
+
+  /// Flash 제어 서비스 (외부 플래시 장치 제어)
   final ControlFlash flashOnWithWeather = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER,
   );
+
   /// Flash 제어 서비스 (수동 경광등 켜기)
   final ControlFlash flashOn = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_ON,
   );
+
   /// Flash 제어 서비스 (수동 경광등 끄기)
   final ControlFlash flashOff = DI.get<ControlFlash>(
     instanceName: USECASE_CONTROL_FLASH_OFF,
   );
+
   /// 경로 안내 계산
   /// 상태가 없는 클래스라 DI가 불필요 할 수 도 있음.
   final GuidanceCalculator guidanceCalculator = DI.get<GuidanceCalculator>();
+
   /// 주어진 텍스트를 음성으로 출력합니다.
   Future<void> speakText(String text) async {
     await ttsService.speak(text);
   }
 
-
   /// 네이버 맵 컨트롤러 (지도 업데이트 및 오버레이 추가에 사용)
   NaverMapController? mapController;
+
   /// 현재 지도 모드를 Reactive 변수로 관리합니다.
   Rx<MapControlMode> mapMode = MapControlMode.idle.obs;
+
   /// 로딩 상태를 나타내는 Reactive 변수입니다.
   RxBool isLoading = true.obs;
+
   /// 현재 위도 (초기값: 37.4865) - 가톨릭대학교 위도
   RxDouble current_latitude = 37.4865.obs;
+
   /// 현재 경도 (초기값: 126.8018) - 가톨릭대학교 경도
   RxDouble current_longitude = 126.8018.obs;
+
   /// 커스텀 시작 위도 (초기값: 37.4865) - 가톨릭대학교 위도
   RxDouble cameraStartLat = 37.4865.obs;
+
   /// 커스텀 시작 경도 (초기값: 126.8018) - 가톨릭대학교 경도
   RxDouble cameraStartLng = 126.8018.obs;
+
   /// 출발지 또는 목적지 설정 모드 (start: 출발지 설정, dest: 목적지 설정, none: 없음)
   RxString settingMode = 'none'.obs;
+
   /// 경로 안내 시 남은 거리를 나타내는 Reactive 변수입니다.
   RxDouble remain_distance = double.infinity.obs;
+
   /// 선택된 시작 위치
   Rxn<GeoLocation> selectedStartLocation = Rxn<GeoLocation>();
+
   /// 선택된 목적지 위치
   Rxn<GeoLocation> selectedDestLocation = Rxn<GeoLocation>();
+
   /// 검색창에 표시할 시작 위치 문자열
   RxString searchLocation = ''.obs;
+
   /// 검색창에 표시할 목적지 문자열
   RxString destinationLocation = ''.obs;
+
   /// 경로선택
   RxString chooseRoute = ''.obs;
+
   /// 시작 위치가 설정되었는지 여부
   RxBool isStart = false.obs;
+
   /// 시작 위치가 설정되었음을 나타내는 Reactive 변수
   RxBool isSetStartLocation = false.obs;
+
   /// 목적지 위치가 설정되었음을 나타내는 Reactive 변수
   RxBool isSetDestinationLocation = false.obs;
 
-
   // 지도 고정 시 현재 지도 방향을 저장하는 변수
   double? _currentBearing;
+
   /// 현재 경로의 경유지 리스트 (재검색시 사용)
   List<LatLng> currentWaypoints = [];
+
   /// 출발지와 목적지 사이의 남은 거리를 나타내는 변수
   late double remain_startpoint;
 
@@ -112,8 +141,6 @@ class NaverMapViewController extends GetxController {
   late double s_longitude;
   late double s_accuracy;
 
-
-
   /// 경광등 상태를 나타내는 Reactive 변수
   RxBool isFlashOn = false.obs;
 
@@ -121,10 +148,8 @@ class NaverMapViewController extends GetxController {
   Timer? _locationUpdateTimer;
   Timer? navigationTimer;
 
-
   /// 나침반 데이터 수신 완료 여부를 판단하기 위한 Completer
   Completer<void> compassReady = Completer<void>();
-
 
   // 방향 관련 변수
   late double? heading;
@@ -135,12 +160,12 @@ class NaverMapViewController extends GetxController {
   // 이동 거리 계산 변수
 
   double distanceToPath = 0.0;
-  
 
   // 경계 및 재경로 검색 관련 변수들
   bool outOfBound = false;
   double boundary = 1.5; // 경계 이탈 감지 거리 (1.5미터)
   bool searchNewPath = false;
+
   /// 경계 조건 문자열 (디버깅용)
   String checkBoundaryCondition = "";
   double searchNewPathBoundary = 15;
@@ -177,18 +202,19 @@ class NaverMapViewController extends GetxController {
   void setContext(BuildContext context) {
     _context = context;
   }
-    // 센서 스트림 구독 객체들
+
+  // 센서 스트림 구독 객체들
   StreamSubscription? _compassSub;
   StreamSubscription? _accelSub;
   StreamSubscription? _gyroSub;
-  
+
   /// onInit: 컨트롤러 초기화 시 호출되며, 위치 업데이트, 센서 데이터 수집 등 초기 설정을 수행합니다.
   @override
   void onInit() {
     super.onInit();
 
     sensorController.start();
-    _initSensorStreams();    
+    _initSensorStreams();
     _initializeLocationServices();
   }
 
@@ -218,7 +244,6 @@ class NaverMapViewController extends GetxController {
       }
 
       await _initLocation();
-
     } catch (e) {
       debugPrint('위치 서비스 초기화 실패: $e');
       current_latitude.value = 37.4865;
@@ -226,9 +251,11 @@ class NaverMapViewController extends GetxController {
       isLoading.value = false;
     }
   }
+
   /// resetSpeedUtilsValue: 경로 재설정 시 속도, 방향, 위치 계산 관련 변수를 초기화합니다.
   void resetSpeedUtilsValue() {
-    pdrCalculator.resetValue(0, Calculators.deg2rad(compassValue.value), 0.0, 0.0);
+    pdrCalculator.resetValue(
+        0, Calculators.deg2rad(compassValue.value), 0.0, 0.0);
   }
 
   /// onClose: 컨트롤러 종료 시 타이머 및 센서 스트림 구독을 취소합니다.
@@ -262,7 +289,8 @@ class NaverMapViewController extends GetxController {
     current_latitude.value = position.latitude;
     current_longitude.value = position.longitude;
     //초기 위치 설정
-    pdrCalculator.setInitialPosition(current_latitude.value, current_longitude.value);
+    pdrCalculator.setInitialPosition(
+        current_latitude.value, current_longitude.value);
 
     // 초기 yawRate 설정
     pdrCalculator.setPdrYaw(Calculators.deg2rad(compassValue.value));
@@ -281,14 +309,15 @@ class NaverMapViewController extends GetxController {
       );
 
       // GPS 정확도에 따라 출발지 안내 멘트 유/무
-      if (!ShowLowGpsAlertOnce && position.accuracy >= 1) {
+      if (!ShowLowGpsAlertOnce && position.accuracy >= 15) {
         ShowLowGpsAlertOnce = true; // 중복 표시 방지 플래그
         showLowAccuracyDialog.value = true; // 알림 다이얼로그 표시 신호
       }
 
-      if (position.accuracy >= 1) {
+      if (position.accuracy >= 15) {
         isGps = false; // GPS 신호 불량
-        pdrCalculator.setVelocityValue(_filteringX.calculateWeightedAverage(), _filteringY.calculateWeightedAverage());
+        pdrCalculator.setVelocityValue(_filteringX.calculateWeightedAverage(),
+            _filteringY.calculateWeightedAverage());
         current_latitude.value = pdrCalculator.newlatitude; // 센서 계산 위도
         current_longitude.value = pdrCalculator.newlongitude; // 센서 계산 경도
         isLoading.value = false;
@@ -296,7 +325,8 @@ class NaverMapViewController extends GetxController {
         isGps = true; // GPS 신호 정상
         current_latitude.value = position.latitude; //  GPS 위도
         current_longitude.value = position.longitude; //  GPS 경도
-        pdrCalculator.setInitialPosition(current_latitude.value, current_longitude.value);
+        pdrCalculator.setInitialPosition(
+            current_latitude.value, current_longitude.value);
         resetSpeedUtilsValue();
         isLoading.value = false;
       }
@@ -313,53 +343,51 @@ class NaverMapViewController extends GetxController {
   }
 
   Future<void> startNavigationWithPath(
-  double startLat,
-  double startLng,
-  double endLat,
-  double endLng,
-  String chooseRoute,
-  double compass,
-  int targetIndex,
-  {List<LatLng> waypoints = const []}
-) async {
-  try {
-    // 1️⃣ 경로 데이터 로드
-    final response = waypoints.isEmpty
-        ? await routeController.loadPathData(
-            startLat, startLng, endLat, endLng, chooseRoute)
-        : await routeController.loadPathDataWithWaypoints(
-            startLat, startLng, endLat, endLng, waypoints, chooseRoute);
+      double startLat,
+      double startLng,
+      double endLat,
+      double endLng,
+      String chooseRoute,
+      double compass,
+      int targetIndex,
+      {List<LatLng> waypoints = const []}) async {
+    try {
+      // 1️⃣ 경로 데이터 로드
+      final response = waypoints.isEmpty
+          ? await routeController.loadPathData(
+              startLat, startLng, endLat, endLng, chooseRoute)
+          : await routeController.loadPathDataWithWaypoints(
+              startLat, startLng, endLat, endLng, waypoints, chooseRoute);
 
-    // 2️⃣ 파싱 및 상태 반영
-    routeController.applyParsePathData(response);
+      // 2️⃣ 파싱 및 상태 반영
+      routeController.applyParsePathData(response);
 
-    // 경유지 정보가 있으면 branchInfo에 waypoint 플래그 설정
-    if(waypoints.isNotEmpty){
-      routeController.checkWaypointsInBranchInfo(waypoints);
+      // 경유지 정보가 있으면 branchInfo에 waypoint 플래그 설정
+      if (waypoints.isNotEmpty) {
+        routeController.checkWaypointsInBranchInfo(waypoints);
+      }
+
+      // 3️⃣ 로깅 (waypoint 유무에 따라 다른 로그)
+      waypoints.isEmpty
+          ? routeController.logLoadPathData()
+          : routeController.logLoadPathDataWithWayPoint();
+
+      // 4️⃣ 분기점 방향 계산
+      routeController.calculatePathBearing();
+      // 5️⃣ 인덱스 초기화
+      indexController.reset(startIndex: 0);
+      // 6️⃣ 나침반 기준 yaw 오프셋 설정
+      routeController.resetDeviationYaw(targetIndex, compass);
+      // 7️⃣ 지도 오버레이 추가
+      overlayController
+        ..addPathOverlays(routeController.paths)
+        ..addBranchMarkers();
+      // 8️⃣ 네비게이션 시작
+      startNavigationTimer();
+    } catch (e, s) {
+      debugPrint('startNavigationWithPath 실패: $e\n$s');
     }
-    
-    // 3️⃣ 로깅 (waypoint 유무에 따라 다른 로그)
-    waypoints.isEmpty
-      ? routeController.logLoadPathData()
-      : routeController.logLoadPathDataWithWayPoint();
-
-    // 4️⃣ 분기점 방향 계산
-    routeController.calculatePathBearing();
-    // 5️⃣ 인덱스 초기화
-    indexController.reset(startIndex: 0);
-    // 6️⃣ 나침반 기준 yaw 오프셋 설정
-    routeController.resetDeviationYaw(targetIndex, compass);
-    // 7️⃣ 지도 오버레이 추가
-    overlayController
-      ..addPathOverlays(routeController.paths)
-      ..addBranchMarkers();
-    // 8️⃣ 네비게이션 시작
-    startNavigationTimer();
-
-  } catch (e, s) {
-    debugPrint('startNavigationWithPath 실패: $e\n$s');
   }
-}
 
   /// startNavigationWithRoute: 즐겨찾기 경로를 사용한 경로 안내 시작
   Future<void> startNavigationWithRoute({
@@ -402,9 +430,7 @@ class NaverMapViewController extends GetxController {
     );
   }
 
-
-
-  void _initSensorStreams(){
+  void _initSensorStreams() {
     _compassSub = sensorStreams.compass.listen((headingVal) {
       heading = headingVal;
       compassValue.value = headingVal;
@@ -418,32 +444,30 @@ class NaverMapViewController extends GetxController {
     _accelSub = sensorStreams.accel.listen((accelEvent) {
       pdrCalculator.positionUpdate(accelEvent, Duration(milliseconds: 20));
     });
-    
   }
-  
+
   /// checkBoundary: 현재 위치가 경로(분기)로부터 얼마나 벗어났는지 확인합니다.
   /// 경로 이탈, 재경로 탐색 등의 조건을 판단합니다.
-void checkBoundary() {
-  final currentWindow = indexController.getCurrentWindowRecords(
-    routeController.branchinfo,
-    indexController.currentIndex,
-    5,
-  );
+  void checkBoundary() {
+    final currentWindow = indexController.getCurrentWindowRecords(
+      routeController.branchinfo,
+      indexController.currentIndex,
+      5,
+    );
 
-  final result = guidanceCalculator.evaluateBoundary(
-    window: currentWindow,
-    currentLat: current_latitude.value,
-    currentLon: current_longitude.value,
-    boundary: boundary,
-    searchNewPathBoundary: searchNewPathBoundary,
-  );
+    final result = guidanceCalculator.evaluateBoundary(
+      window: currentWindow,
+      currentLat: current_latitude.value,
+      currentLon: current_longitude.value,
+      boundary: boundary,
+      searchNewPathBoundary: searchNewPathBoundary,
+    );
 
-  distanceToPath         = result.minDistanceMeters;
-  outOfBound             = result.outOfBound;
-  searchNewPath          = result.searchNewPath;
-  checkBoundaryCondition = result.condition;
-}
-
+    distanceToPath = result.minDistanceMeters;
+    outOfBound = result.outOfBound;
+    searchNewPath = result.searchNewPath;
+    checkBoundaryCondition = result.condition;
+  }
 
   /// updateMapPosition: 지도 카메라를 현재 위치 및 모드에 따라 업데이트합니다.
   /// [current_latitude]: 현재 위도.
@@ -475,10 +499,12 @@ void checkBoundary() {
       double baseLat, double baseLng, double targetLat, double targetLng) {
     Map<String, double> relativePosition =
         Calculators.latLonToXY(baseLat, baseLng, targetLat, targetLng);
-    pdrCalculator.moveRelativePosition(relativePosition['y']!, relativePosition['x']!);
+    pdrCalculator.moveRelativePosition(
+        relativePosition['y']!, relativePosition['x']!);
     debugPrint('기준 좌표: ($baseLat, $baseLng)');
     debugPrint('목표 좌표: ($targetLat, $targetLng)');
-    debugPrint('Relative Coordinates: px = ${pdrCalculator.px}, py = ${pdrCalculator.py}');
+    debugPrint(
+        'Relative Coordinates: px = ${pdrCalculator.px}, py = ${pdrCalculator.py}');
   }
 
   /// 지도 중심 좌표를 즉시 읽어와서 현재 위치 마커로 고정 설정 (IMU 기반일 때만)
@@ -526,6 +552,7 @@ void checkBoundary() {
       debugPrint("GPS 사용 중이므로 수동 위치 설정 차단됨");
     }
   }
+
   ///
   /// handleStartLocationSelection: 시작 위치를 설정하고, 목적지가 이미 설정되어 있다면 경로 데이터를 요청합니다.
   Future<void> handleStartLocationSelection(GeoLocation newStart) async {
@@ -563,19 +590,18 @@ void checkBoundary() {
       // 일반 경로 안내시에는 경유지 초기화
       currentWaypoints.clear();
       await startNavigationWithPath(
-          selectedStartLocation.value!.lat,
-          selectedStartLocation.value!.lng,
-          selectedDestLocation.value!.lat,
-          selectedDestLocation.value!.lng,
-          chooseRoute.value,
-          compassValue.value,
-          indexController._targetIndex,);
+        selectedStartLocation.value!.lat,
+        selectedStartLocation.value!.lng,
+        selectedDestLocation.value!.lat,
+        selectedDestLocation.value!.lng,
+        chooseRoute.value,
+        compassValue.value,
+        indexController._targetIndex,
+      );
     } else {
       debugPrint('출발지 또는 목적지가 설정되지 않았습니다.');
     }
   }
-
-  
 
   /// startNavigationTimer: 경로 안내를 위한 타이머를 시작합니다.
   void startNavigationTimer() {
@@ -655,7 +681,8 @@ void checkBoundary() {
         isStart.value = false;
       }
       if (!isStart.value) {
-        if (routeController.branchinfo.isNotEmpty && indexController.targetIndex < routeController.branchinfo.length) {
+        if (routeController.branchinfo.isNotEmpty &&
+            indexController.targetIndex < routeController.branchinfo.length) {
           branchTargetIndex = indexController.targetIndex;
           while (branchTargetIndex < routeController.branchinfo.length &&
               !routeController.branchinfo[branchTargetIndex].branch) {
@@ -669,21 +696,28 @@ void checkBoundary() {
               routeController.branchinfo[branchTargetIndex].point.longitude,
             );
             clock = guidanceCalculator.getGuidanceDirection(
-              routeController.branchinfo[indexController.currentIndex].point.longitude,
-              routeController.branchinfo[indexController.currentIndex].point.latitude,
-              routeController.branchinfo[indexController.targetIndex].point.longitude,
-              routeController.branchinfo[indexController.targetIndex].point.latitude,
+              routeController
+                  .branchinfo[indexController.currentIndex].point.longitude,
+              routeController
+                  .branchinfo[indexController.currentIndex].point.latitude,
+              routeController
+                  .branchinfo[indexController.targetIndex].point.longitude,
+              routeController
+                  .branchinfo[indexController.targetIndex].point.latitude,
               current_latitude.value,
               current_longitude.value,
               pdrCalculator.deviationYawTurn,
-              routeController.branchinfo[indexController.currentIndex].bearingToPoint,
+              routeController
+                  .branchinfo[indexController.currentIndex].bearingToPoint,
             );
           }
         } else {
           debugPrint("branchinfo 리스트가 비어 있거나 targetIndex가 유효하지 않습니다.");
         }
         if (remain_distance.value < 0.015) {
-          if (routeController.branchinfo[indexController.currentIndex].crosswalk == true) {
+          if (routeController
+                  .branchinfo[indexController.currentIndex].crosswalk ==
+              true) {
             final result = await flashOnWithWeather(NoParams());
             if (result.isLeft()) {
               debugPrint('안전 경광등을 사용할 수 없습니다.');
@@ -692,15 +726,21 @@ void checkBoundary() {
             }
             speakText('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
           }
-          if (routeController.branchinfo[indexController.targetIndex].branch == true) {
-            speakText('${routeController.branchinfo[indexController.targetIndex].description}하세요.');
+          if (routeController.branchinfo[indexController.targetIndex].branch ==
+              true) {
+            speakText(
+                '${routeController.branchinfo[indexController.targetIndex].description}하세요.');
           }
         }
         if (indexController.currentIndex > 0 &&
-            ((routeController.branchinfo[indexController.currentIndex].bearingToPoint - compassValue.value)
+            ((routeController.branchinfo[indexController.currentIndex]
+                                .bearingToPoint -
+                            compassValue.value)
                         .abs() <=
                     18 ||
-                (routeController.branchinfo[indexController.currentIndex].bearingToPoint - compassValue.value)
+                (routeController.branchinfo[indexController.currentIndex]
+                                .bearingToPoint -
+                            compassValue.value)
                         .abs() >=
                     342)) {
           Vibration.vibrate(duration: 200);
@@ -872,8 +912,12 @@ void checkBoundary() {
             .add(SearchDestinationRequested(searchDestination: ''));
       }
       // 7. 현재 위치 마커만 다시 추가
-      await overlayController.updateCurrentLocationMarker(current_latitude.value,
-          current_longitude.value, compassValue.value, false, mapMode.value);
+      await overlayController.updateCurrentLocationMarker(
+          current_latitude.value,
+          current_longitude.value,
+          compassValue.value,
+          false,
+          mapMode.value);
       // 8. 지도 업데이트
       updateMapByMode(current_latitude.value, current_longitude.value,
           compassValue.value, isGps);

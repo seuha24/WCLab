@@ -1,6 +1,5 @@
 part of '../../framework/controller.dart';
 
-
 enum BranchType { start, waypoint, normal, destination }
 
 /// 지도 위 오버레이(경로, 마커 등)를 관리하는 컨트롤러
@@ -12,6 +11,7 @@ class MapOverlayController {
   });
 
   RouteController routeController;
+
   /// 네이버 지도 컨트롤러 (지도 조작 및 오버레이 추가/삭제에 사용)
   NaverMapController? mapController;
 
@@ -95,7 +95,6 @@ class MapOverlayController {
     debugPrint("📍 addBranchMarkers() 완료됨 — ${markersSet.length}개 추가됨");
   }
 
-
   /// _createBranchMarkerIcons: 분기점 타입별 아이콘 생성
   Future<Map<BranchType, NOverlayImage>> _createBranchMarkerIcons(
     Map<BranchType, Color> branchColors,
@@ -127,9 +126,6 @@ class MapOverlayController {
     return BranchType.normal;
   }
 
-
- 
-
   /// updateCurrentLocationMarker: 현재 위치 마커 업데이트
   Future<void> updateCurrentLocationMarker(
     double currentLatitude,
@@ -141,7 +137,7 @@ class MapOverlayController {
     if (mapController == null) return;
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
-    
+
     // 아이콘 속성 생성
     final icon = await _createLocationMarkerIcon(
       compassValue: compassValue,
@@ -151,18 +147,16 @@ class MapOverlayController {
     );
 
     if (_currentLocationMarker == null) {
-    
-    // 마커가 없으면 새로 생성
-    _currentLocationMarker = NMarker(
-      id: 'current_location',
-      position: NLatLng(currentLatitude, currentLongitude),
-      icon: icon,
-    );
+      // 마커가 없으면 새로 생성
+      _currentLocationMarker = NMarker(
+        id: 'current_location',
+        position: NLatLng(currentLatitude, currentLongitude),
+        icon: icon,
+      );
 
-    // 지도에 마커 추가
-    mapController!.addOverlay(_currentLocationMarker!);
-    }
-    else {
+      // 지도에 마커 추가
+      mapController!.addOverlay(_currentLocationMarker!);
+    } else {
       // 마커가 이미 존재하면 아이콘 갱신
       _currentLocationMarker!.setIcon(icon);
       // 이미 존재하면 위치만 갱신
@@ -170,10 +164,9 @@ class MapOverlayController {
         NLatLng(currentLatitude, currentLongitude),
       );
     }
-    debugPrint("현재 위치 마커가 업데이트되었습니다.");
+    //debugPrint("현재 위치 마커가 업데이트되었습니다.");
   }
 
-  
   /// 아이콘 생성 로직 (형태/색상 분리)
   Future<NOverlayImage> _createLocationMarkerIcon({
     required double compassValue,
@@ -182,7 +175,8 @@ class MapOverlayController {
     required MapControlMode mapMode,
   }) async {
     // 기기 나침반 각도와 지도 각도를 보정
-    final double adjustedAngle = _adjustAngleForIconBearing(compassValue, mapBearing);
+    final double adjustedAngle =
+        _adjustAngleForIconBearing(compassValue, mapBearing);
     // mapMode에 따라 아이콘 선택
     final IconData iconImage = _selectIconByMapMode(mapMode);
     // 센서 기반 아이콘 색상 선택
@@ -190,7 +184,6 @@ class MapOverlayController {
     // 아이콘 크기 정의
     const double locationMarkerSize = 25.0;
 
-    
     return NOverlayImage.fromWidget(
       widget: Transform.rotate(
         angle: Calculators.deg2rad(adjustedAngle),
@@ -210,12 +203,12 @@ class MapOverlayController {
   }
 
   /// 아이콘 이미지 선택 로직 (지도 모드 기반)
-  IconData _selectIconByMapMode(MapControlMode mapMode){
-    final IconData iconImage = mapMode == MapControlMode.idle ||
-            mapMode == MapControlMode.off
-        ? Icons.circle
-        : Icons.navigation;
-    
+  IconData _selectIconByMapMode(MapControlMode mapMode) {
+    final IconData iconImage =
+        mapMode == MapControlMode.idle || mapMode == MapControlMode.off
+            ? Icons.circle
+            : Icons.navigation;
+
     return iconImage;
   }
 
@@ -223,7 +216,6 @@ class MapOverlayController {
   Color _selectColorBySource(bool isGps) {
     return isGps ? Colors.blue : Colors.red;
   }
-
 
   /// clearOverlays: 지도에서 모든 오버레이 제거
   void clearOverlays() {
