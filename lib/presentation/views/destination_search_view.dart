@@ -19,6 +19,9 @@ class _DesSearchState extends State<DesSearch> {
   // TTS 서비스 (음성 안내용)
   final TtsService ttsService = DI.get<TtsService>();
 
+  // Kakao Repository (장소 검색)
+  final KakaoRepository kakaoRepository = DI.get<KakaoRepository>();
+
   final FocusNode _focusNode = FocusNode();
 
   List<PlaceResult> places = []; // 전체 장소 검색 결과
@@ -66,47 +69,21 @@ class _DesSearchState extends State<DesSearch> {
 
   // Kakao API를 사용하여 장소 검색 요청
   Future<List<PlaceResult>> placeSearch(String query) async {
-    final String apiKey = '93848fcc11798c6f48099dd2e2373263';
-    final String apiUrl =
-        'https://dapi.kakao.com/v2/local/search/keyword.json?query=$query';
+    final result = await kakaoRepository.searchPlaces(query);
 
-    final Map<String, String> headers = {
-      'Authorization': 'KakaoAK $apiKey',
-    };
-
-    final response = await http.get(Uri.parse(apiUrl), headers: headers);
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
-      final List<dynamic> documents = jsonResponse['documents'];
-
-      debugPrint('documents : $documents');
-
-      // 검색 결과가 없는 경우 이전 결과 리스트를 유지.
-      // 검색 결과가 있는 경우 새로운 리스트 생성
-      if (documents.isNotEmpty) {
-        places = documents.map((doc) {
-          // 도로명 주소가 있으면 우선 사용, 없으면 지번 주소 사용
-          final addressName = doc['road_address_name']?.isNotEmpty == true
-              ? doc['road_address_name']
-              : doc['address_name'];
-          return PlaceResult(
-            name: doc['place_name'],
-            address: addressName,
-            geometry: LatLngGeometry(
-              location: GeoLocation(
-                lat: double.parse(doc['y']),
-                lng: double.parse(doc['x']),
-              ),
-            ),
-          );
-        }).toList();
-      }
-
-      return places;
-    } else {
-      throw Exception('장소 검색 실패: ${response.statusCode}');
-    }
+    return result.fold(
+      (failure) {
+        // 검색 실패 시 기존 결과 유지
+        return places;
+      },
+      (newPlaces) {
+        // 검색 성공 시 결과가 있으면 업데이트
+        if (newPlaces.isNotEmpty) {
+          places = newPlaces;
+        }
+        return places;
+      },
+    );
   }
 
   // 입력된 검색어로 장소 검색 실행
@@ -396,34 +373,3 @@ class _DesSearchState extends State<DesSearch> {
 }
 
 // 장소 검색 결과를 담는 모델 클래스
-class PlaceResult {
-  final String name;
-  final String address;
-  final LatLngGeometry geometry;
-
-  PlaceResult({
-    required this.name,
-    required this.address,
-    required this.geometry,
-  });
-}
-
-// 위경도 정보 모델 클래스
-class GeoLocation {
-  final double lat;
-  final double lng;
-
-  GeoLocation({
-    required this.lat,
-    required this.lng,
-  });
-}
-
-// LatLng 포맷을 GeoLocation으로 감싼 구조
-class LatLngGeometry {
-  final GeoLocation location;
-
-  LatLngGeometry({
-    required this.location,
-  });
-}

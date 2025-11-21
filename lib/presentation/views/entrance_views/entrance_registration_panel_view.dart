@@ -50,6 +50,7 @@ class _EntrancePanelViewState extends State<EntrancePanelView> {
 
     bloc = EntranceRegistrationBloc(
       sendCustomStartPointUseCase: DI.get<SendCustomStartPointUseCase>(),
+      kakaoRepository: DI.get<KakaoRepository>(),
     );
 
     // bloc을 GetX로 등록하여 다른 곳에서 찾을 수 있도록 함

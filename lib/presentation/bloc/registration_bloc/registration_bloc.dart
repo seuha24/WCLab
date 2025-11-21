@@ -10,9 +10,14 @@ class EntranceRegistrationBloc
   /// 출입구 등록 UseCase. 서버에 출입구 데이터를 전송하는 역할을 한다.
   final SendCustomStartPointUseCase sendCustomStartPointUseCase;
 
+  /// 카카오 로컬 API Repository (역지오코딩)
+  final KakaoRepository kakaoRepository;
+
   /// Bloc 초기화. 초기 상태 설정 및 이벤트 핸들러 등록.
-  EntranceRegistrationBloc({required this.sendCustomStartPointUseCase})
-      : super(RegistrationInitial()) {
+  EntranceRegistrationBloc({
+    required this.sendCustomStartPointUseCase,
+    required this.kakaoRepository,
+  }) : super(RegistrationInitial()) {
     on<AddressUpdated>(_onAddressUpdated); // 위치 갱신 이벤트 처리
     on<SubmitEntranceData>(_onSubmitEntranceData); // 출입구 등록 이벤트 처리
   }
@@ -61,41 +66,16 @@ class EntranceRegistrationBloc
     );
   }
 
-  /// 좌표를 기반으로 도로명 주소를 요청하는 내부 함수.
-  /// 도로명 주소가 없거나 오류가 발생할 경우 기본 메시지를 반환한다.
+  /// 좌표를 기반으로 주소를 요청하는 내부 함수.
   Future<String> _fetchAddress(NLatLng latLng) async {
-    final url =
-        'https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${latLng.longitude}&y=${latLng.latitude}';
-    debugPrint('\n=== 카카오 API 요청 ===');
-    debugPrint('요청 URL: $url');
-
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'KakaoAK 93848fcc11798c6f48099dd2e2373263'},
+    final result = await kakaoRepository.getAddressFromCoordinates(
+      latitude: latLng.latitude,
+      longitude: latLng.longitude,
     );
 
-    final jsonResponse = jsonDecode(response.body);
-    debugPrint('\n=== 카카오 API 응답 ===');
-    debugPrint('전체 응답: ${jsonEncode(jsonResponse)}');
-
-    final docs = jsonResponse['documents'];
-    debugPrint('\n문서 개수: ${docs.length}');
-
-    if (docs.isNotEmpty) {
-      final roadAddress = docs[0]['road_address']?['address_name'];
-
-      if (roadAddress != null && roadAddress.isNotEmpty) {
-        debugPrint('\n도로명 주소 찾음: $roadAddress');
-        debugPrint('현재 위치: 위도 ${latLng.latitude}, 경도 ${latLng.longitude}');
-        return roadAddress;
-      }
-
-      debugPrint('\n도로명 주소를 찾을 수 없음');
-      debugPrint('현재 위치: 위도 ${latLng.latitude}, 경도 ${latLng.longitude}');
-      return "도로명 주소 없음";
-    }
-
-    debugPrint('\n문서가 없음');
-    return "주소를 찾을 수 없습니다";
+    return result.fold(
+      (failure) => "주소를 찾을 수 없습니다",
+      (address) => address,
+    );
   }
 }

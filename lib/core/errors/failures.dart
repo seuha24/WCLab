@@ -13,6 +13,10 @@ class ServerFailure extends Failure {
   const ServerFailure([super.message = '서버 연결 오류']);
 }
 
+class NetworkFailure extends Failure {
+  const NetworkFailure([super.message = '네트워크 연결 오류']);
+}
+
 class CacheFailure extends Failure {
   const CacheFailure([super.message = '캐시 오류']);
 }

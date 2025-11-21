@@ -26,6 +26,7 @@ class _StartSearchState extends State<StartSearch> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
   final TtsService ttsService = DI.get<TtsService>();
+  final KakaoRepository kakaoRepository = DI.get<KakaoRepository>();
   final FocusNode _focusNode = FocusNode();
 
   List<PlaceResult> places = [];
@@ -73,42 +74,17 @@ class _StartSearchState extends State<StartSearch> {
   }
 
   Future<List<PlaceResult>> placeSearch(String query) async {
-    debugPrint('장소검색 api 호출');
-    const String apiKey = '93848fcc11798c6f48099dd2e2373263';
-    final String apiUrl =
-        'https://dapi.kakao.com/v2/local/search/keyword.json?query=$query';
+    final result = await kakaoRepository.searchPlaces(query);
 
-    final headers = {'Authorization': 'KakaoAK $apiKey'};
-    final response = await http.get(Uri.parse(apiUrl), headers: headers);
-
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      final documents = jsonResponse['documents'];
-
-      debugPrint('documents : $documents');
-
-      if (documents.isNotEmpty) {
-        places = documents.map<PlaceResult>((doc) {
-          final addressName = doc['road_address_name']?.isNotEmpty == true
-              ? doc['road_address_name']
-              : doc['address_name'];
-          return PlaceResult(
-            name: doc['place_name'],
-            address: addressName,
-            geometry: LatLngGeometry(
-              location: GeoLocation(
-                lat: double.parse(doc['y']),
-                lng: double.parse(doc['x']),
-              ),
-            ),
-          );
-        }).toList();
-      }
-
-      return places;
-    } else {
-      throw Exception('장소 검색 실패: ${response.statusCode}');
-    }
+    return result.fold(
+      (failure) => places,
+      (newPlaces) {
+        if (newPlaces.isNotEmpty) {
+          places = newPlaces;
+        }
+        return places;
+      },
+    );
   }
 
   void _performSearch(String query) async {
@@ -379,26 +355,17 @@ class _StartSearchState extends State<StartSearch> {
                             lng: position.longitude,
                           );
 
-                          // 현재 위치의 주소를 가져오기 위해 카카오 API 호출
-                          final apiKey = '93848fcc11798c6f48099dd2e2373263';
-                          final url =
-                              'https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${position.longitude}&y=${position.latitude}';
-
-                          final response = await http.get(
-                            Uri.parse(url),
-                            headers: {'Authorization': 'KakaoAK $apiKey'},
+                          // 현재 위치의 주소를 가져오기 (역지오코딩)
+                          final addressResult =
+                              await kakaoRepository.getAddressFromCoordinates(
+                            latitude: position.latitude,
+                            longitude: position.longitude,
                           );
 
-                          String currentAddress = '현재 위치';
-                          if (response.statusCode == 200) {
-                            final jsonResponse = jsonDecode(response.body);
-                            final documents = jsonResponse['documents'];
-                            if (documents.isNotEmpty) {
-                              currentAddress = documents[0]['road_address']
-                                      ?['address_name'] ??
-                                  documents[0]['address']['address_name'];
-                            }
-                          }
+                          final currentAddress = addressResult.fold(
+                            (failure) => '현재 위치',
+                            (address) => address,
+                          );
 
                           _searchController.text = currentAddress;
                           speakTTS('현재 위치로 설정하셨습니다.');

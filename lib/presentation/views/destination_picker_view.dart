@@ -9,6 +9,8 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
   final DestinationPickerController controller =
       Get.put(DestinationPickerController());
 
+  final KakaoRepository kakaoRepository = DI.get<KakaoRepository>();
+
   final RxString _address = ''.obs;
   NCameraPosition? _currentCameraPosition;
   NaverMapController? _naverMapController;
@@ -62,39 +64,20 @@ class _DestinationPickerViewState extends State<DestinationPickerView> {
 
   /// 카카오 API를 통해 위경도로부터 주소 문자열을 얻음
   Future<void> _updateAddress(NLatLng latLng) async {
-    final lat = latLng.latitude;
-    final lng = latLng.longitude;
+    final result = await kakaoRepository.getAddressFromCoordinates(
+      latitude: latLng.latitude,
+      longitude: latLng.longitude,
+    );
 
-    try {
-      final apiKey = '93848fcc11798c6f48099dd2e2373263';
-      final url =
-          'https://dapi.kakao.com/v2/local/geo/coord2address.json?x=$lng&y=$lat';
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {'Authorization': 'KakaoAK $apiKey'},
-      );
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final documents = jsonResponse['documents'];
-
-        if (documents.isNotEmpty) {
-          // 도로명 주소가 있으면 우선 사용, 없으면 지번 주소 사용
-          final addressName = documents[0]['road_address']?['address_name'] ??
-              documents[0]['address']['address_name'];
-
-          _address.value = addressName;
-          controller.updateAddress(addressName); // 컨트롤러에 주소 업데이트
-        } else {
-          _address.value = '주소를 찾을 수 없습니다';
-        }
-      } else {
+    result.fold(
+      (failure) {
         _address.value = '주소 요청 실패';
-      }
-    } catch (_) {
-      _address.value = '주소 요청 오류';
-    }
+      },
+      (address) {
+        _address.value = address;
+        controller.updateAddress(address);
+      },
+    );
   }
 
   @override

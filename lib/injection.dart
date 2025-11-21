@@ -15,8 +15,11 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/data/network/dio_client.dart';
+import 'package:safelight/data/repositories/kakao_repository_impl.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/data/services/tts_service.dart';
+import 'package:safelight/data/services/kakao_local_api_service.dart';
+import 'package:safelight/domain/repositories/kakao_repository.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
@@ -73,6 +76,15 @@ Future<void> init() async {
     () => LocationPermissionCubit(
       getPermission: DI(instanceName: USECASE_GET_LOCATION_PERMISSION),
       setPermission: DI(instanceName: USECASE_SET_LOCATION_PERMISSION),
+    ),
+  );
+
+  // 현재 위치 알림 Controller
+  DI.registerLazySingleton(
+    () => LocationAnnouncementController(
+      navigatorRepository: DI(),  // 출입구 조회 API 재사용
+      kakaoRepository: DI(),      // 카카오 로컬 API Repository
+      ttsService: DI(),
     ),
   );
 
@@ -213,9 +225,8 @@ Future<void> init() async {
     () => NavigatorRepositoryImpl(navDataSource: DI()),
   );
 
-
   DI.registerLazySingleton<SensorStreams>(() => SensorStreamsImpl());
-    
+
   DI.registerLazySingleton<SensorController>(
     () => SensorControllerImpl(DI<SensorStreams>()),
   );
@@ -268,9 +279,13 @@ Future<void> init() async {
       debug: true,
     );
   });
-  
+
 
   DI.registerLazySingleton(() => GuidanceCalculator());
+
+  DI.registerLazySingleton<KakaoRepository>(
+    () => KakaoRepositoryImpl(apiService: DI()),
+  );
 
   // datasource injection area
   DI.registerLazySingleton<AuthRemoteDataSource>(
@@ -306,6 +321,11 @@ Future<void> init() async {
   );
   DI.registerLazySingleton<AmbientLightLevelDataSource>(
     () => AmbientLightLevelDataSourceImpl(),
+  );
+
+  // 카카오 로컬 API 서비스 (장소 검색, 역지오코딩)
+  DI.registerLazySingleton<KakaoLocalApiService>(
+    () => KakaoLocalApiService(),
   );
 
   // core injection area

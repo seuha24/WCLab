@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // Domain Layer
 import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:safelight/domain/entities/favorite_route.dart';
+import 'package:safelight/domain/entities/place_result.dart';
 import 'package:safelight/domain/usecases/favorite_usecase.dart';
 
 // Data Layer

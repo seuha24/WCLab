@@ -1532,14 +1532,14 @@ SPEC CHECKSUMS:
   FirebaseFirestoreInternal: 8c5921c360a70e447bfeefb245f450e8b50e750b
   FirebaseSharedSwift: e17c654ef1f1a616b0b33054e663ad1035c8fd40
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_compass: b236ab69b61545cce89fd58527f401a7587d5cc1
-  flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
-  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
-  flutter_naver_map: 651a0c5af560ee180f6ee57c11e4ec62aa82abc8
-  flutter_tts: b88dbc8655d3dc961bc4a796e4e16a4cc1795833
-  fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
-  geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
-  google_sign_in_ios: 19297361f2c51d7d8ac0201b866ef1fa5d1f94a8
+  flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
+  flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
+  flutter_native_splash: df59bb2e1421aa0282cb2e95618af4dcb0c56c29
+  flutter_naver_map: 8936ea216d66ead633d52950fc542dfb5bbcd7e0
+  flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
+  fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
+  geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
+  google_sign_in_ios: 4111e87aa5e24a4404f00ea13479f35e571969cc
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": 2fa52b3141e7789a28a737f251e0c45b4cb20a87
@@ -1550,21 +1550,21 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   NMapsGeometry: 4e02554fa9880ef02ed96b075dc84355d6352479
   NMapsMap: 09552eb050059e13b4c8fc294055760713cfdad8
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   Protobuf: 164aea2ae380c3951abdc3e195220c01d17400e0
   reactive_ble_mobile: ea97709e18fa6f0b0592909725d7ae7e1c595b64
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
-  sensors_plus: 6a11ed0c2e1d0bd0b20b4029d3bad27d96e0c65b
-  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
-  speech_to_text: 9dc43a5df3cbc2813f8c7cc9bd0fbf94268ed7ac
+  sensors_plus: 7229095999f30740798f0eeef5cd120357a8f4f2
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
+  speech_to_text: 627d3fd2194770b51abb324ba45c2d39398f24a8
   SwiftProtobuf: e1b437c8e31a4c5577b643249a0bb62ed4f02153
-  text_to_speech: 94cb6c54446c65feaf0007e444113f922fe1fc99
-  torch_light: d093d579a221a59ef8a6b8c0eca20d52f7178087
+  text_to_speech: 8669facdbd5b72d2939b810493defd991634f6f9
+  torch_light: 682062fa12102172fa38b6b14c106d93b060f83e
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
   vibration: 69774ad57825b11c951ee4c46155f455d7a592ce
 
-PODFILE CHECKSUM: 21a75e462f63b369444b463b589ff89a2a9442ad
+PODFILE CHECKSUM: c693f5b5ae5f1104bfb60476721aa935ba3521ee
 
 COCOAPODS: 1.16.2

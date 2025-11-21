@@ -18,50 +18,45 @@ class NaverMapView extends GetView<NaverMapViewController> {
           /// (1)지도 또는 로딩 표시
           /// 출입구 등록 패널이 활성화되어도 현위치 동적 마커는 계속 표시됨
           NaverMap(
-                    options: NaverMapViewOptions(
-                      indoorEnable: true,
-                      initialCameraPosition: NCameraPosition(
-                        target: NLatLng(
-                          controller.currentLatitude.value,
-                          controller.currentLongitude.value,
-                        ),
-                        zoom: 18.5,
-                        bearing: controller.compassValue.value,
-                        tilt: 0,
-                      ),
-                      mapType: NMapType.basic,
-                      activeLayerGroups: [
-                        NLayerGroup.building,
-                        NLayerGroup.transit
-                      ],
-                      locationButtonEnable: false,
-                    ),
-                    onMapReady: (naverMapController) {
-                      controller.mapController = naverMapController;
-                      controller.routeController.mapController = naverMapController;
-                      controller.overlayController.mapController = naverMapController;
-                      // 맵이 준비되면 항상 초기 카메라 위치 업데이트
-                      controller.updateMapPosition(
-                        controller.currentLatitude.value,
-                        controller.currentLongitude.value,
-                        controller.compassValue.value,
-                      );
-                    },
-                    onCameraChange: (reason, animated) {
-                      if (reason == NCameraUpdateReason.gesture) {
-                        controller.handleMapDrag();
-                      }
-                    },
-                    onCameraIdle: () async {
-                      // 출입구 등록 패널이 활성화되었을 때만 위치 업데이트
-                      final slidingController =
-                          Get.find<SlidingPanelController>();
-                      if (slidingController.activePanelId.value ==
-                          'entrance_panel') {
-                        if (controller.mapController != null) {
-                          final pos = await controller.mapController!
-                              .getCameraPosition();
-                          final latLng = pos.target;
+            options: NaverMapViewOptions(
+              indoorEnable: true,
+              initialCameraPosition: NCameraPosition(
+                target: NLatLng(
+                  controller.currentLatitude.value,
+                  controller.currentLongitude.value,
+                ),
+                zoom: 18.5,
+                bearing: controller.compassValue.value,
+                tilt: 0,
+              ),
+              mapType: NMapType.basic,
+              activeLayerGroups: [NLayerGroup.building, NLayerGroup.transit],
+              locationButtonEnable: false,
+            ),
+            onMapReady: (naverMapController) {
+              controller.mapController = naverMapController;
+              controller.routeController.mapController = naverMapController;
+              controller.overlayController.mapController = naverMapController;
+              // 맵이 준비되면 항상 초기 카메라 위치 업데이트
+              controller.updateMapPosition(
+                controller.currentLatitude.value,
+                controller.currentLongitude.value,
+                controller.compassValue.value,
+              );
+            },
+            onCameraChange: (reason, animated) {
+              if (reason == NCameraUpdateReason.gesture) {
+                controller.handleMapDrag();
+              }
+            },
+            onCameraIdle: () async {
+              // 출입구 등록 패널이 활성화되었을 때만 위치 업데이트
+              final slidingController = Get.find<SlidingPanelController>();
+              if (slidingController.activePanelId.value == 'entrance_panel') {
+                if (controller.mapController != null) {
+                  final pos =
+                      await controller.mapController!.getCameraPosition();
+                  final latLng = pos.target;
 
                           // 출입구 등록 패널의 bloc에 직접 AddressUpdated 이벤트 전송
                           try {
@@ -91,7 +86,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
 
           /// 화면 중앙 고정 마커
 
-          /// (2)항상 표시되는 고정 버튼들 (지도 모드 변경, 경광등, 즐겨찾기)
+          /// (2)항상 표시되는 고정 버튼들 (지도 모드 변경, 경광등)
           Positioned(
             top: MediaQuery.of(context).padding.top + 20,
             right: 20,
@@ -135,6 +130,25 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     ),
                   );
                 }),
+
+                // 현재 위치 알림 FAB
+                SizedBox(height: 16),
+                FloatingActionButton(
+                  heroTag: 'locationAnnouncement',
+                  onPressed: () {
+                    debugPrint('\n' + '=' * 60);
+                    debugPrint('🎯 [UI] 현재 위치 알림 버튼 클릭');
+                    debugPrint('=' * 60);
+
+                    final locationController =
+                        DI.get<LocationAnnouncementController>();
+                    locationController.announceNearbyBuilding();
+                    HapticFeedback.mediumImpact();
+                  },
+                  backgroundColor: Colors.blue,
+                  child: Icon(Icons.campaign, color: Colors.white),
+                  tooltip: '현재 위치 알림',
+                ),
               ],
             ),
           ),
@@ -525,6 +539,7 @@ class _LocationSearchSheet extends StatefulWidget {
 
 class _LocationSearchSheetState extends State<_LocationSearchSheet> {
   final TextEditingController _searchController = TextEditingController();
+  final KakaoRepository kakaoRepository = DI.get<KakaoRepository>();
   Timer? _debounce;
   List<PlaceResult> _searchResults = [];
   bool _isLoading = false;
@@ -578,36 +593,12 @@ class _LocationSearchSheetState extends State<_LocationSearchSheet> {
   
   //여기에있으면 안됨
   Future<List<PlaceResult>> _placeSearch(String query) async {
-    const String apiKey = '93848fcc11798c6f48099dd2e2373263';
-    final String apiUrl =
-        'https://dapi.kakao.com/v2/local/search/keyword.json?query=$query';
+    final result = await kakaoRepository.searchPlaces(query);
 
-    final headers = {'Authorization': 'KakaoAK $apiKey'};
-    final response = await http.get(Uri.parse(apiUrl), headers: headers);
-
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      final documents = jsonResponse['documents'];
-
-      if (documents.isNotEmpty) {
-        return documents.map<PlaceResult>((doc) {
-          final addressName = doc['road_address_name']?.isNotEmpty == true
-              ? doc['road_address_name']
-              : doc['address_name'];
-          return PlaceResult(
-            name: doc['place_name'],
-            address: addressName,
-            geometry: LatLngGeometry(
-              location: GeoLocation(
-                lat: double.parse(doc['y']),
-                lng: double.parse(doc['x']),
-              ),
-            ),
-          );
-        }).toList();
-      }
-    }
-    return [];
+    return result.fold(
+      (failure) => [],
+      (places) => places,
+    );
   }
 
   @override
