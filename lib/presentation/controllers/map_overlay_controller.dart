@@ -218,7 +218,7 @@ class MapOverlayController {
   }
 
   /// clearOverlays: 지도에서 모든 오버레이 제거
-  void clearOverlays() {
+  Future<void> clearOverlays() async{
     if (mapController == null) return;
     mapController!.clearOverlays();
     _currentLocationMarker = null; // 현재 위치 마커 초기화
