@@ -3,8 +3,6 @@ library;
 
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-
 
 // Firebase Firestore 제거 - BLE 직접 연결
 import 'package:firebase_auth/firebase_auth.dart';
@@ -325,7 +323,7 @@ Future<void> init() async {
 
   // 카카오 로컬 API 서비스 (장소 검색, 역지오코딩)
   DI.registerLazySingleton<KakaoLocalApiService>(
-    () => KakaoLocalApiService(),
+    () => KakaoLocalApiService(dio: DI()),
   );
 
   // core injection area

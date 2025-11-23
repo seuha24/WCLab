@@ -1,85 +1,108 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+
+enum KakaoCategoryCode {
+  SC4, // 학교
+  PO3, // 공공기관
+  CE7, // 카페
+  FD6, // 음식점
+  CS2, // 편의점
+  SW8, // 지하철역
+  BK9, // 은행
+  MT1, // 대형마트
+  HP8, // 병원
+  PM9, // 약국
+  CT1, // 문화시설
+  AT4, // 관광명소
+}
 
 /// 카카오 로컬 API 통합 서비스
 ///
-/// **역할:**
+/// 역할:
 /// - 카카오 REST API Key 중앙 관리
 /// - 카카오 로컬 API 공통 요청 처리
-/// - 키워드 검색, 역지오코딩 등 제공
+/// - 키워드 검색, 역지오코딩, 주변 장소 검색 제공
 ///
-/// **API 문서:**
-/// - https://developers.kakao.com/docs/latest/ko/local/dev-guide
-///
-/// **사용 예시:**
-/// ```dart
-/// final service = KakaoLocalApiService();
-///
-/// // 키워드 검색
+/// 사용 예시:
+/// final service = DI<KakaoLocalApiService>();
 /// final places = await service.searchPlaces('아주대학교');
-///
-/// // 역지오코딩 (좌표 → 주소)
-/// final address = await service.getAddressFromCoordinates(
-///   latitude: 37.4859,
-///   longitude: 126.8015,
-/// );
-/// ```
-///
-/// **참고:**
-/// - 기존 6군데 중복되던 API Key를 한 곳에서 관리
-/// - destination_search_view.dart 등에서도 이 서비스 사용 권장
 class KakaoLocalApiService {
-  /// 카카오 REST API 키
-  ///
-  /// **주의:**
-  /// - 이 Key는 프로젝트 전체에서 공유됩니다
-  /// - 변경 시 이 파일만 수정하면 됩니다
-  /// - 기존 중복 위치:
-  ///   1. destination_search_view.dart
-  ///   2. startspot_search_view.dart
-  ///   3. destination_picker_view.dart
-  ///   4. map_view.dart
-  ///   5. registration_bloc.dart
-  ///   6. geocoding_service.dart (삭제 예정)
-  static const String _apiKey = '93848fcc11798c6f48099dd2e2373263';
+  final Dio _dio;
 
+  KakaoLocalApiService({required Dio dio}) : _dio = dio;
+
+  /// 카카오 REST API 키
+  static const String _apiKey = '93848fcc11798c6f48099dd2e2373263';
+  /// 카카오 로컬 API 기본 URL
+  static const String _baseUrl = 'https://dapi.kakao.com/v2/local';
+  /// 알 수 없는 위치 레이블
+  static const String _unknownLocationLabel = '알 수 없는 위치';
   /// 카카오 API 공통 헤더
-  static Map<String, String> get _headers => {
+  Map<String, String> get _headers => {
         'Authorization': 'KakaoAK $_apiKey',
       };
 
+  /// 공통 URL 빌더
+  String _buildUrl(String path) {
+    return '$_baseUrl$path';
+  }
+
+  /// 카카오 로컬 API 공통 GET 요청 헬퍼
+  ///
+  /// 역할:
+  /// - 카카오 API 엔드포인트에 대한 GET 요청 수행
+  /// - 인증 헤더(KakaoAK) 자동 추가
+  /// - 응답 상태 코드 검증 및 타입 체크
+  ///
+  /// Parameters:
+  /// - [path]: API 엔드포인트 경로 (예: `/search/keyword.json`)
+  /// - [query]: 쿼리 파라미터 (선택)
+  ///
+  /// Returns:
+  /// - 성공 시: JSON 응답을 `Map<String, dynamic>` 형태로 반환
+  ///
+  /// Throws:
+  /// - HTTP 상태 코드가 200이 아닌 경우
+  /// - 응답 데이터가 `Map<String, dynamic>` 타입이 아닌 경우
+  ///
+  /// 사용 예시:
+  /// ```dart
+  /// final result = await _getJson('/search/keyword.json', query: {'query': '아주대'});
+  /// ```
+  Future<Map<String, dynamic>> _getJson(
+    String path, {
+    Map<String, dynamic>? query,
+  }) async {
+    // ① URL 생성: baseUrl + path 조합
+    final url = _buildUrl(path);
+
+    // ② Dio를 사용한 GET 요청 수행
+    // - 쿼리 파라미터 자동 인코딩
+    // - 카카오 인증 헤더 자동 추가
+    final response = await _dio.get(
+      url,
+      queryParameters: query,
+      options: Options(headers: _headers),
+    );
+
+    // ③ HTTP 상태 코드 검증
+    if (response.statusCode == 200) {
+      final data = response.data;
+
+      // ④ 응답 데이터 타입 체크
+      // 카카오 API는 항상 JSON 객체를 반환해야 함
+      if (data is Map<String, dynamic>) {
+        return data;
+      }
+      throw Exception('카카오 API 응답 포맷 오류: Map<String, dynamic>가 아닙니다.');
+    }
+
+    // ⑤ HTTP 오류 발생 시 예외 처리
+    throw Exception('카카오 API 요청 실패: ${response.statusCode}');
+  }
+
   /// 키워드로 장소 검색
   ///
-  /// **API:** https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-keyword
-  ///
-  /// **Parameters:**
-  /// - `query`: 검색 키워드 (예: "아주대학교")
-  /// - `x`: (선택) 중심 경도 (결과 정렬용)
-  /// - `y`: (선택) 중심 위도 (결과 정렬용)
-  /// - `radius`: (선택) 검색 반경 (미터, 기본값: 20000)
-  /// - `page`: (선택) 페이지 번호 (1~45, 기본값: 1)
-  /// - `size`: (선택) 한 페이지에 보여질 문서 수 (1~15, 기본값: 15)
-  ///
-  /// **Returns:**
-  /// - 성공: JSON 응답 (Map<String, dynamic>)
-  /// - 실패: Exception
-  ///
-  /// **응답 구조:**
-  /// ```json
-  /// {
-  ///   "documents": [
-  ///     {
-  ///       "place_name": "아주대학교",
-  ///       "address_name": "경기 수원시 영통구 원천동 산5",
-  ///       "road_address_name": "경기 수원시 영통구 월드컵로 206",
-  ///       "x": "127.044696258564",
-  ///       "y": "37.2822455365507",
-  ///       "category_name": "교육,연구 > 학교 > 대학교",
-  ///       "phone": "031-219-2114"
-  ///     }
-  ///   ]
-  /// }
-  /// ```
+  /// API: /search/keyword.json
   Future<Map<String, dynamic>> searchPlaces(
     String query, {
     double? x,
@@ -88,294 +111,182 @@ class KakaoLocalApiService {
     int page = 1,
     int size = 15,
   }) async {
-    // URL 구성
-    final uri = Uri.parse(
-      'https://dapi.kakao.com/v2/local/search/keyword.json',
-    ).replace(queryParameters: {
+    final queryParams = <String, dynamic>{
       'query': query,
-      if (x != null) 'x': x.toString(),
-      if (y != null) 'y': y.toString(),
-      if (radius != null) 'radius': radius.toString(),
-      'page': page.toString(),
-      'size': size.toString(),
-    });
+      'page': '$page',
+      'size': '$size',
+      if (x != null) 'x': '$x',
+      if (y != null) 'y': '$y',
+      if (radius != null) 'radius': '$radius',
+    };
 
-    // HTTP GET 요청
-    final response = await http.get(uri, headers: _headers);
+    return _getJson(
+      '/search/keyword.json',
+      query: queryParams,
+    );
+  }
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body) as Map<String, dynamic>;
-    } else {
-      throw Exception('장소 검색 실패: ${response.statusCode}');
-    }
+  /// Kakao Local API 주소 응답에서 행정구역 depth 정보를 일괄 추출합니다.
+  ///
+  /// 사용 대상:
+  /// - `address`
+  /// - `road_address`
+  ///
+  /// 처리 방식:
+  /// - `region_1depth_name`, `region_2depth_name`, `region_3depth_name` 순서대로 읽습니다.
+  /// - 값이 `null`이거나 빈 문자열인 항목은 제거합니다.
+  /// - `addressData`가 `null`이거나 유효한 필드가 하나도 없으면 빈 리스트를 반환합니다.
+  ///
+  /// 예:
+  /// - addressData가
+  ///   {
+  ///     "region_1depth_name": "경기도",
+  ///     "region_2depth_name": "수원시 영통구",
+  ///     "region_3depth_name": "원천동"
+  ///   }
+  ///   인 경우 → ["경기도", "수원시 영통구", "원천동"] 반환
+  ///
+  /// 주의:
+  /// - Kakao Local API의 필드 명명 규칙(`region_1depth_name` 등)에 강하게 의존합니다.
+  ///   필드 구조가 변경되면 이 함수도 함께 수정해야 합니다.
+  
+  List<String> _extractRegionParts(Map<String, dynamic>? addressData) {
+    if (addressData == null) return [];
+
+    return [1, 2, 3]
+        .map((i) => (addressData['region_${i}depth_name'] ?? '').toString())
+        .where((region) => region.isNotEmpty)
+        .toList();
   }
 
   /// 좌표를 주소로 변환 (역지오코딩)
   ///
-  /// **API:** https://developers.kakao.com/docs/latest/ko/local/dev-guide#coord-to-address
+  /// API: /geo/coord2address.json
   ///
-  /// **Parameters:**
-  /// - `latitude`: 위도 (WGS84 좌표계)
-  /// - `longitude`: 경도 (WGS84 좌표계)
-  ///
-  /// **Returns:**
-  /// - 성공: "경기도 수원시 영통구 원천동"
-  /// - 실패: "알 수 없는 위치"
-  ///
-  /// **응답 구조:**
-  /// ```json
-  /// {
-  ///   "documents": [
-  ///     {
-  ///       "address": {
-  ///         "region_1depth_name": "경기도",
-  ///         "region_2depth_name": "수원시 영통구",
-  ///         "region_3depth_name": "원천동"
-  ///       },
-  ///       "road_address": {
-  ///         "region_1depth_name": "경기도",
-  ///         "region_2depth_name": "수원시 영통구",
-  ///         "region_3depth_name": "원천동",
-  ///         "road_name": "월드컵로"
-  ///       }
-  ///     }
-  ///   ]
-  /// }
-  /// ```
+  /// 성공: "경기도 수원시 영통구 원천동"
+  /// 실패: "알 수 없는 위치"
   Future<String> getAddressFromCoordinates({
     required double latitude,
     required double longitude,
   }) async {
     try {
-      // URL 구성
-      final uri = Uri.parse(
-        'https://dapi.kakao.com/v2/local/geo/coord2address.json',
-      ).replace(queryParameters: {
-        'x': longitude.toString(),
-        'y': latitude.toString(),
-      });
+      final jsonResponse = await _getJson(
+        '/geo/coord2address.json',
+        query: {
+          'x': longitude.toString(),
+          'y': latitude.toString(),
+        },
+      );
 
-      // HTTP GET 요청
-      final response = await http.get(uri, headers: _headers);
+      final documents =
+          jsonResponse['documents'] as List<dynamic>? ?? <dynamic>[];
 
-      // 응답 확인
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        final List<dynamic> documents = jsonResponse['documents'];
-
-        // 결과가 없는 경우
-        if (documents.isEmpty) {
-          return '알 수 없는 위치';
-        }
-
-        final doc = documents[0];
-
-        // 도로명 주소 우선, 없으면 지번 주소 사용
-        final roadAddress = doc['road_address'];
-        final address = doc['address'];
-
-        final parts = <String>[];
-
-        if (roadAddress != null) {
-          // 도로명 주소 조합
-          final region1 = roadAddress['region_1depth_name'] ?? '';
-          final region2 = roadAddress['region_2depth_name'] ?? '';
-          final region3 = roadAddress['region_3depth_name'] ?? '';
-
-          if (region1.isNotEmpty) parts.add(region1);
-          if (region2.isNotEmpty) parts.add(region2);
-          if (region3.isNotEmpty) parts.add(region3);
-        } else if (address != null) {
-          // 지번 주소 조합
-          final region1 = address['region_1depth_name'] ?? '';
-          final region2 = address['region_2depth_name'] ?? '';
-          final region3 = address['region_3depth_name'] ?? '';
-
-          if (region1.isNotEmpty) parts.add(region1);
-          if (region2.isNotEmpty) parts.add(region2);
-          if (region3.isNotEmpty) parts.add(region3);
-        }
-
-        // 주소 조합 결과 반환
-        return parts.isEmpty ? '알 수 없는 위치' : parts.join(' ');
+      if (documents.isEmpty) {
+        return _unknownLocationLabel;
       }
 
-      // HTTP 오류
-      return '알 수 없는 위치';
-    } catch (e) {
-      // 모든 예외를 기본값으로 처리
-      return '알 수 없는 위치';
+      final doc = documents.first as Map<String, dynamic>;
+      final roadAddress = doc['road_address'] as Map<String, dynamic>?;
+      final address = doc['address'] as Map<String, dynamic>?;
+
+      final parts = _extractRegionParts(roadAddress);
+      if (parts.isEmpty) {
+        parts.addAll(_extractRegionParts(address));
+      }
+
+      return parts.isEmpty ? _unknownLocationLabel : parts.join(' ');
+    } catch (_) {
+      return _unknownLocationLabel;
     }
   }
 
   /// 주소로 좌표 검색 (지오코딩)
   ///
-  /// **API:** https://developers.kakao.com/docs/latest/ko/local/dev-guide#address-coord
-  ///
-  /// **Parameters:**
-  /// - `address`: 주소 (예: "경기 수원시 영통구 월드컵로 206")
-  ///
-  /// **Returns:**
-  /// - 성공: JSON 응답
-  /// - 실패: Exception
-  ///
-  /// **응답 구조:**
-  /// ```json
-  /// {
-  ///   "documents": [
-  ///     {
-  ///       "address_name": "경기 수원시 영통구 원천동 산5",
-  ///       "x": "127.044696258564",
-  ///       "y": "37.2822455365507"
-  ///     }
-  ///   ]
-  /// }
-  /// ```
+  /// API: /search/address.json
   Future<Map<String, dynamic>> getCoordinatesFromAddress(
     String address,
   ) async {
-    // URL 구성
-    final uri = Uri.parse(
-      'https://dapi.kakao.com/v2/local/search/address.json',
-    ).replace(queryParameters: {
-      'query': address,
-    });
-
-    // HTTP GET 요청
-    final response = await http.get(uri, headers: _headers);
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body) as Map<String, dynamic>;
-    } else {
-      throw Exception('주소 검색 실패: ${response.statusCode}');
-    }
+    return _getJson(
+      '/search/address.json',
+      query: {
+        'query': address,
+      },
+    );
   }
 
   /// 좌표 기반 주변 장소 검색 (카테고리 검색 API)
   ///
-  /// **API:** https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-category
+  /// API: /search/category.json
   ///
-  /// **Parameters:**
-  /// - `latitude`: 위도 (WGS84)
-  /// - `longitude`: 경도 (WGS84)
-  /// - `radius`: 검색 반경 (미터, 기본값: 50m, 최대: 20000m)
-  ///
-  /// **Returns:**
-  /// - 성공: List of POI (거리순 정렬)
-  /// - 실패: Exception
-  ///
-  /// **카테고리 코드:**
-  /// - MT1: 대형마트, CS2: 편의점, PS3: 어린이집/유치원
-  /// - SC4: 학교, AC5: 학원, PK6: 주차장
-  /// - OL7: 주유소, SW8: 지하철역, BK9: 은행
-  /// - CT1: 문화시설, AG2: 중개업소, PO3: 공공기관
-  /// - AT4: 관광명소, AD5: 숙박, FD6: 음식점
-  /// - CE7: 카페, HP8: 병원, PM9: 약국
-  ///
-  /// **응답 구조:**
-  /// ```json
-  /// {
-  ///   "documents": [
-  ///     {
-  ///       "place_name": "스타벅스 아주대R&D점",
-  ///       "category_name": "음식점 > 카페",
-  ///       "address_name": "경기 수원시 영통구 이의동 864",
-  ///       "road_address_name": "경기 수원시 영통구 광교로 145",
-  ///       "x": "127.044812",
-  ///       "y": "37.282156",
-  ///       "distance": "23"
-  ///     }
-  ///   ]
-  /// }
-  /// ```
+  /// 반환: 카테고리 우선순위 + 거리순 정렬, 최대 5개
   Future<List<Map<String, dynamic>>> searchNearbyPlaces({
     required double latitude,
     required double longitude,
     int radius = 50,
   }) async {
-    // 주요 카테고리 코드 (사용자가 관심있을 만한 것들)
-    final categories = [
-      'SC4', // 학교
-      'PO3', // 공공기관
-      'CE7', // 카페 (우선순위 높음)
-      'FD6', // 음식점
-      'CS2', // 편의점
-      'SW8', // 지하철역
-      'BK9', // 은행
-      'MT1', // 대형마트
-      'HP8', // 병원
-      'PM9', // 약국
-      'CT1', // 문화시설
-      'AT4', // 관광명소
-    ];
-
+    final categories = KakaoCategoryCode.values;
     final allResults = <Map<String, dynamic>>[];
 
-    // 각 카테고리별로 검색 (최대 5개씩)
     for (final category in categories) {
       try {
-        final uri = Uri.parse(
-          'https://dapi.kakao.com/v2/local/search/category.json',
-        ).replace(queryParameters: {
-          'category_group_code': category,
-          'x': longitude.toString(),
-          'y': latitude.toString(),
-          'radius': radius.toString(),
-          'sort': 'distance',
-          'size': '5',
-        });
+        final jsonResponse = await _getJson(
+          '/search/category.json',
+          query: {
+            'category_group_code': category.name,
+            'x': longitude.toString(),
+            'y': latitude.toString(),
+            'radius': radius.toString(),
+            'sort': 'distance',
+            'size': '5',
+          },
+        );
 
-        final response = await http.get(uri, headers: _headers);
+        final documents =
+            jsonResponse['documents'] as List<dynamic>? ?? <dynamic>[];
 
-        if (response.statusCode == 200) {
-          final jsonResponse =
-              json.decode(response.body) as Map<String, dynamic>;
-          final documents = jsonResponse['documents'] as List;
-
-          for (var doc in documents) {
-            allResults.add(doc as Map<String, dynamic>);
-          }
-
-          // 결과가 충분히 모이면 중단 (최대 15개)
-          if (allResults.length >= 15) {
-            break;
-          }
+        for (final doc in documents) {
+          allResults.add(doc as Map<String, dynamic>);
         }
-      } catch (e) {
-        // 개별 카테고리 실패는 무시하고 계속 진행
+
+        // 결과가 충분히 모이면 중단 (최대 15개)
+        if (allResults.length >= 15) {
+          break;
+        }
+      } catch (_) {
+        // 카테고리 하나 실패해도 전체는 계속 진행
         continue;
       }
     }
 
     // 카테고리 우선순위 유지 + 같은 카테고리 내 거리순 정렬
     allResults.sort((a, b) {
-      // 카테고리 코드 추출
       final categoryA = a['category_group_code']?.toString() ?? '';
       final categoryB = b['category_group_code']?.toString() ?? '';
 
-      // categories 배열에서 우선순위 인덱스 찾기
-      final priorityA = categories.indexOf(categoryA);
-      final priorityB = categories.indexOf(categoryB);
+      int indexOfCode(String code) {
+        return categories.indexWhere((c) => c.name == code);
+      }
 
-      // 우선순위가 다르면 카테고리 우선순위로 정렬
+      final priorityA = indexOfCode(categoryA);
+      final priorityB = indexOfCode(categoryB);
+
       if (priorityA != priorityB) {
-        // -1(없음)은 맨 뒤로
         if (priorityA == -1) return 1;
         if (priorityB == -1) return -1;
         return priorityA.compareTo(priorityB);
       }
 
-      // 같은 카테고리면 거리순 정렬
       final distA =
           int.tryParse(a['distance']?.toString() ?? '999999') ?? 999999;
       final distB =
           int.tryParse(b['distance']?.toString() ?? '999999') ?? 999999;
+
       return distA.compareTo(distB);
     });
 
-    // 중복 제거 (같은 place_id)
+    // 중복 제거 (같은 place_id 기준)
     final uniqueResults = <String, Map<String, dynamic>>{};
-    for (var result in allResults) {
+    for (final result in allResults) {
       final id =
           result['id']?.toString() ?? result['place_name']?.toString() ?? '';
       if (id.isNotEmpty && !uniqueResults.containsKey(id)) {
@@ -383,7 +294,6 @@ class KakaoLocalApiService {
       }
     }
 
-    // 최대 5개만 반환
     return uniqueResults.values.take(5).toList();
   }
 }
