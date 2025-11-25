@@ -40,7 +40,7 @@ class KakaoLocalApiService {
   Map<String, String> get _headers => {
         'Authorization': 'KakaoAK $_apiKey',
       };
-
+  
   /// 공통 URL 빌더
   String _buildUrl(String path) {
     return '$_baseUrl$path';

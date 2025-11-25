@@ -142,7 +142,11 @@ class NaverMapView extends GetView<NaverMapViewController> {
 
                     final locationController =
                         DI.get<LocationAnnouncementController>();
-                    locationController.announceNearbyBuilding();
+                        
+                    locationController.announceNearbyBuilding(
+                      controller.currentLatitude.value,
+                      controller.currentLongitude.value
+                    );
                     HapticFeedback.mediumImpact();
                   },
                   backgroundColor: Colors.blue,

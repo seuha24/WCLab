@@ -40,7 +40,7 @@ class LocationAnnouncementController {
 
   /// 카카오 로컬 API Repository (주변 POI 검색)
   final KakaoRepository kakaoRepository;
-
+  
   /// TTS 서비스
   final TtsService ttsService;
 
@@ -70,7 +70,7 @@ class LocationAnnouncementController {
   /// - GPS 정보 없음 → "GPS 정보를 가져올 수 없습니다"
   /// - 네트워크 에러 → "네트워크 연결을 확인해주세요"
   /// - 서버 에러 → "주변 건물 정보를 가져올 수 없습니다"
-  Future<void> announceNearbyBuilding() async {
+  Future<void> announceNearbyBuilding(curLat,curLng) async {
     // 중복 요청 방지 (디바운싱)
     if (_isLoading) {
       debugPrint('[LocationAnnouncement] ⏳ 이미 로딩 중입니다. 요청 무시됨');
@@ -81,7 +81,7 @@ class LocationAnnouncementController {
       _isLoading = true;
 
       // 타임아웃과 함께 실행
-      await _executeWithTimeout();
+      await _executeWithTimeout(curLat,curLng);
     } catch (e, stackTrace) {
       debugPrint('[LocationAnnouncement] ❌ 예외 발생: $e');
       debugPrint('[LocationAnnouncement] 스택 트레이스:\n$stackTrace');
@@ -93,10 +93,10 @@ class LocationAnnouncementController {
   }
 
   /// 타임아웃이 적용된 실제 검색 로직
-  Future<void> _executeWithTimeout() async {
+  Future<void> _executeWithTimeout(curLat,curLng) async {
     try {
       await Future.any([
-        _performSearch(),
+        _performSearch(curLat,curLng),
         Future.delayed(_timeout).then((_) => throw TimeoutException(
               '위치 정보 조회 시간이 초과되었습니다',
               _timeout,
@@ -109,32 +109,32 @@ class LocationAnnouncementController {
   }
 
   /// 실제 검색 수행 (타임아웃 내부 로직)
-  Future<void> _performSearch() async {
+  Future<void> _performSearch(curLat,curLng) async {
     // 0. 즉시 검색 시작 안내 (사용자 피드백)
     debugPrint('[LocationAnnouncement] 🔍 주변 장소 검색 시작');
-    await ttsService.speak('주변 장소를 검색합니다');
+    // await ttsService.speak('주변 장소를 검색합니다');
 
-    // 1. 현재 GPS 좌표 가져오기
-    final positionResult = await navigatorRepository.getCurrentPosition();
+    // // // 1. 현재 GPS 좌표 가져오기
+    // final positionResult = await navigatorRepository.getCurrentPosition();
 
-    await positionResult.fold(
-      (failure) async {
-        // GPS 조회 실패
-        debugPrint('[LocationAnnouncement] ❌ GPS 조회 실패: $failure');
-        await ttsService.speak('GPS 정보를 가져올 수 없습니다');
-      },
-      (position) async {
+    // await positionResult.fold(
+    //   (failure) async {
+    //     // GPS 조회 실패
+    //     debugPrint('[LocationAnnouncement] ❌ GPS 조회 실패: $failure');
+    //     await ttsService.speak('GPS 정보를 가져올 수 없습니다');
+    //   },
+    //   (position) async {
         // GPS 좌표 성공
         debugPrint('[LocationAnnouncement] ✅ GPS 좌표 수신:');
-        debugPrint('  - 위도(Latitude): ${position.latitude}');
-        debugPrint('  - 경도(Longitude): ${position.longitude}');
+        debugPrint('  - 위도(Latitude): $curLat');
+        debugPrint('  - 경도(Longitude): $curLng');
 
         // 2. 주변 POI 검색 (카카오 Category Search API)
         debugPrint('[LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작');
         debugPrint('  - 검색 반경: 50m');
         final placesResult = await kakaoRepository.searchNearbyPlaces(
-          latitude: position.latitude,
-          longitude: position.longitude,
+          latitude: curLat,
+          longitude: curLng,
           radius: 50,
         );
 
@@ -142,13 +142,13 @@ class LocationAnnouncementController {
           (failure) {
             // POI 검색 실패
             debugPrint('[LocationAnnouncement] ❌ POI 검색 실패: $failure');
-            ttsService.speak('주변 장소를 찾을 수 없습니다');
+            // ttsService.speak('주변 장소를 찾을 수 없습니다');
           },
           (places) {
             if (places.isEmpty) {
               // 검색 결과 없음
               debugPrint('[LocationAnnouncement] ⚠️ 주변에 등록된 장소가 없습니다');
-              ttsService.speak('주변에 등록된 장소가 없습니다');
+              // ttsService.speak('주변에 등록된 장소가 없습니다');
               return;
             }
 
@@ -171,8 +171,6 @@ class LocationAnnouncementController {
             ttsService.speak(message);
           },
         );
-      },
-    );
   }
 
   /// PlaceResult를 TTS 메시지로 변환
