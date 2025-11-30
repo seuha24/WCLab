@@ -69,7 +69,6 @@ part '../presentation/views/main_view.dart';
 part '../presentation/views/map_view.dart';
 part '../presentation/views/sign_in_view.dart';
 part '../presentation/views/tutorial_view.dart';
-part '../presentation/views/flashlight_view.dart';
 part '../presentation/views/blue_off_view.dart';
 
 // =====================================================================
