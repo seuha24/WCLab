@@ -22,6 +22,75 @@ class MapPanelController extends GetxController {
     mapController = Get.find<NaverMapViewController>();
   }
 
+  /// 즐겨찾기 지점으로 경로 안내를 시작합니다
+  Future<void> startNavigationWithFavoritePoint(
+    BuildContext context,
+    FavoritePoint point,
+  ) async {
+    // 출입구 좌표가 있으면 사용, 없으면 일반 좌표 사용
+    final lat = point.entranceLatitude ?? point.latitude;
+    final lng = point.entranceLongitude ?? point.longitude;
+
+    // 목적지 설정
+    mapController.handleDestinationLocationSelection(
+      GeoLocation(lat: lat, lng: lng),
+    );
+
+    // SearchBloc 목적지 텍스트 업데이트
+    context.read<SearchBloc>().add(
+          SearchDestinationRequested(
+            searchDestination: point.name,
+            geoLocation: GeoLocation(lat: lat, lng: lng),
+          ),
+        );
+
+    // 경로 선택 모달 표시
+    String? selectedRoute = await showRouteSelectionModal(context);
+    if (selectedRoute != null) {
+      mapController.chooseRoute.value = selectedRoute;
+      await mapController.startNavigation();
+
+      // 즐겨찾기 패널 닫기
+      slidingController.collapseSlidingBar('favorite_panel');
+    }
+  }
+
+  /// 즐겨찾기 경로로 경로 안내를 시작합니다
+  Future<void> startNavigationWithFavoriteRoute(
+    BuildContext context,
+    FavoriteRoute route,
+  ) async {
+    if (route.startPoint == null || route.finishPoint == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('출발지 또는 목적지 정보가 없습니다.')),
+      );
+      return;
+    }
+
+    // 경유지 리스트 생성
+    List<LatLng> waypoints = route.stopovers
+        .whereType<RoutePoint>()
+        .map((s) => LatLng(s.latitude, s.longitude))
+        .toList();
+
+    // 경로 선택 모달 표시
+    String? selectedRoute = await showRouteSelectionModal(context);
+    if (selectedRoute != null) {
+      // 경로 안내 시작
+      await mapController.startNavigationWithRoute(
+        startLatitude: route.startPoint!.latitude,
+        startLongitude: route.startPoint!.longitude,
+        endLatitude: route.finishPoint!.latitude,
+        endLongitude: route.finishPoint!.longitude,
+        waypoints: waypoints,
+        chooseRoute: selectedRoute,
+      );
+
+      // 즐겨찾기 패널 닫기
+      slidingController.collapseSlidingBar('favorite_panel');
+    }
+  }
+
   /// 출발지 검색 화면을 엽니다
   Future<GeoLocation?> openStartLocationSearch(BuildContext context) async {
     return await Navigator.push(

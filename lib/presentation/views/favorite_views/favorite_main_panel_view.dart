@@ -55,6 +55,7 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
   List<GlobalKey> keys = [GlobalKey(), GlobalKey()];
   late DraggableScrollableController _controller;
   late SlidingPanelController _slidingController;
+  late MapPanelController _mapPanelController;
 
   // 현재 패널 상태 관리
   FavoritePanelState _currentState = FavoritePanelState.main;
@@ -81,9 +82,10 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
     _initializeUseCases();
     _controller = DraggableScrollableController();
     _slidingController = Get.find<SlidingPanelController>();
+    _mapPanelController = Get.find<MapPanelController>();
 
     _slidingController.registerPanel(
-      'favorite_panel', //패널 식별자
+      'favorite_panel',
       _controller,
       config: PanelConfig(
         minHeight: 0.0,
@@ -820,6 +822,10 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
             fontSize: 12,
           ),
         ),
+        onTap: () => _mapPanelController.startNavigationWithFavoritePoint(
+          context,
+          point,
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -864,6 +870,10 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
             color: Colors.grey[600],
             fontSize: 12,
           ),
+        ),
+        onTap: () => _mapPanelController.startNavigationWithFavoriteRoute(
+          context,
+          route,
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

@@ -12,6 +12,8 @@ import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
 import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:safelight/domain/entities/branch_info.dart';
+import 'package:safelight/domain/entities/favorite_point.dart';
+import 'package:safelight/domain/entities/favorite_route.dart';
 import 'package:safelight/domain/entities/place_result.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
