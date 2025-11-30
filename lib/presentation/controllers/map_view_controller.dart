@@ -393,10 +393,10 @@ class NaverMapViewController extends GetxController {
       indexController.reset(startIndex: 0);
       // 6️⃣ 나침반 기준 yaw 오프셋 설정
       routeController.resetDeviationYaw(targetIndex, compass);
-      // 7️⃣ 지도 오버레이 추가
-      overlayController
-        ..addPathOverlays(routeController.paths)
-        ..addBranchMarkers();
+      // 7️⃣ 기존 오버레이 제거 후 새로 추가
+      await overlayController.clearOverlays();
+      overlayController.addPathOverlays(routeController.paths);
+      await overlayController.addBranchMarkers();
       // 8️⃣ 네비게이션 시작
       startNavigationTimer();
 
@@ -435,14 +435,16 @@ class NaverMapViewController extends GetxController {
     // 경유지 저장 (재검색시 사용)
     currentWaypoints = waypoints;
 
-    // 경유지 포함 경로 로드
-    await routeController.loadPathDataWithWaypoints(
+    // 경유지 포함 경로 안내 시작 (startNavigationWithPath 활용)
+    await startNavigationWithPath(
       startLatitude,
       startLongitude,
       endLatitude,
       endLongitude,
-      waypoints,
       chooseRoute,
+      compassValue.value,
+      indexController.targetIndex,
+      waypoints: waypoints,
     );
   }
 
@@ -515,27 +517,17 @@ class NaverMapViewController extends GetxController {
           // 10초 이상 지속 시 경로 재검색
           debugPrint('출발지와 너무 멀어짐. 10초 후 자동으로 경로 재검색 수행');
 
-          // 현재 위치를 새로운 출발지로 설정하고 지도 업데이트
-          // 경유지가 있으면 경유지 포함 경로 재검색
-          if (currentWaypoints.isNotEmpty) {
-            debugPrint('경유지 ${currentWaypoints.length}개를 포함한 경로 재검색');
-            await routeController.loadPathDataWithWaypoints(
-              currentLatitude.value,
-              currentLongitude.value,
-              selectedDestLocation.value!.lat,
-              selectedDestLocation.value!.lng,
-              currentWaypoints,
-              chooseRoute.value,
-            );
-          } else {
-            await routeController.loadPathData(
-              currentLatitude.value,
-              currentLongitude.value,
-              selectedDestLocation.value!.lat,
-              selectedDestLocation.value!.lng,
-              chooseRoute.value,
-            );
-          }
+          // 현재 위치를 새로운 출발지로 설정하고 경로 재검색
+          await startNavigationWithPath(
+            currentLatitude.value,
+            currentLongitude.value,
+            selectedDestLocation.value!.lat,
+            selectedDestLocation.value!.lng,
+            chooseRoute.value,
+            compassValue.value,
+            indexController.targetIndex,
+            waypoints: currentWaypoints,
+          );
           speakText("출발지에 벗어나 새로운 경로로 안내합니다.");
           debugPrint('출발지를 현재 위치로 변경하고 지도 업데이트 완료');
           searchStartNewPathTime = 0; // 카운트 초기화
@@ -608,27 +600,18 @@ class NaverMapViewController extends GetxController {
           if (searchNewPath) {
             searchNewPathTime++;
             if (searchNewPathTime >= 5) {
-              // 경유지가 있으면 경유지 포함 경로 재검색
-              if (currentWaypoints.isNotEmpty) {
-                debugPrint(
-                    '경로 이탈 - 경유지 ${currentWaypoints.length}개를 포함한 경로 재검색');
-                await routeController.loadPathDataWithWaypoints(
-                  currentLatitude.value,
-                  currentLongitude.value,
-                  selectedDestLocation.value!.lat,
-                  selectedDestLocation.value!.lng,
-                  currentWaypoints,
-                  chooseRoute.value,
-                );
-              } else {
-                await routeController.loadPathData(
-                  currentLatitude.value,
-                  currentLongitude.value,
-                  selectedDestLocation.value!.lat,
-                  selectedDestLocation.value!.lng,
-                  chooseRoute.value,
-                );
-              }
+              // 현재 위치에서 경로 재검색
+              debugPrint('경로 이탈 - 경로 재검색 수행');
+              await startNavigationWithPath(
+                currentLatitude.value,
+                currentLongitude.value,
+                selectedDestLocation.value!.lat,
+                selectedDestLocation.value!.lng,
+                chooseRoute.value,
+                compassValue.value,
+                indexController.targetIndex,
+                waypoints: currentWaypoints,
+              );
               speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
               searchNewPathTime = 0;
             }
