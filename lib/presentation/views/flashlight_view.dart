@@ -17,7 +17,7 @@ class FlashlightView extends StatefulWidget {
 }
 
 class _FlashlightViewState extends State<FlashlightView> {
-  final tts = DI.get<TTS>();
+  final tts = DI.get<TtsService>();
   final message = DI.get<Message>();
 
   @override
@@ -45,14 +45,14 @@ class _FlashlightViewState extends State<FlashlightView> {
                 onPressed: () async {
                   final result = await widget.flashOn(NoParams());
                   if (result.isLeft()) {
-                    tts('안전 경광등을 사용할 수 없습니다.');
+                    tts.speak('안전 경광등을 사용할 수 없습니다.');
                     message.snackbar(
                       context,
                       text: '안전 경광등을 사용할 수 없습니다.',
                       position: SnackBarBehavior.fixed,
                     );
                   } else {
-                    tts('안전 경광등이 켜졌습니다.');
+                    tts.speak('안전 경광등이 켜졌습니다.');
                     message.snackbar(
                       context,
                       text: '안전 경광등이 켜졌습니다.',
@@ -78,14 +78,14 @@ class _FlashlightViewState extends State<FlashlightView> {
                 onPressed: () async {
                   final result = await widget.flashOff(NoParams());
                   if (result.isLeft()) {
-                    tts('안전 경광등을 사용할 수 없습니다.');
+                    tts.speak('안전 경광등을 사용할 수 없습니다.');
                     message.snackbar(
                       context,
                       text: '안전 경광등을 사용할 수 없습니다.',
                       position: SnackBarBehavior.fixed,
                     );
                   } else {
-                    tts('안전 경광등이 꺼졌습니다.');
+                    tts.speak('안전 경광등이 꺼졌습니다.');
                     message.snackbar(
                       context,
                       text: '안전 경광등이 꺼졌습니다.',

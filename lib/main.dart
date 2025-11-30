@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:safelight/data/services/tts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/data/services/auth_service.dart';
@@ -62,7 +62,9 @@ class SafeLight extends StatelessWidget {
             SystemTheme.mode,
             defaultValue: ThemeMode.system.name,
           );
-          TTS.enable = box.get('tts', defaultValue: false);
+          // TTS 활성화 상태 설정
+          final ttsEnabled = box.get('tts', defaultValue: false);
+          DI.get<TtsService>().setEnabled(ttsEnabled);
           return MultiBlocProvider(
             providers: [
               BlocProvider(

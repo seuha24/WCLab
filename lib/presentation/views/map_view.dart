@@ -3,8 +3,10 @@ part of '../../framework/ui.dart';
 class NaverMapView extends GetView<NaverMapViewController> {
   const NaverMapView({super.key});
 
+  
   @override
   Widget build(BuildContext context) {
+    final tts = DI.get<TtsService>();
     final box = Hive.box(SystemTheme.themeBox);
     final mode = box.get(SystemTheme.mode);
     final systemBright = MediaQuery.of(context).platformBrightness;
@@ -79,7 +81,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     onMapTapped: (NPoint point, NLatLng latLng) {
                       int meters =
                           (controller.remainDistance.value * 1000).round();
-                      controller.speakText('다음 안내까지 ${meters}미터 남았습니다.');
+                      tts.speakWithChannel('다음 안내까지 ${meters}미터 남았습니다.', channel: ETtsChannel.FEEDBACK, cooldownKey: 'on_tap_remain_distance', cooldown: Duration(seconds: 0),);
                     },
                   ),
        
@@ -145,7 +147,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
                         
                     locationController.announceNearbyBuilding(
                       controller.currentLatitude.value,
-                      controller.currentLongitude.value
+                      controller.currentLongitude.value,
+                      controller.compassValue.value,
                     );
                     HapticFeedback.mediumImpact();
                   },

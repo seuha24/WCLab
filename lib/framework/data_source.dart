@@ -19,6 +19,7 @@ import 'package:safelight/data/network/api_endpoints.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:torch_light/torch_light.dart';
+import 'package:safelight/data/services/tts_service.dart';
 
 import 'package:camera/camera.dart' as cam;
 

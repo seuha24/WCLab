@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:safelight/data/services/tts_service.dart';
 
 // Domain Layer
 import 'package:safelight/domain/entities/auth_type.dart';
@@ -48,7 +49,7 @@ class FavoriteMainPanelView extends StatefulWidget {
 }
 
 class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
-  final tts = DI.get<TTS>();
+  final tts = DI.get<TtsService>();
   final message = DI.get<Message>();
   final AuthService _authService = AuthService();
 

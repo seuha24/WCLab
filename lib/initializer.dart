@@ -22,14 +22,14 @@ Future<void> init() async {
   // CrosswalkAPI.map 초기화 필요 없음
   CrosswalkAPI.map = [];
 
-  FlutterTts flutterTts = DI.get<FlutterTts>();
-  await flutterTts.awaitSpeakCompletion(true);
-  await flutterTts.setSharedInstance(true);
-  await flutterTts.setVolume(1.0);
-  await flutterTts.setIosAudioCategory(
-    IosTextToSpeechAudioCategory.playback,
-    [IosTextToSpeechAudioCategoryOptions.duckOthers],
-  );
+  // FlutterTts flutterTts = DI.get<FlutterTts>();
+  // await flutterTts.awaitSpeakCompletion(true);
+  // await flutterTts.setSharedInstance(true);
+  // await flutterTts.setVolume(1.0);
+  // await flutterTts.setIosAudioCategory(
+  //   IosTextToSpeechAudioCategory.playback,
+  //   [IosTextToSpeechAudioCategoryOptions.duckOthers],
+  // );
 
   await requestPermissions();
 }

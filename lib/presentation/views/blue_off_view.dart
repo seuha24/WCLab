@@ -11,12 +11,12 @@ class BlueOffView extends StatefulWidget {
 }
 
 class _BlueOffViewState extends State<BlueOffView> {
-  final tts = DI.get<TTS>();
+  final tts = DI.get<TtsService>();
 
   @override
   void initState() {
     super.initState();
-    tts('블루투스가 꺼져 있습니다. 블루투스를 켜주세요.');
+    tts.speak('블루투스가 꺼져 있습니다. 블루투스를 켜주세요.');
   }
 
   @override

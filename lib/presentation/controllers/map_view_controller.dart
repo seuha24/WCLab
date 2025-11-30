@@ -22,7 +22,7 @@ class NaverMapViewController extends GetxController {
   /// API 서비스 (경로 데이터 요청 등)
   final NavigationApiService apiService = DI.get<NavigationApiService>();
   /// TTS 서비스 (텍스트를 음성으로 변환)
-  final TtsService ttsService = DI.get<TtsService>();
+  final TtsService tts = DI.get<TtsService>();
   /// 센서 컨트롤러 (센서 데이터 수집 및 처리)
   final SensorController sensorController = DI<SensorController>();
   /// 센서 허브
@@ -148,6 +148,9 @@ class NaverMapViewController extends GetxController {
   /// 나침반 데이터 수신 완료 여부를 판단하기 위한 Completer
   Completer<void> compassReady = Completer<void>();
 
+  /// POI 안내 마지막 호출 시간 (API 호출 빈도 제한용)
+  DateTime? _lastPoiAnnouncementTime;
+
   // 방향 관련 변수
   late double? heading;
   double firstBearingToPoint = 0.0;
@@ -158,7 +161,7 @@ class NaverMapViewController extends GetxController {
 
   // 경계 및 재경로 검색 관련 변수들
   bool outOfBound = false;
-  double boundary = 1.5; // 경계 이탈 감지 거리 (1.5미터)
+  double boundary = 3; // 경계 이탈 감지 거리 (1.5미터)
   bool searchNewPath = false;
   /// 경계 조건 문자열 (디버깅용)
   String checkBoundaryCondition = "";
@@ -195,6 +198,7 @@ class NaverMapViewController extends GetxController {
   /// onClose: 컨트롤러 종료 시 타이머 및 센서 스트림 구독을 취소합니다.
   @override
   void onClose() {
+    tts.stopAll();
     _locationUpdateTimer?.cancel();
     // 센서 스트림 구독 취소
     _compassSub?.cancel();
@@ -496,7 +500,12 @@ class NaverMapViewController extends GetxController {
           debugPrint('목적지 도착 감지: ${destinationDistance * 1000}m');
 
           // TTS 음성 안내
-          await speakText("목적지에 도착했습니다.");
+          await tts.speakWithChannel(
+            '목적지에 도착했습니다.',
+            channel:ETtsChannel.NAVIGATE,
+            cooldownKey: 'arrive_destination',
+            cooldown: Duration(seconds: 20),
+          );
 
           // 경로 안내 자동 종료
           await stopNavigationTimer();
@@ -544,7 +553,13 @@ class NaverMapViewController extends GetxController {
               chooseRoute.value,
             );
           }
-          speakText("출발지에 벗어나 새로운 경로로 안내합니다.");
+          
+          tts.speakWithChannel(
+            '출발지에 벗어나 새로운 경로로 안내합니다.',
+            channel: ETtsChannel.NAVIGATE,
+            cooldownKey: 'research_out_of_start',
+            cooldown: Duration(seconds: 10),
+          );
           debugPrint('출발지를 현재 위치로 변경하고 지도 업데이트 완료');
           _startPointDeviationTime = null; // 시간 초기화
         }
@@ -590,18 +605,27 @@ class NaverMapViewController extends GetxController {
             } else {
               debugPrint('안전 경광등이 켜졌습니다.');
             }
-            speakText('잠시 후 횡단보도 입니다. 차량에 유의하세요!');
+            
+            tts.speakWithChannel('잠시 후 횡단보도 입니다. 차량에 유의하세요!', channel: ETtsChannel.ALERT,cooldownKey: 'crosswalk_alert', cooldown: Duration(seconds: 2),);
           }
           if (routeController.branchinfo[indexController.targetIndex].branch == true) {
-            speakText('${routeController.branchinfo[indexController.targetIndex].description}하세요.');
+            
+            String message = routeController.branchinfo[indexController.targetIndex].description;
+            tts.speakWithChannel(message, channel: ETtsChannel.NAVIGATE, cooldownKey: 'branch_instruction', cooldown: Duration(seconds: 10),);
           }
         }
         /////////////////////////POI 안내 /////////////////////////
-        ///테스트//
-        locationAnnouncementController.announceNearbyBuilding(
-          currentLatitude.value,
-          currentLongitude.value,
-        );
+        // 10초에 한 번만 API 호출 (성능 최적화)
+        final now = DateTime.now();
+        if (_lastPoiAnnouncementTime == null ||
+            now.difference(_lastPoiAnnouncementTime!).inSeconds >= 20) {
+          _lastPoiAnnouncementTime = now;
+          locationAnnouncementController.announceNearbyBuilding(
+            currentLatitude.value,
+            currentLongitude.value,
+            compassValue.value,
+          );
+        }
 
         ///////////////////////////////경로내 진동 안내///////////////////////////
         if (indexController.currentIndex > 0 &&
@@ -611,16 +635,17 @@ class NaverMapViewController extends GetxController {
                 (routeController.branchinfo[indexController.currentIndex].bearingToPoint - compassValue.value)
                         .abs() >=
                     342)) {
-          Vibration.vibrate(duration: 200);
+          Vibration.vibrate(duration: 500);
           debugPrint(
               "경로내 진동 베어링 값 ${(routeController.branchinfo[indexController.currentIndex].bearingToPoint - compassValue.value)}");
         }
         ///////////////////////////////경계이탈 안내///////////////////////////
         if (outOfBound) {
           Vibration.vibrate(duration: 100);
-          debugPrint('경계이탈');
+          
           debugPrint('searchNewPath : $searchNewPath');
-          speakText(clock);
+          // speakText(clock);
+          tts.speakWithChannel(clock, channel: ETtsChannel.ALERT, cooldownKey: 'out_of_bound', cooldown: Duration(seconds: 2),);
           if (searchNewPath) {
             searchNewPathTime++;
             if (searchNewPathTime >= 5) {
@@ -645,7 +670,8 @@ class NaverMapViewController extends GetxController {
                   chooseRoute.value,
                 );
               }
-              speakText("경로를 이탈하여 새로운 경로로 안내합니다.");
+              
+              tts.speakWithChannel("경로를 이탈하여 새로운 경로로 안내합니다.", channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'research_out_of_path', cooldown: Duration(seconds: 10),);
               searchNewPathTime = 0;
             }
           } else {
@@ -653,7 +679,8 @@ class NaverMapViewController extends GetxController {
           }
         }
       } else if (isStart.value) {
-        speakText("출발지로 이동하세요.");
+        
+        tts.speakWithChannel("출발지로 이동하세요.", channel: ETtsChannel.NAVIGATE, cooldownKey: 'move_to_startpoint', cooldown: Duration(seconds: 5),);
       }
     });
   }
@@ -719,6 +746,8 @@ class NaverMapViewController extends GetxController {
     outOfBound             = result.outOfBound;
     searchNewPath          = result.searchNewPath;
     checkBoundaryCondition = result.condition;
+    debugPrint('경계 조건: $checkBoundaryCondition');
+    debugPrint('경계 이탈: $outOfBound');
   }
 
   /// resetStateVariables: 상태 초기화 메서드
@@ -942,34 +971,27 @@ class NaverMapViewController extends GetxController {
         // 경광등이 켜져 있으면 끄기
         final result = await flashOff(NoParams());
         if (result.isLeft()) {
-          speakText('안전 경광등을 끌 수 없습니다.');
+          
+          tts.speakWithChannel('안전 경광등을 끌 수 없습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_fail', cooldown: Duration(seconds: 5),);
         } else {
           isFlashOn.value = false;
-          speakText('안전 경광등이 꺼졌습니다.');
+          tts.speakWithChannel('안전 경광등이 꺼졌습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_success', cooldown: Duration(seconds: 5),);
         }
       } else {
         // 경광등이 꺼져 있으면 켜기
         final result = await flashOn(NoParams());
         if (result.isLeft()) {
-          speakText('안전 경광등을 켤 수 없습니다.');
+          tts.speakWithChannel('안전 경광등을 켤 수 없습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_fail', cooldown: Duration(seconds: 5),);
         } else {
           isFlashOn.value = true;
-          speakText('안전 경광등이 켜졌습니다.');
+          tts.speakWithChannel('안전 경광등이 켜졌습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_success', cooldown: Duration(seconds: 5),);
         }
       }
     } catch (e) {
       debugPrint('경광등 제어 중 오류 발생: $e');
-      speakText('안전 경광등 제어 중 오류가 발생했습니다.');
+      tts.speakWithChannel('경광등 제어 중 오류가 발생했습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_control_error', cooldown: Duration(seconds: 5),);
     }
   }
 
 
-  // ============================================================
-  // 11. 유틸리티 메서드
-  // ============================================================
-
-  /// speakText: 주어진 텍스트를 음성으로 출력합니다.
-  Future<void> speakText(String text) async {
-    await ttsService.speak(text);
-  }
 }

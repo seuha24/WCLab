@@ -11,7 +11,7 @@ class CrosswalkPanelView extends StatefulWidget {
 
 class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
   // TTS(Text-to-Speech) 서비스 인스턴스
-  final tts = DI.get<TTS>();
+  final tts = DI.get<TtsService>();
   // 스낵바 메시지 표시를 위한 메시지 서비스 인스턴스
   final message = DI.get<Message>();
 
