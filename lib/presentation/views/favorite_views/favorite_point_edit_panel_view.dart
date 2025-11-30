@@ -143,16 +143,14 @@ class _FavoritePointEditPanelViewState
 
       result.fold(
         (failure) {
-          // 수정 실패
+          if (mounted) widget.onNavigateBack?.call();
         },
         (success) {
-          if (mounted) {
-            widget.onSaveSuccess?.call();
-          }
+          if (mounted) widget.onSaveSuccess?.call();
         },
       );
     } catch (e) {
-      // 에러 발생
+      if (mounted) widget.onNavigateBack?.call();
     } finally {
       if (mounted) {
         setState(() {

@@ -293,16 +293,14 @@ class _FavoriteRouteAddPanelViewState extends State<FavoriteRouteAddPanelView> {
 
       result.fold(
         (failure) {
-          // 등록 실패
+          if (mounted) widget.onNavigateBack?.call();
         },
         (success) {
-          if (mounted) {
-            widget.onSaveSuccess?.call();
-          }
+          if (mounted) widget.onSaveSuccess?.call();
         },
       );
     } catch (e) {
-      // 에러 발생
+      if (mounted) widget.onNavigateBack?.call();
     } finally {
       if (mounted) {
         setState(() {
