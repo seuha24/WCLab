@@ -50,7 +50,11 @@ class MapOverlayController {
       return;
     }
 
-    final context = navigatorKey.currentContext!;
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      debugPrint("context가 없습니다. 마커 추가 불가");
+      return;
+    }
     final markersCache = <String, NMarker>{};
     final markersSet = <NAddableOverlay>{};
 
@@ -135,6 +139,10 @@ class MapOverlayController {
     MapControlMode mapMode,
   ) async {
     if (mapController == null) return;
+    if (navigatorKey.currentContext == null) {
+      debugPrint("context가 없습니다. 현재 위치 마커 업데이트 불가");
+      return;
+    }
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
 
