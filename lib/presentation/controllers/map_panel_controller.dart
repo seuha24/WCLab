@@ -27,6 +27,9 @@ class MapPanelController extends GetxController {
     BuildContext context,
     FavoritePoint point,
   ) async {
+    // TTS 안내 (fire-and-forget)
+    mapController.speakText('${point.name}으로 안내를 선택했습니다.');
+
     // 출입구 좌표가 있으면 사용, 없으면 일반 좌표 사용
     final lat = point.entranceLatitude ?? point.latitude;
     final lng = point.entranceLongitude ?? point.longitude;
@@ -60,6 +63,9 @@ class MapPanelController extends GetxController {
     BuildContext context,
     FavoriteRoute route,
   ) async {
+    // TTS 안내 (fire-and-forget)
+    mapController.speakText('${route.name}으로 안내를 선택했습니다.');
+
     if (route.startPoint == null || route.finishPoint == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('출발지 또는 목적지 정보가 없습니다.')),
