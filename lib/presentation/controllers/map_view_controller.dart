@@ -189,6 +189,8 @@ class NaverMapViewController extends GetxController {
   @override
   void onClose() {
     _locationUpdateTimer?.cancel();
+    navigationTimer?.cancel();
+    navigationTimer = null;
     // 센서 스트림 구독 취소
     _compassSub?.cancel();
     _accelSub?.cancel();
@@ -645,12 +647,11 @@ class NaverMapViewController extends GetxController {
       resetStateVariables();
       // 6. SearchBloc 상태 초기화
       if (_context != null) {
-        _context!
-            .read<SearchBloc>()
-            .add(SearchStartLocationRequested(searchLocation: ''));
-        _context!
-            .read<SearchBloc>()
-            .add(SearchDestinationRequested(searchDestination: ''));
+        final searchBloc = _context!.read<SearchBloc>();
+        if (!searchBloc.isClosed) {
+          searchBloc.add(SearchStartLocationRequested(searchLocation: ''));
+          searchBloc.add(SearchDestinationRequested(searchDestination: ''));
+        }
       }
       // 7. 현재 위치 마커만 다시 추가
       await overlayController.updateCurrentLocationMarker(currentLatitude.value,

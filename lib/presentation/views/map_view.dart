@@ -264,9 +264,12 @@ class NaverMapView extends GetView<NaverMapViewController> {
               if (controller.isNavigating.value) {
                 return Center(
                   child: FloatingActionButton.extended(
-                    onPressed: () {
-                      controller.stopNavigationTimer();
-                      context.read<SearchBloc>().add(SearchResetRequested());
+                    onPressed: () async {
+                      final searchBloc = context.read<SearchBloc>();
+                      await controller.stopNavigationTimer();
+                      if (!searchBloc.isClosed) {
+                        searchBloc.add(SearchResetRequested());
+                      }
                       controller.searchLocation.value = '';
                       controller.destinationLocation.value = '';
                     },
