@@ -87,19 +87,31 @@ class RouteController {
     }
   }
 
-  void checkWaypointsInBranchInfo(List<LatLng> waypoints){
-    for (final branch in branchinfo) {
-      for (final waypoint in waypoints) {
-        final distance = Calculators.calculateDistance(
+  /// 각 경유지에 대해 가장 가까운 분기점 하나만 경유지로 표시
+  void checkWaypointsInBranchInfo(List<LatLng> waypoints) {
+    for (final waypoint in waypoints) {
+      BranchInfo? closestBranch;
+      double minDistance = double.infinity;
+
+      // 첫 번째와 마지막 분기점(출발지/목적지)은 제외
+      for (int i = 1; i < branchinfo.length - 1; i++) {
+        final branch = branchinfo[i];
+        final distanceKm = Calculators.calculateDistance(
           branch.point.latitude,
           branch.point.longitude,
           waypoint.latitude,
           waypoint.longitude,
         );
-        if (distance < 20.0) { // 20m 이내면 경유지로 판단
-          branch.waypoint = true;
-          break;
+
+        if (distanceKm < minDistance) {
+          minDistance = distanceKm;
+          closestBranch = branch;
         }
+      }
+
+      // 가장 가까운 분기점만 경유지로 표시
+      if (closestBranch != null) {
+        closestBranch.waypoint = true;
       }
     }
   }
