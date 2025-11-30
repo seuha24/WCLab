@@ -180,11 +180,6 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
         serverUserId = await _authService.loadServerUserId();
 
         if (serverUserId == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('사용자 정보를 가져올 수 없습니다.')),
-            );
-          }
           return;
         }
       }
@@ -229,11 +224,7 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
         },
       );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('즐겨찾기를 불러오는 중 오류가 발생했습니다: $e')),
-        );
-      }
+      // 에러는 로딩 상태로 표시됨
     } finally {
       setState(() {
         _isLoadingFavorites = false;
@@ -351,11 +342,6 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
         serverUserId = await _authService.loadServerUserId();
 
         if (serverUserId == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('사용자 정보를 가져올 수 없습니다.')),
-            );
-          }
           return;
         }
       }
@@ -372,27 +358,16 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
 
       result.fold(
         (failure) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('지점 삭제에 실패했습니다.')),
-            );
-          }
+          // 삭제 실패 시 목록 새로고침
+          if (mounted) _loadFavorites();
         },
         (success) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('지점이 삭제되었습니다.')),
-            );
-            _loadFavorites();
-          }
+          if (mounted) _loadFavorites();
         },
       );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류가 발생했습니다: $e')),
-        );
-      }
+      // 에러 발생 시 목록 새로고침
+      if (mounted) _loadFavorites();
     }
   }
 
@@ -458,11 +433,6 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
         serverUserId = await _authService.loadServerUserId();
 
         if (serverUserId == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('사용자 정보를 가져올 수 없습니다.')),
-            );
-          }
           return;
         }
       }
@@ -479,27 +449,16 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
 
       result.fold(
         (failure) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('경로 삭제에 실패했습니다.')),
-            );
-          }
+          // 삭제 실패 시 목록 새로고침
+          if (mounted) _loadFavorites();
         },
         (success) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('경로가 삭제되었습니다.')),
-            );
-            _loadFavorites();
-          }
+          if (mounted) _loadFavorites();
         },
       );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류가 발생했습니다: $e')),
-        );
-      }
+      // 에러 발생 시 목록 새로고침
+      if (mounted) _loadFavorites();
     }
   }
 

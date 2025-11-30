@@ -165,23 +165,14 @@ class _FavoriteRouteEditPanelViewState
 
   Future<void> _updateFavoriteRouteData() async {
     if (_nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('경로 이름을 입력해주세요.')),
-      );
       return;
     }
 
     if (_startPoint == null || _finishPoint == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('출발지와 목적지를 모두 선택해주세요.')),
-      );
       return;
     }
 
     if (widget.favoriteRoute.favIdx == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('수정할 수 없는 항목입니다.')),
-      );
       return;
     }
 
@@ -192,9 +183,6 @@ class _FavoriteRouteEditPanelViewState
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인이 필요합니다.')),
-        );
         return;
       }
 
@@ -232,11 +220,6 @@ class _FavoriteRouteEditPanelViewState
         serverUserId = await _authService.loadServerUserId();
 
         if (serverUserId == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('사용자 정보를 가져올 수 없습니다.')),
-            );
-          }
           return;
         }
       }
@@ -257,27 +240,16 @@ class _FavoriteRouteEditPanelViewState
 
       result.fold(
         (failure) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('수정에 실패했습니다.')),
-            );
-          }
+          // 수정 실패
         },
         (success) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('수정되었습니다.')),
-            );
             widget.onSaveSuccess?.call();
           }
         },
       );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류가 발생했습니다: $e')),
-        );
-      }
+      // 에러 발생
     } finally {
       setState(() {
         _isLoading = false;

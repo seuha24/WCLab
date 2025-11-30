@@ -156,16 +156,10 @@ class _FavoritePointAddPanelViewState extends State<FavoritePointAddPanelView> {
 
   Future<void> _saveFavoritePoint() async {
     if (_nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('즐겨찾기 이름을 입력해주세요.')),
-      );
       return;
     }
 
     if (_selectedLatitude == null || _selectedLongitude == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('위치를 선택해주세요.')),
-      );
       return;
     }
 
@@ -177,9 +171,6 @@ class _FavoritePointAddPanelViewState extends State<FavoritePointAddPanelView> {
       // 사용자 정보 가져오기
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인이 필요합니다.')),
-        );
         return;
       }
 
@@ -217,11 +208,6 @@ class _FavoritePointAddPanelViewState extends State<FavoritePointAddPanelView> {
         serverUserId = await _authService.loadServerUserId();
 
         if (serverUserId == null) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('사용자 정보를 가져올 수 없습니다.')),
-            );
-          }
           return;
         }
       }
@@ -241,27 +227,16 @@ class _FavoritePointAddPanelViewState extends State<FavoritePointAddPanelView> {
 
       result.fold(
         (failure) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('즐겨찾기 등록에 실패했습니다.')),
-            );
-          }
+          // 등록 실패
         },
         (point) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('즐겨찾기가 등록되었습니다.')),
-            );
             widget.onSaveSuccess?.call();
           }
         },
       );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류가 발생했습니다: $e')),
-        );
-      }
+      // 에러 발생
     } finally {
       setState(() {
         _isLoading = false;
