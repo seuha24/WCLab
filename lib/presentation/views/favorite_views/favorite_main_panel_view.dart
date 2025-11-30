@@ -52,7 +52,6 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
   final message = DI.get<Message>();
   final AuthService _authService = AuthService();
 
-  List<GlobalKey> keys = [GlobalKey(), GlobalKey()];
   late DraggableScrollableController _controller;
   late SlidingPanelController _slidingController;
   late MapPanelController _mapPanelController;
