@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:safelight/data/models/favorite_point_model.dart';
 import 'package:safelight/data/models/favorite_route_model.dart';
 import 'package:safelight/data/network/api_endpoints.dart';
@@ -80,30 +78,17 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
   }) async {
     try {
       final url = ApiEndpoints.getFavoritePoints(loginMethod, userId);
-      
-      // GET 요청 로깅
-      debugPrint('=== 즐겨찾기 지점 조회 요청 ===');
-      debugPrint('URL: $url');
-      debugPrint('Login Method: $loginMethod');
-      debugPrint('User ID: $userId');
-      debugPrint('===================================');
-      
       final response = await dioClient.dio.get(url);
 
       if (response.data['error'] != null) {
         throw ServerException();
       }
 
-      // 서버 응답 로깅
-      debugPrint('지점 조회 응답: ${response.data}');
-      
       final list = response.data['list'] as List? ?? [];
       if (list.isEmpty) {
-        debugPrint('빈 즐겨찾기 리스트');
         return [];
       }
-      
-      debugPrint('즐겨찾기 지점 개수: ${list.length}');
+
       return list.map((json) => FavoritePointModel.fromJson(json)).toList();
     } on DioException {
       throw ServerException();
@@ -117,14 +102,6 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
   }) async {
     try {
       final url = ApiEndpoints.getFavoriteRoutes(loginMethod, userId);
-      
-      // GET 요청 로깅
-      debugPrint('=== 즐겨찾기 경로 조회 요청 ===');
-      debugPrint('URL: $url');
-      debugPrint('Login Method: $loginMethod');
-      debugPrint('User ID: $userId');
-      debugPrint('===================================');
-      
       final response = await dioClient.dio.get(url);
 
       if (response.data['error'] != null) {
@@ -156,14 +133,7 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
           'lat': latitude,
         },
       };
-      
-      // JSON 데이터 로깅
-      debugPrint('=== 즐겨찾기 지점 추가 요청 데이터 ===');
-      debugPrint('URL: ${ApiEndpoints.addFavoritePoint}');
-      debugPrint('JSON 데이터:');
-      debugPrint(const JsonEncoder.withIndent('  ').convert(requestData));
-      debugPrint('=====================================');
-      
+
       final response = await dioClient.dio.post(
         ApiEndpoints.addFavoritePoint,
         data: requestData,
@@ -226,14 +196,7 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
           }).toList(),
         },
       };
-      
-      // JSON 데이터 로깅
-      debugPrint('=== 즐겨찾기 경로 추가 요청 데이터 ===');
-      debugPrint('URL: ${ApiEndpoints.addFavoriteRoute}');
-      debugPrint('JSON 데이터:');
-      debugPrint(const JsonEncoder.withIndent('  ').convert(requestData));
-      debugPrint('=====================================');
-      
+
       final response = await dioClient.dio.post(
         ApiEndpoints.addFavoriteRoute,
         data: requestData,
@@ -257,13 +220,9 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
         'ID': userId,
         'fav_idx': favIdx,
       };
-      
+
       final url = ApiEndpoints.deleteFavoritePoint(userId, favIdx);
-      
-      debugPrint('=== 즐겨찾기 지점 삭제 요청 ===');
-      debugPrint('URL: $url');
-      debugPrint('Request: $requestData');
-      
+
       final response = await dioClient.dio.delete(
         url,
         data: requestData,
@@ -287,13 +246,9 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
         'ID': userId,
         'fav_idx': favIdx,
       };
-      
+
       final url = ApiEndpoints.deleteFavoriteRoute(userId, favIdx);
-      
-      debugPrint('=== 즐겨찾기 경로 삭제 요청 ===');
-      debugPrint('URL: $url');
-      debugPrint('Request: $requestData');
-      
+
       final response = await dioClient.dio.delete(
         url,
         data: requestData,
@@ -325,11 +280,7 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
           'lat': latitude,
         },
       };
-      
-      debugPrint('=== 즐겨찾기 지점 수정 요청 ===');
-      debugPrint('URL: ${ApiEndpoints.updateFavoritePoint}');
-      debugPrint('Request: $requestData');
-      
+
       final response = await dioClient.dio.post(
         ApiEndpoints.updateFavoritePoint,
         data: requestData,
@@ -379,12 +330,7 @@ class FavoriteRemoteDataSourceImpl implements FavoriteRemoteDataSource {
           }).toList(),
         },
       };
-      
-      debugPrint('=== 즐겨찾기 경로 수정 요청 ===');
-      debugPrint('URL: ${ApiEndpoints.updateFavoriteRoute}');
-      debugPrint('JSON 데이터:');
-      debugPrint(const JsonEncoder.withIndent('  ').convert(requestData));
-      
+
       final response = await dioClient.dio.post(
         ApiEndpoints.updateFavoriteRoute,
         data: requestData,

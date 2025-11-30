@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Domain Layer
-import 'package:safelight/domain/entities/auth_type.dart';
 import 'package:safelight/domain/entities/favorite_route.dart';
 import 'package:safelight/domain/entities/place_result.dart';
 import 'package:safelight/domain/usecases/favorite_usecase.dart';
@@ -164,17 +163,9 @@ class _FavoriteRouteEditPanelViewState
   }
 
   Future<void> _updateFavoriteRouteData() async {
-    if (_nameController.text.isEmpty) {
-      return;
-    }
-
-    if (_startPoint == null || _finishPoint == null) {
-      return;
-    }
-
-    if (widget.favoriteRoute.favIdx == null) {
-      return;
-    }
+    if (_nameController.text.isEmpty) return;
+    if (_startPoint == null || _finishPoint == null) return;
+    if (widget.favoriteRoute.favIdx == null) return;
 
     setState(() {
       _isLoading = true;
@@ -182,54 +173,27 @@ class _FavoriteRouteEditPanelViewState
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        return;
-      }
+      if (user == null) return;
 
-      // authType 가져오기 (누락된 경우 Firebase provider로 판단)
-      AuthType authType = await _authService.loadAuthType();
+      // 인증 정보 가져오기
+      var credentials = await _authService.getFavoriteCredentials(user: user);
 
-      // authType이 anonymous(기본값)이면 Firebase provider로 판단
-      if (authType == AuthType.anonymous) {
-        final providerData = user.providerData;
-        if (providerData.isNotEmpty) {
-          final providerId = providerData.first.providerId;
-          if (providerId == 'google.com') {
-            authType = AuthType.google;
-            await _authService.saveAuthType(authType: AuthType.google);
-          } else if (providerId == 'apple.com') {
-            authType = AuthType.apple;
-            await _authService.saveAuthType(authType: AuthType.apple);
-          }
-        }
-      }
-
-      final loginMethod = authType == AuthType.google ? 'google' : 'apple';
-
-      // 서버 UUID 가져오기
-      String? serverUserId = await _authService.loadServerUserId();
-
-      // 서버 ID가 없으면 /user/me API 호출하여 가져오기
-      if (serverUserId == null) {
-        // GetUserInfoEvent를 호출하여 서버 ID 가져오기
+      // 서버 ID가 없으면 AuthBloc 통해 조회
+      if (credentials == null) {
         if (!mounted) return;
-        context.read<AuthBloc>().add(GetUserInfoEvent());
+        final serverUserId = await _authService.ensureServerUserId(
+          authBloc: context.read<AuthBloc>(),
+        );
+        if (serverUserId == null) return;
 
-        // 잠시 대기 후 다시 시도
-        await Future.delayed(const Duration(seconds: 1));
-        serverUserId = await _authService.loadServerUserId();
-
-        if (serverUserId == null) {
-          return;
-        }
+        credentials = await _authService.getFavoriteCredentials(user: user);
+        if (credentials == null) return;
       }
-
-      final userId = serverUserId; // 서버 UUID 사용
 
       final result = await _updateFavoriteRoute.call(
         UpdateFavoriteRouteParams(
-          loginMethod: loginMethod,
-          userId: userId,
+          loginMethod: credentials.loginMethod,
+          userId: credentials.userId,
           favIdx: widget.favoriteRoute.favIdx!,
           name: _nameController.text,
           startPoint: _startPoint,
@@ -251,9 +215,11 @@ class _FavoriteRouteEditPanelViewState
     } catch (e) {
       // 에러 발생
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

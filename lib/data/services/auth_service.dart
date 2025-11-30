@@ -1,5 +1,8 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/domain/entities/auth_type.dart';
+import 'package:safelight/framework/controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 인증 데이터 관리 서비스를 제공하는 클래스입니다.
@@ -58,11 +61,6 @@ class AuthService {
   Future<Map<String, String?>> loadAuthData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    debugPrint(
-        'prefs.getString(_accessTokenKey): ${prefs.getString(_accessTokenKey)}');
-    debugPrint(
-        'prefs.getString(_refreshTokenKey): ${prefs.getString(_refreshTokenKey)}');
-
     return {
       'accessToken': prefs.getString(_accessTokenKey),
       'refreshToken': prefs.getString(_refreshTokenKey),
@@ -85,9 +83,6 @@ class AuthService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final authString = AuthTypeExtension.getLabel(authType);
-
-    debugPrint('authString : $authString');
-
     await prefs.setString(_authTypeTokenKey, authString);
   }
 
@@ -96,8 +91,6 @@ class AuthService {
   /// 저장된 문자열을 [AuthType]으로 변환하여 반환합니다.
   Future<AuthType> loadAuthType() async {
     final prefs = await SharedPreferences.getInstance();
-    debugPrint(
-        'prefs.getString(_authTypeTokenKey): ${prefs.getString(_authTypeTokenKey)}');
     return AuthTypeExtension.getType(prefs.getString(_authTypeTokenKey));
   }
 
@@ -111,5 +104,71 @@ class AuthService {
   Future<String?> loadServerUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_serverUserIdKey);
+  }
+
+  /// 즐겨찾기 API 호출에 필요한 인증 정보를 가져옵니다.
+  ///
+  /// [user]: Firebase User 객체
+  /// 반환: (loginMethod: 'google'|'apple', userId: 서버UUID) 또는 null
+  Future<({String loginMethod, String userId})?> getFavoriteCredentials({
+    required User user,
+  }) async {
+    // 1. authType 로드
+    AuthType authType = await loadAuthType();
+
+    // 2. anonymous면 Firebase provider로 판단하여 저장
+    if (authType == AuthType.anonymous) {
+      final providerData = user.providerData;
+      if (providerData.isNotEmpty) {
+        final providerId = providerData.first.providerId;
+        if (providerId == 'google.com') {
+          authType = AuthType.google;
+          await saveAuthType(authType: AuthType.google);
+        } else if (providerId == 'apple.com') {
+          authType = AuthType.apple;
+          await saveAuthType(authType: AuthType.apple);
+        }
+      }
+    }
+
+    final loginMethod = authType == AuthType.google ? 'google' : 'apple';
+
+    // 3. 서버 UUID 가져오기
+    final serverUserId = await loadServerUserId();
+    if (serverUserId == null) {
+      return null;
+    }
+
+    return (loginMethod: loginMethod, userId: serverUserId);
+  }
+
+  /// 서버 ID를 확보합니다. 없으면 AuthBloc을 통해 조회 후 반환합니다.
+  ///
+  /// [authBloc]: AuthBloc 인스턴스
+  /// [timeout]: 최대 대기 시간 (기본 10초)
+  /// 반환: 서버 UUID 또는 null (타임아웃/실패)
+  Future<String?> ensureServerUserId({
+    required AuthBloc authBloc,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    // 1. 먼저 로컬에서 확인
+    String? serverUserId = await loadServerUserId();
+    if (serverUserId != null) return serverUserId;
+
+    // 2. 없으면 AuthBloc 호출
+    authBloc.add(GetUserInfoEvent());
+
+    // 3. 성공 상태 대기 (Future.delayed 대신)
+    try {
+      await authBloc.stream
+          .firstWhere((state) =>
+              state.getUserInfoStatus == Status.success ||
+              state.getUserInfoStatus == Status.failure)
+          .timeout(timeout);
+
+      return await loadServerUserId();
+    } catch (e) {
+      return null;
+    }
   }
 }
