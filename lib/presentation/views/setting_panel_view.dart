@@ -16,6 +16,7 @@ class _SettingPanelViewState extends State<SettingPanelView> {
   late Box flashbox;
   final AuthService _authService = DI<AuthService>();
   final message = DI.get<Message>();
+  final tts = DI.get<TtsService>();
 
   final List<Map<String, dynamic>> modes = [
     {
@@ -416,19 +417,20 @@ class _SettingPanelViewState extends State<SettingPanelView> {
         ValueListenableBuilder(
           valueListenable: Hive.box(SystemTheme.themeBox).listenable(),
           builder: (context, Box box, widget) {
-            TTS.enable = box.get('tts', defaultValue: false);
+            final isEnabled = box.get('tts', defaultValue: false);
+            tts.setEnabled(isEnabled);
             return Semantics.fromProperties(
               properties: SemanticsProperties(
                 hint: '설정을 킬 경우 횡단보도 검색 및 연결에서 보조 음성이 들리게 됩니다.',
-                checked: TTS.enable,
+                checked: isEnabled,
               ),
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 onTap: () async {
-                  await box.put('tts', !TTS.enable);
-                  setState(() {
-                    TTS.enable = box.get('tts');
-                  });
+                  final newValue = !isEnabled;
+                  await box.put('tts', newValue);
+                  tts.setEnabled(newValue);
+                  setState(() {});
                 },
                 title: Text(
                   '음성보조 설정',
@@ -438,15 +440,15 @@ class _SettingPanelViewState extends State<SettingPanelView> {
                   ),
                 ),
                 trailing: CupertinoSwitch(
-                  value: TTS.enable,
+                  value: isEnabled,
                   thumbColor: Colors.white,
                   trackColor: Colors.grey[300],
                   activeColor: Colors.green,
                   onChanged: (bool? value) async {
-                    await box.put('tts', !TTS.enable);
-                    setState(() {
-                      TTS.enable = box.get('tts');
-                    });
+                    final newValue = value ?? !isEnabled;
+                    await box.put('tts', newValue);
+                    tts.setEnabled(newValue);
+                    setState(() {});
                   },
                 ),
               ),

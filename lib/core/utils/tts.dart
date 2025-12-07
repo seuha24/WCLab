@@ -1,15 +1,15 @@
 part of '../../framework/core.dart';
 
-class TTS {
-  static bool enable = false;
-  final FlutterTts tts;
+// class TTS {
+//   static bool enable = false;
+//   final FlutterTts tts;
 
-  TTS({required this.tts});
+//   TTS({required this.tts});
 
-  Future<void> call(String text) async {
-    await tts.stop();
-    if (enable) {
-      await tts.speak(text);
-    }
-  }
-}
+//   Future<void> call(String text) async {
+//     await tts.stop();
+//     if (enable) {
+//       await tts.speak(text);
+//     }
+//   }
+// }

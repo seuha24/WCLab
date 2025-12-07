@@ -1398,8 +1398,6 @@ PODS:
     - FlutterMacOS
     - Try
   - SwiftProtobuf (1.33.3)
-  - text_to_speech (0.0.1):
-    - Flutter
   - torch_light (0.0.1):
     - Flutter
   - Try (2.1.1)
@@ -1428,7 +1426,6 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
-  - text_to_speech (from `.symlinks/plugins/text_to_speech/ios`)
   - torch_light (from `.symlinks/plugins/torch_light/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
 
@@ -1505,8 +1502,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
   speech_to_text:
     :path: ".symlinks/plugins/speech_to_text/darwin"
-  text_to_speech:
-    :path: ".symlinks/plugins/text_to_speech/ios"
   torch_light:
     :path: ".symlinks/plugins/torch_light/ios"
   vibration:
@@ -1560,7 +1555,6 @@ SPEC CHECKSUMS:
   sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
   speech_to_text: 9dc43a5df3cbc2813f8c7cc9bd0fbf94268ed7ac
   SwiftProtobuf: e1b437c8e31a4c5577b643249a0bb62ed4f02153
-  text_to_speech: 94cb6c54446c65feaf0007e444113f922fe1fc99
   torch_light: d093d579a221a59ef8a6b8c0eca20d52f7178087
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
   vibration: 3797858f8cbf53d841e189ef8bd533d96e4ca93c

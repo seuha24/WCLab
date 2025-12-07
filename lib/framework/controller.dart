@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/core/utils/status_enum.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';

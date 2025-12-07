@@ -13,18 +13,13 @@ class _MainViewState extends State<MainView> {
   final bluetooth = DI.get<FlutterReactiveBle>();
 
   // TTS 서비스 인스턴스
-  final ttsService = DI.get<TtsService>();
+  final tts = DI.get<TtsService>();
 
   int _selectedIndex = 0; // 초기 선택된 탭 인덱스 (지도)
   int _previousIndex = 0; // 이전에 선택된 탭 인덱스 (중복 음성 방지용)
 
   // 하단바 메뉴 이름 리스트
   final List<String> menuNames = ['지도', '즐겨찾기', '횡단보도', '출입구 등록', '설정'];
-
-  // TTS로 안내 메시지 읽어줌
-  Future<void> speakTTS(String message) async {
-    ttsService.speak(message);
-  }
 
   @override
   void initState() {
@@ -58,7 +53,10 @@ class _MainViewState extends State<MainView> {
     if (index != _previousIndex) {
       final selectedMenu =
           index < menuNames.length ? menuNames[index] : menuNames[0];
-      speakTTS('${selectedMenu}을 선택하셨습니다.');
+      tts.speakWithChannel('${selectedMenu}을 선택하셨습니다.',
+          channel: ETtsChannel.FEEDBACK,
+          cooldownKey: 'menu_selection',
+          cooldown: Duration(seconds: 0));
       _previousIndex = index; // 현재 선택된 인덱스를 이전 인덱스로 업데이트
     }
 

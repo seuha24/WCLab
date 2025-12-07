@@ -198,5 +198,46 @@ class Calculators {
         targetIndexLatitude, targetIndexLongitude);
   }
 
-  
+  /// clockDirectionLabel: 상대 각도(0~360)를 "몇 시 방향" 문자열로 변환합니다.
+  /// 12시 방향이 0도, 시계 방향으로 증가합니다.
+  static String clockDirectionLabel(double relativeDeg) {
+    final index = ((relativeDeg + 15.0) % 360.0 ~/ 30.0); // 0~11
+    const labels = [
+      "열두시",
+      "한시",
+      "두시",
+      "세시",
+      "네시",
+      "다섯시",
+      "여섯시",
+      "일곱시",
+      "여덟시",
+      "아홉시",
+      "열시",
+      "열한시",
+    ];
+    return labels[index];
+  }
+
+  /// clockDirectionFromPositions: 현재 위치에서 타겟까지의 시계 방향을 계산합니다.
+  /// [currentLatitude], [currentLongitude]: 현재 위치
+  /// [targetLatitude], [targetLongitude]: 타겟 위치
+  /// [compassValue]: 현재 나침반 값 (북쪽 기준 사용자가 바라보는 방향)
+  /// 반환값: "12시", "3시" 등의 시계 방향 문자열
+  static String clockDirectionFromPositions({
+    required double currentLatitude,
+    required double currentLongitude,
+    required double targetLatitude,
+    required double targetLongitude,
+    required double compassValue,
+  }) {
+    final bearing = calculateBearing(
+      currentLatitude,
+      currentLongitude,
+      targetLatitude,
+      targetLongitude,
+    );
+    final relative = (bearing - compassValue + 360.0) % 360.0;
+    return clockDirectionLabel(relative);
+  }
 }

@@ -15,9 +15,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:safelight/data/network/dio_client.dart';
 import 'package:safelight/data/repositories/kakao_repository_impl.dart';
 import 'package:safelight/data/services/navigation_api_service.dart';
-import 'package:safelight/data/services/tts_service.dart';
+// import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/data/services/kakao_local_api_service.dart';
 import 'package:safelight/domain/repositories/kakao_repository.dart';
+import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/data_source.dart';
@@ -341,13 +342,13 @@ Future<void> init() async {
   DI.registerLazySingleton<Dio>(() => Dio()); // 추가
 
   // TTS
-  DI.registerLazySingleton(() => FlutterTts());
-
-  DI.registerLazySingleton<TtsService>(() => TtsService());
-
+  DI.registerLazySingleton<FlutterTts>(() => FlutterTts());
+  DI.registerLazySingleton<TtsService>(
+    () => TtsService(DI<FlutterTts>()),
+  );
   DI.registerLazySingleton<WeatherValidator>(() => WeatherValidator());
 
-  DI.registerLazySingleton<TTS>(() => TTS(tts: DI()));
+  // DI.registerLazySingleton<TTS>(() => TTS(tts: DI()));
 
   DI.registerLazySingleton<Message>(() => Message());
 

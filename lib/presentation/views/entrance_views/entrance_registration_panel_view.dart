@@ -17,7 +17,6 @@ class _EntrancePanelViewState extends State<EntrancePanelView> {
   late EntranceRegistrationBloc bloc;
   late DraggableScrollableController _controller;
   late SlidingPanelController _slidingController;
-  NaverMapController? _mapController;
   final Rx<NLatLng?> _selectedLocation = Rx<NLatLng?>(null);
 
   // 디바운스를 위한 타이머
