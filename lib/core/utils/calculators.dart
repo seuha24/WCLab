@@ -203,18 +203,18 @@ class Calculators {
   static String clockDirectionLabel(double relativeDeg) {
     final index = ((relativeDeg + 15.0) % 360.0 ~/ 30.0); // 0~11
     const labels = [
-      "12시",
-      "1시",
-      "2시",
-      "3시",
-      "4시",
-      "5시",
-      "6시",
-      "7시",
-      "8시",
-      "9시",
-      "10시",
-      "11시",
+      "열두시",
+      "한시",
+      "두시",
+      "세시",
+      "네시",
+      "다섯시",
+      "여섯시",
+      "일곱시",
+      "여덟시",
+      "아홉시",
+      "열시",
+      "열한시",
     ];
     return labels[index];
   }

@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 const _kTtsDebug = false;
+
+// 큐 최대 길이 (필요하면 나중에 조정)
+const int _kMaxQueueSize = 30;
 /// ETtsChannel
 /// 선언 순서 = 우선순위 (index 낮을수록 우선순위 높음)
 /// FEEDBACK > SYSTEM_ANNOUNCE > ALERT >  NAVIGATE
@@ -15,22 +18,6 @@ enum ETtsChannel {
   NAVIGATE,         // 일반 경로 안내
 }
 
-// /// 채널 우선순위 확장
-// extension ETtsChannelPriority on ETtsChannel {
-//   /// 숫자가 작을수록 우선순위가 높다
-//   int get priority {
-//     switch (this) {
-//       case ETtsChannel.ALERT:
-//         return 0;
-//       case ETtsChannel.FEEDBACK:
-//         return 1;
-//       case ETtsChannel.SYSTEM_ANNOUNCE:
-//         return 2;
-//       case ETtsChannel.NAVIGATE:
-//         return 3;
-//     }
-//   }
-// }
 extension ETtsChannelPriority on ETtsChannel {
   int get priority => index;
 }
@@ -222,6 +209,9 @@ class TtsService {
     await _tts.stop();
   }
 
+    void clearChannel(ETtsChannel channel) {
+    _queue.removeWhere((r) => r.channel == channel);
+  }
   // =========================================================
   // 내부 로직: 큐/쿨다운/우선순위 처리
   // =========================================================
@@ -248,18 +238,6 @@ class TtsService {
     return '${req.channel.name}_${req.text}';
   }
 
-  // void _enqueueRequest(_TtsRequest req) {
-    
-  //   _queue.add(req);
-  //   // 우선순위 정렬: 숫자 작을수록 우선, 같으면 최신(createdAt 늦은 것)이 앞으로
-  //   _queue.sort((a, b) {
-  //     final priorityCompare = a.channel.priority.compareTo(b.channel.priority);
-  //     if (priorityCompare != 0) return priorityCompare;
-  //     // 우선순위 같으면 최신이 앞으로 (내림차순)
-  //     return b.createdAt.compareTo(a.createdAt);
-  //   });
-  // }
-
   void _enqueueRequest(_TtsRequest req) {
   // 1) 같은 channel + 같은 cooldownKey는 덮어쓰기
   if (req.cooldownKey != null) {
@@ -281,6 +259,13 @@ class TtsService {
     // 우선순위 같으면 최신이 앞으로 (내림차순)
     return b.createdAt.compareTo(a.createdAt);
   });
+
+  // 4) 큐 길이 상한 적용:
+  //    - 앞쪽: 중요/최신 보존
+  //    - 뒤쪽: 덜 중요/오래된 항목부터 버림
+  if (_queue.length > _kMaxQueueSize) {
+    _queue.removeRange(_kMaxQueueSize, _queue.length);
+  }
 }
 
   void _playNextIfAny() {
@@ -295,4 +280,7 @@ class TtsService {
     if (_kTtsDebug) debugPrint('TtsService: speak => [${next.channel}] ${next.text}');
     _tts.speak(next.text);
   }
+
+
+
 }

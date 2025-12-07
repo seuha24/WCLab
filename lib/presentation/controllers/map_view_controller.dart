@@ -775,7 +775,7 @@ class NaverMapViewController extends GetxController {
   }
 
   bool checkIsArrived(desDis){
-    if (desDis < 0.003) {
+    if (desDis < 3.0) {
       return true;
     } else {
       return false;
