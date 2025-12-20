@@ -25,7 +25,7 @@ class Calculators {
     return earthRadius * c;
   }
 
-   ///계산 분리
+  
   /// calculateBearing: 두 지점 간의 방향(베어링)을 계산합니다.
   static double calculateBearing(double currentLatitude, double currentLongitude,
       double targetLatitude, double targetLongitude) {
@@ -198,6 +198,15 @@ class Calculators {
         targetIndexLatitude, targetIndexLongitude);
   }
 
+  //각도 정규화
+  static double normalizeAngleDeg(double angleDeg) {
+    var a = angleDeg % 360.0;
+    if (a > 180.0) a -= 360.0;
+    if (a <= -180.0) a += 360.0;
+    return a;
+  }
+
+  ///////////////////////////임시//////////////////////////////
   /// clockDirectionLabel: 상대 각도(0~360)를 "몇 시 방향" 문자열로 변환합니다.
   /// 12시 방향이 0도, 시계 방향으로 증가합니다.
   static String clockDirectionLabel(double relativeDeg) {
@@ -240,4 +249,62 @@ class Calculators {
     final relative = (bearing - compassValue + 360.0) % 360.0;
     return clockDirectionLabel(relative);
   }
+
+
+  /// computeTrackHeadingWithThreshold:
+  /// 이전 위치(prevLat, prevLon)에서 현재 위치(curLat, curLon)로의
+  /// 진행 방향(heading)을 계산합니다.
+  ///
+  /// - 두 점 사이의 거리가 [minMoveMeters] 미만이면 null을 반환하여
+  ///   "방향 업데이트 안 함"을 의미합니다.
+  /// - 충분히 움직였으면 A->B 방향 bearing(0~360도)를 반환합니다.
+  static double? computeTrackHeadingWithThreshold({
+    required double prevLat,
+    required double prevLon,
+    required double curLat,
+    required double curLon,
+    double minMoveMeters = 5.0,
+  }) {
+    // km 단위 거리
+    final distKm = calculateDistance(prevLat, prevLon, curLat, curLon);
+    final distMeters = distKm * 1000.0;
+
+    // 최소 이동거리 미만이면 방향 업데이트 안 함
+    if (distMeters < minMoveMeters) {
+      return null;
+    }
+
+    // 충분히 움직였으면 A -> B 방향 bearing 계산
+    final headingDeg = calculateBearing(
+      prevLat,
+      prevLon,
+      curLat,
+      curLon,
+    );
+
+    return headingDeg; // 0~360도
+  }
+  ////////////////////////////////////////////////////////////
+  
+
+
+  static Map<String, double> calLatLng(double startLat, double startLng, double bearing, double distanceKm) {
+    const double earthRadiusKm = 6371.0;
+
+
+    final startLatRad = deg2rad(startLat);
+    final startLngRad = deg2rad(startLng);
+    final bearingRad = deg2rad(bearing);
+    final distanceRad = distanceKm / earthRadiusKm;
+    final newLatRad = math.asin(math.sin(startLatRad) * math.cos(distanceRad) +
+        math.cos(startLatRad) * math.sin(distanceRad) * math.cos(bearingRad));
+    final newLngRad = startLngRad +
+        math.atan2(
+            math.sin(bearingRad) * math.sin(distanceRad) * math.cos(startLatRad),
+            math.cos(distanceRad) - math.sin(startLatRad) * math.sin(newLatRad));
+    final newLat = rad2deg(newLatRad);
+    final newLng = rad2deg(newLngRad);
+    return {'latitude': newLat, 'longitude': newLng};
+  }
+  
 }

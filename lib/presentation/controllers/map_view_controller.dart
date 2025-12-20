@@ -107,6 +107,7 @@ class NaverMapViewController extends GetxController {
   Rxn<GeoLocation> selectedDestLocation = Rxn<GeoLocation>();
   /// 시작 위치가 설정되었는지 여부
   RxBool isStart = false.obs;
+  RxBool isOutOfStart = false.obs;
   /// 시작 위치가 설정되었음을 나타내는 Reactive 변수
   RxBool isSetStartLocation = false.obs;
   /// 목적지 위치가 설정되었음을 나타내는 Reactive 변수
@@ -152,7 +153,7 @@ class NaverMapViewController extends GetxController {
   DateTime? _lastPoiAnnouncementTime;
 
   // 방향 관련 변수
-  late double? heading;
+  double? heading;
   double firstBearingToPoint = 0.0;
   String clock = "";
 
@@ -161,7 +162,7 @@ class NaverMapViewController extends GetxController {
 
   // 경계 및 재경로 검색 관련 변수들
   bool outOfBound = false;
-  double boundary = 3; // 경계 이탈 감지 거리 (1.5미터)
+  double boundary = 5; // 경계 이탈 감지 거리 (1.5미터)
   bool searchNewPath = false;
   /// 경계 조건 문자열 (디버깅용)
   String checkBoundaryCondition = "";
@@ -270,6 +271,7 @@ class NaverMapViewController extends GetxController {
 
     // 초기 yawRate 설정
     pdrCalculator.setPdrYaw(Calculators.deg2rad(compassValue.value));
+    
 
     _locationUpdateTimer =Timer.periodic(Duration(milliseconds: 100), (timer) {
       sAccuracy = position.accuracy;
@@ -517,12 +519,12 @@ class NaverMapViewController extends GetxController {
       checkBoundary();
       ///경로 안내 진행
       indexController.indexUpdate();
-      
+
       /////////////////////정상 출발 체크/////////////////////////////
       // 출발지(첫 번째 분기점)와 현재 위치 사이 거리 계산
       checkIsStart();
       // 출발지와 현재 위치가 50m 이상 차이나면 재검색 준비
-      if (remainStartpoint > 0.05 && isStart.value == false) {
+      if (isOutOfStart.value) {
         // 이탈 시작 시간 기록
         _startPointDeviationTime ??= DateTime.now();
         // 경과 시간 계산
@@ -575,47 +577,48 @@ class NaverMapViewController extends GetxController {
               !routeController.branchinfo[branchTargetIndex].branch) {
             branchTargetIndex++;
           }
-          if (routeController.branchinfo[branchTargetIndex].branch) {
+          if (branchTargetIndex < routeController.branchinfo.length &&
+              routeController.branchinfo[branchTargetIndex].branch) {
             remainDistance.value = Calculators.calculateDistance(
               currentLatitude.value,
               currentLongitude.value,
               routeController.branchinfo[branchTargetIndex].point.latitude,
               routeController.branchinfo[branchTargetIndex].point.longitude,
             );
-            clock = guidanceCalculator.getGuidanceDirection(
-              routeController.branchinfo[indexController.currentIndex].point.longitude,
-              routeController.branchinfo[indexController.currentIndex].point.latitude,
-              routeController.branchinfo[indexController.targetIndex].point.longitude,
-              routeController.branchinfo[indexController.targetIndex].point.latitude,
-              currentLatitude.value,
-              currentLongitude.value,
-              pdrCalculator.deviationYawTurn,
-              routeController.branchinfo[indexController.currentIndex].bearingToPoint,
-            );
           }
         } else {
           debugPrint("branchinfo 리스트가 비어 있거나 targetIndex가 유효하지 않습니다.");
         }
         /////////////////////////////////브랜치 도달 안내///////////////////////////
-        if (remainDistance.value < 0.015) {
-          if (routeController.branchinfo[indexController.currentIndex].crosswalk == true) {
+        if (remainDistance.value < 0.015 &&
+            indexController.targetIndex < routeController.branchinfo.length) {
+          final currentIndex = routeController.branchinfo[indexController.currentIndex];
+          final targetIndex = routeController.branchinfo[indexController.targetIndex];
+          if (currentIndex.crosswalk == true) {
             final result = await flashOnWithWeather(NoParams());
             if (result.isLeft()) {
               debugPrint('안전 경광등을 사용할 수 없습니다.');
             } else {
               debugPrint('안전 경광등이 켜졌습니다.');
             }
-            
+
             tts.speakWithChannel('잠시 후 횡단보도 입니다. 차량에 유의하세요!', channel: ETtsChannel.ALERT,cooldownKey: 'crosswalk_alert', cooldown: Duration(seconds: 2),);
           }
-          if (routeController.branchinfo[indexController.targetIndex].branch == true) {
-            
-            String message = routeController.branchinfo[indexController.targetIndex].description;
-            tts.speakWithChannel(message, channel: ETtsChannel.NAVIGATE, cooldownKey: 'branch_instruction', cooldown: Duration(seconds: 10),);
+          if (targetIndex.branch == true) {
+            String message = targetIndex.description;
+            tts.speakWithChannel('$message하세요.', channel: ETtsChannel.NAVIGATE, cooldownKey: 'branch_instruction', cooldown: Duration(seconds: 10),);
+          }
+        }
+        else{
+          final result = await flashOff(NoParams());
+          if (result.isLeft()) {
+            debugPrint('경광등을 끌 수 없습니다.');
+          } else {
+            debugPrint('경광등이 꺼졌습니다.');
           }
         }
         /////////////////////////POI 안내 /////////////////////////
-        // 10초에 한 번만 API 호출 (성능 최적화)
+        // 20초에 한 번만 API 호출 (성능 최적화)
         final now = DateTime.now();
         if (_lastPoiAnnouncementTime == null ||
             now.difference(_lastPoiAnnouncementTime!).inSeconds >= 20) {
@@ -644,8 +647,17 @@ class NaverMapViewController extends GetxController {
           Vibration.vibrate(duration: 100);
           
           debugPrint('searchNewPath : $searchNewPath');
-          // speakText(clock);
-          tts.speakWithChannel(clock, channel: ETtsChannel.ALERT, cooldownKey: 'out_of_bound', cooldown: Duration(seconds: 2),);
+          clock = guidanceCalculator.getGuidanceDirection(
+              routeController.branchinfo[indexController.currentIndex].point.longitude,
+              routeController.branchinfo[indexController.currentIndex].point.latitude,
+              routeController.branchinfo[indexController.targetIndex].point.longitude,
+              routeController.branchinfo[indexController.targetIndex].point.latitude,
+              currentLatitude.value,
+              currentLongitude.value,
+              pdrCalculator.deviationYawTurn,
+              routeController.branchinfo[indexController.currentIndex].bearingToPoint,
+            );
+          tts.speakWithChannel(clock, channel: ETtsChannel.ALERT, cooldownKey: 'out_of_bound', cooldown: Duration(seconds: 10),);
           if (searchNewPath) {
             searchNewPathTime++;
             if (searchNewPathTime >= 5) {
@@ -678,8 +690,7 @@ class NaverMapViewController extends GetxController {
             searchNewPathTime = 0;
           }
         }
-      } else if (isStart.value) {
-        
+      } else {
         tts.speakWithChannel("출발지로 이동하세요.", channel: ETtsChannel.NAVIGATE, cooldownKey: 'move_to_startpoint', cooldown: Duration(seconds: 5),);
       }
     });
@@ -691,7 +702,7 @@ class NaverMapViewController extends GetxController {
       // 1. 먼저 타이머를 취소하고 네비게이션 상태를 false로 설정
       isNavigating.value = false;
       navigationTimer?.cancel();
-      isStart.value == false;
+      isStart.value = false;
       navigationTimer = null;
       // 2. 지도 컨트롤러가 유효한지 확인
       if (mapController == null) {
@@ -747,6 +758,7 @@ class NaverMapViewController extends GetxController {
     searchNewPath          = result.searchNewPath;
     checkBoundaryCondition = result.condition;
     debugPrint('경계 조건: $checkBoundaryCondition');
+    debugPrint('경로로부터 거리: ${distanceToPath.toStringAsFixed(2)}m');
     debugPrint('경계 이탈: $outOfBound');
   }
 
@@ -785,10 +797,14 @@ class NaverMapViewController extends GetxController {
   void initNavigation(){
     isNavigating.value = true;
     navigationTimer?.cancel(); // 기존 타이머 제거
+    tts.stopAll(); // 기존 TTS 멘트 제거
   }
 
   void checkIsStart(){
-          remainStartpoint = Calculators.calculateDistance(
+    if (routeController.branchinfo.isEmpty) return;
+
+    if(isStart.value==false){
+      remainStartpoint = Calculators.calculateDistance(
         currentLatitude.value,
         currentLongitude.value,
         routeController.branchinfo[0].point.latitude,
@@ -797,7 +813,12 @@ class NaverMapViewController extends GetxController {
 
       if (remainStartpoint<0.015) {
         isStart.value = true;
+        isOutOfStart.value = false;
       }
+      else if(remainStartpoint>=0.05){
+        isOutOfStart.value = true;
+      }
+    }
   }
   // ============================================================
   // 9. 지도 제어 메서드

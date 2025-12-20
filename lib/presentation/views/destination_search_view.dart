@@ -250,9 +250,9 @@ class _DesSearchState extends State<DesSearch> {
                               if (entranceState
                                   .buildingResponse.entrances.isNotEmpty) {
                                 if (!mounted) return;
-                                await Navigator.push(
+                                await Navigator.push<void>(
                                   context,
-                                  MaterialPageRoute(
+                                  MaterialPageRoute<void>(
                                     builder: (_) => EntranceSelectionView(
                                       buildingResponse:
                                           entranceState.buildingResponse,

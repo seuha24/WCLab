@@ -39,10 +39,9 @@ const _kLocationAnnouncementDebug = false;
 class LocationAnnouncementController {
   /// GPS 좌표 획득을 위한 Repository
   final NavigatorRepository navigatorRepository;
-
   /// 카카오 로컬 API Repository (주변 POI 검색)
   final KakaoRepository kakaoRepository;
-  
+
   /// TTS 서비스
   final TtsService ttsService;
 
@@ -51,13 +50,16 @@ class LocationAnnouncementController {
 
   /// API 호출 타임아웃 시간 (30초)
   static const Duration _timeout = Duration(seconds: 30);
+  static const double extensionPointDistanceKm = 0.04;
+
+  
 
   LocationAnnouncementController({
     required this.navigatorRepository,
     required this.kakaoRepository,
     required this.ttsService,
   });
-
+  
   /// 현재 위치 기반 건물 정보를 조회하고 TTS로 음성 안내
   ///
   /// **실행 흐름:**
@@ -89,7 +91,7 @@ class LocationAnnouncementController {
         debugPrint('[LocationAnnouncement] ❌ 예외 발생: $e');
         debugPrint('[LocationAnnouncement] 스택 트레이스:\n$stackTrace');
       }
-      ttsService.speak('알 수 없는 오류가 발생했습니다');
+      // ttsService.speakWithChannel('알 수 없는 오류가 발생했습니다', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'poi_announcement_error', cooldown: Duration(seconds: 10),);
     } finally {
       _isLoading = false;
       if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)');
@@ -108,12 +110,16 @@ class LocationAnnouncementController {
       ]);
     } on TimeoutException catch (e) {
       if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ⏱️ 타임아웃 발생: ${e.message}');
-      await ttsService.speak('위치 정보 조회 시간이 초과되었습니다. 다시 시도해주세요');
+      // await ttsService.speak('위치 정보 조회 시간이 초과되었습니다. 다시 시도해주세요');
     }
   }
 
+
+  
   /// 실제 검색 수행 (타임아웃 내부 로직)
   Future<void> _performSearch(double curLat, double curLng, double compassValue) async {
+
+  
     // 0. 즉시 검색 시작 안내 (사용자 피드백)
     if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] 🔍 주변 장소 검색 시작');
     // await ttsService.speak('주변 장소를 검색합니다');
@@ -134,15 +140,17 @@ class LocationAnnouncementController {
           debugPrint('  - 위도(Latitude): $curLat');
           debugPrint('  - 경도(Longitude): $curLng');
         }
-
+        final extensionLatLng =Calculators.calLatLng(curLat, curLng, compassValue, extensionPointDistanceKm);
+        final double extensionLat = extensionLatLng['latitude']!;
+        final double extensionLng = extensionLatLng['longitude']!;
         // 2. 주변 POI 검색 (카카오 Category Search API)
         if (_kLocationAnnouncementDebug) {
           debugPrint('[LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작');
           debugPrint('  - 검색 반경: 50m');
         }
         final placesResult = await kakaoRepository.searchNearbyPlaces(
-          latitude: curLat,
-          longitude: curLng,
+          latitude: extensionLat,
+          longitude: extensionLng,
           radius: 50,
         );
 
@@ -176,15 +184,24 @@ class LocationAnnouncementController {
             }
 
             // 4. TTS 안내 (시계 방향 포함)
-            final clockDirection = getClockDirectionForPoi(
-              curLat: curLat,
-              curLng: curLng,
-              place: nearest,
-              compassValue: compassValue,
+            final clockDirection = getClockDirectionForPoi(curLat: curLat, curLng: curLng, place: nearest, compassValue: compassValue);
+            final userToPoiDistKm = Calculators.calculateDistance(
+              curLat,
+              curLng,
+              nearest.geometry.location.lat,
+              nearest.geometry.location.lng,
             );
-            final message = _buildPoiMessage(nearest, clockDirection);
+            final userToPoiDistMeters = (userToPoiDistKm * 1000).round();
+            final message = _buildPoiMessage(nearest, clockDirection, userToPoiDistMeters);
+
             if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] 🔊 TTS 안내: $message');
-            ttsService.speakWithChannel(message, channel: ETtsChannel.NAVIGATE, cooldownKey: 'nearby_poi', cooldown: Duration(seconds: 10),);
+            
+            ttsService.speakWithChannel(
+              message, 
+              channel: ETtsChannel.NAVIGATE, 
+              cooldownKey: 'nearby_poi', 
+              cooldown: Duration(seconds: 10),
+              );
           },
         );
   }
@@ -200,15 +217,56 @@ class LocationAnnouncementController {
   /// - distance: 45m → "아주대학교, 45미터 앞입니다"
   /// - distance: 150m → "아주대학교 근처입니다"
   /// - distance: null → "강남역 근처입니다"
-  String _buildPoiMessage(PlaceResult place, String clockDirection) {
-    if (place.distance != null && place.distance! < 100) {
+  String _buildPoiMessage(PlaceResult place, String clockDirection, int userToPoiDistMeters) {
+    if (userToPoiDistMeters < 100) {
       // 100m 이내면 정확한 거리 안내
-      return ' ${place.distance}미터 앞,${clockDirection}방향에 ${place.name}가 있습니다';
+      return ' ${userToPoiDistMeters}미터 거리,${clockDirection}방향에 ${place.name}입니다';
     } else {
       // 100m 이상이거나 거리 정보 없으면 "근처"
       return '${place.name} 근처입니다';
     }
   }
+
+  // double? _headingPrevLat;
+  // double? _headingPrevLon;
+  // double? _lastTrackHeadingDeg;
+
+  // // 최소 이동 거리 상수 (튀면 숫자 조정)
+  // static const double _minMoveMetersForHeading = 1.5;
+
+  // /// GPS 기반 진행 방향 업데이트
+  // /// - curLat/curLon만 받고, 이전 좌표는 내부에서 관리
+  // /// - 충분히 안 움직였으면 이전 heading 유지 (새로 계산 X)
+  // /// - 최초 호출 등으로 아직 heading 없으면 null
+  // double? updateTrackHeadingByGps(double curLat, double curLon) {
+  //   // 이전 좌표가 없으면: 저장만 하고 heading 계산 안 함
+  //   if (_headingPrevLat == null || _headingPrevLon == null) {
+  //     _headingPrevLat = curLat;
+  //     _headingPrevLon = curLon;
+  //     return _lastTrackHeadingDeg; // 아직 진행 방향 없음
+  //   }
+
+  //   final newHeading = Calculators.computeTrackHeadingWithThreshold(
+  //     prevLat: _headingPrevLat!,
+  //     prevLon: _headingPrevLon!,
+  //     curLat: curLat,
+  //     curLon: curLon,
+  //     minMoveMeters: _minMoveMetersForHeading,
+  //   );
+
+  //   if (newHeading == null) {
+  //     // 너무 조금 움직였으면: prev는 그대로 두고 heading도 그대로 둔다.
+  //     return _lastTrackHeadingDeg;
+  //   }
+
+  //   // 충분히 움직였으면 heading 업데이트 + prev를 현재 위치로 당겨옴
+  //   _lastTrackHeadingDeg = newHeading;
+  //   _headingPrevLat = curLat;
+  //   _headingPrevLon = curLon;
+
+  //   return _lastTrackHeadingDeg;
+  // }
+
 
   /// POI의 시계 방향을 계산하여 반환합니다.
   ///
@@ -235,4 +293,32 @@ class LocationAnnouncementController {
       compassValue: compassValue,
     );
   }
+
+  
+  // String getClockDirectionForPoiByGps(double curLat, double curLng, PlaceResult place, double compassValue) {
+  // final trackHeadingDeg = updateTrackHeadingByGps(curLat, curLng);
+
+  // if (trackHeadingDeg == null) {
+  //   // 아직 진행 방향을 결정할 만큼 안 움직였음 → 안내 스킵 or 컴퍼스 fallback
+  //   return getClockDirectionForPoi(curLat: curLat, curLng: curLng, place: place, compassValue: compassValue);
+  // }
+
+  // final poiBearingDeg = Calculators.calculateBearing(
+  //   curLat,
+  //   curLng,
+  //   place.geometry.location.lat,
+  //   place.geometry.location.lng,
+  // );
+
+  // final relativeDeg = Calculators.normalizeAngleDeg(
+  //   poiBearingDeg - trackHeadingDeg,
+  // );
+
+  // return Calculators.clockDirectionLabel(relativeDeg);
+
+
+  // }
+
+
+
 }
