@@ -44,6 +44,9 @@ class SlidingPanelController extends GetxController {
     controller.addListener(() {
       _panelStates[screenTag] = controller.size;
     });
+
+    // 대기 중인 애니메이션이 있으면 실행
+    executePendingAnimation(screenTag);
   }
 
   /// 패널이 등록되어 있지 않으면 자동으로 등록합니다
@@ -63,15 +66,18 @@ class SlidingPanelController extends GetxController {
     return _controllers[screenTag];
   }
 
+  /// 대기 중인 패널 애니메이션 (컨트롤러 등록 후 실행)
+  final Map<String, double> _pendingAnimations = {};
+
   /// 패널을 활성화하고 특정 높이로 애니메이션
   void showPanel(String panelId, {double? height}) {
     activePanelId.value = panelId;
 
     final controller = _controllers[panelId];
     final config = _panelConfigs[panelId];
+    final targetHeight = height ?? 0.4;
 
     if (controller != null && config != null) {
-      final targetHeight = height ?? config.defaultHeight;
       final clampedHeight =
           targetHeight.clamp(config.minHeight, config.maxHeight);
 
@@ -93,6 +99,30 @@ class SlidingPanelController extends GetxController {
           }
         } catch (e) {
           print('Failed to show panel $panelId: $e');
+        }
+      });
+    } else {
+      // 컨트롤러가 아직 등록되지 않은 경우 대기열에 추가
+      _pendingAnimations[panelId] = targetHeight;
+    }
+  }
+
+  /// 패널 등록 후 대기 중인 애니메이션 실행
+  void executePendingAnimation(String screenTag) {
+    final pendingHeight = _pendingAnimations.remove(screenTag);
+    if (pendingHeight != null && activePanelId.value == screenTag) {
+      // 다음 프레임에서 애니메이션 실행
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final controller = _controllers[screenTag];
+        final config = _panelConfigs[screenTag];
+        if (controller != null && config != null) {
+          final clampedHeight =
+              pendingHeight.clamp(config.minHeight, config.maxHeight);
+          controller.animateTo(
+            clampedHeight,
+            duration: config.animationDuration,
+            curve: config.animationCurve,
+          );
         }
       });
     }
@@ -128,6 +158,17 @@ class SlidingPanelController extends GetxController {
   /// 특정 화면의 슬라이딩바를 40% 높이로 올리는 메서드
   void expandSlidingBar(String screenTag) {
     showPanel(screenTag, height: 0.4);
+  }
+
+  /// 같은 패널을 다시 터치했을 때 토글 (열림↔닫힘)
+  void toggleSlidingBar(String screenTag) {
+    // 이미 같은 패널이 활성화되어 있고 열려있으면 접기
+    if (activePanelId.value == screenTag && isPanelExpanded(screenTag)) {
+      collapseSlidingBar(screenTag);
+    } else {
+      // 다른 패널이거나 접혀있으면 열기
+      showPanel(screenTag, height: 0.4);
+    }
   }
 
   /// 출입구 선택 패널을 표시하는 메서드

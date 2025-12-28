@@ -133,29 +133,20 @@ class NaverMapView extends GetView<NaverMapViewController> {
                   );
                 }),
 
-                // 현재 위치 알림 FAB
+                // 주변 건물 자동 알림 FAB
                 SizedBox(height: 16),
-                FloatingActionButton(
+                Obx(() => FloatingActionButton(
                   heroTag: 'locationAnnouncement',
                   onPressed: () {
-                    debugPrint('\n' + '=' * 60);
-                    debugPrint('🎯 [UI] 현재 위치 알림 버튼 클릭');
-                    debugPrint('=' * 60);
-
-                    final locationController =
-                        DI.get<LocationAnnouncementController>();
-                        
-                    locationController.announceNearbyBuilding(
-                      controller.currentLatitude.value,
-                      controller.currentLongitude.value,
-                      controller.compassValue.value,
-                    );
+                    controller.toggleAutoPoiAnnounce();
                     HapticFeedback.mediumImpact();
                   },
-                  backgroundColor: Colors.blue,
+                  backgroundColor: controller.isAutoPoiAnnounceEnabled.value
+                      ? Colors.green
+                      : Colors.grey,
                   child: Icon(Icons.campaign, color: Colors.white),
-                  tooltip: '현재 위치 알림',
-                ),
+                  tooltip: '주변 건물 자동 알림',
+                )),
               ],
             ),
           ),
@@ -205,33 +196,32 @@ class NaverMapView extends GetView<NaverMapViewController> {
             return SizedBox.shrink();
           }),
 
-          /// 화면 중앙 고정 마커(출발지 설정 시 사라짐)
-          Stack(
-            children: [
-              Obx(() {
-                final isSet = controller.isSetStartLocation.value;
-                if (isSet) return SizedBox.shrink();
-                return Center(
+          /// 화면 중앙 고정 마커 + 현재 위치 설정 버튼
+          /// GPS 정확도가 나쁠 때만 표시하여 사용자가 직접 출발지 조정 가능
+          Obx(() {
+            final slidingController = Get.find<SlidingPanelController>();
+            final isMapFunctionActive =
+                slidingController.activePanelId.value == 'map_panel';
+            final isSet = controller.isSetStartLocation.value;
+            final isGpsAccurate = controller.isGpsAccurate.value;
+
+            // 지도 기능이 활성화되지 않았거나 이미 출발지가 설정되었거나 GPS 정확도가 좋으면 숨김
+            if (!isMapFunctionActive || isSet || isGpsAccurate) {
+              return SizedBox.shrink();
+            }
+
+            return Stack(
+              children: [
+                // 화면 중앙 고정 마커
+                Center(
                   child: Icon(
                     Icons.location_pin,
                     color: Colors.red,
                     size: 40,
                   ),
-                );
-              }),
-
-              /// (4)현재 위치 설정 버튼 (지도 기능 사용 시에만 표시)
-              /// 커스텀 출발지 설정 버튼
-              Obx(() {
-                final slidingController = Get.find<SlidingPanelController>();
-                final isMapFunctionActive =
-                    slidingController.activePanelId.value == 'map_panel';
-                final isSet = controller.isSetStartLocation.value;
-
-                // 지도 기능이 활성화되지 않았거나 이미 출발지가 설정되면 버튼 숨김
-                if (!isMapFunctionActive || isSet) return SizedBox.shrink();
-
-                return Positioned(
+                ),
+                // 현재 위치 설정 버튼
+                Positioned(
                   bottom: 50.0,
                   left: 0,
                   right: 0,
@@ -257,10 +247,10 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       ),
                     ),
                   ),
-                );
-              }),
-            ],
-          ),
+                ),
+              ],
+            );
+          }),
 
           /// (5)경로 안내 종료 버튼
           Positioned(
@@ -473,10 +463,12 @@ class NaverMapView extends GetView<NaverMapViewController> {
   Future<String?> _showRouteSelectionBottomSheet() async {
     return await showModalBottomSheet<String>(
       context: Get.context!,
+      isScrollControlled: true,
       builder: (_) => Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElevatedButton(
               onPressed: () => Navigator.pop(Get.context!, "0"),

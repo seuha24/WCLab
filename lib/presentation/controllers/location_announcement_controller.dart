@@ -1,6 +1,6 @@
 part of '../../framework/controller.dart';
 
-const _kLocationAnnouncementDebug = false;
+const _kLocationAnnouncementDebug = true;
 
 /// 현재 위치 알림 기능을 담당하는 Controller
 ///
@@ -77,7 +77,7 @@ class LocationAnnouncementController {
   Future<void> announceNearbyBuilding(double curLat, double curLng, double compassValue) async {
     // 중복 요청 방지 (디바운싱)
     if (_isLoading) {
-      if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ⏳ 이미 로딩 중입니다. 요청 무시됨');
+      _log('[LocationAnnouncement] ⏳ 이미 로딩 중입니다. 요청 무시됨');
       return;
     }
 
@@ -87,14 +87,14 @@ class LocationAnnouncementController {
       // 타임아웃과 함께 실행
       await _executeWithTimeout(curLat, curLng, compassValue);
     } catch (e, stackTrace) {
-      if (_kLocationAnnouncementDebug) {
-        debugPrint('[LocationAnnouncement] ❌ 예외 발생: $e');
-        debugPrint('[LocationAnnouncement] 스택 트레이스:\n$stackTrace');
-      }
+      
+      _log('[LocationAnnouncement] ❌ 예외 발생: $e');
+      _log('[LocationAnnouncement] 스택 트레이스:\n$stackTrace');
+      
       // ttsService.speakWithChannel('알 수 없는 오류가 발생했습니다', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'poi_announcement_error', cooldown: Duration(seconds: 10),);
     } finally {
       _isLoading = false;
-      if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)');
+      _log('[LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)');
     }
   }
 
@@ -109,7 +109,7 @@ class LocationAnnouncementController {
             )),
       ]);
     } on TimeoutException catch (e) {
-      if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ⏱️ 타임아웃 발생: ${e.message}');
+      _log('[LocationAnnouncement] ⏱️ 타임아웃 발생: ${e.message}');
       // await ttsService.speak('위치 정보 조회 시간이 초과되었습니다. 다시 시도해주세요');
     }
   }
@@ -121,7 +121,7 @@ class LocationAnnouncementController {
 
   
     // 0. 즉시 검색 시작 안내 (사용자 피드백)
-    if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] 🔍 주변 장소 검색 시작');
+    _log('[LocationAnnouncement] 🔍 주변 장소 검색 시작');
     // await ttsService.speak('주변 장소를 검색합니다');
 
     // // // 1. 현재 GPS 좌표 가져오기
@@ -135,19 +135,17 @@ class LocationAnnouncementController {
     //   },
     //   (position) async {
         // GPS 좌표 성공
-        if (_kLocationAnnouncementDebug) {
-          debugPrint('[LocationAnnouncement] ✅ GPS 좌표 수신:');
-          debugPrint('  - 위도(Latitude): $curLat');
-          debugPrint('  - 경도(Longitude): $curLng');
-        }
+        _log('[LocationAnnouncement] ✅ GPS 좌표 수신:');
+        _log('  - 위도(Latitude): $curLat');
+        _log('  - 경도(Longitude): $curLng');
         final extensionLatLng =Calculators.calLatLng(curLat, curLng, compassValue, extensionPointDistanceKm);
         final double extensionLat = extensionLatLng['latitude']!;
         final double extensionLng = extensionLatLng['longitude']!;
         // 2. 주변 POI 검색 (카카오 Category Search API)
-        if (_kLocationAnnouncementDebug) {
-          debugPrint('[LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작');
-          debugPrint('  - 검색 반경: 50m');
-        }
+        
+        _log('[LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작');
+        _log('  - 검색 반경: 50m');
+
         final placesResult = await kakaoRepository.searchNearbyPlaces(
           latitude: extensionLat,
           longitude: extensionLng,
@@ -157,31 +155,31 @@ class LocationAnnouncementController {
         placesResult.fold(
           (failure) {
             // POI 검색 실패
-            if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ❌ POI 검색 실패: $failure');
+            _log('[LocationAnnouncement] ❌ POI 검색 실패: $failure');
             // ttsService.speak('주변 장소를 찾을 수 없습니다');
           },
           (places) {
             if (places.isEmpty) {
               // 검색 결과 없음
-              if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] ⚠️ 주변에 등록된 장소가 없습니다');
+              _log('[LocationAnnouncement] ⚠️ 주변에 등록된 장소가 없습니다');
               // ttsService.speak('주변에 등록된 장소가 없습니다');
               return;
             }
 
-            // 3. 가장 가까운 장소 (이미 거리순 정렬됨)
-            final nearest = places.first;
-            if (_kLocationAnnouncementDebug) {
-              debugPrint('[LocationAnnouncement] ✅ POI 검색 성공:');
-              debugPrint('  - 장소명: ${nearest.name}');
-              debugPrint('  - 거리: ${nearest.distance}m');
-              debugPrint('  - 주소: ${nearest.address}');
+            // 3. 내 실제 위치 기준으로 가장 가까운 장소 선택
+            final nearest = _findNearestFromCurrentPosition(places, curLat, curLng);
+            
+              _log('[LocationAnnouncement] ✅ POI 검색 성공:');
+              _log('  - 장소명: ${nearest.name}');
+              _log('  - 거리: ${nearest.distance}m');
+              _log('  - 주소: ${nearest.address}');
 
               // 검색된 모든 장소 로그 (디버깅용)
-              debugPrint('[LocationAnnouncement] 📍 검색된 장소 목록 (${places.length}개):');
+              _log('[LocationAnnouncement] 📍 검색된 장소 목록 (${places.length}개):');
               for (var i = 0; i < places.length; i++) {
                 debugPrint('  ${i + 1}. ${places[i].name} (${places[i].distance}m)');
               }
-            }
+            
 
             // 4. TTS 안내 (시계 방향 포함)
             final clockDirection = getClockDirectionForPoi(curLat: curLat, curLng: curLng, place: nearest, compassValue: compassValue);
@@ -194,8 +192,8 @@ class LocationAnnouncementController {
             final userToPoiDistMeters = (userToPoiDistKm * 1000).round();
             final message = _buildPoiMessage(nearest, clockDirection, userToPoiDistMeters);
 
-            if (_kLocationAnnouncementDebug) debugPrint('[LocationAnnouncement] 🔊 TTS 안내: $message');
-            
+            _log('[LocationAnnouncement] 🔊 TTS 안내: $message');
+
             ttsService.speakWithChannel(
               message, 
               channel: ETtsChannel.NAVIGATE, 
@@ -319,6 +317,40 @@ class LocationAnnouncementController {
 
   // }
 
+  void _log(String message) {
+    if (_kLocationAnnouncementDebug) {
+      debugPrint('[LocationAnnouncement] $message');
+    }
+  }
 
+  /// 내 실제 위치 기준으로 가장 가까운 POI를 찾습니다.
+  ///
+  /// [places]: extension point 기준으로 검색된 POI 리스트
+  /// [curLat], [curLng]: 내 실제 위치
+  ///
+  /// **반환값:** 내 위치에서 가장 가까운 PlaceResult
+  PlaceResult _findNearestFromCurrentPosition(
+    List<PlaceResult> places,
+    double curLat,
+    double curLng,
+  ) {
+    PlaceResult nearest = places.first;
+    double minDistance = double.infinity;
+
+    for (final place in places) {
+      final distance = Calculators.calculateDistance(
+        curLat,
+        curLng,
+        place.geometry.location.lat,
+        place.geometry.location.lng,
+      );
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = place;
+      }
+    }
+
+    return nearest;
+  }
 
 }
