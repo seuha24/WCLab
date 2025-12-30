@@ -99,62 +99,12 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               // 횡단보도 내용 영역
               Expanded(
                 child: BlocConsumer<CrosswalkBloc, CrosswalkState>(
-                  // 상태 변화를 감지하여 스낵바 메시지 표시
                   listener: (context, state) {
-                    if (state is SearchOn) {
-                      // 검색 중일 때
-                      if (state.infinite) {
-                        // 무한 검색 모드일 때 안내 메시지
-                        message.snackbar(
-                          context,
-                          text: '자동으로 내 주변 횡단보도에 연결중입니다.',
-                          margin: EdgeInsets.only(
-                            bottom: 90.h,
-                          ),
-                        );
-                      }
-                    } else if (state is SearchOff) {
-                      // 검색 완료일 때
-                      if (state.results.isEmpty) {
-                        // 검색 결과가 없을 때 안내 메시지
-                        message.snackbar(
-                          context,
-                          text: '주변에 스마트압버튼이 없습니다.',
-                          margin: EdgeInsets.only(
-                            bottom: 90.h,
-                          ),
-                        );
-                      } else {
-                        // 검색 결과가 있을 때 성공 메시지
-                        message.snackbar(
-                          context,
-                          text: '${state.results.length} 개의 스마트 압버튼을 찾았습니다.',
-                          margin: EdgeInsets.only(
-                            bottom: 90.h,
-                          ),
-                        );
-                        // 횡단보도 목록이 있으면 현재 위치 유지 (목록이 이미 표시됨)
-                      }
-                    } else if (state is ConnectOn) {
-                      // 연결 중일 때 - 이미 연결 시도 중이므로 추가 메시지는 표시하지 않음
-                    } else if (state is ConnectOff) {
-                      // 연결 완료일 때 - 타이머 정리
+                    if (state is ConnectOff) {
                       _handleConnectionSuccess();
-                      message.snackbar(
-                        context,
-                        text: '횡단보도와 연결되었습니다!',
-                        margin: EdgeInsets.only(bottom: 90.h),
-                      );
                     } else if (state is CrosswalkError) {
-                      // 에러 발생 시 에러 메시지 표시 및 타이머 정리
                       _connectionTimer?.cancel();
                       _connectionTimer = null;
-
-                      message.snackbar(
-                        context,
-                        text: state.message,
-                        margin: EdgeInsets.only(bottom: 90.h),
-                      );
                     }
                   },
 
@@ -535,29 +485,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
         horizontal: SizeTheme.w_md,
       ),
       child: BlocConsumer<CrosswalkBloc, CrosswalkState>(
-        listener: (context, state) {
-          if (state is CrosswalkError) {
-            message.snackbar(
-              context,
-              text: state.message,
-              duration: const Duration(seconds: 4),
-            );
-          } else if (state is ConnectOff) {
-            if (state.enableCompass && state.latLng != null) {
-              message.snackbar(
-                context,
-                text: '진동이 울리지 않는 방향으로 보행하세요.',
-                duration: const Duration(seconds: 4),
-              );
-            } else {
-              message.snackbar(
-                context,
-                text: '음향신호기의 안내에 따라 보행하세요.',
-                duration: const Duration(seconds: 4),
-              );
-            }
-          }
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           if (state is ConnectOn) {
             return const Center(child: CircularProgressIndicator());
