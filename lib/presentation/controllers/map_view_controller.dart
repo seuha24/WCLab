@@ -426,7 +426,7 @@ class NaverMapViewController extends GetxController {
         showLowGpsAlrertOnce = true; // 중복 표시 방지 플래그
         showLowAccuracyDialog.value = true; // 알림 다이얼로그 표시 신호
       }
-
+      
       if (position.accuracy >= 15) {
         isGpsAccurate.value = false; // GPS 신호 불량
         pdrCalculator.setVelocityValue(_filteringX.calculateWeightedAverage(), _filteringY.calculateWeightedAverage());
@@ -835,6 +835,9 @@ class NaverMapViewController extends GetxController {
 
   /// 목적지까지의 거리를 계산합니다. (단위: 미터)
   double checkDistanceToDestination() {
+    if (routeController.branchinfo.isEmpty) {
+      return double.infinity;
+    }
     final destination = routeController.branchinfo.last.point;
     final distance = Calculators.calculateDistance(
       currentLatitude.value,

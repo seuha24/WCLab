@@ -33,27 +33,31 @@ class _TutorialViewState extends State<TutorialView> {
             Visibility(
               visible: _currentIndex != 0,
               child: Flexible(
-                child: InkWell(
-                  onTap: () {
-                    if (_currentIndex != 0) {
-                      setState(() {
-                        Scrollable.ensureVisible(
-                          keys[--_currentIndex].currentContext!,
-                          duration: const Duration(milliseconds: 600),
-                          curve: Curves.easeInOut,
-                        );
-                      });
-                    }
-                  },
-                  child: Container(
-                    color: ColorTheme.highlight1,
-                    child: Center(
-                      child: Text(
-                        '이전',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineLarge!
-                            .apply(color: const Color(0xff2A2C41)),
+                child: Semantics(
+                  label: '이전 페이지로 이동',
+                  button: true,
+                  child: InkWell(
+                    onTap: () {
+                      if (_currentIndex != 0) {
+                        setState(() {
+                          Scrollable.ensureVisible(
+                            keys[--_currentIndex].currentContext!,
+                            duration: const Duration(milliseconds: 600),
+                            curve: Curves.easeInOut,
+                          );
+                        });
+                      }
+                    },
+                    child: Container(
+                      color: ColorTheme.highlight1,
+                      child: Center(
+                        child: Text(
+                          '이전',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge!
+                              .apply(color: const Color(0xff2A2C41)),
+                        ),
                       ),
                     ),
                   ),
@@ -63,27 +67,31 @@ class _TutorialViewState extends State<TutorialView> {
             Visibility(
               visible: true,
               child: Flexible(
-                child: InkWell(
-                  onTap: () async {
-                    if (_currentIndex == keys.length - 1) {
-                      Navigator.pop(context);
-                    } else {
-                      await Scrollable.ensureVisible(
-                        keys[++_currentIndex].currentContext!,
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.easeInOut,
-                      );
-                      setState(() {});
-                    }
-                  },
-                  child: Container(
-                    color: Theme.of(context).colorScheme.primary,
-                    child: Center(
-                      child: Text(
-                        _currentIndex == keys.length - 1 ? '종료' : '다음',
-                        style: Theme.of(context).textTheme.headlineLarge!.apply(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
+                child: Semantics(
+                  label: _currentIndex == keys.length - 1 ? '도움말 종료' : '다음 페이지로 이동',
+                  button: true,
+                  child: InkWell(
+                    onTap: () async {
+                      if (_currentIndex == keys.length - 1) {
+                        Navigator.pop(context);
+                      } else {
+                        await Scrollable.ensureVisible(
+                          keys[++_currentIndex].currentContext!,
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.easeInOut,
+                        );
+                        setState(() {});
+                      }
+                    },
+                    child: Container(
+                      color: Theme.of(context).colorScheme.primary,
+                      child: Center(
+                        child: Text(
+                          _currentIndex == keys.length - 1 ? '종료' : '다음',
+                          style: Theme.of(context).textTheme.headlineLarge!.apply(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                        ),
                       ),
                     ),
                   ),

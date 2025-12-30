@@ -177,6 +177,7 @@ class _DesSearchState extends State<DesSearch> {
                               Icons.close,
                               color: Theme.of(context).colorScheme.primary,
                             ),
+                            tooltip: '검색어 삭제',
                             onPressed: () {
                               _searchController.clear();
                               _searchResults.clear();

@@ -102,6 +102,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       await controller.toggleMapMode();
                       HapticFeedback.mediumImpact();
                     },
+                    tooltip: '지도 모드 변경',
                     backgroundColor: _getButtonColor(controller),
                     child: AnimatedRotation(
                       duration: Duration(milliseconds: 300),
@@ -121,6 +122,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       controller.toggleFlashlight();
                       HapticFeedback.mediumImpact();
                     },
+                    tooltip: controller.isFlashOn.value ? '경광등 끄기' : '경광등 켜기',
                     backgroundColor: controller.isFlashOn.value
                         ? Colors.orange
                         : Colors.grey,
@@ -186,6 +188,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       Icons.location_pin,
                       color: Colors.red,
                       size: 40,
+                      semanticLabel: '출입구 등록 위치',
                     ),
                   ),
                   // 현위치 동적 마커는 계속 표시되어야 함 (컨트롤러에서 관리)
@@ -218,6 +221,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     Icons.location_pin,
                     color: Colors.red,
                     size: 40,
+                    semanticLabel: '현재 위치 설정 마커',
                   ),
                 ),
                 // 현재 위치 설정 버튼
@@ -267,6 +271,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       controller.searchLocation.value = '';
                       controller.destinationLocation.value = '';
                     },
+                    tooltip: '경로 안내 종료',
                     backgroundColor: Colors.red,
                     icon: Icon(Icons.stop, color: Colors.white),
                     label:
@@ -296,34 +301,38 @@ class NaverMapView extends GetView<NaverMapViewController> {
     required String value,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                blurRadius: 4,
-                offset: Offset(0, 2))
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                value.isEmpty ? label : value,
-                style: TextStyle(
-                  fontSize: AppSizes.scaledFont(18),
-                  color: value.isEmpty ? Colors.grey : Colors.black,
+    return Semantics(
+      label: value.isEmpty ? label : value,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: Offset(0, 2))
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value.isEmpty ? label : value,
+                  style: TextStyle(
+                    fontSize: AppSizes.scaledFont(18),
+                    color: value.isEmpty ? Colors.grey : Colors.black,
+                  ),
                 ),
               ),
-            ),
-            Icon(Icons.search),
-          ],
+              Icon(Icons.search, semanticLabel: '검색'),
+            ],
+          ),
         ),
       ),
     );
@@ -438,23 +447,27 @@ class NaverMapView extends GetView<NaverMapViewController> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: Colors.grey[600], size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _showLocationSearch(context),
-              child: Text(
-                '장소를 검색하세요',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
+      child: Semantics(
+        label: '장소를 검색하세요',
+        button: true,
+        child: GestureDetector(
+          onTap: () => _showLocationSearch(context),
+          child: Row(
+            children: [
+              Icon(Icons.search, color: Colors.grey[600], size: 20, semanticLabel: '검색'),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '장소를 검색하세요',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 16,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
