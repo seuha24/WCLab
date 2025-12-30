@@ -28,13 +28,12 @@ class _MainViewState extends State<MainView> {
     Get.put(NaverMapViewController());
     Get.put(SlidingPanelController());
 
-    // 첫 화면(지도)의 패널을 표시하기 위해
-    // 충분한 지연 후 실행 (Sheet가 완전히 준비될 때까지)
+    // 초기 상태: 패널 접힌 상태로 시작
+    // activePanelId만 설정하고 패널은 펼치지 않음
     Future.delayed(const Duration(milliseconds: 500), () {
-      // 초기 선택된 탭이 0(지도)이고 위젯이 마운트된 상태면 패널 표시
       if (mounted && _selectedIndex == 0) {
         final slidingController = Get.find<SlidingPanelController>();
-        slidingController.expandSlidingBar('map_panel');
+        slidingController.activePanelId.value = 'map_panel';
       }
     });
   }
@@ -43,6 +42,9 @@ class _MainViewState extends State<MainView> {
   void _onItemTapped(int index) {
     // 음성 안내 중지 (예: TTS가 말하는 도중 탭을 전환하면 중단)
     DI.get<FlutterTts>().stop();
+
+    // 같은 탭을 다시 터치했는지 확인
+    final isSameTab = index == _selectedIndex;
 
     // 선택된 탭 인덱스를 갱신하여 화면 전환
     setState(() {
@@ -60,29 +62,44 @@ class _MainViewState extends State<MainView> {
       _previousIndex = index; // 현재 선택된 인덱스를 이전 인덱스로 업데이트
     }
 
-    // 슬라이딩 패널 제어: 화면에 따라 슬라이딩바를 열거나 무시
+    // 슬라이딩 패널 제어: 화면에 따라 슬라이딩바를 열거나 토글
     try {
       final slidingController = Get.find<SlidingPanelController>();
 
-      switch (index) {
-        case 0: // 지도 화면
-          slidingController.expandSlidingBar('map_panel'); // 슬라이딩 바 열기
-          break;
-        case 1: // 즐겨찾기 화면
-          slidingController.expandSlidingBar('favorite_panel');
-          break;
-        case 2: // 횡단보도 화면
-          slidingController.expandSlidingBar('crosswalk_panel');
-          break;
-        case 3: // 출입구 등록 화면
-          slidingController.expandSlidingBar('entrance_panel');
-          break;
-        case 4: // 설정 화면
-          slidingController.expandSlidingBar('setting_panel');
-          break;
-        default:
-          // 나머지 화면에서는 슬라이딩바를 사용하지 않음
-          break;
+      // 패널 ID 매핑
+      final panelIds = [
+        'map_panel',
+        'favorite_panel',
+        'crosswalk_panel',
+        'entrance_panel',
+        'setting_panel',
+      ];
+
+      if (index < panelIds.length) {
+        final panelId = panelIds[index];
+        final selectedMenu = menuNames[index];
+
+        if (isSameTab) {
+          // 같은 탭이면 토글 (열림↔닫힘)
+          final isExpanded = slidingController.isPanelExpanded(panelId);
+          slidingController.toggleSlidingBar(panelId);
+
+          // 패널 상태에 따라 TTS 안내
+          if (isExpanded) {
+            tts.speakWithChannel('$selectedMenu 패널을 접었습니다.',
+                channel: ETtsChannel.FEEDBACK,
+                cooldownKey: 'panel_toggle',
+                cooldown: Duration(seconds: 0));
+          } else {
+            tts.speakWithChannel('$selectedMenu 패널을 펼쳤습니다.',
+                channel: ETtsChannel.FEEDBACK,
+                cooldownKey: 'panel_toggle',
+                cooldown: Duration(seconds: 0));
+          }
+        } else {
+          // 다른 탭이면 열기
+          slidingController.expandSlidingBar(panelId);
+        }
       }
     } catch (e) {
       // 컨트롤러가 등록되지 않은 경우 대비한 예외 처리

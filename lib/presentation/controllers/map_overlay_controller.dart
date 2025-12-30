@@ -50,9 +50,14 @@ class MapOverlayController {
       return;
     }
 
+    if (routeController.branchinfo.isEmpty) {
+      debugPrint("branchinfo가 비어있습니다. 마커 추가 불가");
+      return;
+    }
+
     final context = navigatorKey.currentContext;
     if (context == null) {
-      debugPrint("context가 없습니다. 마커 추가 불가");
+      debugPrint("navigatorKey.currentContext가 null입니다. 마커 추가 불가");
       return;
     }
     final markersCache = <String, NMarker>{};
@@ -139,10 +144,13 @@ class MapOverlayController {
     MapControlMode mapMode,
   ) async {
     if (mapController == null) return;
-    if (navigatorKey.currentContext == null) {
-      debugPrint("context가 없습니다. 현재 위치 마커 업데이트 불가");
+
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      debugPrint("updateCurrentLocationMarker: context가 null입니다.");
       return;
     }
+
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
 
@@ -152,6 +160,7 @@ class MapOverlayController {
       mapBearing: mapBearing,
       isGps: isGps,
       mapMode: mapMode,
+      context: context,
     );
 
     if (_currentLocationMarker == null) {
@@ -181,6 +190,7 @@ class MapOverlayController {
     required double mapBearing,
     required bool isGps,
     required MapControlMode mapMode,
+    required BuildContext context,
   }) async {
     // 기기 나침반 각도와 지도 각도를 보정
     final double adjustedAngle =
@@ -198,7 +208,7 @@ class MapOverlayController {
         child: Icon(iconImage, color: color, size: locationMarkerSize),
       ),
       size: const Size(locationMarkerSize, locationMarkerSize),
-      context: navigatorKey.currentContext!,
+      context: context,
     );
   }
 

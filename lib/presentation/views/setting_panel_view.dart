@@ -284,6 +284,7 @@ class _SettingPanelViewState extends State<SettingPanelView> {
                 leading: const Icon(
                   Icons.bluetooth,
                   color: ColorTheme.highlight3,
+                  semanticLabel: '블루투스',
                 ),
                 title: Text(
                   '블루투스 권한',
@@ -332,6 +333,7 @@ class _SettingPanelViewState extends State<SettingPanelView> {
                 leading: const Icon(
                   Icons.gps_fixed_rounded,
                   color: ColorTheme.highlight4,
+                  semanticLabel: 'GPS 위치',
                 ),
                 title: Text(
                   '사용자 위치 정보 권한',

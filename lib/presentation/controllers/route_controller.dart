@@ -117,6 +117,10 @@ class RouteController {
   }
 
   void resetDeviationYaw(int targetIndex, double compassValue) {
+    if (branchinfo.isEmpty || targetIndex < 0 || targetIndex >= branchinfo.length) {
+      debugPrint('resetDeviationYaw: 유효하지 않은 targetIndex=$targetIndex (branchinfo.length=${branchinfo.length})');
+      return;
+    }
     pdrCalculator.setDeviationYaw(
       Calculators.deg2rad(
         Calculators.calculateYawDeviationFromCompass(

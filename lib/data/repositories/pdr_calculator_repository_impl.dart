@@ -37,7 +37,8 @@ class PdrCalculatorImpl implements PdrCalculator{
   // --- 각도 변환 상수 ---
   static const double angleToRadian = math.pi / 180;
   static const double radianToAngle = 180 / math.pi;
-  static const double addFilteringValue = ((1 / 130) * (math.pi / 180));
+  // static const double addFilteringValue = ((1 / 130) * (math.pi / 180));
+  static const double addFilteringValue = 0;
 
   PdrCalculatorImpl({
     required this.filteringX,
@@ -82,6 +83,8 @@ class PdrCalculatorImpl implements PdrCalculator{
       yawRatePerDt = (event.z * dt);
     }
     _pdrYaw = _updateRotationValue(_pdrYaw, yawRatePerDt, addFilteringValue);
+    
+
     _deviationYaw = _updateRotationValue(_deviationYaw, yawRatePerDt, addFilteringValue);
 
     _deviationYawTurn = _deviationYaw * radianToAngle;

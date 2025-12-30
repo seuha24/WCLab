@@ -353,6 +353,11 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                               ? Images.TrafficCross // 교차로
                               : Images.TrafficYellow, // 점멸 신호등
                     ),
+                    semanticLabel: results[index].type == ECrosswalk.SINGLE_ROAD
+                        ? '단일 신호등'
+                        : results[index].type == ECrosswalk.INTERSECTION
+                            ? '교차로 신호등'
+                            : '점멸 신호등',
                   ),
                 ),
 

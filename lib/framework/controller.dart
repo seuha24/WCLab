@@ -60,6 +60,6 @@ part '../presentation/controllers/map_panel_controller.dart';
 part '../presentation/controllers/route_controller.dart';
 part '../presentation/controllers/map_overlay_controller.dart';
 part '../presentation/controllers/index_controller.dart';
-part '../presentation/controllers/navigate_controller.dart';
+part '../presentation/controllers/route_recovery_controller.dart';
 part '../presentation/controllers/location_announcement_controller.dart';
-
+part '../presentation/controllers/navigate_controller.dart';

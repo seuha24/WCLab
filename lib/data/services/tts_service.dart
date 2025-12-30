@@ -190,7 +190,13 @@ class TtsService {
         // 우선 새 요청을 큐의 제일 앞에 넣고
         _queue.insert(0, request);
         // 현재 재생 중단 (cancelHandler → _onDoneOrError → _playNextIfAny)
-        await _tts.stop();
+        try {
+          await _tts.stop();
+        } catch (e) {
+          debugPrint('TtsService: stop error => $e');
+          _isPlaying = false;
+          _current = null;
+        }
         return;
       }
     }
@@ -206,7 +212,11 @@ class TtsService {
     _queue.clear();
     _current = null;
     _isPlaying = false;
-    await _tts.stop();
+    try {
+      await _tts.stop();
+    } catch (e) {
+      debugPrint('TtsService: stopAll error => $e');
+    }
   }
 
     void clearChannel(ETtsChannel channel) {
@@ -278,7 +288,16 @@ class TtsService {
     _updateCooldown(next);
 
     if (_kTtsDebug) debugPrint('TtsService: speak => [${next.channel}] ${next.text}');
-    _tts.speak(next.text);
+
+    try {
+      _tts.speak(next.text);
+    } catch (e) {
+      debugPrint('TtsService: speak error => $e');
+      _isPlaying = false;
+      _current = null;
+      // 에러 발생 시 다음 항목 시도
+      Future.microtask(() => _playNextIfAny());
+    }
   }
 
 

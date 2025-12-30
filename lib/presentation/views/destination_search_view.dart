@@ -177,6 +177,7 @@ class _DesSearchState extends State<DesSearch> {
                               Icons.close,
                               color: Theme.of(context).colorScheme.primary,
                             ),
+                            tooltip: '검색어 삭제',
                             onPressed: () {
                               _searchController.clear();
                               _searchResults.clear();
@@ -250,9 +251,9 @@ class _DesSearchState extends State<DesSearch> {
                               if (entranceState
                                   .buildingResponse.entrances.isNotEmpty) {
                                 if (!mounted) return;
-                                await Navigator.push(
+                                await Navigator.push<void>(
                                   context,
-                                  MaterialPageRoute(
+                                  MaterialPageRoute<void>(
                                     builder: (_) => EntranceSelectionView(
                                       buildingResponse:
                                           entranceState.buildingResponse,

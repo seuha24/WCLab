@@ -730,10 +730,12 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
           children: [
             IconButton(
               icon: Icon(Icons.edit, color: Colors.grey[600], size: 20),
+              tooltip: '${point.name} 수정',
               onPressed: () => _navigateToPointEdit(point),
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[400], size: 20),
+              tooltip: '${point.name} 삭제',
               onPressed: () => _deletePoint(point),
             ),
           ],
@@ -779,10 +781,12 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
           children: [
             IconButton(
               icon: Icon(Icons.edit, color: Colors.grey[600], size: 20),
+              tooltip: '${route.name} 수정',
               onPressed: () => _navigateToRouteEdit(route),
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[400], size: 20),
+              tooltip: '${route.name} 삭제',
               onPressed: () => _deleteRoute(route),
             ),
           ],

@@ -101,35 +101,45 @@ class _SignInViewState extends State<SignInView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // 애플 로그인 버튼
-                      GestureDetector(
-                        onTap: () {
-                          context.read<AuthBloc>().add(SignInWithAppleEvent());
-                          debugPrint("애플로그인하기");
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(2.sp),
-                          child: Image(
-                            width: AppSizes.scaledWidth(60),
-                            height: AppSizes.scaledWidth(60),
-                            image: AssetImage(
-                              Images.AppleLogo,
+                      Semantics(
+                        label: '애플로 로그인',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            context.read<AuthBloc>().add(SignInWithAppleEvent());
+                            debugPrint("애플로그인하기");
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(2.sp),
+                            child: Image(
+                              width: AppSizes.scaledWidth(60),
+                              height: AppSizes.scaledWidth(60),
+                              image: AssetImage(
+                                Images.AppleLogo,
+                              ),
+                              semanticLabel: '애플 로고',
                             ),
                           ),
                         ),
                       ),
                       Gap(),
                       // 구글 로그인 버튼
-                      GestureDetector(
-                        onTap: () {
-                          context.read<AuthBloc>().add(SignInWithGoogleEvent());
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(2.sp),
-                          child: Image(
-                            width: AppSizes.scaledWidth(60),
-                            height: AppSizes.scaledWidth(60),
-                            image: AssetImage(
-                              Images.GoogleLogo,
+                      Semantics(
+                        label: '구글로 로그인',
+                        button: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(2.sp),
+                            child: Image(
+                              width: AppSizes.scaledWidth(60),
+                              height: AppSizes.scaledWidth(60),
+                              image: AssetImage(
+                                Images.GoogleLogo,
+                              ),
+                              semanticLabel: '구글 로고',
                             ),
                           ),
                         ),
