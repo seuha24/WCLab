@@ -1247,6 +1247,13 @@ class NaverMapViewController extends GetxController {
   Future<void> updateMapByMode(double latitude, double longitude,
       double compassValue, bool isGps) async {
     if (mapController == null) return;
+
+    // 횡단보도(음향신호기) 마커 업데이트 (비동기, 50m 이상 이동 시에만 갱신)
+    overlayController.updateCrosswalkMarkers(
+      latitude: latitude,
+      longitude: longitude,
+    );
+
     switch (mapMode.value) {
       case MapControlMode.idle:
 
