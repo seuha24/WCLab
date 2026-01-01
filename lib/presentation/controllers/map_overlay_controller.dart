@@ -21,6 +21,16 @@ class MapOverlayController {
   /// 현재 위치 마커 Getter
   NMarker? get currentLocationMarker => _currentLocationMarker;
 
+  /// 횡단보도(음향신호기) 마커 캐시
+  final Map<String, NMarker> _signalDeviceMarkers = {};
+
+  /// 횡단보도 마커 아이콘 캐시
+  NOverlayImage? _crosswalkIcon;
+
+  /// 마지막으로 횡단보도 마커를 업데이트한 위치
+  double? _lastCrosswalkLat;
+  double? _lastCrosswalkLng;
+
   /// addPathOverlays: 경로 오버레이를 지도에 추가
   void addPathOverlays(List<LatLng> paths) {
     if (mapController == null) return;
@@ -240,6 +250,167 @@ class MapOverlayController {
     if (mapController == null) return;
     mapController!.clearOverlays();
     _currentLocationMarker = null; // 현재 위치 마커 초기화
+    _signalDeviceMarkers.clear(); // 횡단보도 마커 초기화
     debugPrint("모든 오버레이가 제거되었습니다.");
+  }
+
+  // ====== 횡단보도(음향신호기) 마커 관련 메서드 ======
+
+  /// 횡단보도 마커 업데이트 (위치 기반)
+  ///
+  /// 현재 위치 기준 반경 내 음향신호기를 조회하여 지도에 마커로 표시한다.
+  /// 위치가 50m 이상 변경된 경우에만 업데이트하여 성능 최적화.
+  Future<void> updateCrosswalkMarkers({
+    required double latitude,
+    required double longitude,
+    double radiusInMeters = 1000,
+  }) async {
+    if (mapController == null) return;
+
+    // 위치 변경이 50m 미만이면 업데이트 스킵 (성능 최적화)
+    if (_lastCrosswalkLat != null && _lastCrosswalkLng != null) {
+      final distance = _calculateDistance(
+        _lastCrosswalkLat!,
+        _lastCrosswalkLng!,
+        latitude,
+        longitude,
+      );
+      if (distance < 50) return;
+    }
+
+    try {
+      // UseCase로 주변 음향신호기 조회
+      final getNearbySignalDevices = DI<GetNearbySignalDevices>();
+      final result = await getNearbySignalDevices(
+        NearbySignalDevicesParams(
+          latitude: latitude,
+          longitude: longitude,
+          radiusInMeters: radiusInMeters,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('횡단보도 마커 조회 실패: ${failure.message}');
+        },
+        (devices) async {
+          await _updateSignalDeviceMarkersOnMap(devices);
+          _lastCrosswalkLat = latitude;
+          _lastCrosswalkLng = longitude;
+          debugPrint('횡단보도 마커 업데이트: ${devices.length}개');
+        },
+      );
+    } catch (e) {
+      debugPrint('횡단보도 마커 업데이트 오류: $e');
+    }
+  }
+
+  /// 지도에 음향신호기 마커 업데이트
+  Future<void> _updateSignalDeviceMarkersOnMap(
+    List<SignalDevice> devices,
+  ) async {
+    if (mapController == null) return;
+
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+
+    // 아이콘이 없으면 생성
+    _crosswalkIcon ??= await _createCrosswalkIcon(context);
+
+    // 현재 표시할 마커 ID 집합
+    final currentIds = devices.map((d) => d.managementId).toSet();
+
+    // 1. 더 이상 표시하지 않을 마커 제거
+    final toRemove = <String>[];
+    for (final id in _signalDeviceMarkers.keys) {
+      if (!currentIds.contains(id)) {
+        toRemove.add(id);
+      }
+    }
+    for (final id in toRemove) {
+      final marker = _signalDeviceMarkers.remove(id);
+      if (marker != null) {
+        mapController!.deleteOverlay(
+          NOverlayInfo(type: NOverlayType.marker, id: 'crosswalk_$id'),
+        );
+      }
+    }
+
+    // 2. 새로운 마커 추가
+    final newMarkers = <NAddableOverlay>{};
+    for (final device in devices) {
+      if (!_signalDeviceMarkers.containsKey(device.managementId)) {
+        final marker = NMarker(
+          id: 'crosswalk_${device.managementId}',
+          position: NLatLng(device.latitude, device.longitude),
+          icon: _crosswalkIcon!,
+        );
+        _signalDeviceMarkers[device.managementId] = marker;
+        newMarkers.add(marker);
+      }
+    }
+
+    if (newMarkers.isNotEmpty) {
+      await mapController!.addOverlayAll(newMarkers);
+    }
+  }
+
+  /// 횡단보도 마커 아이콘 생성
+  Future<NOverlayImage> _createCrosswalkIcon(BuildContext context) async {
+    const double iconSize = 20.0;
+    return NOverlayImage.fromWidget(
+      widget: Container(
+        width: iconSize,
+        height: iconSize,
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.directions_walk,
+          color: Colors.white,
+          size: 12,
+        ),
+      ),
+      size: const Size(iconSize, iconSize),
+      context: context,
+    );
+  }
+
+  /// 거리 계산 (미터 단위, 간이 계산)
+  double _calculateDistance(
+    double lat1,
+    double lng1,
+    double lat2,
+    double lng2,
+  ) {
+    const meterPerLat = 111000.0;
+    const meterPerLng = 88000.0;
+    final dLat = (lat2 - lat1) * meterPerLat;
+    final dLng = (lng2 - lng1) * meterPerLng;
+    return math.sqrt(dLat * dLat + dLng * dLng);
+  }
+
+  /// 횡단보도 마커만 제거
+  Future<void> clearCrosswalkMarkers() async {
+    if (mapController == null) return;
+
+    for (final entry in _signalDeviceMarkers.entries) {
+      mapController!.deleteOverlay(
+        NOverlayInfo(type: NOverlayType.marker, id: 'crosswalk_${entry.key}'),
+      );
+    }
+    _signalDeviceMarkers.clear();
+    _lastCrosswalkLat = null;
+    _lastCrosswalkLng = null;
+    debugPrint('횡단보도 마커가 모두 제거되었습니다.');
   }
 }
