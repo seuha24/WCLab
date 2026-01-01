@@ -84,6 +84,7 @@ flutter:
     - lib/assets/images/
     - lib/assets/images/ic/
     - lib/assets/jsons/lotties/
+    - lib/assets/data/
 
 flutter_native_splash:
   color: "#758BFD"
