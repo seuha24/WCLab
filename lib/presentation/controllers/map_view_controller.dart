@@ -229,10 +229,56 @@ class NaverMapViewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    
+
     sensorController.start();
     _initSensorStreams();
     _initializeLocationServices();
+    _loadFavoritePointsCache();
+  }
+
+  /// 즐겨찾기 관심지점을 서버에서 로드하여 LocationAnnouncementController 캐시에 저장
+  ///
+  /// 앱 시작 시 즐겨찾기 패널을 열지 않아도 POI 안내에 즐겨찾기가 포함되도록 함
+  Future<void> _loadFavoritePointsCache() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null || user.isAnonymous) {
+        debugPrint('[MapViewController] 즐겨찾기 캐시 로드 스킵: 로그인되지 않음');
+        return;
+      }
+
+      final authService = DI.get<AuthService>();
+      final credentials = await authService.getFavoriteCredentials(user: user);
+      if (credentials == null) {
+        debugPrint('[MapViewController] 즐겨찾기 캐시 로드 스킵: 인증 정보 없음');
+        return;
+      }
+
+      // 즐겨찾기 조회
+      final dioClient = DioClient();
+      final remoteDataSource = FavoriteRemoteDataSourceImpl(dioClient: dioClient);
+      final repository = FavoriteRepositoryImpl(remoteDataSource: remoteDataSource);
+      final getFavoritePoints = GetFavoritePoints(repository);
+
+      final result = await getFavoritePoints.call(
+        GetFavoritePointsParams(
+          loginMethod: credentials.loginMethod,
+          userId: credentials.userId,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('[MapViewController] 즐겨찾기 캐시 로드 실패: $failure');
+        },
+        (points) {
+          locationAnnouncementController.updateFavoritePointsCache(points);
+          debugPrint('[MapViewController] 즐겨찾기 캐시 로드 완료: ${points.length}개');
+        },
+      );
+    } catch (e) {
+      debugPrint('[MapViewController] 즐겨찾기 캐시 로드 에러: $e');
+    }
   }
 
   /// 주변 건물 자동 알림 토글
@@ -424,12 +470,12 @@ class NaverMapViewController extends GetxController {
       );
 
       // GPS 정확도에 따라 출발지 안내 멘트 유/무
-      if (!showLowGpsAlrertOnce && position.accuracy >= 15) {
+      if (!showLowGpsAlrertOnce && position.accuracy >= 1) {
         showLowGpsAlrertOnce = true; // 중복 표시 방지 플래그
         showLowAccuracyDialog.value = true; // 알림 다이얼로그 표시 신호
       }
       
-      if (position.accuracy >= 15) {
+      if (position.accuracy >= 1) {
         isGpsAccurate.value = false; // GPS 신호 불량
         pdrCalculator.setVelocityValue(_filteringX.calculateWeightedAverage(), _filteringY.calculateWeightedAverage());
         currentLatitude.value = pdrCalculator.newlatitude; // 센서 계산 위도

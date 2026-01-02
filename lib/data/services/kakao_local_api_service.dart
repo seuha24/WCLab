@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 enum KakaoCategoryCode {
+  FAV, // 즐겨찾기 (사용자 등록 관심지점)
   SC4, // 학교
   PO3, // 공공기관
   CE7, // 카페

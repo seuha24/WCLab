@@ -80,6 +80,8 @@ class _SettingPanelViewState extends State<SettingPanelView> {
 
   @override
   void dispose() {
+    // 패널 컨트롤러 정리: Map에서 제거하여 다음 mount 시 새로 등록되도록 함
+    _slidingController.removeController('setting_panel');
     _controller.dispose();
     super.dispose();
   }
