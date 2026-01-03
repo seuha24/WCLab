@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 
 enum KakaoCategoryCode {
   FAV, // 즐겨찾기 (사용자 등록 관심지점)
+  CSR, // 교차로
+  BST, // 버스정류장
+  CSW, // 횡단보도
   SC4, // 학교
   PO3, // 공공기관
   CE7, // 카페
@@ -14,6 +17,7 @@ enum KakaoCategoryCode {
   PM9, // 약국
   CT1, // 문화시설
   AT4, // 관광명소
+
 }
 
 /// 카카오 로컬 API 통합 서비스

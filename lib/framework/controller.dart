@@ -36,6 +36,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:safelight/core/utils/weighted_average_filter.dart';
 import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/domain/repositories/kakao_repository.dart';
+import 'package:safelight/domain/repositories/local_poi_repository.dart';
 import 'package:safelight/main.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:get/get.dart';

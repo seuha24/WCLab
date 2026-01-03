@@ -41,12 +41,17 @@ class LocationAnnouncementController {
   final NavigatorRepository navigatorRepository;
   /// 카카오 로컬 API Repository (주변 POI 검색)
   final KakaoRepository kakaoRepository;
+  /// 로컬 POI Repository (횡단보도, 버스정류장 등)
+  final LocalPoiRepository localPoiRepository;
 
   /// TTS 서비스
   final TtsService ttsService;
 
   /// 로딩 상태 관리 (중복 요청 방지)
   bool _isLoading = false;
+
+  /// 로컬 POI 초기화 여부
+  bool _isLocalPoiInitialized = false;
 
   /// API 호출 타임아웃 시간 (30초)
   static const Duration _timeout = Duration(seconds: 30);
@@ -74,11 +79,19 @@ class LocationAnnouncementController {
     _log('[LocationAnnouncement] 🗑️ 즐겨찾기 캐시 초기화');
   }
 
-  
+  /// 로컬 POI 초기화 (앱 시작 시 호출)
+  Future<void> initializeLocalPois() async {
+    if (_isLocalPoiInitialized) return;
+
+    final pois = await localPoiRepository.loadAllPois();
+    _isLocalPoiInitialized = true;
+    _log('[LocationAnnouncement] 📍 로컬 POI 초기화 완료: ${pois.length}개');
+  }
 
   LocationAnnouncementController({
     required this.navigatorRepository,
     required this.kakaoRepository,
+    required this.localPoiRepository,
     required this.ttsService,
   });
   
@@ -178,6 +191,15 @@ class LocationAnnouncementController {
     final nearbyFavorites = _filterNearbyFavorites(extensionLat, extensionLng, 50);
     allPlaces.addAll(nearbyFavorites);
     _log('[LocationAnnouncement] ⭐ 즐겨찾기 ${nearbyFavorites.length}개 추가 (전방 40m 기준 50m 이내)');
+
+    // 4. 로컬 POI 추가 (횡단보도, 버스정류장, 사거리 등)
+    final nearbyLocalPois = localPoiRepository.searchNearbyPois(
+      latitude: extensionLat,
+      longitude: extensionLng,
+      radiusMeters: 50,
+    );
+    allPlaces.addAll(nearbyLocalPois);
+    _log('[LocationAnnouncement] 🚦 로컬 POI ${nearbyLocalPois.length}개 추가 (전방 40m 기준 50m 이내)');
 
     // 4. 합쳐진 리스트에서 가까운 순으로 정렬
     if (allPlaces.isEmpty) {
