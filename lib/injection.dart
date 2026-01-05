@@ -202,6 +202,15 @@ Future<void> init() async {
     () => LoadAllSignalDevices(repository: DI()),
   );
 
+  // Intersection (공공데이터 교차로) UseCase
+  DI.registerLazySingleton<GetNearbyIntersections>(
+    () => GetNearbyIntersections(repository: DI()),
+  );
+
+  DI.registerLazySingleton<LoadAllIntersections>(
+    () => LoadAllIntersections(repository: DI()),
+  );
+
   // repository injection area
   DI.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authDataSource: DI()),
@@ -236,6 +245,11 @@ Future<void> init() async {
   // SignalDevice (공공데이터 횡단보도) Repository
   DI.registerLazySingleton<SignalDeviceRepository>(
     () => SignalDeviceRepositoryImpl(localDataSource: DI()),
+  );
+
+  // Intersection (공공데이터 교차로) Repository
+  DI.registerLazySingleton<IntersectionRepository>(
+    () => IntersectionRepositoryImpl(localDataSource: DI()),
   );
 
   DI.registerLazySingleton<SensorStreams>(() => SensorStreamsImpl());
@@ -339,6 +353,11 @@ Future<void> init() async {
   // SignalDevice (공공데이터 횡단보도) DataSource
   DI.registerLazySingleton<SignalDeviceLocalDataSource>(
     () => SignalDeviceLocalDataSourceImpl(),
+  );
+
+  // Intersection (공공데이터 교차로) DataSource
+  DI.registerLazySingleton<IntersectionLocalDataSource>(
+    () => IntersectionLocalDataSourceImpl(),
   );
 
   // 카카오 로컬 API 서비스 (장소 검색, 역지오코딩)

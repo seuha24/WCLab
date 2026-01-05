@@ -39,3 +39,6 @@ part '../data/repositories/pdr_calculator_repository_impl.dart';
 
 part '../domain/repositories/signal_device_repository.dart';
 part '../data/repositories/signal_device_repository_impl.dart';
+
+part '../domain/repositories/intersection_repository.dart';
+part '../data/repositories/intersection_repository_impl.dart';

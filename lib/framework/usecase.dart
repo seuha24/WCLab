@@ -15,3 +15,4 @@ part '../domain/usecases/permission_usecase.dart';
 part '../domain/usecases/service_usecase.dart';
 part '../domain/usecases/send_startpoint_params.dart';
 part '../domain/usecases/signal_device_usecase.dart';
+part '../domain/usecases/intersection_usecase.dart';

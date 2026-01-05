@@ -38,3 +38,5 @@ part '../data/sources/setting_cache_data_source.dart';
 part '../data/sources/ambientlightlevel.data_source.dart';
 
 part '../data/sources/signal_device_local_data_source.dart';
+
+part '../data/sources/intersection_local_data_source.dart';
