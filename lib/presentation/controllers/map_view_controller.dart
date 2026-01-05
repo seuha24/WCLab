@@ -1254,6 +1254,12 @@ class NaverMapViewController extends GetxController {
       longitude: longitude,
     );
 
+    // 교차로 마커 업데이트 (비동기, 50m 이상 이동 시에만 갱신)
+    overlayController.updateIntersectionMarkers(
+      latitude: latitude,
+      longitude: longitude,
+    );
+
     switch (mapMode.value) {
       case MapControlMode.idle:
 

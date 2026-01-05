@@ -33,6 +33,16 @@ class MapOverlayController {
   double? _lastCrosswalkLat;
   double? _lastCrosswalkLng;
 
+  /// 교차로 마커 캐시
+  final Map<String, NMarker> _intersectionMarkers = {};
+
+  /// 교차로 마커 아이콘 캐시
+  NOverlayImage? _intersectionIcon;
+
+  /// 마지막으로 교차로 마커를 업데이트한 위치
+  double? _lastIntersectionLat;
+  double? _lastIntersectionLng;
+
   /// addPathOverlays: 경로 오버레이를 지도에 추가
   void addPathOverlays(List<LatLng> paths) {
     if (mapController == null) return;
@@ -253,6 +263,7 @@ class MapOverlayController {
     mapController!.clearOverlays();
     _currentLocationMarker = null; // 현재 위치 마커 초기화
     _signalDeviceMarkers.clear(); // 횡단보도 마커 초기화
+    _intersectionMarkers.clear(); // 교차로 마커 초기화
     debugPrint("모든 오버레이가 제거되었습니다.");
   }
 
@@ -477,5 +488,165 @@ class MapOverlayController {
     _lastCrosswalkLat = null;
     _lastCrosswalkLng = null;
     debugPrint('횡단보도 마커가 모두 제거되었습니다.');
+  }
+
+  // ====== 교차로 마커 관련 메서드 ======
+
+  /// 교차로 마커 업데이트 (위치 기반)
+  ///
+  /// 현재 위치 기준 반경 내 교차로를 조회하여 지도에 마커로 표시한다.
+  /// 위치가 50m 이상 변경된 경우에만 업데이트하여 성능 최적화.
+  Future<void> updateIntersectionMarkers({
+    required double latitude,
+    required double longitude,
+    double radiusInMeters = 100000, // 100km - 서울 전체 교차로 표시용
+  }) async {
+    if (mapController == null) return;
+
+    // 위치 변경이 50m 미만이면 업데이트 스킵 (성능 최적화)
+    if (_lastIntersectionLat != null && _lastIntersectionLng != null) {
+      final distance = _calculateDistance(
+        _lastIntersectionLat!,
+        _lastIntersectionLng!,
+        latitude,
+        longitude,
+      );
+      if (distance < 50) return;
+    }
+
+    try {
+      // UseCase로 주변 교차로 조회
+      final getNearbyIntersections = DI<GetNearbyIntersections>();
+      final result = await getNearbyIntersections(
+        NearbyIntersectionsParams(
+          latitude: latitude,
+          longitude: longitude,
+          radiusInMeters: radiusInMeters,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('교차로 마커 조회 실패: ${failure.message}');
+        },
+        (intersections) async {
+          await _updateIntersectionMarkersOnMap(intersections);
+          _lastIntersectionLat = latitude;
+          _lastIntersectionLng = longitude;
+          debugPrint('교차로 마커 업데이트: ${intersections.length}개');
+        },
+      );
+    } catch (e) {
+      debugPrint('교차로 마커 업데이트 오류: $e');
+    }
+  }
+
+  /// 지도에 교차로 마커 업데이트
+  Future<void> _updateIntersectionMarkersOnMap(
+    List<Intersection> intersections,
+  ) async {
+    if (mapController == null) return;
+
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+
+    // 현재 표시할 마커 ID 집합
+    final currentIds = intersections.map((i) => i.intersectionId).toSet();
+
+    // 1. 더 이상 표시하지 않을 마커 제거
+    final toRemove = <String>[];
+    for (final id in _intersectionMarkers.keys) {
+      if (!currentIds.contains(id)) {
+        toRemove.add(id);
+      }
+    }
+    for (final id in toRemove) {
+      final marker = _intersectionMarkers.remove(id);
+      if (marker != null) {
+        mapController!.deleteOverlay(
+          NOverlayInfo(type: NOverlayType.marker, id: 'intersection_$id'),
+        );
+      }
+    }
+
+    // 2. 아이콘 준비 (캐시에 없으면 생성)
+    _intersectionIcon ??= await _createIntersectionIcon(context);
+
+    // 3. 새로운 마커 추가
+    final newMarkers = <NAddableOverlay>{};
+    for (final intersection in intersections) {
+      if (!_intersectionMarkers.containsKey(intersection.intersectionId)) {
+        final marker = NMarker(
+          id: 'intersection_${intersection.intersectionId}',
+          position: NLatLng(intersection.latitude, intersection.longitude),
+          icon: _intersectionIcon!,
+        );
+        _intersectionMarkers[intersection.intersectionId] = marker;
+        newMarkers.add(marker);
+      }
+    }
+
+    if (newMarkers.isNotEmpty) {
+      await mapController!.addOverlayAll(newMarkers);
+    }
+  }
+
+  /// 교차로 마커 아이콘 생성
+  ///
+  /// 파란색 둥근 사각형 + 교차로 심볼 (+)
+  Future<NOverlayImage> _createIntersectionIcon(BuildContext context) async {
+    const double iconSize = 24.0;
+
+    return NOverlayImage.fromWidget(
+      widget: SizedBox(
+        width: iconSize,
+        height: iconSize,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 둥근 사각형 배경
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.white, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+            // 교차로 심볼 (+)
+            const Icon(
+              Icons.add,
+              color: Colors.white,
+              size: 12,
+            ),
+          ],
+        ),
+      ),
+      size: const Size(iconSize, iconSize),
+      context: context,
+    );
+  }
+
+  /// 교차로 마커만 제거
+  Future<void> clearIntersectionMarkers() async {
+    if (mapController == null) return;
+
+    for (final entry in _intersectionMarkers.entries) {
+      mapController!.deleteOverlay(
+        NOverlayInfo(type: NOverlayType.marker, id: 'intersection_${entry.key}'),
+      );
+    }
+    _intersectionMarkers.clear();
+    _lastIntersectionLat = null;
+    _lastIntersectionLng = null;
+    debugPrint('교차로 마커가 모두 제거되었습니다.');
   }
 }
