@@ -277,7 +277,7 @@ class MapOverlayController {
     required double latitude,
     required double longitude,
     //double radiusInMeters = 1000,
-    double radiusInMeters = 100000, // 100km - 서울 전체 음향신호기 표시용
+    double radiusInMeters = 1000, // 100km - 서울 전체 음향신호기 표시용
   }) async {
     if (mapController == null) return;
 
@@ -499,7 +499,7 @@ class MapOverlayController {
   Future<void> updateIntersectionMarkers({
     required double latitude,
     required double longitude,
-    double radiusInMeters = 100000, // 100km - 서울 전체 교차로 표시용
+    double radiusInMeters = 1000, // 100km - 서울 전체 교차로 표시용
   }) async {
     if (mapController == null) return;
 
