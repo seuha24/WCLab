@@ -1,57 +1,65 @@
 class ApiEndpoints {
-  // 즐겨찾기 관련 엔드포인트
-  static const String favBaseUrl = 'http://aws2.cuksl.xyz:3003'; //즐겨찾기
-  static const String baseUrl = 'http://aws2.cuksl.xyz:3333'; //로그인 서버
-  static const String baseUrl2 = 'http://aws2.cuksl.xyz:3003'; //출입구 조회
-  /// 학교 서버: 'http://cuksl.xyz:3306'
-  // Auth 관련 엔드포인트
-  static const String googleAuthToken = '$baseUrl/auth/google/token';
-  static const String appleAuthToken = '$baseUrl/auth/apple/token';
-  static const String refreshAuthToken = '$baseUrl/auth/refresh';
+  /// BASE URL
+  static const String API_BASE_URL = 'http://aws2.cuksl.xyz:3003'; //메인 서버
+  static const String API_SUB_BASE_URL = 'http://cuksl.xyz:3306'; //서브 서버
+  static const String AUTH_BASE_URL = 'http://aws2.cuksl.xyz:3333'; //로그인 서버
 
-  // User 관련 엔드포인트
-  static const String patchUserInfo = '$baseUrl/user/info';
-  static const String getUserInfo = '$baseUrl/user/me';
+  /// Auth 관련 엔드포인트
+  static const String googleAuthToken = '$AUTH_BASE_URL/auth/google/token';
+  static const String appleAuthToken = '$AUTH_BASE_URL/auth/apple/token';
+  static const String refreshAuthToken = '$AUTH_BASE_URL/auth/refresh';
 
-  // 출입구 관련 엔드포인트
+  /// User 관련 엔드포인트
+  static const String patchUserInfo = '$AUTH_BASE_URL/user/info';
+  static const String getUserInfo = '$AUTH_BASE_URL/user/me';
 
-  // 출입구 좌표 등록 (POST)
-  static const String saveBuildingEntrance = '$baseUrl2/save/entrances';
-
-  /// 주소, 위도, 경도로 출입구 정보를 조회하는 엔드포인트 (GET)
-  static String getBuildingEntrance(String encodedAddr, double longitude, double latitude) {
-    return '$baseUrl2/$encodedAddr/$longitude/$latitude';
+  /// 출입구 관련 엔드포인트
+  // 주소, 위도, 경도로 출입구 정보를 조회하는 엔드포인트 (GET) 0-1
+  static String getBuildingEntrance(
+      String encodedAddr, double longitude, double latitude) {
+    return '$API_BASE_URL/api/entrances/search'
+        '?address=$encodedAddr&lon=$longitude&lat=$latitude';
   }
 
-  // 즐겨찾기 지점 조회
+  // 출입구 좌표 등록 (POST) 0-2
+  static const String saveBuildingEntrance = '$API_BASE_URL/api/entrances/save';
+
+  /// 즐겨찾기 관련 엔드포인트
+  // 지점 즐겨찾기 조회 1-1
   static String getFavoritePoints(String loginMethod, String userId) {
-    return '$favBaseUrl/fav_point/$loginMethod/$userId';
+    return '$API_BASE_URL/api/favorites/points/search'
+        '?login_method=$loginMethod&uuid=$userId';
   }
 
-  // 즐겨찾기 경로 조회
-  static String getFavoriteRoutes(String loginMethod, String userId) {
-    return '$favBaseUrl/fav_route/$loginMethod/$userId';
-  }
-
-  // 즐겨찾기 지점 등록
-  static const String addFavoritePoint = '$favBaseUrl/save/fav/point';
-
-  // 즐겨찾기 경로 등록
-  static const String addFavoriteRoute = '$favBaseUrl/save/fav/route';
-
-  // 즐겨찾기 지점 삭제
+  // 지점 즐겨찾기 등록 1-2
+  static const String addFavoritePoint =
+      '$API_BASE_URL/api/favorites/points/save';
+  // 지점 즐겨찾기 삭제 1-3
   static String deleteFavoritePoint(String userId, String favIdx) {
-    return '$favBaseUrl/delete/fav/point/$userId/$favIdx';
+    return '$API_BASE_URL/api/favorites/points/delete'
+        '?uuid=$userId&idx=$favIdx';
   }
 
-  // 즐겨찾기 경로 삭제
+  // 지점 즐겨찾기 수정 1-4
+  static const String updateFavoritePoint =
+      '$API_BASE_URL/api/favorites/points/alter';
+
+  // 경로 즐겨찾기 조회 1-5
+  static String getFavoriteRoutes(String loginMethod, String userId) {
+    return '$API_BASE_URL/api/favorites/routes/search'
+        '?login_method=$loginMethod&uuid=$userId';
+  }
+
+  // 경로 즐겨찾기 등록 1-6
+  static const String addFavoriteRoute =
+      '$API_BASE_URL/api/favorites/routes/save';
+  // 경로 즐겨찾기 삭제 1-7
   static String deleteFavoriteRoute(String userId, String favIdx) {
-    return '$favBaseUrl/delete/fav/route/$userId/$favIdx';
+    return '$API_BASE_URL/api/favorites/routes/delete'
+        '?uuid=$userId&idx=$favIdx';
   }
 
-  // 즐겨찾기 지점 수정
-  static const String updateFavoritePoint = '$favBaseUrl/alter/fav/point';
-
-  // 즐겨찾기 경로 수정
-  static const String updateFavoriteRoute = '$favBaseUrl/alter/fav/route';
+  // 경로 즐겨찾기 수정 1-8
+  static const String updateFavoriteRoute =
+      '$API_BASE_URL/api/favorites/routes/alter';
 }
