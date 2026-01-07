@@ -174,6 +174,8 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
             setState(() {
               _favoritePoints = [];
             });
+            // 캐시 초기화
+            DI.get<LocationAnnouncementController>().updateFavoritePointsCache([]);
           }
         },
         (points) {
@@ -181,6 +183,8 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
             setState(() {
               _favoritePoints = points;
             });
+            // LocationAnnouncementController 캐시 업데이트
+            DI.get<LocationAnnouncementController>().updateFavoritePointsCache(points);
           }
         },
       );
@@ -228,6 +232,8 @@ class _FavoriteMainPanelViewState extends State<FavoriteMainPanelView> {
 
   @override
   void dispose() {
+    // 패널 컨트롤러 정리: Map에서 제거하여 다음 mount 시 새로 등록되도록 함
+    _slidingController.removeController('favorite_panel');
     _controller.dispose();
     super.dispose();
   }

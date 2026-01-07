@@ -64,6 +64,16 @@ class PdrCalculatorImpl implements PdrCalculator{
   double get deviationYaw => _deviationYaw;
   @override
   double get deviationYawTurn => _deviationYawTurn;
+
+  /// Gyro 기반 heading 값 (degree, 0~360)
+  @override
+  double get pdrYawDeg {
+    double deg = _pdrYaw * radianToAngle;
+    // 0~360 범위로 정규화
+    deg = deg % 360;
+    if (deg < 0) deg += 360;
+    return deg;
+  }
  
 
     double _updateRotationValue(double value, double valuePerDt, double addValue) {

@@ -16,7 +16,6 @@ class _MainViewState extends State<MainView> {
   final tts = DI.get<TtsService>();
 
   int _selectedIndex = 0; // 초기 선택된 탭 인덱스 (지도)
-  int _previousIndex = 0; // 이전에 선택된 탭 인덱스 (중복 음성 방지용)
 
   // 하단바 메뉴 이름 리스트
   final List<String> menuNames = ['지도', '즐겨찾기', '횡단보도', '출입구 등록', '설정'];
@@ -45,22 +44,12 @@ class _MainViewState extends State<MainView> {
 
     // 같은 탭을 다시 터치했는지 확인
     final isSameTab = index == _selectedIndex;
+    final selectedMenu = index < menuNames.length ? menuNames[index] : menuNames[0];
 
     // 선택된 탭 인덱스를 갱신하여 화면 전환
     setState(() {
       _selectedIndex = index;
     });
-
-    // 다른 메뉴로 전환할 때만 음성 안내 (같은 메뉴 중복 클릭 방지)
-    if (index != _previousIndex) {
-      final selectedMenu =
-          index < menuNames.length ? menuNames[index] : menuNames[0];
-      tts.speakWithChannel('${selectedMenu}을 선택하셨습니다.',
-          channel: ETtsChannel.FEEDBACK,
-          cooldownKey: 'menu_selection',
-          cooldown: Duration(seconds: 0));
-      _previousIndex = index; // 현재 선택된 인덱스를 이전 인덱스로 업데이트
-    }
 
     // 슬라이딩 패널 제어: 화면에 따라 슬라이딩바를 열거나 토글
     try {
@@ -77,7 +66,6 @@ class _MainViewState extends State<MainView> {
 
       if (index < panelIds.length) {
         final panelId = panelIds[index];
-        final selectedMenu = menuNames[index];
 
         if (isSameTab) {
           // 같은 탭이면 토글 (열림↔닫힘)
@@ -85,20 +73,21 @@ class _MainViewState extends State<MainView> {
           slidingController.toggleSlidingBar(panelId);
 
           // 패널 상태에 따라 TTS 안내
-          if (isExpanded) {
-            tts.speakWithChannel('$selectedMenu 패널을 접었습니다.',
-                channel: ETtsChannel.FEEDBACK,
-                cooldownKey: 'panel_toggle',
-                cooldown: Duration(seconds: 0));
-          } else {
-            tts.speakWithChannel('$selectedMenu 패널을 펼쳤습니다.',
-                channel: ETtsChannel.FEEDBACK,
-                cooldownKey: 'panel_toggle',
-                cooldown: Duration(seconds: 0));
-          }
+          final stateMessage = isExpanded ? '접었습니다' : '펼쳤습니다';
+          tts.speakWithChannel('$selectedMenu 패널을 $stateMessage',
+              channel: ETtsChannel.FEEDBACK,
+              cooldownKey: 'panel_action',
+              cooldown: Duration(seconds: 0));
         } else {
-          // 다른 탭이면 열기
+          // 다른 탭으로 전환: 새 패널 열기
+          // activePanelId 변경으로 이전 패널은 자동으로 교체됨
           slidingController.expandSlidingBar(panelId);
+
+          // 통합된 TTS 메시지: "즐겨찾기 패널로 이동합니다"
+          tts.speakWithChannel('$selectedMenu 패널로 이동합니다.',
+              channel: ETtsChannel.FEEDBACK,
+              cooldownKey: 'panel_action',
+              cooldown: Duration(seconds: 0));
         }
       }
     } catch (e) {
