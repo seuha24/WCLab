@@ -176,6 +176,9 @@ class MapOverlayController {
     final mapBearing =
         await mapController!.getCameraPosition().then((pos) => pos.bearing);
 
+    // async gap 후 context 유효성 체크
+    if (!context.mounted) return;
+
     // 아이콘 속성 생성
     final icon = await _createLocationMarkerIcon(
       compassValue: compassValue,
@@ -412,12 +415,12 @@ class MapOverlayController {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.9),
+                color: Colors.orange.withValues(alpha: 0.9),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 3,
                     offset: const Offset(0, 1),
                   ),
@@ -609,12 +612,12 @@ class MapOverlayController {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.9),
+                color: Colors.blue.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(color: Colors.white, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 3,
                     offset: const Offset(0, 1),
                   ),
