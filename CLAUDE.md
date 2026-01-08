@@ -34,6 +34,7 @@ flutter run
 - ❌ try-catch 빈 블록
 - ❌ View에서 Repository 직접 호출
 - ❌ Global 변수 사용
+- ❌ 커밋 메시지에 Claude/AI 서명 금지 (Co-Authored-By, Generated with Claude 등)
 
 ### ✅ 필수 준수 사항
 - ✔️ DI 사용 (get_it)
