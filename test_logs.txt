@@ -1,382 +1,678 @@
-Automatically signing iOS for device deployment using specified development team in Xcode project: F4Y32S2PZB
-Running Xcode build...                                                  
- └─Compiling, linking and signing...                         6.4s
-Xcode build done.                                           42.8s
-Installing and launching...                                         4.4s
-
-Flutter run key commands.
-h List all available interactive commands.
-c Clear the screen
-q Quit (terminate the application on the device).
-
-flutter: Location When in Use permission denied
-flutter: One or more Bluetooth permissions denied
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter: snapshot.data :null
-flutter: snapshot.data :User(displayName: 김호중, email: jack777998@gmail.com, isEmailVerified: true, isAnonymous: false, metadata: UserMetadata(creationTime: 2025-01-06 05:59:47.566Z, lastSignInTime: 2025-11-14 06:46:36.655Z), phoneNumber: null, photoURL: https://lh3.googleusercontent.com/a/ACg8ocJIJ0jx0WDgqIPiAjbcj1evd6exWAA2O1yFQffgNBMoKVDK1g=s96-c, providerData, [UserInfo(displayName: 김호중, email: jack777998@gmail.com, phoneNumber: null, photoURL: null, providerId: google.com, uid: 101436158695966312261)], refreshToken: AMf-vBwIwGXeeDfq3vuIkxprRTaQJG2c83x8rkPebIC2UHxj5nWGKA3_LNLouXNWqvLA20EsnCEYvc6uEHqB7HHVjoAeobxlZ9Wo02sg6WvhN-JdmGLhAdk497-u51E3KtTr59wIJxGHcDVIahJ5JMJZHnhQophwucgxrA0dwKR20rrjcNeF6lY17C8dSkVWmzTfC3ySlg2lfthUFz4HQLPg0zVFPnL8SgYTBqpi6p4TWtrk69wfDnDRXGfhzUTtH_exaDX60Eu8Ajr0l0ZZM4aLHDgznWWfHScObpEfR8qGG7_EwgyAUtwkRGsD3VD3qkoCnvhJczcyXPUaeNmDOo04UAZg1JKLCZWPTSxtByPr8h6SkfcIOtRlPT9clEIN5B9I3rzHaU_pgmaXXdys1zlj_6GSiJp2rttkkSlZI0OHsuzUBw-ALYU, tenantId: null, uid: oiPruPnop<…>
-flutter: initTts()
-flutter: Speaking: 즐겨찾기을 선택하셨습니다.
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 지점 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 92 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [{fav_idx: 15, name: 신길동, lon: 126.91117116568536, lat: 37.5088855279404}]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: 지점 조회 응답: {ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b, list: [{fav_idx: 15, name: 신길동, lon: 126.91117116568536, lat: 37.5088855279404}]}
-flutter: 즐겨찾기 지점 개수: 1
-flutter: === 즐겨찾기 경로 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 10 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "login_method": "google",
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [
-flutter: ║            {
-flutter: ║                 "fav_idx": 10,
-flutter: ║                 "name": "학교",
-flutter: ║                 "start_point": {lon: 126.90679867413073, lat: 37.49724130414526},
-flutter: ║                 "finish_point": {lon: 126.9066833004275, lat: 37.50846166124221},
-flutter: ║                 "stopovers": [{lon: 126.9279071257543, lat: 37.50106751811966}]
-flutter: ║            },
-flutter: ║            {
-flutter: ║                 "fav_idx": 11,
-flutter: ║                 "name": "나",
-flutter: ║                 "start_point": {lon: 126.90569964812951, lat: 37.49984914207008},
-flutter: ║                 "finish_point": {lon: 126.91476195150705, lat: 37.50308558785533},
-flutter: ║                 "stopovers": [{lon: 126.90726728782954, lat: 37.49581442263905}]
-flutter: ║            }
-flutter: ║         ]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: Speaking: 학교으로 안내를 선택했습니다.
-flutter: 경유지 포함 경로 안내 시작
-flutter: 출발지: 37.49724130414526, 126.90679867413073
-flutter: 목적지: 37.50846166124221, 126.9066833004275
-flutter: 경유지: 1개
-flutter: paths: [LatLng(latitude:37.497273, longitude:126.90681), LatLng(latitude:37.497223, longitude:126.906985), LatLng(latitude:37.497223, longitude:126.906985), LatLng(latitude:37.497309, longitude:126.907116), LatLng(latitude:37.497453, longitude:126.907338), LatLng(latitude:37.497598, longitude:126.907563), LatLng(latitude:37.497645, longitude:126.907654), LatLng(latitude:37.497717, longitude:126.908013), LatLng(latitude:37.497717, longitude:126.908013), LatLng(latitude:37.497745, longitude:126.907996), LatLng(latitude:37.497923, longitude:126.908002), LatLng(latitude:37.497923, longitude:126.908002), LatLng(latitude:37.497923, longitude:126.908279), LatLng(latitude:37.497923, longitude:126.908279), LatLng(latitude:37.498042, longitude:126.908293), LatLng(latitude:37.498172, longitude:126.908313), LatLng(latitude:37.498331, longitude:126.908346), LatLng(latitude:37.498442, longitude:126.908374), LatLng(latitude:37.498489, longitude:126.908388), LatLng(latitude:37.49862, longitude:126.908<…>
-flutter: branchInfoList: [BranchInfo{point: LatLng(latitude:37.497273, longitude:126.90681), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497223, longitude:126.906985), : true, description: 대흥인테리어에서 좌회전 후 109m 이동, bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497309, longitude:126.907116), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497453, longitude:126.907338), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497598, longitude:126.907563), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497645, longitude:126.907654), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:3<…>
-flutter: IndexController.reset → cur=0, tgt=1
-flutter: 모든 오버레이가 제거되었습니다.
-flutter: 📍 addBranchMarkers() 완료됨 — 238개 추가됨
-flutter: startNavigationTimer()
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: 모든 오버레이가 제거되었습니다.
-flutter: 경로 안내가 성공적으로 종료되었습니다.
-flutter: Speaking: 서울 동작구 대방동 위치를 선택하셨습니다.
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 경로 수정 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/alter/fav/route
-flutter: JSON 데이터:
-flutter: {
-flutter:   "login_method": "google",
-flutter:   "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter:   "fav_idx": "10",
-flutter:   "list": {
-flutter:     "name": "학교",
-flutter:     "start_point": {
-flutter:       "lon": 126.90679867413073,
-flutter:       "lat": 37.49724130414526
-flutter:     },
-flutter:     "finish_point": {
-flutter:       "lon": 126.9066833004275,
-flutter:       "lat": 37.50846166124221
-flutter:     },
-flutter:     "stopovers": [
-flutter:       {
-flutter:         "lon": 126.92805536184744,
-flutter:         "lat": 37.50007117469065
-flutter:       },
-flutter:       null,
-flutter:       null
-flutter:     ]
-flutter:   }
-flutter: }
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ POST
-flutter: ║  http://aws2.cuksl.xyz:3003/alter/fav/route
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 45 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/alter/fav/route
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "success": true
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 지점 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 15 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [{fav_idx: 15, name: 신길동, lon: 126.91117116568536, lat: 37.5088855279404}]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: 지점 조회 응답: {ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b, list: [{fav_idx: 15, name: 신길동, lon: 126.91117116568536, lat: 37.5088855279404}]}
-flutter: 즐겨찾기 지점 개수: 1
-flutter: === 즐겨찾기 경로 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 27 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "login_method": "google",
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [
-flutter: ║            {
-flutter: ║                 "fav_idx": 10,
-flutter: ║                 "name": "학교",
-flutter: ║                 "start_point": {lon: 126.90679867413073, lat: 37.49724130414526},
-flutter: ║                 "finish_point": {lon: 126.9066833004275, lat: 37.50846166124221},
-flutter: ║                 "stopovers": [{lon: 126.92805536184744, lat: 37.50007117469065}]
-flutter: ║            },
-flutter: ║            {
-flutter: ║                 "fav_idx": 11,
-flutter: ║                 "name": "나",
-flutter: ║                 "start_point": {lon: 126.90569964812951, lat: 37.49984914207008},
-flutter: ║                 "finish_point": {lon: 126.91476195150705, lat: 37.50308558785533},
-flutter: ║                 "stopovers": [{lon: 126.90726728782954, lat: 37.49581442263905}]
-flutter: ║            }
-flutter: ║         ]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: Speaking: 학교으로 안내를 선택했습니다.
-flutter: paths: [LatLng(latitude:37.497273, longitude:126.90681), LatLng(latitude:37.497223, longitude:126.906985), LatLng(latitude:37.497223, longitude:126.906985), LatLng(latitude:37.497309, longitude:126.907116), LatLng(latitude:37.497453, longitude:126.907338), LatLng(latitude:37.497598, longitude:126.907563), LatLng(latitude:37.497645, longitude:126.907654), LatLng(latitude:37.497717, longitude:126.908013), LatLng(latitude:37.497717, longitude:126.908013), LatLng(latitude:37.497745, longitude:126.907996), LatLng(latitude:37.497923, longitude:126.908002), LatLng(latitude:37.497923, longitude:126.908002), LatLng(latitude:37.497923, longitude:126.908279), LatLng(latitude:37.497923, longitude:126.908279), LatLng(latitude:37.498042, longitude:126.908293), LatLng(latitude:37.498172, longitude:126.908313), LatLng(latitude:37.498331, longitude:126.908346), LatLng(latitude:37.498442, longitude:126.908374), LatLng(latitude:37.498489, longitude:126.908388), LatLng(latitude:37.49862, longitude:126.908<…>
-flutter: branchInfoList: [BranchInfo{point: LatLng(latitude:37.497273, longitude:126.90681), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497223, longitude:126.906985), : true, description: 대흥인테리어에서 좌회전 후 109m 이동, bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497309, longitude:126.907116), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497453, longitude:126.907338), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497598, longitude:126.907563), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497645, longitude:126.907654), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:3<…>
-flutter: IndexController.reset → cur=0, tgt=1
-flutter: 모든 오버레이가 제거되었습니다.
-flutter: 📍 addBranchMarkers() 완료됨 — 233개 추가됨
-flutter: startNavigationTimer()
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: 모든 오버레이가 제거되었습니다.
-flutter: Speaking: 서울 동작구 위치를 선택하셨습니다.
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 경로 수정 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/alter/fav/route
-flutter: JSON 데이터:
-flutter: {
-flutter:   "login_method": "google",
-flutter:   "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter:   "fav_idx": "10",
-flutter:   "list": {
-flutter:     "name": "학교",
-flutter:     "start_point": {
-flutter:       "lon": 126.90679867413073,
-flutter:       "lat": 37.49724130414526
-flutter:     },
-flutter:     "finish_point": {
-flutter:       "lon": 126.9066833004275,
-flutter:       "lat": 37.50846166124221
-flutter:     },
-flutter:     "stopovers": [
-flutter:       {
-flutter:         "lon": 126.92555975164538,
-flutter:         "lat": 37.503377175663665
-flutter:       },
-flutter:       null,
-flutter:       null
-flutter:     ]
-flutter:   }
-flutter: }
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ POST
-flutter: ║  http://aws2.cuksl.xyz:3003/alter/fav/route
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ POST ║ Status: 200 OK  ║ Time: 47 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/alter/fav/route
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "success": true
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: prefs.getString(_authTypeTokenKey): google
-flutter: === 즐겨찾기 지점 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 10 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_point/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [{fav_idx: 15, name: 신길동, lon: 126.91117116568536, lat: 37.5088855279404}]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: 지점 조회 응답: {ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b, list: [{fav_idx: 15, name: 신길동, lon: 126.91117116568536, lat: 37.5088855279404}]}
-flutter: 즐겨찾기 지점 개수: 1
-flutter: === 즐겨찾기 경로 조회 요청 ===
-flutter: URL: http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: Login Method: google
-flutter: User ID: 9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ===================================
-flutter: prefs.getString(_accessTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJpYXQiOjE3NjMxMDI3OTgsImV4cCI6MTc2NDE4Mjc5OCwiaXNzIjoibG9jYWxob3N0In0.gyl2L2_BXvHg4jUlbhgcGS_ZSpbf06yWLD8OpCVULI9M-jA06kIrgQ3I7mZ9o7JptZlImfltj29wVpRblseMKxwGbEch38lp1UKvh4HBThJhaMUBPUGwntAX6Gh4O4OL0XlL_UffIehFMNju5KWl_IapPN6jfbE7tk3JADz0d63yCVHc8NNzngI0sXuH3WKVYlBLj3PyKBrwcnqY6zK8TYGFKZz8JkxbFdjgjCEzh7oBullBpk1Q75N8cDdMpYQls1XMy5sAf_IgR50bK5AYnGpgCSfB2qL87TOP0Sp3WrH0_vF2HiwndgWkH1pBLRV7iAmVc_crEOEzDfXeVz1-gg
-flutter: prefs.getString(_refreshTokenKey): eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDk0ZDlmYi0xYTMyLTRkOGMtOTI2Ny0xMjVjZTRkYmE2NWIiLCJoIjoiSXMgcmVmcmVzaCB0b2tlbiIsImlhdCI6MTc2MzEwMjc5OCwiZXhwIjoxNzY1Njk0Nzk4LCJpc3MiOiJsb2NhbGhvc3QifQ.K81GAWyvcWKDbADP0MqaS89IK8WSHyRsqAr__GVw47-M2d2rHNm3K05t1CrFgMW00jcxts-cTwMiQ5x3vpwDipIXVgswH05M702_aZPM99VSV-BAGl1ybvm4xKOyww_S0ZBMUMWe3PP4Zu1Aqja7PI-mNYlVNUNF4RItNIn5wr0LFHtlJ1Oq10b-aR8qbTVo6B3W2VZsYpAzn5vUBQKtlaOru9XAAeTwsfS1SaRZqgbluCuxA3H8RdzzSJsiYAJIbWC7SF1QrpPMwzI_OEnI8ihysByZ3BvOXOru9X4FJlgx9wTRR-5oJg8vHpDPehy_K-Dnm8enwWYQm1rA07KjTw
-flutter:
-flutter: ╔╣ Request ║ GET
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter:
-flutter: ╔╣ Response ║ GET ║ Status: 200 OK  ║ Time: 11 ms
-flutter: ║  http://aws2.cuksl.xyz:3003/fav_route/google/9494d9fb-1a32-4d8c-9267-125ce4dba65b
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: ╔ Body
-flutter: ║
-flutter: ║    {
-flutter: ║         "login_method": "google",
-flutter: ║         "ID": "9494d9fb-1a32-4d8c-9267-125ce4dba65b",
-flutter: ║         "list": [
-flutter: ║            {
-flutter: ║                 "fav_idx": 10,
-flutter: ║                 "name": "학교",
-flutter: ║                 "start_point": {lon: 126.90679867413073, lat: 37.49724130414526},
-flutter: ║                 "finish_point": {lon: 126.9066833004275, lat: 37.50846166124221},
-flutter: ║                 "stopovers": [{lon: 126.92555975164538, lat: 37.50337717566367}]
-flutter: ║            },
-flutter: ║            {
-flutter: ║                 "fav_idx": 11,
-flutter: ║                 "name": "나",
-flutter: ║                 "start_point": {lon: 126.90569964812951, lat: 37.49984914207008},
-flutter: ║                 "finish_point": {lon: 126.91476195150705, lat: 37.50308558785533},
-flutter: ║                 "stopovers": [{lon: 126.90726728782954, lat: 37.49581442263905}]
-flutter: ║            }
-flutter: ║         ]
-flutter: ║    }
-flutter: ║
-flutter: ╚══════════════════════════════════════════════════════════════════════════════════════════╝
-flutter: Speaking: 학교으로 안내를 선택했습니다.
-flutter: 경유지 포함 경로 안내 시작
-flutter: 출발지: 37.49724130414526, 126.90679867413073
-flutter: 목적지: 37.50846166124221, 126.9066833004275
-flutter: 경유지: 1개
-flutter: paths: [LatLng(latitude:37.497273, longitude:126.90681), LatLng(latitude:37.497223, longitude:126.906985), LatLng(latitude:37.497223, longitude:126.906985), LatLng(latitude:37.497309, longitude:126.907116), LatLng(latitude:37.497453, longitude:126.907338), LatLng(latitude:37.497598, longitude:126.907563), LatLng(latitude:37.497645, longitude:126.907654), LatLng(latitude:37.497717, longitude:126.908013), LatLng(latitude:37.497717, longitude:126.908013), LatLng(latitude:37.497745, longitude:126.907996), LatLng(latitude:37.497923, longitude:126.908002), LatLng(latitude:37.497923, longitude:126.908002), LatLng(latitude:37.497923, longitude:126.908279), LatLng(latitude:37.497923, longitude:126.908279), LatLng(latitude:37.498042, longitude:126.908293), LatLng(latitude:37.498172, longitude:126.908313), LatLng(latitude:37.498331, longitude:126.908346), LatLng(latitude:37.498442, longitude:126.908374), LatLng(latitude:37.498489, longitude:126.908388), LatLng(latitude:37.49862, longitude:126.908<…>
-flutter: branchInfoList: [BranchInfo{point: LatLng(latitude:37.497273, longitude:126.90681), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497223, longitude:126.906985), : true, description: 대흥인테리어에서 좌회전 후 109m 이동, bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497309, longitude:126.907116), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497453, longitude:126.907338), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497598, longitude:126.907563), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:37.497645, longitude:126.907654), : false, description: , bearingToBranch: 0.0, crosswalk: false, waypoint: false}, BranchInfo{point: LatLng(latitude:3<…>
-flutter: IndexController.reset → cur=0, tgt=1
-flutter: 모든 오버레이가 제거되었습니다.
-flutter: 📍 addBranchMarkers() 완료됨 — 217개 추가됨
-flutter: startNavigationTimer()
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: window idx: [0, 1, 2]
-flutter: moveIndex 결과: 0
-flutter: 모든 오버레이가 제거되었습니다.
-flutter: 경로 안내가 성공적으로 종료되었습니다.
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 열시방향 4미터에 영인약국 횡단보도, 한시방향 43미터에 장금이집밥, 열한시방향 46미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49620247876486
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225173272535
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 아홉시방향 4미터에 영인약국 횡단보도, 한시방향 42미터에 장금이집밥, 열한시방향 45미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49619787450143
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225246304459
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 아홉시방향 4미터에 영인약국 횡단보도, 한시방향 41미터에 장금이집밥, 열한시방향 44미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49619341612074
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225317023811
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 아홉시방향 4미터에 영인약국 횡단보도, 한시방향 41미터에 장금이집밥, 열한시방향 44미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.496190640261254
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225361054816
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 아홉시방향 4미터에 영인약국 횡단보도, 한시방향 40미터에 장금이집밥, 열한시방향 43미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49618541314845
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225443967871
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 여덟시방향 4미터에 영인약국 횡단보도, 한시방향 40미터에 장금이집밥, 열한시방향 43미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49618281389996
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225485197439
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 여덟시방향 4미터에 영인약국 횡단보도, 한시방향 39미터에 장금이집밥, 열한시방향 43미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49617056292456
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90225679523738
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 여덟시방향 5미터에 영인약국 횡단보도, 한시방향 38미터에 장금이집밥, 열한시방향 41미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.496157956810364
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.9022587948322
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 일곱시방향 6미터에 영인약국 횡단보도, 한시방향 37미터에 장금이집밥, 열한시방향 40미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49613773773979
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.9022620020006
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 2개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 일곱시방향 8미터에 영인약국 횡단보도, 한시방향 35미터에 장금이집밥, 열한시방향 38미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.496117842924164
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90226515773365
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [SignalDevicePoiService] 반경 50m 내 음향신호기 1개 발견
+I/flutter (23908): [SignalDevicePoiService] 중복 제거 후 1개
+I/flutter (23908): [SignalDevicePoiService] 교차로 매칭: 영인약국 (10.0m)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 1개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 영인약국 횡단보도
+I/flutter (23908): [LocationAnnouncement]   2. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   3. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (6개):
+I/flutter (23908):   1. 영인약국 횡단보도
+I/flutter (23908):   2. 장금이집밥
+I/flutter (23908):   3. 빵에 빠지다
+I/flutter (23908):   4. 동네짜장
+I/flutter (23908):   5. 오은오은디저트
+I/flutter (23908):   6. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 일곱시방향 10미터에 영인약국 횡단보도, 한시방향 33미터에 장금이집밥, 열한시방향 36미터에 빵에 빠지다가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49610075942642
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90226786753166
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 31미터에 장금이집밥, 열한시방향 34미터에 빵에 빠지다, 두시방향 45미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49608987651151
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90226959378761
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 30미터에 장금이집밥, 열한시방향 33미터에 빵에 빠지다, 두시방향 44미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49608198267855
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.9022708459129
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 29미터에 장금이집밥, 열한시방향 32미터에 빵에 빠지다, 두시방향 44미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49607617391605
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90227176730266
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 28미터에 장금이집밥, 열한시방향 32미터에 빵에 빠지다, 두시방향 44미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49607196055209
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90227243562917
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 28미터에 장금이집밥, 열한시방향 31미터에 빵에 빠지다, 두시방향 43미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.496067727585704
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90227310706496
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 27미터에 장금이집밥, 열한시방향 31미터에 빵에 빠지다, 두시방향 43미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.496060148354125
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90227430928722
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 27미터에 장금이집밥, 열한시방향 30미터에 빵에 빠지다, 두시방향 43미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.496049022484705
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90227607407888
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 26미터에 장금이집밥, 열한시방향 29미터에 빵에 빠지다, 두시방향 42미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49602409310546
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90228002838906
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 23미터에 장금이집밥, 열한시방향 27미터에 빵에 빠지다, 두시방향 41미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49597412837699
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90228795381043
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 동네짜장
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 동네짜장
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 한시방향 19미터에 장금이집밥, 열한시방향 23미터에 빵에 빠지다, 두시방향 39미터 에 동네짜장이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49592328200519
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90229601906738
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 5개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. CU 대림우성점
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (5개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. CU 대림우성점
+I/flutter (23908):   4. 오은오은디저트
+I/flutter (23908):   5. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 두시방향 15미터에 장금이집밥, 열시방향 19미터에 빵에 빠지다, 세시방향 24미터에 CU 대림우성점이 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49587838287703
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90230314096272
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 3개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (3개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 두시방향 12미터에 장금이집밥, 열시방향 17미터에 빵에 빠지다, 열시방향 42미터에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.495841043039505
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.9023090637975
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 3개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (3개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 세시방향 12미터에 장금이집밥, 아홉시방향 16미터에 빵에 빠지다, 열시방향 40미터 에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49581141057125
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90231376408727
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 3개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (3개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 네시방향 13미터에 장금이집밥, 아홉시방향 16미터에 빵에 빠지다, 열시방향 38미터 에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): 횡단보도 마커 업데이트: 331개
+I/flutter (23908): 교차로 마커 업데이트: 76개
+I/flutter (23908): 교차로 마커 업데이트: 76개
+I/flutter (23908): 횡단보도 마커 업데이트: 331개
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49578613299369
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.9023177736031
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 3개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (3개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 네시방향 14미터에 장금이집밥, 여덟시방향 16미터에 빵에 빠지다, 열시방향 37미터 에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49577082157704
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90232020229051
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 3개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 3개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 장금이집밥
+I/flutter (23908): [LocationAnnouncement]   2. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (3개):
+I/flutter (23908):   1. 장금이집밥
+I/flutter (23908):   2. 빵에 빠지다
+I/flutter (23908):   3. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 네시방향 15미터에 장금이집밥, 여덟시방향 17미터에 빵에 빠지다, 열시방향 36미터 에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.495767494117246
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90232073008997
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 2개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 2개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   2. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (2개):
+I/flutter (23908):   1. 빵에 빠지다
+I/flutter (23908):   2. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 여덟시방향 17미터에 빵에 빠지다, 열시방향 36미터에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
+I/flutter (23908): [AutoPoiAnnounce] 20초 주기 안내 실행
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔍 주변 장소 검색 시작
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ GPS 좌표 수신:
+I/flutter (23908): [LocationAnnouncement]   - 위도(Latitude): 37.49576343611959
+I/flutter (23908): [LocationAnnouncement]   - 경도(Longitude): 126.90232137376681
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작
+I/flutter (23908): [LocationAnnouncement]   - 검색 반경: 50m
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 카카오 POI 2개 로드
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ⭐ 즐겨찾기 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚦 로컬 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🚸 음향신호기 POI 0개 추가 (전방 40m 기준 50m 이내)
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✅ 가까운 장소 2개 선택
+I/flutter (23908): [LocationAnnouncement]   1. 빵에 빠지다
+I/flutter (23908): [LocationAnnouncement]   2. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 📍 전체 검색 목록 (2개):
+I/flutter (23908):   1. 빵에 빠지다
+I/flutter (23908):   2. 김밥나라
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] 🔊 TTS 안내: 주변에 여덟시방향 17미터에 빵에 빠지다, 열시방향 36미터에 김밥나라가 있습니다
+I/flutter (23908): [LocationAnnouncement] [LocationAnnouncement] ✨ 검색 완료 (로딩 상태 해제)
