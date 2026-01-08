@@ -291,6 +291,7 @@ class LocationAnnouncementController {
     if (places.isEmpty) return '';
 
     final descriptions = <String>[];
+    String lastPoiName = '';
 
     for (final place in places) {
       final isFavorite = place.category == KakaoCategoryCode.FAV;
@@ -313,9 +314,10 @@ class LocationAnnouncementController {
       final userToPoiDistMeters = (userToPoiDistKm * 1000).round();
 
       descriptions.add(TtsMessages.poiDescription(clockDirection, userToPoiDistMeters, placeName));
+      lastPoiName = placeName;
     }
 
-    return TtsMessages.nearbyPoiSummary(descriptions);
+    return TtsMessages.nearbyPoiSummary(descriptions, lastPoiName: lastPoiName);
   }
 
   /// 현재 위치 기준 반경 내 즐겨찾기를 PlaceResult로 변환하여 반환

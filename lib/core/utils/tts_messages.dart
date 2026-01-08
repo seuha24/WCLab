@@ -1,3 +1,5 @@
+import 'package:safelight/core/utils/korean_particle.dart';
+
 /// TTS 멘트 중앙 관리
 ///
 /// 모든 TTS 멘트를 한 곳에서 관리하여 일관성을 유지합니다.
@@ -26,10 +28,19 @@ abstract class TtsMessages {
   /// 여러 POI 안내 문구 생성
   ///
   /// [descriptions]: POI 설명 목록 (poiDescription으로 생성)
+  /// [lastPoiName]: 마지막 POI 이름 (조사 결정용)
   ///
-  /// 반환: "주변에 열두시방향 25미터에 A, 세시방향 30미터에 B이 있습니다"
-  static String nearbyPoiSummary(List<String> descriptions) =>
-      '주변에 ${descriptions.join(', ')}이 있습니다';
+  /// 반환: "주변에 열두시방향 25미터에 A, 세시방향 30미터에 B가 있습니다"
+  static String nearbyPoiSummary(List<String> descriptions, {String? lastPoiName}) {
+    if (descriptions.isEmpty) return '';
+
+    // 마지막 POI 이름으로 조사 결정
+    final particle = lastPoiName != null
+        ? KoreanParticle.subjectParticle(lastPoiName)
+        : '이'; // 기본값
+
+    return '주변에 ${descriptions.join(', ')}$particle 있습니다';
+  }
 
   // ============================================================
   // 횡단보도/음향신호기 안내 멘트
