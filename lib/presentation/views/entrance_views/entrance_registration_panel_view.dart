@@ -80,7 +80,11 @@ class _EntrancePanelViewState extends State<EntrancePanelView> {
   @override
   void dispose() {
     _debounceTimer?.cancel(); // 타이머 정리
+
+    // 패널 컨트롤러 정리: Map에서 제거하여 다음 mount 시 새로 등록되도록 함
+    _slidingController.removeController('entrance_panel');
     _controller.dispose();
+
     roadAddressController.dispose();
     buildingNameController.dispose();
     buildingDetailController.dispose();

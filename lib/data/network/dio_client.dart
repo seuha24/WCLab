@@ -27,7 +27,7 @@ class DioClient {
   DioClient._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: ApiEndpoints.baseUrl,
+        baseUrl: ApiEndpoints.API_BASE_URL,
         connectTimeout: const Duration(seconds: 10), // 연결 타임아웃 설정
         receiveTimeout: const Duration(seconds: 10), // 응답 타임아웃 설정
         contentType: 'application/json', // 기본 콘텐츠 타입 설정

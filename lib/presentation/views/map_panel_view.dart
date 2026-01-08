@@ -53,8 +53,9 @@ class _MapPanelViewState extends State<MapPanelView> {
 
   @override
   void dispose() {
-    // SlidingPanelController가 관리하므로 여기서 dispose하지 않음
-    // 패널 재사용 시 문제가 발생할 수 있음
+    // 패널 컨트롤러 정리: Map에서 제거하여 다음 mount 시 새로 등록되도록 함
+    _slidingController.removeController('map_panel');
+    _controller.dispose();
     super.dispose();
   }
 

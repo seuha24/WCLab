@@ -9,6 +9,8 @@ abstract class PdrCalculator{
   double get yawRatePerDt;
   double get deviationYaw;
   double get deviationYawTurn;
+  /// Gyro 기반 heading 값 (degree, 0~360)
+  double get pdrYawDeg;
 
 
   // 업데이트 메서드
