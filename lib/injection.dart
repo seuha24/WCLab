@@ -20,6 +20,7 @@ import 'package:safelight/data/services/kakao_local_api_service.dart';
 import 'package:safelight/domain/repositories/kakao_repository.dart';
 import 'package:safelight/domain/repositories/local_poi_repository.dart';
 import 'package:safelight/data/repositories/local_poi_repository_impl.dart';
+import 'package:safelight/data/services/signal_device_poi_service.dart';
 import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
@@ -80,12 +81,21 @@ Future<void> init() async {
     ),
   );
 
+  // 음향신호기-교차로 POI 서비스
+  DI.registerLazySingleton<SignalDevicePoiService>(
+    () => SignalDevicePoiService(
+      signalDeviceRepository: DI(),
+      intersectionRepository: DI(),
+    ),
+  );
+
   // 현재 위치 알림 Controller
   DI.registerLazySingleton(
     () => LocationAnnouncementController(
-      navigatorRepository: DI(),  // 출입구 조회 API 재사용
-      kakaoRepository: DI(),      // 카카오 로컬 API Repository
-      localPoiRepository: DI(),   // 로컬 POI Repository (횡단보도, 버스정류장 등)
+      navigatorRepository: DI(),        // 출입구 조회 API 재사용
+      kakaoRepository: DI(),            // 카카오 로컬 API Repository
+      localPoiRepository: DI(),         // 로컬 POI Repository (횡단보도, 버스정류장 등)
+      signalDevicePoiService: DI(),     // 음향신호기-교차로 POI 서비스
       ttsService: DI(),
     ),
   );

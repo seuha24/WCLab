@@ -43,6 +43,8 @@ class LocationAnnouncementController {
   final KakaoRepository kakaoRepository;
   /// 로컬 POI Repository (횡단보도, 버스정류장 등)
   final LocalPoiRepository localPoiRepository;
+  /// 음향신호기-교차로 POI 서비스
+  final SignalDevicePoiService signalDevicePoiService;
 
   /// TTS 서비스
   final TtsService ttsService;
@@ -83,15 +85,21 @@ class LocationAnnouncementController {
   Future<void> initializeLocalPois() async {
     if (_isLocalPoiInitialized) return;
 
-    final pois = await localPoiRepository.loadAllPois();
+    // 병렬로 초기화
+    await Future.wait([
+      localPoiRepository.loadAllPois(),
+      signalDevicePoiService.initialize(),
+    ]);
+
     _isLocalPoiInitialized = true;
-    _log('[LocationAnnouncement] 📍 로컬 POI 초기화 완료: ${pois.length}개');
+    _log('[LocationAnnouncement] 📍 로컬 POI 및 음향신호기 초기화 완료');
   }
 
   LocationAnnouncementController({
     required this.navigatorRepository,
     required this.kakaoRepository,
     required this.localPoiRepository,
+    required this.signalDevicePoiService,
     required this.ttsService,
   });
   
@@ -192,7 +200,7 @@ class LocationAnnouncementController {
     allPlaces.addAll(nearbyFavorites);
     _log('[LocationAnnouncement] ⭐ 즐겨찾기 ${nearbyFavorites.length}개 추가 (전방 40m 기준 50m 이내)');
 
-    // 4. 로컬 POI 추가 (횡단보도, 버스정류장, 사거리 등)
+    // 4. 로컬 POI 추가 (횡단보도, 버스정류장, 사거리 등 - yeokgok_poi.json)
     final nearbyLocalPois = localPoiRepository.searchNearbyPois(
       latitude: extensionLat,
       longitude: extensionLng,
@@ -201,7 +209,16 @@ class LocationAnnouncementController {
     allPlaces.addAll(nearbyLocalPois);
     _log('[LocationAnnouncement] 🚦 로컬 POI ${nearbyLocalPois.length}개 추가 (전방 40m 기준 50m 이내)');
 
-    // 4. 합쳐진 리스트에서 가까운 순으로 정렬
+    // 5. 음향신호기 POI 추가 (서울시 공공데이터 - 교차로 매칭)
+    final nearbySignalDevicePois = signalDevicePoiService.searchNearbySignalDevicePois(
+      latitude: extensionLat,
+      longitude: extensionLng,
+      radiusMeters: 50,
+    );
+    allPlaces.addAll(nearbySignalDevicePois);
+    _log('[LocationAnnouncement] 🚸 음향신호기 POI ${nearbySignalDevicePois.length}개 추가 (전방 40m 기준 50m 이내)');
+
+    // 6. 합쳐진 리스트에서 가까운 순으로 정렬
     if (allPlaces.isEmpty) {
       _log('[LocationAnnouncement] ⚠️ 주변에 등록된 장소가 없습니다');
       return;
@@ -277,7 +294,9 @@ class LocationAnnouncementController {
 
     for (final place in places) {
       final isFavorite = place.category == KakaoCategoryCode.FAV;
-      final placeName = isFavorite ? '내 장소 ${place.name}' : place.name;
+      final placeName = isFavorite
+          ? TtsMessages.favoritePlaceName(place.name)
+          : place.name;
 
       final clockDirection = getClockDirectionForPoi(
         curLat: curLat,
@@ -293,10 +312,10 @@ class LocationAnnouncementController {
       );
       final userToPoiDistMeters = (userToPoiDistKm * 1000).round();
 
-      descriptions.add('$clockDirection방향 $userToPoiDistMeters미터에 $placeName');
+      descriptions.add(TtsMessages.poiDescription(clockDirection, userToPoiDistMeters, placeName));
     }
 
-    return '주변에 ${descriptions.join(', ')}이 있습니다';
+    return TtsMessages.nearbyPoiSummary(descriptions);
   }
 
   /// 현재 위치 기준 반경 내 즐겨찾기를 PlaceResult로 변환하여 반환
