@@ -191,4 +191,25 @@ lib/core/utils/korean_particle.dart
 ---
 
 *작성일: 2025-01-09*
-*상태: 기획 완료, 구현 대기*
+*상태: ✅ 구현 완료 (2026-01-11)*
+
+---
+
+## 구현 완료 내역
+
+### 완료된 작업
+- [x] TtsMessages 클래스 확장 (35개 멘트 추가)
+- [x] crosswalk_bloc.dart 마이그레이션 (9개)
+- [x] flash_native_data_source.dart 마이그레이션 (1개)
+- [x] blue_off_view.dart 마이그레이션 (1개)
+- [x] tutorial_view.dart 마이그레이션 (1개)
+- [x] destination_search_view.dart 마이그레이션 (6개)
+- [x] startspot_search_view.dart 마이그레이션 (8개)
+- [x] map_view_controller.dart 마이그레이션 (11개)
+- [x] map_view.dart 마이그레이션 (1개)
+
+**총 마이그레이션: 39개 멘트**
+
+### 추후 작업 (Phase 2)
+- [ ] KoreanParticle 유틸을 활용한 조사 자동 처리 (`을/를`, `이/가`, `으로/로`)
+- [ ] main_view.dart 패널 멘트 중앙화 (`$selectedMenu 패널을 $stateMessage`)
