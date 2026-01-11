@@ -887,7 +887,7 @@ class NaverMapViewController extends GetxController {
     debugPrint('목적지 도착 감지: ${destinationDistanceMeters.toStringAsFixed(2)}m');
 
     await tts.speakWithChannel(
-      '목적지에 도착했습니다.',
+      TtsMessages.arrivedAtDestination,
       channel: ETtsChannel.NAVIGATE,
       cooldownKey: 'arrive_destination',
       cooldown: const Duration(seconds: 20),
@@ -1026,7 +1026,7 @@ class NaverMapViewController extends GetxController {
       await _rerouteFromCurrentLocation();
 
       tts.speakWithChannel(
-        "새로운 경로로 안내합니다.",
+        TtsMessages.rerouteComplete,
         channel: ETtsChannel.SYSTEM_ANNOUNCE,
         cooldownKey: 'reroute_done',
         cooldown: const Duration(seconds: 10),
@@ -1058,7 +1058,7 @@ class NaverMapViewController extends GetxController {
     await _rerouteFromCurrentLocation();
 
     tts.speakWithChannel(
-      '출발지에 벗어나 새로운 경로로 안내합니다.',
+      TtsMessages.rerouteFromDeviation,
       channel: ETtsChannel.NAVIGATE,
       cooldownKey: 'research_out_of_start',
       cooldown: const Duration(seconds: 10),
@@ -1128,7 +1128,7 @@ class NaverMapViewController extends GetxController {
   /// 출발 전 안내 멘트를 재생합니다.
   void _announceMoveToStart() {
     tts.speakWithChannel(
-      "출발지로 이동하세요.",
+      TtsMessages.moveToStartPoint,
       channel: ETtsChannel.NAVIGATE,
       cooldownKey: 'move_to_startpoint',
       cooldown: const Duration(seconds: 5),
@@ -1206,7 +1206,7 @@ class NaverMapViewController extends GetxController {
       }
 
       tts.speakWithChannel(
-        '잠시 후 횡단보도 입니다. 차량에 유의하세요!',
+        TtsMessages.crosswalkAhead,
         channel: ETtsChannel.ALERT,
         cooldownKey: 'crosswalk_alert',
         cooldown: const Duration(seconds: 2),
@@ -1233,7 +1233,7 @@ class NaverMapViewController extends GetxController {
     if (targetBranch.branch == true) {
       final message = targetBranch.description;
       tts.speakWithChannel(
-        '$message하세요.',
+        TtsMessages.branchInstruction(message),
         channel: ETtsChannel.NAVIGATE,
         cooldownKey: 'branch_instruction',
         cooldown: const Duration(seconds: 10),
@@ -1460,24 +1460,24 @@ class NaverMapViewController extends GetxController {
         final result = await flashOff(NoParams());
         if (result.isLeft()) {
           
-          tts.speakWithChannel('안전 경광등을 끌 수 없습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_fail', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.cannotTurnOffFlash, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_fail', cooldown: Duration(seconds: 5),);
         } else {
           isFlashOn.value = false;
-          tts.speakWithChannel('안전 경광등이 꺼졌습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_success', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.flashTurnedOff, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_success', cooldown: Duration(seconds: 5),);
         }
       } else {
         // 경광등이 꺼져 있으면 켜기
         final result = await flashOn(NoParams());
         if (result.isLeft()) {
-          tts.speakWithChannel('안전 경광등을 켤 수 없습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_fail', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.cannotTurnOnFlash, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_fail', cooldown: Duration(seconds: 5),);
         } else {
           isFlashOn.value = true;
-          tts.speakWithChannel('안전 경광등이 켜졌습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_success', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.flashTurnedOn, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_success', cooldown: Duration(seconds: 5),);
         }
       }
     } catch (e) {
       debugPrint('경광등 제어 중 오류 발생: $e');
-      tts.speakWithChannel('경광등 제어 중 오류가 발생했습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_control_error', cooldown: Duration(seconds: 5),);
+      tts.speakWithChannel(TtsMessages.flashControlError, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_control_error', cooldown: Duration(seconds: 5),);
     }
   }
 

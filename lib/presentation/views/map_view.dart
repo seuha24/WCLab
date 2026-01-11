@@ -81,7 +81,7 @@ class NaverMapView extends GetView<NaverMapViewController> {
                     onMapTapped: (NPoint point, NLatLng latLng) {
                       int meters =
                           (controller.remainDistance.value * 1000).round();
-                      tts.speakWithChannel('다음 안내까지 ${meters}미터 남았습니다.', channel: ETtsChannel.FEEDBACK, cooldownKey: 'on_tap_remain_distance', cooldown: Duration(seconds: 0),);
+                      tts.speakWithChannel(TtsMessages.remainingDistance(meters), channel: ETtsChannel.FEEDBACK, cooldownKey: 'on_tap_remain_distance', cooldown: Duration(seconds: 0),);
                     },
                   ),
        

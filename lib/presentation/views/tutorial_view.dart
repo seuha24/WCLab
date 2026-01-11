@@ -232,7 +232,7 @@ class _TutorialViewState extends State<TutorialView> {
                             );
                           } else {
                             final tts = DI.get<TtsService>();
-                            tts.speak('안전 나침반이 켜집니다. 진동이 울리지 않는 방향으로 보행하세요.');
+                            tts.speak(TtsMessages.safetyCompassOn);
                             showModalBottomSheet(
                               isScrollControlled: true,
                               context: context,
