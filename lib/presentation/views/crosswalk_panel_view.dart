@@ -54,6 +54,8 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
 
   @override
   void dispose() {
+    // 패널 컨트롤러 정리: Map에서 제거하여 다음 mount 시 새로 등록되도록 함
+    _slidingController.removeController('crosswalk_panel');
     // 컨트롤러 리소스 해제
     _controller.dispose();
     // 타이머 해제

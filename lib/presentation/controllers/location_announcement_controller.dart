@@ -41,6 +41,10 @@ class LocationAnnouncementController {
   final NavigatorRepository navigatorRepository;
   /// 카카오 로컬 API Repository (주변 POI 검색)
   final KakaoRepository kakaoRepository;
+  /// 로컬 POI Repository (횡단보도, 버스정류장 등)
+  final LocalPoiRepository localPoiRepository;
+  /// 음향신호기-교차로 POI 서비스
+  final SignalDevicePoiService signalDevicePoiService;
 
   /// TTS 서비스
   final TtsService ttsService;
@@ -48,15 +52,54 @@ class LocationAnnouncementController {
   /// 로딩 상태 관리 (중복 요청 방지)
   bool _isLoading = false;
 
+  /// 로컬 POI 초기화 여부
+  bool _isLocalPoiInitialized = false;
+
   /// API 호출 타임아웃 시간 (30초)
   static const Duration _timeout = Duration(seconds: 30);
   static const double extensionPointDistanceKm = 0.04;
 
-  
+  /// 즐겨찾기 관심지점 캐시
+  ///
+  /// FavoriteMainPanelView에서 즐겨찾기 로드 시 업데이트됨
+  /// announceNearbyBuilding 호출 시 카카오 POI와 함께 검색됨
+  List<FavoritePoint> _cachedFavoritePoints = [];
+
+  /// 즐겨찾기 관심지점 캐시 업데이트
+  ///
+  /// **호출 시점:**
+  /// - FavoriteMainPanelView._loadFavorites() 성공 시
+  /// - 즐겨찾기 추가/삭제/수정 시
+  void updateFavoritePointsCache(List<FavoritePoint> points) {
+    _cachedFavoritePoints = points;
+    _log('[LocationAnnouncement] 📍 즐겨찾기 캐시 업데이트: ${points.length}개');
+  }
+
+  /// 즐겨찾기 캐시 초기화 (로그아웃 시)
+  void clearFavoritePointsCache() {
+    _cachedFavoritePoints = [];
+    _log('[LocationAnnouncement] 🗑️ 즐겨찾기 캐시 초기화');
+  }
+
+  /// 로컬 POI 초기화 (앱 시작 시 호출)
+  Future<void> initializeLocalPois() async {
+    if (_isLocalPoiInitialized) return;
+
+    // 병렬로 초기화
+    await Future.wait([
+      localPoiRepository.loadAllPois(),
+      signalDevicePoiService.initialize(),
+    ]);
+
+    _isLocalPoiInitialized = true;
+    _log('[LocationAnnouncement] 📍 로컬 POI 및 음향신호기 초기화 완료');
+  }
 
   LocationAnnouncementController({
     required this.navigatorRepository,
     required this.kakaoRepository,
+    required this.localPoiRepository,
+    required this.signalDevicePoiService,
     required this.ttsService,
   });
   
@@ -118,111 +161,189 @@ class LocationAnnouncementController {
   
   /// 실제 검색 수행 (타임아웃 내부 로직)
   Future<void> _performSearch(double curLat, double curLng, double compassValue) async {
-
-  
     // 0. 즉시 검색 시작 안내 (사용자 피드백)
     _log('[LocationAnnouncement] 🔍 주변 장소 검색 시작');
-    // await ttsService.speak('주변 장소를 검색합니다');
 
-    // // // 1. 현재 GPS 좌표 가져오기
-    // final positionResult = await navigatorRepository.getCurrentPosition();
+    _log('[LocationAnnouncement] ✅ GPS 좌표 수신:');
+    _log('  - 위도(Latitude): $curLat');
+    _log('  - 경도(Longitude): $curLng');
 
-    // await positionResult.fold(
-    //   (failure) async {
-    //     // GPS 조회 실패
-    //     debugPrint('[LocationAnnouncement] ❌ GPS 조회 실패: $failure');
-    //     await ttsService.speak('GPS 정보를 가져올 수 없습니다');
-    //   },
-    //   (position) async {
-        // GPS 좌표 성공
-        _log('[LocationAnnouncement] ✅ GPS 좌표 수신:');
-        _log('  - 위도(Latitude): $curLat');
-        _log('  - 경도(Longitude): $curLng');
-        final extensionLatLng =Calculators.calLatLng(curLat, curLng, compassValue, extensionPointDistanceKm);
-        final double extensionLat = extensionLatLng['latitude']!;
-        final double extensionLng = extensionLatLng['longitude']!;
-        // 2. 주변 POI 검색 (카카오 Category Search API)
-        
-        _log('[LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작');
-        _log('  - 검색 반경: 50m');
+    final extensionLatLng = Calculators.calLatLng(curLat, curLng, compassValue, extensionPointDistanceKm);
+    final double extensionLat = extensionLatLng['latitude']!;
+    final double extensionLng = extensionLatLng['longitude']!;
 
-        final placesResult = await kakaoRepository.searchNearbyPlaces(
-          latitude: extensionLat,
-          longitude: extensionLng,
-          radius: 50,
-        );
+    // 1. 주변 POI 검색 (카카오 Category Search API)
+    _log('[LocationAnnouncement] 🗺️ 카카오 주변 POI 검색 시작');
+    _log('  - 검색 반경: 50m');
 
-        placesResult.fold(
-          (failure) {
-            // POI 검색 실패
-            _log('[LocationAnnouncement] ❌ POI 검색 실패: $failure');
-            // ttsService.speak('주변 장소를 찾을 수 없습니다');
-          },
-          (places) {
-            if (places.isEmpty) {
-              // 검색 결과 없음
-              _log('[LocationAnnouncement] ⚠️ 주변에 등록된 장소가 없습니다');
-              // ttsService.speak('주변에 등록된 장소가 없습니다');
-              return;
-            }
+    final placesResult = await kakaoRepository.searchNearbyPlaces(
+      latitude: extensionLat,
+      longitude: extensionLng,
+      radius: 50,
+    );
 
-            // 3. 내 실제 위치 기준으로 가장 가까운 장소 선택
-            final nearest = _findNearestFromCurrentPosition(places, curLat, curLng);
-            
-              _log('[LocationAnnouncement] ✅ POI 검색 성공:');
-              _log('  - 장소명: ${nearest.name}');
-              _log('  - 거리: ${nearest.distance}m');
-              _log('  - 주소: ${nearest.address}');
+    // 2. 카카오 POI + 즐겨찾기 합치기
+    List<PlaceResult> allPlaces = [];
 
-              // 검색된 모든 장소 로그 (디버깅용)
-              _log('[LocationAnnouncement] 📍 검색된 장소 목록 (${places.length}개):');
-              for (var i = 0; i < places.length; i++) {
-                debugPrint('  ${i + 1}. ${places[i].name} (${places[i].distance}m)');
-              }
-            
+    placesResult.fold(
+      (failure) {
+        _log('[LocationAnnouncement] ❌ POI 검색 실패: $failure');
+      },
+      (places) {
+        allPlaces.addAll(places);
+        _log('[LocationAnnouncement] ✅ 카카오 POI ${places.length}개 로드');
+      },
+    );
 
-            // 4. TTS 안내 (시계 방향 포함)
-            final clockDirection = getClockDirectionForPoi(curLat: curLat, curLng: curLng, place: nearest, compassValue: compassValue);
-            final userToPoiDistKm = Calculators.calculateDistance(
-              curLat,
-              curLng,
-              nearest.geometry.location.lat,
-              nearest.geometry.location.lng,
-            );
-            final userToPoiDistMeters = (userToPoiDistKm * 1000).round();
-            final message = _buildPoiMessage(nearest, clockDirection, userToPoiDistMeters);
+    // 3. 즐겨찾기 관심지점을 PlaceResult로 변환하여 추가 (extensionPoint 기준 50m 이내)
+    final nearbyFavorites = _filterNearbyFavorites(extensionLat, extensionLng, 50);
+    allPlaces.addAll(nearbyFavorites);
+    _log('[LocationAnnouncement] ⭐ 즐겨찾기 ${nearbyFavorites.length}개 추가 (전방 40m 기준 50m 이내)');
 
-            _log('[LocationAnnouncement] 🔊 TTS 안내: $message');
+    // 4. 로컬 POI 추가 (횡단보도, 버스정류장, 사거리 등 - yeokgok_poi.json)
+    final nearbyLocalPois = localPoiRepository.searchNearbyPois(
+      latitude: extensionLat,
+      longitude: extensionLng,
+      radiusMeters: 50,
+    );
+    allPlaces.addAll(nearbyLocalPois);
+    _log('[LocationAnnouncement] 🚦 로컬 POI ${nearbyLocalPois.length}개 추가 (전방 40m 기준 50m 이내)');
 
-            ttsService.speakWithChannel(
-              message, 
-              channel: ETtsChannel.NAVIGATE, 
-              cooldownKey: 'nearby_poi', 
-              cooldown: Duration(seconds: 10),
-              );
-          },
-        );
+    // 5. 음향신호기 POI 추가 (서울시 공공데이터 - 교차로 매칭)
+    final nearbySignalDevicePois = signalDevicePoiService.searchNearbySignalDevicePois(
+      latitude: extensionLat,
+      longitude: extensionLng,
+      radiusMeters: 50,
+    );
+    allPlaces.addAll(nearbySignalDevicePois);
+    _log('[LocationAnnouncement] 🚸 음향신호기 POI ${nearbySignalDevicePois.length}개 추가 (전방 40m 기준 50m 이내)');
+
+    // 6. 합쳐진 리스트에서 가까운 순으로 정렬
+    if (allPlaces.isEmpty) {
+      _log('[LocationAnnouncement] ⚠️ 주변에 등록된 장소가 없습니다');
+      return;
+    }
+
+    // 거리순 정렬
+    final sortedPlaces = _sortByDistance(allPlaces, curLat, curLng);
+
+    // 최대 3개까지 선택
+    final topPlaces = sortedPlaces.take(3).toList();
+
+    _log('[LocationAnnouncement] ✅ 가까운 장소 ${topPlaces.length}개 선택');
+    for (var i = 0; i < topPlaces.length; i++) {
+      final place = topPlaces[i];
+      final tag = place.category == KakaoCategoryCode.FAV ? '⭐' : '';
+      _log('  ${i + 1}. $tag${place.name}');
+    }
+
+    // 검색된 모든 장소 로그 (디버깅용)
+    _log('[LocationAnnouncement] 📍 전체 검색 목록 (${allPlaces.length}개):');
+    for (var i = 0; i < sortedPlaces.length; i++) {
+      final place = sortedPlaces[i];
+      final tag = place.category == KakaoCategoryCode.FAV ? '⭐' : '';
+      debugPrint('  ${i + 1}. $tag${place.name}');
+    }
+
+    // 5. TTS 안내 (최대 3개)
+    final message = _buildMultiPoiMessage(topPlaces, curLat, curLng, compassValue);
+
+    _log('[LocationAnnouncement] 🔊 TTS 안내: $message');
+
+    ttsService.speakWithChannel(
+      message,
+      channel: ETtsChannel.NAVIGATE,
+      cooldownKey: 'nearby_poi',
+      cooldown: Duration(seconds: 10),
+    );
   }
 
-  /// PlaceResult를 TTS 메시지로 변환
+  /// 거리순으로 정렬된 장소 리스트 반환
+  List<PlaceResult> _sortByDistance(List<PlaceResult> places, double curLat, double curLng) {
+    final sorted = List<PlaceResult>.from(places);
+    sorted.sort((a, b) {
+      final distA = Calculators.calculateDistance(
+        curLat, curLng,
+        a.geometry.location.lat, a.geometry.location.lng,
+      );
+      final distB = Calculators.calculateDistance(
+        curLat, curLng,
+        b.geometry.location.lat, b.geometry.location.lng,
+      );
+      return distA.compareTo(distB);
+    });
+    return sorted;
+  }
+
+  /// 여러 POI를 하나의 TTS 메시지로 변환
   ///
   /// **메시지 형식:**
-  /// - 100m 이내: "{장소명}, {거리}미터 앞입니다"
-  /// - 100m 이상 또는 거리 없음: "{장소명} 근처입니다"
+  /// "주변에 {장소1}, {장소2}, {장소3}이 있습니다"
   ///
   /// **예시:**
-  /// - distance: 23m → "스타벅스 아주대점, 23미터 앞입니다"
-  /// - distance: 45m → "아주대학교, 45미터 앞입니다"
-  /// - distance: 150m → "아주대학교 근처입니다"
-  /// - distance: null → "강남역 근처입니다"
-  String _buildPoiMessage(PlaceResult place, String clockDirection, int userToPoiDistMeters) {
-    if (userToPoiDistMeters < 100) {
-      // 100m 이내면 정확한 거리 안내
-      return ' ${userToPoiDistMeters}미터 거리,${clockDirection}방향에 ${place.name}입니다';
-    } else {
-      // 100m 이상이거나 거리 정보 없으면 "근처"
-      return '${place.name} 근처입니다';
+  /// - "주변에 내 장소 집, 스타벅스, 편의점이 있습니다"
+  String _buildMultiPoiMessage(
+    List<PlaceResult> places,
+    double curLat,
+    double curLng,
+    double compassValue,
+  ) {
+    if (places.isEmpty) return '';
+
+    final descriptions = <String>[];
+    String lastPoiName = '';
+
+    for (final place in places) {
+      final isFavorite = place.category == KakaoCategoryCode.FAV;
+      final placeName = isFavorite
+          ? TtsMessages.favoritePlaceName(place.name)
+          : place.name;
+
+      final clockDirection = getClockDirectionForPoi(
+        curLat: curLat,
+        curLng: curLng,
+        place: place,
+        compassValue: compassValue,
+      );
+      final userToPoiDistKm = Calculators.calculateDistance(
+        curLat,
+        curLng,
+        place.geometry.location.lat,
+        place.geometry.location.lng,
+      );
+      final userToPoiDistMeters = (userToPoiDistKm * 1000).round();
+
+      descriptions.add(TtsMessages.poiDescription(clockDirection, userToPoiDistMeters, placeName));
+      lastPoiName = placeName;
     }
+
+    return TtsMessages.nearbyPoiSummary(descriptions, lastPoiName: lastPoiName);
+  }
+
+  /// 현재 위치 기준 반경 내 즐겨찾기를 PlaceResult로 변환하여 반환
+  ///
+  /// [curLat], [curLng]: 현재 위치
+  /// [radiusMeters]: 검색 반경 (미터)
+  List<PlaceResult> _filterNearbyFavorites(double curLat, double curLng, int radiusMeters) {
+    if (_cachedFavoritePoints.isEmpty) return [];
+
+    final List<PlaceResult> nearbyFavorites = [];
+
+    for (final point in _cachedFavoritePoints) {
+      final distanceKm = Calculators.calculateDistance(
+        curLat,
+        curLng,
+        point.latitude,
+        point.longitude,
+      );
+      final distanceMeters = distanceKm * 1000;
+
+      if (distanceMeters <= radiusMeters) {
+        nearbyFavorites.add(PlaceResult.fromFavoritePoint(point));
+      }
+    }
+
+    return nearbyFavorites;
   }
 
   // double? _headingPrevLat;
@@ -322,35 +443,4 @@ class LocationAnnouncementController {
       debugPrint('[LocationAnnouncement] $message');
     }
   }
-
-  /// 내 실제 위치 기준으로 가장 가까운 POI를 찾습니다.
-  ///
-  /// [places]: extension point 기준으로 검색된 POI 리스트
-  /// [curLat], [curLng]: 내 실제 위치
-  ///
-  /// **반환값:** 내 위치에서 가장 가까운 PlaceResult
-  PlaceResult _findNearestFromCurrentPosition(
-    List<PlaceResult> places,
-    double curLat,
-    double curLng,
-  ) {
-    PlaceResult nearest = places.first;
-    double minDistance = double.infinity;
-
-    for (final place in places) {
-      final distance = Calculators.calculateDistance(
-        curLat,
-        curLng,
-        place.geometry.location.lat,
-        place.geometry.location.lng,
-      );
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearest = place;
-      }
-    }
-
-    return nearest;
-  }
-
 }

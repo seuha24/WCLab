@@ -1,6 +1,7 @@
 library;
 
 import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:safelight/data/models/auth_data_model.dart';
 import 'package:safelight/framework/core.dart';
@@ -13,3 +14,5 @@ part '../domain/usecases/nav_usecase.dart';
 part '../domain/usecases/permission_usecase.dart';
 part '../domain/usecases/service_usecase.dart';
 part '../domain/usecases/send_startpoint_params.dart';
+part '../domain/usecases/signal_device_usecase.dart';
+part '../domain/usecases/intersection_usecase.dart';

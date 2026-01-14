@@ -113,6 +113,10 @@ class NaverMapViewController extends GetxController {
 
   /// 현재 나침반 값을 나타내는 Reactive 변수
   RxDouble compassValue = 0.0.obs;
+
+  /// 센서 융합 heading 가중치 (1.0 = compass only, 0.0 = gyro only)
+  double _sensorFusionWeight = 1.0;
+
   /// 커스텀 시작 지점 사용 여부
   RxBool isCustomStartPoint = false.obs;
 
@@ -162,7 +166,8 @@ class NaverMapViewController extends GetxController {
   late double sLatitude;
   late double sLongitude;
   late double sAccuracy;
-
+  /// GPS 정확도 임계값 (미터 단위)
+  int kMinGpsAccuracyThreshold = 1;
   /// 위치 업데이트 타이머
   Timer? _locationUpdateTimer;
   Timer? navigationTimer;
@@ -183,6 +188,12 @@ class NaverMapViewController extends GetxController {
   double? heading;
   double firstBearingToPoint = 0.0;
   String clock = "";
+
+  /// 센서 융합 heading 계산: (compass * w) + (gyro * (1-w))
+  double get fusedHeading {
+    final w = _sensorFusionWeight;
+    return (compassValue.value * w) + (pdrCalculator.pdrYawDeg * (1 - w));
+  }
 
   // 이동 거리 계산 변수
   double distanceToPath = 0.0;
@@ -229,10 +240,62 @@ class NaverMapViewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    
+
     sensorController.start();
     _initSensorStreams();
     _initializeLocationServices();
+    _loadFavoritePointsCache();
+    _initializeLocalPois();
+  }
+
+  /// 즐겨찾기 관심지점을 서버에서 로드하여 LocationAnnouncementController 캐시에 저장
+  ///
+  /// 앱 시작 시 즐겨찾기 패널을 열지 않아도 POI 안내에 즐겨찾기가 포함되도록 함
+  Future<void> _loadFavoritePointsCache() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null || user.isAnonymous) {
+        debugPrint('[MapViewController] 즐겨찾기 캐시 로드 스킵: 로그인되지 않음');
+        return;
+      }
+
+      final authService = DI.get<AuthService>();
+      final credentials = await authService.getFavoriteCredentials(user: user);
+      if (credentials == null) {
+        debugPrint('[MapViewController] 즐겨찾기 캐시 로드 스킵: 인증 정보 없음');
+        return;
+      }
+
+      // 즐겨찾기 조회
+      final dioClient = DioClient();
+      final remoteDataSource = FavoriteRemoteDataSourceImpl(dioClient: dioClient);
+      final repository = FavoriteRepositoryImpl(remoteDataSource: remoteDataSource);
+      final getFavoritePoints = GetFavoritePoints(repository);
+
+      final result = await getFavoritePoints.call(
+        GetFavoritePointsParams(
+          loginMethod: credentials.loginMethod,
+          userId: credentials.userId,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('[MapViewController] 즐겨찾기 캐시 로드 실패: $failure');
+        },
+        (points) {
+          locationAnnouncementController.updateFavoritePointsCache(points);
+          debugPrint('[MapViewController] 즐겨찾기 캐시 로드 완료: ${points.length}개');
+        },
+      );
+    } catch (e) {
+      debugPrint('[MapViewController] 즐겨찾기 캐시 로드 에러: $e');
+    }
+  }
+
+  /// 로컬 POI 초기화 (횡단보도, 버스정류장 등)
+  Future<void> _initializeLocalPois() async {
+    await locationAnnouncementController.initializeLocalPois();
   }
 
   /// 주변 건물 자동 알림 토글
@@ -257,7 +320,7 @@ class NaverMapViewController extends GetxController {
     locationAnnouncementController.announceNearbyBuilding(
       currentLatitude.value,
       currentLongitude.value,
-      compassValue.value,
+      fusedHeading,
     );
 
     // 20초마다 반복
@@ -274,7 +337,7 @@ class NaverMapViewController extends GetxController {
       locationAnnouncementController.announceNearbyBuilding(
         currentLatitude.value,
         currentLongitude.value,
-        compassValue.value,
+        fusedHeading,
       );
     });
   }
@@ -424,12 +487,12 @@ class NaverMapViewController extends GetxController {
       );
 
       // GPS 정확도에 따라 출발지 안내 멘트 유/무
-      if (!showLowGpsAlrertOnce && position.accuracy >= 15) {
+      if (!showLowGpsAlrertOnce && position.accuracy >= kMinGpsAccuracyThreshold) {
         showLowGpsAlrertOnce = true; // 중복 표시 방지 플래그
         showLowAccuracyDialog.value = true; // 알림 다이얼로그 표시 신호
       }
       
-      if (position.accuracy >= 15) {
+      if (position.accuracy >= kMinGpsAccuracyThreshold) {
         isGpsAccurate.value = false; // GPS 신호 불량
         pdrCalculator.setVelocityValue(_filteringX.calculateWeightedAverage(), _filteringY.calculateWeightedAverage());
         currentLatitude.value = pdrCalculator.newlatitude; // 센서 계산 위도
@@ -824,7 +887,7 @@ class NaverMapViewController extends GetxController {
     debugPrint('목적지 도착 감지: ${destinationDistanceMeters.toStringAsFixed(2)}m');
 
     await tts.speakWithChannel(
-      '목적지에 도착했습니다.',
+      TtsMessages.arrivedAtDestination,
       channel: ETtsChannel.NAVIGATE,
       cooldownKey: 'arrive_destination',
       cooldown: const Duration(seconds: 20),
@@ -963,7 +1026,7 @@ class NaverMapViewController extends GetxController {
       await _rerouteFromCurrentLocation();
 
       tts.speakWithChannel(
-        "새로운 경로로 안내합니다.",
+        TtsMessages.rerouteComplete,
         channel: ETtsChannel.SYSTEM_ANNOUNCE,
         cooldownKey: 'reroute_done',
         cooldown: const Duration(seconds: 10),
@@ -995,7 +1058,7 @@ class NaverMapViewController extends GetxController {
     await _rerouteFromCurrentLocation();
 
     tts.speakWithChannel(
-      '출발지에 벗어나 새로운 경로로 안내합니다.',
+      TtsMessages.rerouteFromDeviation,
       channel: ETtsChannel.NAVIGATE,
       cooldownKey: 'research_out_of_start',
       cooldown: const Duration(seconds: 10),
@@ -1065,7 +1128,7 @@ class NaverMapViewController extends GetxController {
   /// 출발 전 안내 멘트를 재생합니다.
   void _announceMoveToStart() {
     tts.speakWithChannel(
-      "출발지로 이동하세요.",
+      TtsMessages.moveToStartPoint,
       channel: ETtsChannel.NAVIGATE,
       cooldownKey: 'move_to_startpoint',
       cooldown: const Duration(seconds: 5),
@@ -1143,7 +1206,7 @@ class NaverMapViewController extends GetxController {
       }
 
       tts.speakWithChannel(
-        '잠시 후 횡단보도 입니다. 차량에 유의하세요!',
+        TtsMessages.crosswalkAhead,
         channel: ETtsChannel.ALERT,
         cooldownKey: 'crosswalk_alert',
         cooldown: const Duration(seconds: 2),
@@ -1170,7 +1233,7 @@ class NaverMapViewController extends GetxController {
     if (targetBranch.branch == true) {
       final message = targetBranch.description;
       tts.speakWithChannel(
-        '$message하세요.',
+        TtsMessages.branchInstruction(message),
         channel: ETtsChannel.NAVIGATE,
         cooldownKey: 'branch_instruction',
         cooldown: const Duration(seconds: 10),
@@ -1188,7 +1251,7 @@ class NaverMapViewController extends GetxController {
       locationAnnouncementController.announceNearbyBuilding(
         currentLatitude.value,
         currentLongitude.value,
-        compassValue.value,
+        fusedHeading,
       );
     }
   }
@@ -1247,6 +1310,19 @@ class NaverMapViewController extends GetxController {
   Future<void> updateMapByMode(double latitude, double longitude,
       double compassValue, bool isGps) async {
     if (mapController == null) return;
+
+    // 횡단보도(음향신호기) 마커 업데이트 (비동기, 50m 이상 이동 시에만 갱신)
+    overlayController.updateCrosswalkMarkers(
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    // 교차로 마커 업데이트 (비동기, 50m 이상 이동 시에만 갱신)
+    overlayController.updateIntersectionMarkers(
+      latitude: latitude,
+      longitude: longitude,
+    );
+
     switch (mapMode.value) {
       case MapControlMode.idle:
 
@@ -1384,24 +1460,24 @@ class NaverMapViewController extends GetxController {
         final result = await flashOff(NoParams());
         if (result.isLeft()) {
           
-          tts.speakWithChannel('안전 경광등을 끌 수 없습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_fail', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.cannotTurnOffFlash, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_fail', cooldown: Duration(seconds: 5),);
         } else {
           isFlashOn.value = false;
-          tts.speakWithChannel('안전 경광등이 꺼졌습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_success', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.flashTurnedOff, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_success', cooldown: Duration(seconds: 5),);
         }
       } else {
         // 경광등이 꺼져 있으면 켜기
         final result = await flashOn(NoParams());
         if (result.isLeft()) {
-          tts.speakWithChannel('안전 경광등을 켤 수 없습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_fail', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.cannotTurnOnFlash, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_fail', cooldown: Duration(seconds: 5),);
         } else {
           isFlashOn.value = true;
-          tts.speakWithChannel('안전 경광등이 켜졌습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_success', cooldown: Duration(seconds: 5),);
+          tts.speakWithChannel(TtsMessages.flashTurnedOn, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_success', cooldown: Duration(seconds: 5),);
         }
       }
     } catch (e) {
       debugPrint('경광등 제어 중 오류 발생: $e');
-      tts.speakWithChannel('경광등 제어 중 오류가 발생했습니다.', channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_control_error', cooldown: Duration(seconds: 5),);
+      tts.speakWithChannel(TtsMessages.flashControlError, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_control_error', cooldown: Duration(seconds: 5),);
     }
   }
 

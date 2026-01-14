@@ -3,6 +3,7 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show HttpResponse, Platform;
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -20,6 +21,7 @@ import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:torch_light/torch_light.dart';
 import 'package:safelight/data/services/tts_service.dart';
+import 'package:safelight/core/utils/tts_messages.dart';
 
 import 'package:camera/camera.dart' as cam;
 
@@ -35,3 +37,7 @@ part '../data/sources/weather_remote_data_source.dart';
 part '../data/sources/setting_cache_data_source.dart';
 
 part '../data/sources/ambientlightlevel.data_source.dart';
+
+part '../data/sources/signal_device_local_data_source.dart';
+
+part '../data/sources/intersection_local_data_source.dart';

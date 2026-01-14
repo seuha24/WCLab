@@ -1,3 +1,6 @@
+import 'package:safelight/data/services/kakao_local_api_service.dart';
+import 'package:safelight/domain/entities/favorite_point.dart';
+
 /// 카카오 로컬 API 장소 검색 결과 Entity
 ///
 /// **카카오 API 응답 매핑:**
@@ -28,13 +31,47 @@ class PlaceResult {
   /// - distance: null → 거리 정보 없음
   final int? distance;
 
+  /// 장소 카테고리 코드
+  ///
+  /// **사용 목적:**
+  /// - 카카오 POI vs 즐겨찾기 구분
+  /// - FAV: 사용자 등록 즐겨찾기
+  /// - 그 외: 카카오 API 카테고리
+  final KakaoCategoryCode? category;
+
   /// ex) name: '가톨릭대학교 성심교정', address: '경기도 부천시 소사로 327', geometry: LatLngGeometry, distance: 150
   PlaceResult({
     required this.name,
     required this.address,
     required this.geometry,
     this.distance,
+    this.category,
   });
+
+  /// FavoritePoint를 PlaceResult로 변환
+  ///
+  /// **사용 목적:**
+  /// - 즐겨찾기 관심지점을 카카오 POI와 동일한 형태로 통합
+  /// - LocationAnnouncementController에서 거리 비교 시 활용
+  ///
+  /// **예시:**
+  /// ```dart
+  /// final favoritePoint = FavoritePoint(name: '집', latitude: 37.5, longitude: 127.0);
+  /// final placeResult = PlaceResult.fromFavoritePoint(favoritePoint);
+  /// ```
+  factory PlaceResult.fromFavoritePoint(FavoritePoint point) {
+    return PlaceResult(
+      name: point.name,
+      address: '',
+      geometry: LatLngGeometry(
+        location: GeoLocation(
+          lat: point.latitude,
+          lng: point.longitude,
+        ),
+      ),
+      category: KakaoCategoryCode.FAV,
+    );
+  }
 }
 
 /// 위경도 정보 모델 클래스

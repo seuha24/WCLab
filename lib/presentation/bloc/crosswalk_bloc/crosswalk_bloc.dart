@@ -37,7 +37,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     if (BlueNativeDataSourceImpl.subscription != null) {
       BlueNativeDataSourceImpl.subscription!.cancel();
     }
-    tts.speak('자동 스캔이 시작됩니다.');
+    tts.speak(TtsMessages.autoScanStarted);
     timer.cancel();
     emit(SearchOn(infinite: true));
     await search2InfiniteTimes(NoParams());
@@ -70,7 +70,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
         },
         (results) {
           debugPrint('📍 횡단보도 스캔 완료: ${results!.length}개 발견');
-          tts.speak('${results.length} 개의 스마트 압버튼을 찾았습니다.');
+          tts.speak(TtsMessages.smartButtonsFound(results.length));
           emit(SearchOff(results: results));
           debugPrint('📍 SearchOff 상태로 전환 완료');
         },
@@ -85,7 +85,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts.speak('${event.crosswalk.name}에 신호안내를 요청합니다.');
+      tts.speak(TtsMessages.requestSignalGuide(event.crosswalk.name));
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
@@ -102,7 +102,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts.speak('명령이 전송되었습니다.');
+            tts.speak(TtsMessages.commandSent);
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;
@@ -111,11 +111,11 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
           },
         );
       } else {
-        tts.speak('명령이 전송되었습니다.');
+        tts.speak(TtsMessages.commandSent);
         emit(ConnectOff(enableCompass: false));
       }
     } catch (e) {
-      tts.speak('연결 실패했습니다.');
+      tts.speak(TtsMessages.connectionFailed);
       emit(CrosswalkError(message: 'connect failure'));
     }
   }
@@ -125,7 +125,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts.speak('${event.crosswalk.name}에 연결합니다.');
+      tts.speak(TtsMessages.connectingTo(event.crosswalk.name));
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
@@ -137,7 +137,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts.speak('진동이 울리지 않는 방향으로 보행하세요.');
+            tts.speak(TtsMessages.walkTowardsNoVibration);
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;
@@ -159,7 +159,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts.speak('${event.crosswalk.name}에 음성안내를 요청합니다.');
+      tts.speak(TtsMessages.requestVoiceGuide(event.crosswalk.name));
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
@@ -171,7 +171,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts.speak('음향신호기 설치 위치 정보를 안내합니다.');
+            tts.speak(TtsMessages.signalDeviceLocationInfo);
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;

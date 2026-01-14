@@ -210,7 +210,7 @@ class _DesSearchState extends State<DesSearch> {
                         FocusScope.of(context).unfocus();
                         _searchController.text = result.name;
                         Future.microtask(
-                            () => speakTTS('${result.name}을 선택하셨습니다.'));
+                            () => speakTTS(TtsMessages.placeSelected(result.name)));
                         bool? confirmed =
                             await showConfirmationDialog(context, result);
                         if (confirmed == true) {
@@ -238,7 +238,7 @@ class _DesSearchState extends State<DesSearch> {
                                     ),
                                   );
                               Future.microtask(
-                                  () => speakTTS('${result.name}(으)로 안내합니다.'));
+                                  () => speakTTS(TtsMessages.navigatingTo(result.name)));
                               Navigator.pop(context, result.geometry.location);
                               sink.close();
                             },
@@ -265,7 +265,7 @@ class _DesSearchState extends State<DesSearch> {
                                               ),
                                             );
                                         Future.microtask(() => speakTTS(
-                                            '${entrance.entranceName}으로 안내합니다.'));
+                                            TtsMessages.navigatingToEntrance(entrance.entranceName)));
                                         Navigator.pop(context);
                                         Navigator.pop(
                                           context,
@@ -287,7 +287,7 @@ class _DesSearchState extends State<DesSearch> {
                                       ),
                                     );
                                 Future.microtask(() =>
-                                    speakTTS('${result.name}(으)로 안내합니다.'));
+                                    speakTTS(TtsMessages.navigatingTo(result.name)));
                                 Navigator.pop(
                                     context, result.geometry.location);
                               }
@@ -300,12 +300,12 @@ class _DesSearchState extends State<DesSearch> {
                                     ),
                                   );
                               Future.microtask(
-                                  () => speakTTS('${result.name}(으)로 안내합니다.'));
+                                  () => speakTTS(TtsMessages.navigatingTo(result.name)));
                               Navigator.pop(context, result.geometry.location);
                             }
                           }
                         } else {
-                          speakTTS('취소');
+                          speakTTS(TtsMessages.cancelled);
                         }
                       },
                     ),
@@ -335,7 +335,7 @@ class _DesSearchState extends State<DesSearch> {
                           final GeoLocation pickedLocation = result['location'];
                           final String pickedAddress = result['address'];
                           _searchController.text = pickedAddress;
-                          speakTTS('$pickedAddress 위치를 선택하셨습니다.');
+                          speakTTS(TtsMessages.locationSelected(pickedAddress));
                           Navigator.pop(context, pickedLocation);
                           context.read<SearchBloc>().add(
                                 SearchDestinationRequested(

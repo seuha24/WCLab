@@ -28,7 +28,7 @@ class FlashNativeDataSourceImpl implements FlashNativeDataSource {
 
         if (infinite && timer.tick % 15 == 0) {
           // 30초 간격으로 알림 & 무한으로 켜짐
-          tts.speak("현재 경광등이 켜져 있습니다.");
+          tts.speak(TtsMessages.flashLightCurrentlyOn);
           debugPrint("경광등이 켜져 있습니다.");
         }
       });
