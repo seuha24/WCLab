@@ -41,6 +41,17 @@ abstract class KoreanParticle {
     return _hasFinalConsonant(word) ? '과' : '와';
   }
 
+  /// 받침 유무에 따라 "으로/로" 반환
+  ///
+  /// - 받침 있음: "으로" (예: 집**으로**)
+  /// - 받침 없음: "로" (예: 스타벅스**로**)
+  ///
+  /// 참고: ㄹ 받침은 "로"를 사용하지만, 현재 구현에서는 단순화하여
+  /// 받침 유무만 판별합니다. (예: "서울로" 대신 "서울으로"로 출력될 수 있음)
+  static String directionParticle(String word) {
+    return _hasFinalConsonant(word) ? '으로' : '로';
+  }
+
   /// 마지막 글자에 받침이 있는지 확인
   ///
   /// 한글 유니코드 범위: 0xAC00 ~ 0xD7A3 (가 ~ 힣)

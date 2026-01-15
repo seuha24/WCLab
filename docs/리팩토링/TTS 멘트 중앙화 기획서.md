@@ -210,9 +210,9 @@ lib/core/utils/korean_particle.dart
 
 **총 마이그레이션: 39개 멘트**
 
-### 추후 작업 (Phase 2) - 미완료
-- [ ] KoreanParticle 유틸을 활용한 조사 자동 처리 (`을/를`, `이/가`, `으로/로`)
-- [ ] main_view.dart 패널 멘트 중앙화 (`$selectedMenu 패널을 $stateMessage`)
+### 추후 작업 (Phase 2) - ✅ 완료
+- [x] KoreanParticle 유틸을 활용한 조사 자동 처리 (`을/를`, `이/가`, `으로/로`)
+- [x] main_view.dart 패널 멘트 중앙화 (`$selectedMenu 패널을 $stateMessage`)
 
 ---
 

@@ -177,13 +177,16 @@ abstract class TtsMessages {
   // ============================================================
 
   /// 장소 선택됨
-  static String placeSelected(String name) => '$name을 선택하셨습니다.';
+  static String placeSelected(String name) =>
+      '$name${KoreanParticle.objectParticle(name)} 선택하셨습니다.';
 
   /// 장소로 안내
-  static String navigatingTo(String name) => '$name(으)로 안내합니다.';
+  static String navigatingTo(String name) =>
+      '$name${KoreanParticle.directionParticle(name)} 안내합니다.';
 
   /// 출입구로 안내
-  static String navigatingToEntrance(String entranceName) => '$entranceName으로 안내합니다.';
+  static String navigatingToEntrance(String entranceName) =>
+      '$entranceName${KoreanParticle.directionParticle(entranceName)} 안내합니다.';
 
   /// 지도에서 위치 선택됨
   static String locationSelected(String address) => '$address 위치를 선택하셨습니다.';
@@ -214,8 +217,10 @@ abstract class TtsMessages {
   static String panelSwitch(String menu) => '$menu 패널로 이동합니다.';
 
   /// 즐겨찾기 지점 안내 선택
-  static String navigateToFavoritePoint(String name) => '$name으로 안내를 선택했습니다.';
+  static String navigateToFavoritePoint(String name) =>
+      '$name${KoreanParticle.directionParticle(name)} 안내를 선택했습니다.';
 
   /// 즐겨찾기 경로 안내 선택
-  static String navigateToFavoriteRoute(String name) => '$name으로 안내를 선택했습니다.';
+  static String navigateToFavoriteRoute(String name) =>
+      '$name${KoreanParticle.directionParticle(name)} 안내를 선택했습니다.';
 }
