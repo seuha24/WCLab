@@ -199,4 +199,23 @@ abstract class TtsMessages {
 
   /// 현재 위치 가져오기 실패
   static const String cannotGetCurrentLocation = '현재 위치를 가져올 수 없습니다.';
+
+  // ============================================================
+  // UI 피드백 멘트
+  // ============================================================
+
+  /// 경로 이탈 안내 (시계 방향)
+  static String outOfBound(String clockDirection) => '$clockDirection 방향으로 이동하세요.';
+
+  /// 패널 토글 안내
+  static String panelToggle(String menu, String state) => '$menu 패널을 $state';
+
+  /// 패널 전환 안내
+  static String panelSwitch(String menu) => '$menu 패널로 이동합니다.';
+
+  /// 즐겨찾기 지점 안내 선택
+  static String navigateToFavoritePoint(String name) => '$name으로 안내를 선택했습니다.';
+
+  /// 즐겨찾기 경로 안내 선택
+  static String navigateToFavoriteRoute(String name) => '$name으로 안내를 선택했습니다.';
 }

@@ -16,7 +16,7 @@ class _BlueOffViewState extends State<BlueOffView> {
   @override
   void initState() {
     super.initState();
-    tts.speak(TtsMessages.bluetoothOff);
+    tts.speakBluetoothOff();
   }
 
   @override

@@ -232,7 +232,7 @@ class _TutorialViewState extends State<TutorialView> {
                             );
                           } else {
                             final tts = DI.get<TtsService>();
-                            tts.speak(TtsMessages.safetyCompassOn);
+                            tts.speakSafetyCompassOn();
                             showModalBottomSheet(
                               isScrollControlled: true,
                               context: context,

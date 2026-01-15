@@ -28,10 +28,7 @@ class MapPanelController extends GetxController {
     FavoritePoint point,
   ) async {
     // TTS 안내 (fire-and-forget)
-    mapController.tts.speakWithChannel(
-      '${point.name}으로 안내를 선택했습니다.',
-      channel: ETtsChannel.SYSTEM_ANNOUNCE,
-    );
+    mapController.tts.speakNavigateToFavoritePoint(point.name);
 
     // 출입구 좌표가 있으면 사용, 없으면 일반 좌표 사용
     final lat = point.entranceLatitude ?? point.latitude;
@@ -67,10 +64,7 @@ class MapPanelController extends GetxController {
     FavoriteRoute route,
   ) async {
     // TTS 안내 (fire-and-forget)
-    mapController.tts.speakWithChannel(
-      '${route.name}으로 안내를 선택했습니다.',
-      channel: ETtsChannel.SYSTEM_ANNOUNCE,
-    );
+    mapController.tts.speakNavigateToFavoriteRoute(route.name);
 
     if (route.startPoint == null || route.finishPoint == null) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -37,7 +37,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     if (BlueNativeDataSourceImpl.subscription != null) {
       BlueNativeDataSourceImpl.subscription!.cancel();
     }
-    tts.speak(TtsMessages.autoScanStarted);
+    tts.speakAutoScanStarted();
     timer.cancel();
     emit(SearchOn(infinite: true));
     await search2InfiniteTimes(NoParams());
@@ -70,7 +70,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
         },
         (results) {
           debugPrint('📍 횡단보도 스캔 완료: ${results!.length}개 발견');
-          tts.speak(TtsMessages.smartButtonsFound(results.length));
+          tts.speakSmartButtonsFound(results.length);
           emit(SearchOff(results: results));
           debugPrint('📍 SearchOff 상태로 전환 완료');
         },
@@ -85,7 +85,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts.speak(TtsMessages.requestSignalGuide(event.crosswalk.name));
+      tts.speakRequestSignalGuide(event.crosswalk.name);
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
@@ -102,7 +102,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts.speak(TtsMessages.commandSent);
+            tts.speakCommandSent();
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;
@@ -111,11 +111,11 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
           },
         );
       } else {
-        tts.speak(TtsMessages.commandSent);
+        tts.speakCommandSent();
         emit(ConnectOff(enableCompass: false));
       }
     } catch (e) {
-      tts.speak(TtsMessages.connectionFailed);
+      tts.speakConnectionFailed();
       emit(CrosswalkError(message: 'connect failure'));
     }
   }
@@ -125,7 +125,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts.speak(TtsMessages.connectingTo(event.crosswalk.name));
+      tts.speakConnectingTo(event.crosswalk.name);
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
@@ -137,7 +137,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts.speak(TtsMessages.walkTowardsNoVibration);
+            tts.speakWalkTowardsNoVibration();
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;
@@ -159,7 +159,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     Emitter<CrosswalkState> emit,
   ) async {
     try {
-      tts.speak(TtsMessages.requestVoiceGuide(event.crosswalk.name));
+      tts.speakRequestVoiceGuide(event.crosswalk.name);
       emit(ConnectOn());
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
@@ -171,7 +171,7 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
             emit(ConnectOff(enableCompass: false));
           },
           (latLng) async {
-            tts.speak(TtsMessages.signalDeviceLocationInfo);
+            tts.speakSignalDeviceLocationInfo();
             bool enableCompass = true;
             if (Platform.isAndroid) {
               enableCompass = false;

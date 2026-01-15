@@ -50,14 +50,6 @@ class _StartSearchState extends State<StartSearch> {
     super.dispose();
   }
 
-  Future<void> speakText(String text) async {
-    await ttsService.speak(text);
-  }
-
-  Future<void> speakTTS(String message) async {
-    ttsService.speak(message);
-  }
-
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
@@ -212,7 +204,7 @@ class _StartSearchState extends State<StartSearch> {
                         FocusScope.of(context).unfocus();
                         _searchController.text = result.name;
                         Future.microtask(
-                            () => speakTTS(TtsMessages.placeSelected(result.name)));
+                            () => ttsService.speakPlaceSelected(result.name));
                         bool? confirmed =
                             await showConfirmationDialog(context, result);
                         if (confirmed == true) {
@@ -244,7 +236,7 @@ class _StartSearchState extends State<StartSearch> {
                                     );
                               }
                               Future.microtask(
-                                  () => speakTTS(TtsMessages.navigatingTo(result.name)));
+                                  () => ttsService.speakNavigatingTo(result.name));
                               Navigator.pop(context, result.geometry.location);
                               sink.close();
                             },
@@ -274,8 +266,7 @@ class _StartSearchState extends State<StartSearch> {
                                                 ),
                                               );
                                         }
-                                        speakTTS(
-                                            TtsMessages.navigatingToEntrance(entrance.entranceName));
+                                        ttsService.speakNavigatingToEntrance(entrance.entranceName);
                                         Navigator.pop(context);
                                         Navigator.pop(
                                           context,
@@ -298,7 +289,7 @@ class _StartSearchState extends State<StartSearch> {
                                         ),
                                       );
                                 }
-                                speakTTS(TtsMessages.navigatingTo(result.name));
+                                ttsService.speakNavigatingTo(result.name);
                                 Navigator.pop(
                                     context, result.geometry.location);
                               }
@@ -312,12 +303,12 @@ class _StartSearchState extends State<StartSearch> {
                                       ),
                                     );
                               }
-                              speakTTS(TtsMessages.navigatingTo(result.name));
+                              ttsService.speakNavigatingTo(result.name);
                               Navigator.pop(context, result.geometry.location);
                             }
                           }
                         } else {
-                          speakTTS(TtsMessages.cancelled);
+                          ttsService.speakCancelled();
                         }
                       },
                     ),
@@ -341,7 +332,7 @@ class _StartSearchState extends State<StartSearch> {
                               await Geolocator.requestPermission();
                           if (permission == LocationPermission.deniedForever ||
                               permission == LocationPermission.denied) {
-                            speakTTS(TtsMessages.locationPermissionRequired);
+                            ttsService.speakLocationPermissionRequired();
                             return;
                           }
 
@@ -369,7 +360,7 @@ class _StartSearchState extends State<StartSearch> {
                           );
 
                           _searchController.text = currentAddress;
-                          speakTTS(TtsMessages.currentLocationSet);
+                          ttsService.speakCurrentLocationSet();
 
                           // 즐겨찾기 모드가 아닐 때만 SearchBloc 업데이트
                           if (!widget.isFavoriteMode) {
@@ -382,7 +373,7 @@ class _StartSearchState extends State<StartSearch> {
 
                           Navigator.pop(context, currentLocation);
                         } catch (e) {
-                          speakTTS(TtsMessages.cannotGetCurrentLocation);
+                          ttsService.speakCannotGetCurrentLocation();
                         }
                       },
                       icon: Icon(Icons.location_pin,
@@ -423,7 +414,7 @@ class _StartSearchState extends State<StartSearch> {
                           final GeoLocation pickedLocation = result['location'];
                           final String pickedAddress = result['address'];
                           _searchController.text = pickedAddress;
-                          speakTTS(TtsMessages.locationSelected(pickedAddress));
+                          ttsService.speakLocationSelected(pickedAddress);
                           Navigator.pop(context, pickedLocation);
                           // 즐겨찾기 모드가 아닐 때만 SearchBloc 업데이트
                           if (!widget.isFavoriteMode) {

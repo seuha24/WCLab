@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:safelight/core/utils/tts_messages.dart';
 
 const _kTtsDebug = false;
 
@@ -300,6 +301,303 @@ class TtsService {
     }
   }
 
+  // =========================================================
+  // Convenience 메서드: 경로 안내
+  // =========================================================
 
+  /// 목적지 도착 안내
+  void speakArrivedAtDestination() {
+    speakWithChannel(
+      TtsMessages.arrivedAtDestination,
+      channel: ETtsChannel.NAVIGATE,
+      cooldownKey: 'arrive_destination',
+      cooldown: const Duration(seconds: 20),
+    );
+  }
 
+  /// 출발지로 이동 안내
+  void speakMoveToStartPoint() {
+    speakWithChannel(
+      TtsMessages.moveToStartPoint,
+      channel: ETtsChannel.NAVIGATE,
+      cooldownKey: 'move_to_startpoint',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 분기점 안내
+  void speakBranchInstruction(String message) {
+    speakWithChannel(
+      TtsMessages.branchInstruction(message),
+      channel: ETtsChannel.NAVIGATE,
+      cooldownKey: 'branch_instruction',
+      cooldown: const Duration(seconds: 10),
+    );
+  }
+
+  /// 경로 재탐색 완료 안내
+  void speakRerouteComplete() {
+    speakWithChannel(
+      TtsMessages.rerouteComplete,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'reroute_done',
+      cooldown: const Duration(seconds: 10),
+    );
+  }
+
+  /// 출발지 이탈로 인한 재탐색 안내
+  void speakRerouteFromDeviation() {
+    speakWithChannel(
+      TtsMessages.rerouteFromDeviation,
+      channel: ETtsChannel.NAVIGATE,
+      cooldownKey: 'research_out_of_start',
+      cooldown: const Duration(seconds: 10),
+    );
+  }
+
+  /// 남은 거리 안내
+  void speakRemainingDistance(int meters) {
+    speakWithChannel(
+      TtsMessages.remainingDistance(meters),
+      channel: ETtsChannel.FEEDBACK,
+      cooldownKey: 'on_tap_remain_distance',
+      cooldown: Duration.zero,
+    );
+  }
+
+  /// 주변 POI 안내
+  void speakNearbyPoi(List<String> descriptions, {String? lastPoiName}) {
+    speakWithChannel(
+      TtsMessages.nearbyPoiSummary(descriptions, lastPoiName: lastPoiName),
+      channel: ETtsChannel.NAVIGATE,
+      cooldownKey: 'nearby_poi',
+      cooldown: const Duration(seconds: 10),
+    );
+  }
+
+  // =========================================================
+  // Convenience 메서드: 안전 경고
+  // =========================================================
+
+  /// 횡단보도 접근 경고
+  void speakCrosswalkAhead() {
+    speakWithChannel(
+      TtsMessages.crosswalkAhead,
+      channel: ETtsChannel.ALERT,
+      cooldownKey: 'crosswalk_alert',
+      cooldown: const Duration(seconds: 2),
+    );
+  }
+
+  /// 경로 이탈 안내 (시계 방향)
+  void speakOutOfBound(String clockDirection) {
+    speakWithChannel(
+      TtsMessages.outOfBound(clockDirection),
+      channel: ETtsChannel.ALERT,
+      cooldownKey: 'out_of_bound',
+      cooldown: const Duration(seconds: 10),
+    );
+  }
+
+  // =========================================================
+  // Convenience 메서드: 경광등 제어
+  // =========================================================
+
+  /// 경광등 켜짐 안내
+  void speakFlashTurnedOn() {
+    speakWithChannel(
+      TtsMessages.flashTurnedOn,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'flashlight_on_success',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 경광등 꺼짐 안내
+  void speakFlashTurnedOff() {
+    speakWithChannel(
+      TtsMessages.flashTurnedOff,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'flashlight_off_success',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 경광등 켜기 실패 안내
+  void speakCannotTurnOnFlash() {
+    speakWithChannel(
+      TtsMessages.cannotTurnOnFlash,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'flashlight_on_fail',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 경광등 끄기 실패 안내
+  void speakCannotTurnOffFlash() {
+    speakWithChannel(
+      TtsMessages.cannotTurnOffFlash,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'flashlight_off_fail',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 경광등 제어 오류 안내
+  void speakFlashControlError() {
+    speakWithChannel(
+      TtsMessages.flashControlError,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'flashlight_control_error',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 경광등 현재 켜져있음 안내 (주기적)
+  void speakFlashLightCurrentlyOn() {
+    speak(TtsMessages.flashLightCurrentlyOn);
+  }
+
+  // =========================================================
+  // Convenience 메서드: UI 피드백
+  // =========================================================
+
+  /// 패널 토글 안내
+  void speakPanelToggle(String menu, String state) {
+    speakWithChannel(
+      TtsMessages.panelToggle(menu, state),
+      channel: ETtsChannel.FEEDBACK,
+      cooldownKey: 'panel_action',
+      cooldown: Duration.zero,
+    );
+  }
+
+  /// 패널 전환 안내
+  void speakPanelSwitch(String menu) {
+    speakWithChannel(
+      TtsMessages.panelSwitch(menu),
+      channel: ETtsChannel.FEEDBACK,
+      cooldownKey: 'panel_action',
+      cooldown: Duration.zero,
+    );
+  }
+
+  /// 즐겨찾기 지점 안내 선택
+  void speakNavigateToFavoritePoint(String name) {
+    speakWithChannel(
+      TtsMessages.navigateToFavoritePoint(name),
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+    );
+  }
+
+  /// 즐겨찾기 경로 안내 선택
+  void speakNavigateToFavoriteRoute(String name) {
+    speakWithChannel(
+      TtsMessages.navigateToFavoriteRoute(name),
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+    );
+  }
+
+  // =========================================================
+  // Convenience 메서드: BLE/스마트 압버튼
+  // =========================================================
+
+  /// 자동 스캔 시작 안내
+  void speakAutoScanStarted() {
+    speak(TtsMessages.autoScanStarted);
+  }
+
+  /// 스마트 압버튼 발견 안내
+  void speakSmartButtonsFound(int count) {
+    speak(TtsMessages.smartButtonsFound(count));
+  }
+
+  /// 신호안내 요청 안내
+  void speakRequestSignalGuide(String name) {
+    speak(TtsMessages.requestSignalGuide(name));
+  }
+
+  /// 명령 전송 완료 안내
+  void speakCommandSent() {
+    speak(TtsMessages.commandSent);
+  }
+
+  /// 연결 실패 안내
+  void speakConnectionFailed() {
+    speak(TtsMessages.connectionFailed);
+  }
+
+  /// 연결 중 안내
+  void speakConnectingTo(String name) {
+    speak(TtsMessages.connectingTo(name));
+  }
+
+  /// 진동 방향 안내
+  void speakWalkTowardsNoVibration() {
+    speak(TtsMessages.walkTowardsNoVibration);
+  }
+
+  /// 음성안내 요청 안내
+  void speakRequestVoiceGuide(String name) {
+    speak(TtsMessages.requestVoiceGuide(name));
+  }
+
+  /// 음향신호기 위치 안내
+  void speakSignalDeviceLocationInfo() {
+    speak(TtsMessages.signalDeviceLocationInfo);
+  }
+
+  /// 블루투스 꺼짐 안내
+  void speakBluetoothOff() {
+    speak(TtsMessages.bluetoothOff);
+  }
+
+  // =========================================================
+  // Convenience 메서드: 검색/장소 선택
+  // =========================================================
+
+  /// 장소 선택됨 안내
+  void speakPlaceSelected(String name) {
+    speak(TtsMessages.placeSelected(name));
+  }
+
+  /// 장소로 안내 시작
+  void speakNavigatingTo(String name) {
+    speak(TtsMessages.navigatingTo(name));
+  }
+
+  /// 출입구로 안내 시작
+  void speakNavigatingToEntrance(String entranceName) {
+    speak(TtsMessages.navigatingToEntrance(entranceName));
+  }
+
+  /// 취소 안내
+  void speakCancelled() {
+    speak(TtsMessages.cancelled);
+  }
+
+  /// 위치 권한 필요 안내
+  void speakLocationPermissionRequired() {
+    speak(TtsMessages.locationPermissionRequired);
+  }
+
+  /// 현재 위치 설정됨 안내
+  void speakCurrentLocationSet() {
+    speak(TtsMessages.currentLocationSet);
+  }
+
+  /// 현재 위치 가져오기 실패 안내
+  void speakCannotGetCurrentLocation() {
+    speak(TtsMessages.cannotGetCurrentLocation);
+  }
+
+  /// 지도에서 위치 선택됨 안내
+  void speakLocationSelected(String address) {
+    speak(TtsMessages.locationSelected(address));
+  }
+
+  /// 안전 나침반 켜짐 안내
+  void speakSafetyCompassOn() {
+    speak(TtsMessages.safetyCompassOn);
+  }
 }

@@ -886,12 +886,7 @@ class NaverMapViewController extends GetxController {
 
     debugPrint('목적지 도착 감지: ${destinationDistanceMeters.toStringAsFixed(2)}m');
 
-    await tts.speakWithChannel(
-      TtsMessages.arrivedAtDestination,
-      channel: ETtsChannel.NAVIGATE,
-      cooldownKey: 'arrive_destination',
-      cooldown: const Duration(seconds: 20),
-    );
+    tts.speakArrivedAtDestination();
 
     await stopNavigationTimer();
     timer.cancel();
@@ -993,12 +988,7 @@ class NaverMapViewController extends GetxController {
       branchInfo[indexController.currentIndex].bearingToPoint,
     );
 
-    tts.speakWithChannel(
-      clock,
-      channel: ETtsChannel.ALERT,
-      cooldownKey: 'out_of_bound',
-      cooldown: const Duration(seconds: 10),
-    );
+    tts.speakOutOfBound(clock);
 
     // 재탐색 트리거 누적
     if (!searchNewPath) {
@@ -1025,12 +1015,7 @@ class NaverMapViewController extends GetxController {
     try {
       await _rerouteFromCurrentLocation();
 
-      tts.speakWithChannel(
-        TtsMessages.rerouteComplete,
-        channel: ETtsChannel.SYSTEM_ANNOUNCE,
-        cooldownKey: 'reroute_done',
-        cooldown: const Duration(seconds: 10),
-      );
+      tts.speakRerouteComplete();
     } finally {
       _rerouteInFlight = false;
       navPhase.value = NavPhase.navigating;
@@ -1057,12 +1042,7 @@ class NaverMapViewController extends GetxController {
 
     await _rerouteFromCurrentLocation();
 
-    tts.speakWithChannel(
-      TtsMessages.rerouteFromDeviation,
-      channel: ETtsChannel.NAVIGATE,
-      cooldownKey: 'research_out_of_start',
-      cooldown: const Duration(seconds: 10),
-    );
+    tts.speakRerouteFromDeviation();
 
     debugPrint('출발지를 현재 위치로 변경하고 경로 재검색 완료');
     _startPointDeviationTime = null;
@@ -1127,12 +1107,7 @@ class NaverMapViewController extends GetxController {
 
   /// 출발 전 안내 멘트를 재생합니다.
   void _announceMoveToStart() {
-    tts.speakWithChannel(
-      TtsMessages.moveToStartPoint,
-      channel: ETtsChannel.NAVIGATE,
-      cooldownKey: 'move_to_startpoint',
-      cooldown: const Duration(seconds: 5),
-    );
+    tts.speakMoveToStartPoint();
   }
 
   /// 다음 브랜치(branch=true)까지의 남은 거리를 갱신합니다.
@@ -1205,12 +1180,7 @@ class NaverMapViewController extends GetxController {
         debugPrint('안전 경광등이 켜졌습니다.');
       }
 
-      tts.speakWithChannel(
-        TtsMessages.crosswalkAhead,
-        channel: ETtsChannel.ALERT,
-        cooldownKey: 'crosswalk_alert',
-        cooldown: const Duration(seconds: 2),
-      );
+      tts.speakCrosswalkAhead();
     }
 
     // 횡단보도 탈출 처리
@@ -1231,13 +1201,7 @@ class NaverMapViewController extends GetxController {
 
     // 분기 안내
     if (targetBranch.branch == true) {
-      final message = targetBranch.description;
-      tts.speakWithChannel(
-        TtsMessages.branchInstruction(message),
-        channel: ETtsChannel.NAVIGATE,
-        cooldownKey: 'branch_instruction',
-        cooldown: const Duration(seconds: 10),
-      );
+      tts.speakBranchInstruction(targetBranch.description);
     }
   }
 
@@ -1459,25 +1423,24 @@ class NaverMapViewController extends GetxController {
         // 경광등이 켜져 있으면 끄기
         final result = await flashOff(NoParams());
         if (result.isLeft()) {
-          
-          tts.speakWithChannel(TtsMessages.cannotTurnOffFlash, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_fail', cooldown: Duration(seconds: 5),);
+          tts.speakCannotTurnOffFlash();
         } else {
           isFlashOn.value = false;
-          tts.speakWithChannel(TtsMessages.flashTurnedOff, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_off_success', cooldown: Duration(seconds: 5),);
+          tts.speakFlashTurnedOff();
         }
       } else {
         // 경광등이 꺼져 있으면 켜기
         final result = await flashOn(NoParams());
         if (result.isLeft()) {
-          tts.speakWithChannel(TtsMessages.cannotTurnOnFlash, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_fail', cooldown: Duration(seconds: 5),);
+          tts.speakCannotTurnOnFlash();
         } else {
           isFlashOn.value = true;
-          tts.speakWithChannel(TtsMessages.flashTurnedOn, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_on_success', cooldown: Duration(seconds: 5),);
+          tts.speakFlashTurnedOn();
         }
       }
     } catch (e) {
       debugPrint('경광등 제어 중 오류 발생: $e');
-      tts.speakWithChannel(TtsMessages.flashControlError, channel: ETtsChannel.SYSTEM_ANNOUNCE, cooldownKey: 'flashlight_control_error', cooldown: Duration(seconds: 5),);
+      tts.speakFlashControlError();
     }
   }
 

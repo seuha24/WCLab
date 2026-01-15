@@ -62,11 +62,6 @@ class _DesSearchState extends State<DesSearch> {
     });
   }
 
-  // TTS로 안내 메시지 읽어줌
-  Future<void> speakTTS(String message) async {
-    ttsService.speak(message);
-  }
-
   // Kakao API를 사용하여 장소 검색 요청
   Future<List<PlaceResult>> placeSearch(String query) async {
     final result = await kakaoRepository.searchPlaces(query);
@@ -210,7 +205,7 @@ class _DesSearchState extends State<DesSearch> {
                         FocusScope.of(context).unfocus();
                         _searchController.text = result.name;
                         Future.microtask(
-                            () => speakTTS(TtsMessages.placeSelected(result.name)));
+                            () => ttsService.speakPlaceSelected(result.name));
                         bool? confirmed =
                             await showConfirmationDialog(context, result);
                         if (confirmed == true) {
@@ -238,7 +233,7 @@ class _DesSearchState extends State<DesSearch> {
                                     ),
                                   );
                               Future.microtask(
-                                  () => speakTTS(TtsMessages.navigatingTo(result.name)));
+                                  () => ttsService.speakNavigatingTo(result.name));
                               Navigator.pop(context, result.geometry.location);
                               sink.close();
                             },
@@ -264,8 +259,8 @@ class _DesSearchState extends State<DesSearch> {
                                                 entrance: entrance,
                                               ),
                                             );
-                                        Future.microtask(() => speakTTS(
-                                            TtsMessages.navigatingToEntrance(entrance.entranceName)));
+                                        Future.microtask(() =>
+                                            ttsService.speakNavigatingToEntrance(entrance.entranceName));
                                         Navigator.pop(context);
                                         Navigator.pop(
                                           context,
@@ -287,7 +282,7 @@ class _DesSearchState extends State<DesSearch> {
                                       ),
                                     );
                                 Future.microtask(() =>
-                                    speakTTS(TtsMessages.navigatingTo(result.name)));
+                                    ttsService.speakNavigatingTo(result.name));
                                 Navigator.pop(
                                     context, result.geometry.location);
                               }
@@ -300,12 +295,12 @@ class _DesSearchState extends State<DesSearch> {
                                     ),
                                   );
                               Future.microtask(
-                                  () => speakTTS(TtsMessages.navigatingTo(result.name)));
+                                  () => ttsService.speakNavigatingTo(result.name));
                               Navigator.pop(context, result.geometry.location);
                             }
                           }
                         } else {
-                          speakTTS(TtsMessages.cancelled);
+                          ttsService.speakCancelled();
                         }
                       },
                     ),
@@ -335,7 +330,7 @@ class _DesSearchState extends State<DesSearch> {
                           final GeoLocation pickedLocation = result['location'];
                           final String pickedAddress = result['address'];
                           _searchController.text = pickedAddress;
-                          speakTTS(TtsMessages.locationSelected(pickedAddress));
+                          ttsService.speakLocationSelected(pickedAddress);
                           Navigator.pop(context, pickedLocation);
                           context.read<SearchBloc>().add(
                                 SearchDestinationRequested(

@@ -74,20 +74,14 @@ class _MainViewState extends State<MainView> {
 
           // 패널 상태에 따라 TTS 안내
           final stateMessage = isExpanded ? '접었습니다' : '펼쳤습니다';
-          tts.speakWithChannel('$selectedMenu 패널을 $stateMessage',
-              channel: ETtsChannel.FEEDBACK,
-              cooldownKey: 'panel_action',
-              cooldown: Duration(seconds: 0));
+          tts.speakPanelToggle(selectedMenu, stateMessage);
         } else {
           // 다른 탭으로 전환: 새 패널 열기
           // activePanelId 변경으로 이전 패널은 자동으로 교체됨
           slidingController.expandSlidingBar(panelId);
 
           // 통합된 TTS 메시지: "즐겨찾기 패널로 이동합니다"
-          tts.speakWithChannel('$selectedMenu 패널로 이동합니다.',
-              channel: ETtsChannel.FEEDBACK,
-              cooldownKey: 'panel_action',
-              cooldown: Duration(seconds: 0));
+          tts.speakPanelSwitch(selectedMenu);
         }
       }
     } catch (e) {
