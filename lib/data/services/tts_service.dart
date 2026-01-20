@@ -502,6 +502,21 @@ class TtsService {
   // Convenience 메서드: BLE/스마트 압버튼
   // =========================================================
 
+  /// BLE 찾기 안내 (초기 화면)
+  void speakBleScanPrompt() {
+    speak(TtsMessages.bleScanPrompt);
+  }
+
+  /// BLE 스캔 중 안내
+  void speakBleScanning() {
+    speak(TtsMessages.bleScanning);
+  }
+
+  /// BLE 찾지 못함 안내
+  void speakBleNotFound() {
+    speak(TtsMessages.bleNotFound);
+  }
+
   /// 자동 스캔 시작 안내
   void speakAutoScanStarted() {
     speak(TtsMessages.autoScanStarted);

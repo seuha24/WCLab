@@ -15,7 +15,6 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
   // 스낵바 메시지 표시를 위한 메시지 서비스 인스턴스
   final message = DI.get<Message>();
 
-  List<GlobalKey> keys = [GlobalKey(), GlobalKey()];
   // 드래그 가능한 스크롤 시트의 높이와 위치를 제어하는 컨트롤러
   late DraggableScrollableController _controller;
   // 패널의 슬라이딩 애니메이션을 제어하는 컨트롤러
@@ -46,9 +45,11 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
       ),
     );
 
-    // 패널이 열릴 때 자동으로 횡단보도 검색 시작
+    // 패널이 열릴 때 초기 상태로 리셋 및 TTS 안내
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CrosswalkBloc>().add(SearchInfiniteCrosswalkEvent());
+      // bloc 상태를 초기 화면으로 리셋 (이전 상태가 남아있을 수 있음)
+      context.read<CrosswalkBloc>().add(StopScanEvent());
+      tts.speakBleScanPrompt();
     });
   }
 
@@ -128,26 +129,26 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                         const Gap(height: 16),
 
                         // 상태에 따른 UI 렌더링
-                        if (state is SearchOn) ...[
-                          // 1. BLE 횡단보도 찾는 중
-                          _buildSearchingUI('BLE 횡단보도 찾는 중...', state.infinite),
+                        if (state is CrosswalkInitial) ...[
+                          // 1. 초기 화면 - BLE 찾기 버튼
+                          _buildInitialUI(),
+                        ] else if (state is SearchOn) ...[
+                          // 2. BLE 횡단보도 찾는 중
+                          _buildSearchingUI(),
                         ] else if (state is SearchOff) ...[
                           if (state.results.isEmpty) ...[
-                            // 2. BLE 검색 실패
+                            // 3. BLE 검색 결과 없음
                             _buildEmptyResultUI(),
                           ] else ...[
-                            // 3. BLE 검색 완료
+                            // 4. BLE 검색 완료 - 리스트 표시
                             _buildSearchResultsUI(state.results),
                           ],
                         ] else if (state is ConnectOn) ...[
-                          // 4. 횡단보도와 연결 중
+                          // 5. 횡단보도와 연결 중
                           _buildConnectingUI(),
-                        ] else if (state is ConnectOff) ...[
-                          // 5. 횡단보도와 연결 완료 - 방향 안내
-                          //   _buildDirectionalGuidanceUI(state),
-                          // ] else if (state is CrosswalkError) ...[
-                          //   // 에러 상태
-                          //   _buildErrorUI(state.message),
+                        ] else if (state is CrosswalkError) ...[
+                          // 6. 에러 상태
+                          _buildErrorUI(state.message),
                         ],
                       ],
                     );
@@ -161,13 +162,70 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
     );
   }
 
-  /// 검색 중 UI를 구성하는 메서드
-  /// [message]: 표시할 메시지
-  /// [isInfinite]: 무한 검색 모드 여부
-  Widget _buildSearchingUI(String message, bool isInfinite) {
+  /// 초기 화면 UI - BLE 찾기 버튼
+  Widget _buildInitialUI() {
     return Column(
       children: [
-        // 로딩 애니메이션 추가
+        const Gap(height: 40),
+
+        // 안내 메시지
+        Icon(
+          Icons.bluetooth_searching,
+          size: 60,
+          color: Colors.blue[600],
+        ),
+        const Gap(height: 20),
+
+        Text(
+          '주변 음향신호기를 찾으려면\n아래 버튼을 눌러주세요',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: AppSizes.scaledFont(18),
+            color: Colors.grey[700],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Gap(height: 30),
+
+        // BLE 찾기 버튼
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              tts.speakBleScanning();
+              context.read<CrosswalkBloc>().add(SearchFiniteCrosswalkEvent());
+            },
+            icon: const Icon(Icons.search, color: Colors.white, size: 24),
+            label: const Text(
+              'BLE 찾기',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 검색 중 UI를 구성하는 메서드
+  Widget _buildSearchingUI() {
+    return Column(
+      children: [
+        const Gap(height: 20),
+
+        // 로딩 애니메이션
         Semantics(
           label: '횡단보도 검색 중',
           child: CircularProgressIndicator(
@@ -176,28 +234,90 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
         ),
         const Gap(height: 20),
 
-        // 상태 메시지 - 노란색으로 표시하여 진행 중임을 강조
+        // 상태 메시지
         Text(
-          isInfinite ? '자동으로 내 주변 횡단보도에 연결중입니다.' : 'BLE 횡단보도 찾는 중...',
+          '주변 음향신호기를 찾는 중...',
           style: TextStyle(
             fontSize: AppSizes.scaledFont(18),
-            color: isInfinite ? Colors.yellow[600] : Colors.blue[600],
+            color: Colors.blue[600],
             fontWeight: FontWeight.w500,
           ),
         ),
-        const Gap(height: 20),
+        const Gap(height: 30),
 
-        // 중단 버튼 - 검색을 중단할 수 있는 버튼
-        Container(
+        // 중단 버튼 - StopScanEvent 발생
+        SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: () {
-              // 검색 중단 후 빈 결과로 상태 변경
+              context.read<CrosswalkBloc>().add(StopScanEvent());
+            },
+            icon: const Icon(Icons.stop, color: Colors.white, size: 20),
+            label: const Text(
+              '중단',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[600],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 검색 결과 없음 UI를 구성하는 메서드
+  Widget _buildEmptyResultUI() {
+    // TTS 안내
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tts.speakBleNotFound();
+    });
+
+    return Column(
+      children: [
+        const Gap(height: 40),
+
+        // 실패 아이콘
+        Icon(
+          Icons.search_off,
+          size: 60,
+          color: Colors.red[400],
+        ),
+        const Gap(height: 20),
+
+        // 실패 메시지
+        Text(
+          '주변에서 음향신호기를\n찾을 수 없습니다',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: AppSizes.scaledFont(18),
+            color: Colors.red[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Gap(height: 30),
+
+        // 다시 찾기 버튼
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              tts.speakBleScanning();
               context.read<CrosswalkBloc>().add(SearchFiniteCrosswalkEvent());
             },
-            icon: Icon(Icons.stop, color: Colors.white, size: 20),
-            label: Text(
-              '중단',
+            icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
+            label: const Text(
+              '다시찾기',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -211,55 +331,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(22),
               ),
-              padding: EdgeInsets.symmetric(vertical: 20),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 검색 실패 UI를 구성하는 메서드
-  /// 검색 결과가 없을 때 표시되는 화면
-  Widget _buildEmptyResultUI() {
-    return Column(
-      children: [
-        // 실패 메시지 - 빨간색으로 표시하여 실패 상태임을 강조
-        Text(
-          '스마트 압버튼을 찾을 수 없습니다',
-          style: TextStyle(
-            fontSize: AppSizes.scaledFont(18),
-            color: Colors.red[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const Gap(height: 20),
-
-        // 다시 찾기 버튼 - 검색을 다시 시도할 수 있는 버튼
-        Container(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              // 무한 검색 이벤트를 발생시켜 검색 재시작
-              context.read<CrosswalkBloc>().add(SearchInfiniteCrosswalkEvent());
-            },
-            icon: Icon(Icons.refresh, color: Colors.white, size: 20),
-            label: Text(
-              '다시찾기',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(22),
-              ),
-              padding: EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 20),
             ),
           ),
         ),
@@ -270,77 +342,116 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
   /// 검색 완료 UI를 구성하는 메서드
   /// [results]: 찾은 횡단보도 목록
   Widget _buildSearchResultsUI(List<Crosswalk> results) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(
-        horizontal: SizeTheme.w_md,
-      ),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          contentPadding: EdgeInsets.symmetric(
-            vertical: SizeTheme.w_sm,
-            horizontal: SizeTheme.h_lg,
+    return Column(
+      children: [
+        // 결과 리스트
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeTheme.w_md,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SizeTheme.r_sm),
-          ),
-          onTap: () {
-            // 모달 바텀시트로 안전 리모콘 표시
-            _showConnectionOptions(context, results[index]);
-          },
+          itemCount: results.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              contentPadding: EdgeInsets.symmetric(
+                vertical: SizeTheme.w_sm,
+                horizontal: SizeTheme.h_lg,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(SizeTheme.r_sm),
+              ),
+              onTap: () {
+                // 모달 바텀시트로 안전 리모콘 표시
+                _showConnectionOptions(context, results[index]);
+              },
 
-          // 횡단보도 타입별 아이콘 표시
-          leading: results[index].type == ECrosswalk.UNKNOWN
-              ? null
-              : SingleChildRoundedCard(
-                  child: Image(
-                    width: 42.w,
-                    height: 42.w,
-                    image: AssetImage(
-                      results[index].type == ECrosswalk.SINGLE_ROAD
-                          ? Images.TrafficSingle // 단일 신호등
-                          : results[index].type == ECrosswalk.INTERSECTION
-                              ? Images.TrafficCross // 교차로
-                              : Images.TrafficYellow, // 점멸 신호등
-                    ),
-                    semanticLabel: results[index].type == ECrosswalk.SINGLE_ROAD
-                        ? '단일 신호등'
-                        : results[index].type == ECrosswalk.INTERSECTION
-                            ? '교차로 신호등'
-                            : '점멸 신호등',
-                  ),
-                ),
-
-          // 횡단보도 타입 표시
-          title: results[index].type == ECrosswalk.UNKNOWN
-              ? null
-              : Text(
-                  results[index].type == ECrosswalk.SINGLE_ROAD
-                      ? '단일 신호등 지역'
-                      : results[index].type == ECrosswalk.INTERSECTION
-                          ? '교차로 지역'
-                          : '점멸 신호등 지역',
-                  style: Theme.of(context).textTheme.bodyMedium!.apply(
-                        color: results[index].type == ECrosswalk.SINGLE_ROAD
-                            ? ColorTheme.highlight3
+              // 횡단보도 타입별 아이콘 표시
+              leading: results[index].type == ECrosswalk.UNKNOWN
+                  ? null
+                  : SingleChildRoundedCard(
+                      child: Image(
+                        width: 42.w,
+                        height: 42.w,
+                        image: AssetImage(
+                          results[index].type == ECrosswalk.SINGLE_ROAD
+                              ? Images.TrafficSingle // 단일 신호등
+                              : results[index].type == ECrosswalk.INTERSECTION
+                                  ? Images.TrafficCross // 교차로
+                                  : Images.TrafficYellow, // 점멸 신호등
+                        ),
+                        semanticLabel: results[index].type == ECrosswalk.SINGLE_ROAD
+                            ? '단일 신호등'
                             : results[index].type == ECrosswalk.INTERSECTION
-                                ? ColorTheme.highlight2
-                                : ColorTheme.highlight1,
+                                ? '교차로 신호등'
+                                : '점멸 신호등',
                       ),
-                ),
+                    ),
 
-          // 횡단보도 이름 표시
-          subtitle: Text(
-            results[index].name,
-            style: Theme.of(context).textTheme.headlineLarge,
+              // 횡단보도 타입 표시
+              title: results[index].type == ECrosswalk.UNKNOWN
+                  ? null
+                  : Text(
+                      results[index].type == ECrosswalk.SINGLE_ROAD
+                          ? '단일 신호등 지역'
+                          : results[index].type == ECrosswalk.INTERSECTION
+                              ? '교차로 지역'
+                              : '점멸 신호등 지역',
+                      style: Theme.of(context).textTheme.bodyMedium!.apply(
+                            color: results[index].type == ECrosswalk.SINGLE_ROAD
+                                ? ColorTheme.highlight3
+                                : results[index].type == ECrosswalk.INTERSECTION
+                                    ? ColorTheme.highlight2
+                                    : ColorTheme.highlight1,
+                          ),
+                    ),
+
+              // 횡단보도 이름 표시
+              subtitle: Text(
+                results[index].name,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            );
+          },
+          separatorBuilder: (context, index) {
+            return SizedBox(height: SizeTheme.h_sm);
+          },
+        ),
+
+        const Gap(height: 20),
+
+        // 다시찾기 버튼
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: SizeTheme.w_md),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                tts.speakBleScanning();
+                context.read<CrosswalkBloc>().add(SearchFiniteCrosswalkEvent());
+              },
+              icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
+              label: const Text(
+                '다시찾기',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[600],
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
           ),
-        );
-      },
-      separatorBuilder: (context, index) {
-        return SizedBox(height: SizeTheme.h_sm);
-      },
+        ),
+      ],
     );
   }
 
@@ -406,10 +517,70 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
     );
   }
 
+  /// 에러 UI를 구성하는 메서드
+  Widget _buildErrorUI(String errorMessage) {
+    return Column(
+      children: [
+        const Gap(height: 40),
+
+        // 에러 아이콘
+        Icon(
+          Icons.error_outline,
+          size: 60,
+          color: Colors.red[400],
+        ),
+        const Gap(height: 20),
+
+        // 에러 메시지
+        Text(
+          errorMessage,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: AppSizes.scaledFont(16),
+            color: Colors.red[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Gap(height: 30),
+
+        // 다시 시도 버튼
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              context.read<CrosswalkBloc>().add(StopScanEvent());
+            },
+            icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
+            label: const Text(
+              '처음으로',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   /// 횡단보도 연결 옵션을 보여주는 모달
   /// [context]: BuildContext
   /// [crosswalk]: 연결할 횡단보도
   void _showConnectionOptions(BuildContext context, Crosswalk crosswalk) {
+    // 모달이 닫힌 후에도 bloc에 접근할 수 있도록 미리 캡처
+    final crosswalkBloc = context.read<CrosswalkBloc>();
+
     showModalBottomSheet(
       isScrollControlled: true,
       barrierColor: Theme.of(context).colorScheme.onSecondary.withAlpha(100),
@@ -436,26 +607,20 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               child: SizedBox(
                 height: 600.h,
                 width: MediaQuery.of(context).size.width,
-                child: ListView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  children: <Widget>[
-                    _renderSelectedMode(context, crosswalk),
-                    _renderAfterModeSelected(context, crosswalk, 0),
-                  ],
-                ),
+                child: _renderCommandButtons(context, crosswalk),
               ),
             ),
           ),
         );
       },
     ).whenComplete(() async {
-      // HomeView와 동일한 완료 처리
+      // 경광등 끄기
       final flashOff = DI.get<ControlFlash>(
         instanceName: USECASE_CONTROL_FLASH_OFF,
       );
       flashOff(NoParams());
-      context.read<CrosswalkBloc>().add(SearchInfiniteCrosswalkEvent());
+      // 초기 화면으로 돌아감 (캡처된 bloc 참조 사용)
+      crosswalkBloc.add(StopScanEvent());
     }).timeout(
       const Duration(minutes: 3),
       onTimeout: () {
@@ -464,63 +629,65 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
     );
   }
 
-  /// 연결 성공 후 명령 버튼 UI를 렌더링하는 메서드
+  /// 명령 버튼 UI를 렌더링하는 메서드 (통합)
   /// [context]: BuildContext
-  /// [crosswalk]: 연결된 횡단보도 정보
-  /// [index]: 횡단보도 인덱스 (사용되지 않지만 HomeView 호환성을 위해 유지)
-  Container _renderAfterModeSelected(
-      BuildContext context, Crosswalk crosswalk, int index) {
+  /// [crosswalk]: 연결할 횡단보도 정보
+  Widget _renderCommandButtons(BuildContext context, Crosswalk crosswalk) {
     return Container(
-      key: keys[1],
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(
-        horizontal: SizeTheme.w_md,
-      ),
-      child: BlocConsumer<CrosswalkBloc, CrosswalkState>(
-        listener: (context, state) {},
+      padding: EdgeInsets.symmetric(horizontal: SizeTheme.w_md),
+      child: BlocBuilder<CrosswalkBloc, CrosswalkState>(
         builder: (context, state) {
+          // 연결 중 - 로딩 표시
           if (state is ConnectOn) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is Error) {
             return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                SingleChildRoundedCard(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: SizeTheme.h_lg),
-                        child: Icon(
-                          Icons.error_outline,
-                          size: 80.w,
-                          color: ColorTheme.highlight4,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: SizeTheme.h_lg),
-                        child: const Center(child: Text('음향 신호기에 연결할 수 없습니다.')),
-                      ),
-                    ],
-                  ),
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
                 ),
+                // 종료 버튼
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                     child: const Text('종료'),
                   ),
-                )
+                ),
               ],
             );
-          } else if (state is ConnectOff) {
-            // 연결 성공 메시지 + 3가지 명령 버튼 UI
+          }
+
+          // 에러 상태
+          if (state is CrosswalkError) {
             return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 연결 성공 메시지
+                Icon(
+                  Icons.error_outline,
+                  size: 60.w,
+                  color: ColorTheme.highlight4,
+                ),
+                SizedBox(height: SizeTheme.h_md),
+                Text(
+                  '음향 신호기에 연결할 수 없습니다.',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                SizedBox(height: SizeTheme.h_lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('종료'),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          // 기본 상태 및 ConnectOff - 명령 버튼 표시
+          return Column(
+            children: [
+              // 연결 성공 메시지 (ConnectOff 상태일 때만)
+              if (state is ConnectOff) ...[
                 SingleChildRoundedCard(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: Padding(
@@ -535,7 +702,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          '음향신호기에 연결되었습니다',
+                          '명령 전송 완료',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -543,176 +710,85 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                   ),
                 ),
                 SizedBox(height: SizeTheme.h_md),
-
-                // 위치 안내 버튼 (0x31 0x00 0x01)
-                Padding(
-                  padding: EdgeInsets.only(bottom: SizeTheme.h_md),
-                  child: FlatCard(
-                    title: '위치 안내',
-                    titleOnly: true,
-                    leading: const Icon(
-                      Icons.volume_up,
-                      color: ColorTheme.highlight3,
-                    ),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    onTap: () {
-                      context
-                          .read<CrosswalkBloc>()
-                          .add(SendVoiceGuideEvent(crosswalk: crosswalk));
-                    },
-                  ),
-                ),
-
-                // 신호 안내 버튼 (0x31 0x00 0x02)
-                Padding(
-                  padding: EdgeInsets.only(bottom: SizeTheme.h_md),
-                  child: FlatCard(
-                    title: '신호 안내',
-                    titleOnly: true,
-                    leading: const Icon(
-                      Icons.traffic,
-                      color: ColorTheme.highlight1,
-                    ),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    onTap: () {
-                      context
-                          .read<CrosswalkBloc>()
-                          .add(SendAcousticSignalEvent(crosswalk: crosswalk));
-                    },
-                  ),
-                ),
-
-                // 음성 안내 버튼 (0x31 0x00 0x03)
-                Padding(
-                  padding: EdgeInsets.only(bottom: SizeTheme.h_md),
-                  child: FlatCard(
-                    title: '음성 안내',
-                    titleOnly: true,
-                    leading: const Icon(
-                      Icons.directions_walk_rounded,
-                      color: ColorTheme.highlight2,
-                    ),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    onTap: () {
-                      context
-                          .read<CrosswalkBloc>()
-                          .add(SendVoiceInductorEvent(crosswalk: crosswalk));
-                    },
-                  ),
-                ),
-
-                // 종료 버튼
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('종료'),
-                  ),
-                ),
               ],
-            );
-          } else {
-            return const SizedBox();
-          }
-        },
-      ),
-    );
-  }
 
-  /// 연결 모드 선택 화면을 렌더링하는 메서드
-  /// HomeView의 _renderSelectedMode와 동일한 로직
-  /// [context]: BuildContext
-  /// [crosswalk]: 선택할 횡단보도 정보
-  Container _renderSelectedMode(BuildContext context, Crosswalk crosswalk) {
-    return Container(
-      key: keys[0],
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(
-        horizontal: SizeTheme.w_md,
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: SizeTheme.h_md,
-            ),
-            child: FlatCard(
-              title: '위치 안내',
-              titleOnly: true,
-              leading: const Icon(
-                Icons.volume_up,
-                color: ColorTheme.highlight3,
+              // 위치 안내 버튼 (0x31 0x00 0x01)
+              Padding(
+                padding: EdgeInsets.only(bottom: SizeTheme.h_md),
+                child: FlatCard(
+                  title: '위치 안내',
+                  titleOnly: true,
+                  leading: const Icon(
+                    Icons.volume_up,
+                    color: ColorTheme.highlight3,
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onTap: () {
+                    context
+                        .read<CrosswalkBloc>()
+                        .add(SendVoiceGuideEvent(crosswalk: crosswalk));
+                  },
+                ),
               ),
-              trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
+
+              // 신호 안내 버튼 (0x31 0x00 0x02)
+              Padding(
+                padding: EdgeInsets.only(bottom: SizeTheme.h_md),
+                child: FlatCard(
+                  title: '신호 안내',
+                  titleOnly: true,
+                  leading: const Icon(
+                    Icons.traffic,
+                    color: ColorTheme.highlight1,
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onTap: () {
+                    context
+                        .read<CrosswalkBloc>()
+                        .add(SendAcousticSignalEvent(crosswalk: crosswalk));
+                  },
+                ),
               ),
-              onTap: () {
-                context
-                    .read<CrosswalkBloc>()
-                    .add(SendVoiceGuideEvent(crosswalk: crosswalk));
-                // 스크롤 제거 - 현재 화면 유지
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: SizeTheme.h_md,
-            ),
-            child: FlatCard(
-              title: '신호 안내',
-              titleOnly: true,
-              leading: const Icon(
-                Icons.traffic,
-                color: ColorTheme.highlight1,
+
+              // 음성 안내 버튼 (0x31 0x00 0x03)
+              Padding(
+                padding: EdgeInsets.only(bottom: SizeTheme.h_md),
+                child: FlatCard(
+                  title: '음성 안내',
+                  titleOnly: true,
+                  leading: const Icon(
+                    Icons.directions_walk_rounded,
+                    color: ColorTheme.highlight2,
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onTap: () {
+                    context
+                        .read<CrosswalkBloc>()
+                        .add(SendVoiceInductorEvent(crosswalk: crosswalk));
+                  },
+                ),
               ),
-              trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
+
+              // 종료 버튼
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('종료'),
+                ),
               ),
-              onTap: () async {
-                context
-                    .read<CrosswalkBloc>()
-                    .add(SendAcousticSignalEvent(crosswalk: crosswalk));
-                // 스크롤 제거 - 현재 화면 유지
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: SizeTheme.h_md,
-            ),
-            child: FlatCard(
-              title: '음성 안내',
-              titleOnly: true,
-              leading: const Icon(
-                Icons.directions_walk_rounded,
-                color: ColorTheme.highlight2,
-              ),
-              trailing: Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              onTap: () async {
-                context
-                    .read<CrosswalkBloc>()
-                    .add(SendVoiceInductorEvent(crosswalk: crosswalk));
-                // 스크롤 제거 - 현재 화면 유지
-              },
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

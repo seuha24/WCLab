@@ -9,6 +9,9 @@ class SearchFiniteCrosswalkEvent extends CrosswalkEvent {}
 
 class SearchInfiniteCrosswalkEvent extends CrosswalkEvent {}
 
+/// 스캔 중단 이벤트 - 초기 화면으로 돌아감
+class StopScanEvent extends CrosswalkEvent {}
+
 class SendAcousticSignalEvent extends CrosswalkEvent {
   final Crosswalk crosswalk;
 

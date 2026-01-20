@@ -17,9 +17,10 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     required this.sendVoiceInductor,
     required this.sendVoiceGuide,
     required this.controlFlashOnWithWeather,
-  }) : super(SearchOff(results: const [])) {
+  }) : super(CrosswalkInitial()) {
     on<SearchFiniteCrosswalkEvent>(_searchFiniteCrosswalkEvent);
     on<SearchInfiniteCrosswalkEvent>(_searchInfiniteCrosswalkEvent);
+    on<StopScanEvent>(_stopScanEvent);
     on<SendAcousticSignalEvent>(_sendAcousticSignalEvent);
     on<SendVoiceInductorEvent>(_sendVoiceInductorEvent);
     on<SendVoiceGuideEvent>(_sendVoiceGuideEvent);
@@ -43,6 +44,18 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     timer = Timer.periodic(const Duration(seconds: 20), (timer) async {
       await search2InfiniteTimes(NoParams());
     });
+  }
+
+  /// 스캔 중단 핸들러 - 초기 화면으로 돌아감
+  Future _stopScanEvent(
+    StopScanEvent event,
+    Emitter<CrosswalkState> emit,
+  ) async {
+    if (BlueNativeDataSourceImpl.subscription != null) {
+      BlueNativeDataSourceImpl.subscription!.cancel();
+    }
+    timer.cancel();
+    emit(CrosswalkInitial());
   }
 
   Future _searchFiniteCrosswalkEvent(

@@ -6,6 +6,9 @@ abstract class CrosswalkState extends Equatable {
   List<Object?> get props => [];
 }
 
+/// 초기 화면 상태 - BLE 찾기 버튼 표시
+class CrosswalkInitial extends CrosswalkState {}
+
 class SearchOn extends CrosswalkState {
   final bool infinite;
 

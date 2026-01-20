@@ -910,19 +910,21 @@ emit(ConnectOff());
 - [x] `flutter build apk` 빌드 테스트 ✅
 
 #### Phase 2: BLE 수동 연결 UI/UX 수정
-- [ ] `lib/presentation/bloc/crosswalk_bloc/crosswalk_state.dart` - `CrosswalkInitial` State 추가
-- [ ] `lib/presentation/bloc/crosswalk_bloc/crosswalk_event.dart` - `StopScanEvent` Event 추가
-- [ ] `lib/presentation/bloc/crosswalk_bloc/crosswalk_bloc.dart`
-  - [ ] 초기 상태 `CrosswalkInitial`로 변경
-  - [ ] `StopScanEvent` 핸들러 추가
-- [ ] `lib/core/utils/tts_messages.dart` - 새 TTS 문자열 추가
-- [ ] `lib/data/services/tts_service.dart` - 새 TTS 메서드 추가
-- [ ] `lib/presentation/views/crosswalk_panel_view.dart` - UI 전면 수정
-  - [ ] 초기 화면 (BLE 찾기 버튼)
-  - [ ] 찾는 중 화면 (로딩 + 중단 버튼)
-  - [ ] 결과 화면 (리스트 + 다시찾기)
-  - [ ] 결과 없음 화면
-- [ ] `flutter build apk` 빌드 테스트
+- [x] `lib/presentation/bloc/crosswalk_bloc/crosswalk_state.dart` - `CrosswalkInitial` State 추가
+- [x] `lib/presentation/bloc/crosswalk_bloc/crosswalk_event.dart` - `StopScanEvent` Event 추가
+- [x] `lib/presentation/bloc/crosswalk_bloc/crosswalk_bloc.dart`
+  - [x] 초기 상태 `CrosswalkInitial`로 변경
+  - [x] `StopScanEvent` 핸들러 추가
+- [x] `lib/core/utils/tts_messages.dart` - 새 TTS 문자열 추가
+- [x] `lib/data/services/tts_service.dart` - 새 TTS 메서드 추가
+- [x] `lib/presentation/views/crosswalk_panel_view.dart` - UI 전면 수정
+  - [x] 초기 화면 (BLE 찾기 버튼)
+  - [x] 찾는 중 화면 (로딩 + 중단 버튼)
+  - [x] 결과 화면 (리스트 + 다시찾기)
+  - [x] 결과 없음 화면
+  - [x] 에러 화면 추가
+  - [x] 모달 닫힘 시 초기화면으로 복귀 (whenComplete → StopScanEvent)
+- [x] `flutter build apk` 빌드 테스트 ✅
 
 #### Phase 3: 자동 BLE 연동
 - [ ] `lib/core/utils/auto_connect_cooldown_manager.dart` - 신규 생성
