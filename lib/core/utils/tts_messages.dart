@@ -88,8 +88,8 @@ abstract class TtsMessages {
   // BLE/스마트 압버튼 안내 멘트
   // ============================================================
 
-  /// BLE 찾기 안내 (초기 화면)
-  static const String bleScanPrompt = 'BLE 찾기 버튼을 눌러 주변 음향신호기를 검색하세요';
+  /// 음향신호기 찾기 안내 (초기 화면)
+  static const String bleScanPrompt = '음향신호기 찾기 버튼을 눌러 주변 음향신호기를 검색하세요';
 
   /// BLE 스캔 중 안내
   static const String bleScanning = '주변 음향신호기를 찾고 있습니다';

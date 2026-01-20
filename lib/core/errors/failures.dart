@@ -27,11 +27,11 @@ abstract class BlueFailure extends Failure {
 }
 
 class BlueScanFailure extends BlueFailure {
-  const BlueScanFailure() : super('BLE 스캔 실패');
+  const BlueScanFailure() : super('음향신호기 스캔 실패');
 }
 
 class BlueConnectionFailure extends BlueFailure {
-  const BlueConnectionFailure() : super('BLE 연결 실패');
+  const BlueConnectionFailure() : super('음향신호기 연결 실패');
 }
 
 class BlueTimeoutFailure extends BlueFailure {

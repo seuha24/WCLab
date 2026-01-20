@@ -502,7 +502,7 @@ class TtsService {
   // Convenience 메서드: BLE/스마트 압버튼
   // =========================================================
 
-  /// BLE 찾기 안내 (초기 화면)
+  /// 음향신호기 찾기 안내 (초기 화면)
   void speakBleScanPrompt() {
     speak(TtsMessages.bleScanPrompt);
   }

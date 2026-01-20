@@ -130,7 +130,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
 
                         // 상태에 따른 UI 렌더링
                         if (state is CrosswalkInitial) ...[
-                          // 1. 초기 화면 - BLE 찾기 버튼
+                          // 1. 초기 화면 - 음향신호기 찾기 버튼
                           _buildInitialUI(),
                         ] else if (state is SearchOn) ...[
                           // 2. BLE 횡단보도 찾는 중
@@ -162,7 +162,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
     );
   }
 
-  /// 초기 화면 UI - BLE 찾기 버튼
+  /// 초기 화면 UI - 음향신호기 찾기 버튼
   Widget _buildInitialUI() {
     return Column(
       children: [
@@ -187,7 +187,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
         ),
         const Gap(height: 30),
 
-        // BLE 찾기 버튼
+        // 음향신호기 찾기 버튼
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
@@ -197,7 +197,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
             },
             icon: const Icon(Icons.search, color: Colors.white, size: 24),
             label: const Text(
-              'BLE 찾기',
+              '음향신호기 찾기',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -380,11 +380,12 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                                   ? Images.TrafficCross // 교차로
                                   : Images.TrafficYellow, // 점멸 신호등
                         ),
-                        semanticLabel: results[index].type == ECrosswalk.SINGLE_ROAD
-                            ? '단일 신호등'
-                            : results[index].type == ECrosswalk.INTERSECTION
-                                ? '교차로 신호등'
-                                : '점멸 신호등',
+                        semanticLabel:
+                            results[index].type == ECrosswalk.SINGLE_ROAD
+                                ? '단일 신호등'
+                                : results[index].type == ECrosswalk.INTERSECTION
+                                    ? '교차로 신호등'
+                                    : '점멸 신호등',
                       ),
                     ),
 

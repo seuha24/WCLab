@@ -255,7 +255,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
       return results;
     } catch (e) {
       if (e is BlueException) rethrow;
-      throw BlueScanException('BLE 스캔 실패');
+      throw BlueScanException('음향신호기 스캔 실패');
     }
   }
 
@@ -333,7 +333,7 @@ class BlueNativeDataSourceImpl implements BlueNativeDataSource {
     } catch (e) {
       debugPrint('❌ BLE 통신 실패: $e');
       if (e is BlueException) rethrow;
-      throw BlueConnectionException('BLE 연결 실패');
+      throw BlueConnectionException('음향신호기 연결 실패');
     }
   }
 
