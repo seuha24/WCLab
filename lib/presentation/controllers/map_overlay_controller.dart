@@ -24,10 +24,8 @@ class MapOverlayController {
   /// 횡단보도(음향신호기) 마커 캐시
   final Map<String, NMarker> _signalDeviceMarkers = {};
 
-  /// 횡단보도 마커 아이콘 캐시 (방향별)
-  /// key: 방향(도), value: 해당 방향의 아이콘
-  /// null 키는 방향 정보가 없는 경우
-  final Map<int?, NOverlayImage> _crosswalkIcons = {};
+  /// 횡단보도 마커 아이콘 캐시
+  NOverlayImage? _crosswalkIcon;
 
   /// 마지막으로 횡단보도 마커를 업데이트한 위치
   double? _lastCrosswalkLat;
@@ -350,17 +348,17 @@ class MapOverlayController {
       }
     }
 
-    // 2. 새로운 마커 추가
+    // 2. 아이콘 준비 (캐시에 없으면 생성)
+    _crosswalkIcon ??= await _createCrosswalkIcon(context);
+
+    // 3. 새로운 마커 추가
     final newMarkers = <NAddableOverlay>{};
     for (final device in devices) {
       if (!_signalDeviceMarkers.containsKey(device.managementId)) {
-        // 방향별 아이콘 가져오기 (캐시에 없으면 생성)
-        final icon = await _getOrCreateDirectionIcon(context, device.direction);
-
         final marker = NMarker(
           id: 'crosswalk_${device.managementId}',
           position: NLatLng(device.latitude, device.longitude),
-          icon: icon,
+          icon: _crosswalkIcon!,
         );
         _signalDeviceMarkers[device.managementId] = marker;
         newMarkers.add(marker);
@@ -372,91 +370,29 @@ class MapOverlayController {
     }
   }
 
-  /// 방향별 아이콘 가져오기 (캐시 사용)
-  Future<NOverlayImage> _getOrCreateDirectionIcon(
-    BuildContext context,
-    int? direction,
-  ) async {
-    // 캐시에 있으면 반환
-    if (_crosswalkIcons.containsKey(direction)) {
-      return _crosswalkIcons[direction]!;
-    }
-
-    // 없으면 생성 후 캐시에 저장
-    final icon = await _createCrosswalkIconWithDirection(context, direction);
-    _crosswalkIcons[direction] = icon;
-    return icon;
-  }
-
-  /// 방향이 포함된 횡단보도 마커 아이콘 생성
-  ///
-  /// [direction]: 방향(도). 0=북, 90=동, 180=남, 270=서. null이면 방향 없음.
-  Future<NOverlayImage> _createCrosswalkIconWithDirection(
-    BuildContext context,
-    int? direction,
-  ) async {
-    const double iconSize = 28.0;
-    const double arrowSize = 10.0;
-
-    // 방향을 라디안으로 변환 (0°=북=위쪽, 시계방향)
-    // Flutter의 Transform.rotate는 시계방향이 양수
-    final double rotationAngle =
-        direction != null ? direction * math.pi / 180 : 0;
-
+  /// 횡단보도 마커 아이콘 생성
+  Future<NOverlayImage> _createCrosswalkIcon(BuildContext context) async {
+    const double iconSize = 20.0;
     return NOverlayImage.fromWidget(
-      widget: SizedBox(
+      widget: Container(
         width: iconSize,
         height: iconSize,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // 원형 배경
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.9),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            // 방향 화살표 (방향 정보가 있을 때만)
-            if (direction != null)
-              Transform.rotate(
-                angle: rotationAngle,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    width: arrowSize,
-                    height: arrowSize,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.orange, width: 1),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_upward,
-                      color: Colors.orange,
-                      size: 8,
-                    ),
-                  ),
-                ),
-              ),
-            // 방향 정보 없으면 보행자 아이콘
-            if (direction == null)
-              const Icon(
-                Icons.directions_walk,
-                color: Colors.white,
-                size: 10,
-              ),
           ],
+        ),
+        child: const Icon(
+          Icons.directions_walk,
+          color: Colors.white,
+          size: 12,
         ),
       ),
       size: const Size(iconSize, iconSize),
