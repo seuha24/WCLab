@@ -1,7 +1,7 @@
 # BLE 리팩토링 기획서
 
 > **작성일**: 2026-01-15
-> **버전**: 1.1 (보완)
+> **버전**: 1.2 (연결 후 명령 버튼 UI 추가)
 > **상태**: 기획 완료, 구현 대기
 
 ---
@@ -828,18 +828,44 @@ emit(ConnectOff());
 │     └─────────────────────────┘     │
 └─────────────────────────────────────┘
 
-// 변경 후: 간단한 성공 메시지
+// 변경 후: 연결 성공 메시지 + 3가지 명령 버튼
 ┌─────────────────────────────────────┐
 │           안전 리모콘                │
 ├─────────────────────────────────────┤
-│            ✅                        │
-│      음향신호기의 안내에 따라         │
-│         보행하세요                   │
+│  ✅ 음향신호기에 연결되었습니다       │
+├─────────────────────────────────────┤
+│                                     │
+│  📍 위치 안내                    >  │ ← 0x31 0x00 0x01
+│                                     │
+│  🚦 신호 안내                    >  │ ← 0x31 0x00 0x02
+│                                     │
+│  🔊 음성 안내                    >  │ ← 0x31 0x00 0x03
+│                                     │
 │     ┌─────────────────────────┐     │
 │     │        종료              │     │
 │     └─────────────────────────┘     │
 └─────────────────────────────────────┘
 ```
+
+#### 명령 버튼 설명
+
+| 버튼 | 명령 코드 | 설명 |
+|------|-----------|------|
+| 위치 안내 | `[0x31, 0x00, 0x01]` | 음향신호기 위치 안내 음성 재생 |
+| 신호 안내 | `[0x31, 0x00, 0x02]` | 현재 신호 상태 안내 (빨간불/파란불) |
+| 음성 안내 | `[0x31, 0x00, 0x03]` | 음향신호기 음성 안내 재생 |
+
+#### 연결 성공 후 플로우
+
+```
+명령 버튼 클릭 → ConnectOn 상태 (로딩) → 명령 전송 완료 → ConnectOff 상태 (동일 화면 유지)
+                                                            ↓
+                                                   다른 명령 버튼 클릭 가능
+                                                            ↓
+                                                   종료 버튼으로 모달 닫기
+```
+
+> **핵심**: 연결 성공 후에도 사용자가 **다른 명령을 추가로 보낼 수 있도록** 3가지 버튼을 계속 표시
 
 ### 5.7 영향받는 파일 및 변경 사항
 
@@ -865,14 +891,23 @@ emit(ConnectOff());
 
 ### 6.2 상세 구현 체크리스트
 
-#### Phase 1: 방향 안내 기능 제거
-- [ ] `lib/domain/entities/crosswalk.dart` - dir, pos 필드 제거
-- [ ] `lib/presentation/bloc/crosswalk_bloc/crosswalk_state.dart` - ConnectOff 단순화
-- [ ] `lib/presentation/bloc/crosswalk_bloc/crosswalk_bloc.dart` - Compass 관련 로직 제거 (3개 핸들러)
-- [ ] `lib/presentation/views/crosswalk_panel_view.dart` - Compass UI 제거
-- [ ] `lib/data/repositories/crosswalk_repository_impl.dart` - Crosswalk 생성 수정
-- [ ] Compass 위젯 파일 삭제 또는 미사용 처리
-- [ ] `flutter build apk` 빌드 테스트
+#### Phase 1: 방향 안내 기능 제거 + 연결 성공 후 명령 버튼 UI 추가
+- [x] `lib/domain/entities/crosswalk.dart` - dir, pos 필드 제거
+- [x] `lib/data/models/crosswalk_model.dart` - dir, pos 필드 제거
+- [x] `lib/data/sources/crosswalk_remote_data_source.dart` - dir, pos 제거, Distance 의존성 제거
+- [x] `lib/presentation/bloc/crosswalk_bloc/crosswalk_state.dart` - ConnectOff 단순화 (enableCompass, latLng 제거)
+- [x] `lib/presentation/bloc/crosswalk_bloc/crosswalk_bloc.dart` - Compass 관련 로직 제거 (3개 핸들러 단순화, getCurrentPosition 의존성 제거)
+- [x] `lib/presentation/views/crosswalk_panel_view.dart` - Compass UI 제거, dir 필드 표시 제거
+- [x] `lib/presentation/views/crosswalk_panel_view.dart` - **ConnectOff 상태에서 3가지 명령 버튼 UI 추가**
+  - [x] 위치 안내 버튼 (SendVoiceGuideEvent → 0x31 0x00 0x03)
+  - [x] 신호 안내 버튼 (SendAcousticSignalEvent → 0x31 0x00 0x02)
+  - [x] 음성 안내 버튼 (SendVoiceInductorEvent → 0x31 0x00 0x01)
+  - [x] 종료 버튼
+- [x] `lib/injection.dart` - CrosswalkRemoteDataSourceImpl, CrosswalkBloc DI 등록 수정
+- [x] `lib/presentation/widgets/compass.dart` - 삭제
+- [x] `lib/framework/ui.dart` - compass.dart part 선언 제거, flutter_compass import 제거
+- [x] `lib/presentation/views/tutorial_view.dart` - 안전 나침반 튜토리얼 페이지(buildPage4) 제거
+- [x] `flutter build apk` 빌드 테스트 ✅
 
 #### Phase 2: BLE 수동 연결 UI/UX 수정
 - [ ] `lib/presentation/bloc/crosswalk_bloc/crosswalk_state.dart` - `CrosswalkInitial` State 추가
@@ -916,7 +951,9 @@ emit(ConnectOff());
 | 스캔 완료 (결과 있음) | 리스트 표시 |
 | 스캔 완료 (결과 없음) | 실패 메시지 + 다시찾기 버튼 |
 | 리스트 항목 클릭 | 안전 리모콘 모달 표시 |
-| 연결 완료 | 간단한 성공 메시지 (나침반 없음) |
+| 명령 버튼 클릭 (위치/신호/음성) | 해당 명령 전송, ConnectOff 상태로 전환 |
+| 연결 완료 | 연결 성공 메시지 + 3가지 명령 버튼 표시 |
+| 연결 후 다른 명령 클릭 | 추가 명령 전송 가능 |
 | 자동 연결 (30m 진입) | BLE 스캔 → 자동 연결 → 신호안내 |
 | 자동 연결 후 재진입 | 쿨다운으로 인해 연결 안됨 |
 | 자동 연결 후 범위 이탈 후 재진입 | 다시 자동 연결 |
@@ -953,5 +990,5 @@ emit(ConnectOff());
 ---
 
 **작성자**: SafeLight 개발팀
-**최종 수정**: 2026-01-15
-**버전**: 1.1 (보완)
+**최종 수정**: 2026-01-20
+**버전**: 1.2 (연결 후 명령 버튼 UI 추가)

@@ -111,7 +111,6 @@ Future<void> init() async {
       sendAcousticSignal: DI(instanceName: USECASE_SEND_ACOUSTIC_SIGNAL),
       sendVoiceInductor: DI(instanceName: USECASE_SEND_VOICE_INDUCTOR),
       sendVoiceGuide: DI(instanceName: USECASE_SEND_VOICE_GUIDE),
-      getCurrentPosition: DI(),
       controlFlashOnWithWeather:
           DI(instanceName: USECASE_CONTROL_FLASH_ON_WITH_WEATHER),
     ),
@@ -358,7 +357,7 @@ Future<void> init() async {
     () => NavigateRemoteDataSourceImpl(geolocator: DI(), dio: DI()),
   );
   DI.registerLazySingleton<CrosswalkRemoteDataSource>(
-    () => CrosswalkRemoteDataSourceImpl(distance: DI()),
+    () => CrosswalkRemoteDataSourceImpl(),
   );
   DI.registerLazySingleton<WeatherRemoteDataSource>(
     () => WeatherRemoteDataSourceImpl(),

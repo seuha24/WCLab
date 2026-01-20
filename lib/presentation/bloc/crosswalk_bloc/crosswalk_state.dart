@@ -35,12 +35,4 @@ class CrosswalkError extends CrosswalkState {
 
 class ConnectOn extends CrosswalkState {}
 
-class ConnectOff extends CrosswalkState {
-  final bool enableCompass;
-  final LatLng? latLng;
-
-  ConnectOff({required this.enableCompass, this.latLng});
-
-  @override
-  List<Object?> get props => [enableCompass];
-}
+class ConnectOff extends CrosswalkState {}

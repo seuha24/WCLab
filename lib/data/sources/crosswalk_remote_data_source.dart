@@ -8,30 +8,7 @@ abstract class CrosswalkRemoteDataSource {
 }
 
 class CrosswalkRemoteDataSourceImpl implements CrosswalkRemoteDataSource {
-  Distance distance;
-
-  CrosswalkRemoteDataSourceImpl({
-    required this.distance,
-  });
-
-  Map<String, dynamic> _getDirectionAndPosition(
-    var geo1,
-    var geo2,
-    LatLng pos,
-  ) {
-    LatLng pos1 = LatLng(geo1['geo'].latitude, geo1['geo'].longitude);
-    LatLng pos2 = LatLng(geo2['geo'].latitude, geo2['geo'].longitude);
-
-    double meter1 = distance(pos, pos1);
-    double meter2 = distance(pos, pos2);
-
-    if (meter1 > meter2) {
-      return {'pos': pos1, 'dir': geo1['dir']};
-    } else if (meter1 < meter2) {
-      return {'pos': pos2, 'dir': geo2['dir']};
-    }
-    return {'pos': null, 'dir': null};
-  }
+  CrosswalkRemoteDataSourceImpl();
 
   @override
   Future<List<CrosswalkModel>> getCrosswalks(
@@ -45,11 +22,9 @@ class CrosswalkRemoteDataSourceImpl implements CrosswalkRemoteDataSource {
       for (DiscoveredDevice device in lists) {
         results.add(
           CrosswalkModel.fromMap({
-            'name': device.name, // BLE 기기 이름을 그대로 사용
+            'name': device.name,
             'post': device,
-            'type': ECrosswalk.SINGLE_ROAD, // 기본 타입 설정
-            'dir': null, // Firebase 없으므로 방향 정보 없음
-            'pos': null, // Firebase 없으므로 위치 정보 없음
+            'type': ECrosswalk.SINGLE_ROAD,
           }),
         );
       }

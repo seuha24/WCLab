@@ -16,7 +16,6 @@ class _TutorialViewState extends State<TutorialView> {
     GlobalKey(),
     GlobalKey(),
     GlobalKey(),
-    GlobalKey(),
   ];
 
   @override
@@ -111,7 +110,6 @@ class _TutorialViewState extends State<TutorialView> {
                 buildPage1(context),
                 buildPage2(context),
                 buildPage3(context),
-                buildPage4(context),
                 buildPage5(context),
               ],
             ),
@@ -121,9 +119,67 @@ class _TutorialViewState extends State<TutorialView> {
     );
   }
 
+  // ============================================================
+  // buildPage4 - 안전 나침반 튜토리얼 (Phase 1에서 기능 제거로 주석처리)
+  // ============================================================
+  // Container buildPage4(BuildContext context) {
+  //   return Container(
+  //     key: keys[3],
+  //     width: MediaQuery.of(context).size.width,
+  //     padding: EdgeInsets.only(bottom: SizeTheme.w_md),
+  //     child: SingleChildScrollView(
+  //       child: Column(
+  //         children: [
+  //           Board(
+  //             title: 'Q. 안전 나침반은 무엇인가요?',
+  //             titleStyle: Theme.of(context).textTheme.titleLarge,
+  //             body: Padding(
+  //               padding: EdgeInsets.symmetric(horizontal: SizeTheme.w_md),
+  //               child: SingleChildRoundedCard(
+  //                 padding: EdgeInsets.all(SizeTheme.w_md),
+  //                 width: double.infinity,
+  //                 backgroundColor: Theme.of(context).colorScheme.secondary,
+  //                 child: Column(
+  //                   children: [
+  //                     Text(
+  //                       ' 안전 나침반은 횡단보도를 건너는 정확한 방향을 잡아주는 기능입니다.\n\n안전 리모콘에서 음성 유도나 압버튼 누르기 버튼을 누를 경우, 자동으로 안전 나침반이 켜지게 됩니다.',
+  //                       style: Theme.of(context).textTheme.bodyLarge,
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //           Board(
+  //             title: 'Q. 안전 나침반은 어떻게 사용하나요?',
+  //             titleStyle: Theme.of(context).textTheme.titleLarge,
+  //             body: Padding(
+  //               padding: EdgeInsets.symmetric(horizontal: SizeTheme.w_md),
+  //               child: SingleChildRoundedCard(
+  //                 padding: EdgeInsets.all(SizeTheme.w_md),
+  //                 width: double.infinity,
+  //                 backgroundColor: Theme.of(context).colorScheme.secondary,
+  //                 child: Column(
+  //                   children: [
+  //                     Text(
+  //                       ' 안전 나침반이 켜지면 스마트폰이 진동하게 됩니다. 진동이 울리지 않는 방향으로 보행하면 됩니다.\n\n진동이 울리지 않는 방향이 횡단보도를 건너는 정확한 방향입니다.',
+  //                       style: Theme.of(context).textTheme.bodyLarge,
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  // ============================================================
+
   Container buildPage5(BuildContext context) {
     return Container(
-      key: keys[4],
+      key: keys[3],
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(bottom: SizeTheme.w_md),
       child: SingleChildScrollView(
@@ -181,114 +237,6 @@ class _TutorialViewState extends State<TutorialView> {
                       Text(
                         ' 안전 경광등은 안전 리모콘의 음성 유도, 압버튼 누르기 버튼을 누를 때, 경광등 알고리즘에 의해 시야가 확보되지 않는 상황이라 판단되면 자동적으로 켜지게 됩니다.\n\n 또한 홈 화면 오른쪽 상단의 버튼을 눌러 안전 경광등 기능만 따로 사용할 수 있습니다.',
                         style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Container buildPage4(BuildContext context) {
-    return Container(
-      key: keys[3],
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(bottom: SizeTheme.w_md),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Board(
-              title: 'Q. 안전 나침반은 무엇인가요?',
-              titleStyle: Theme.of(context).textTheme.titleLarge,
-              body: Padding(
-                padding: EdgeInsets.symmetric(horizontal: SizeTheme.w_md),
-                child: SingleChildRoundedCard(
-                  padding: EdgeInsets.all(SizeTheme.w_md),
-                  width: double.infinity,
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  child: Column(
-                    children: [
-                      Text(
-                        ' 안전 나침반은 점자 블록이 없는 횡단보도 위에서 보행자가 반대편으로 안전하게 건널 수 있게 도와줍니다. 보행자가 걸어가야 하는 방향을 진동과 나침반 UI를 통해 나타냅니다.\n\n잘못된 방향으로 걸어갈 경우 진동이 울리게 되며, 진동이 울리지 않는 방향으로 보행하도록 유도합니다.',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      SizedBox(height: SizeTheme.h_sm),
-                      TextButton(
-                        onPressed: () {
-                          if (Platform.isAndroid) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Semantics.fromProperties(
-                                  properties: SemanticsProperties(
-                                    liveRegion: true,
-                                  ),
-                                  child: Text('안드로이드에서는 사용할 수 없습니다.'),
-                                ),
-                              ),
-                            );
-                          } else {
-                            final tts = DI.get<TtsService>();
-                            tts.speakSafetyCompassOn();
-                            showModalBottomSheet(
-                              isScrollControlled: true,
-                              context: context,
-                              builder: (context) {
-                                return SizedBox(
-                                  height: 680.h,
-                                  child: Scaffold(
-                                    body: Padding(
-                                      padding: EdgeInsets.all(SizeTheme.w_md),
-                                      child: Compass(
-                                        latLng: LatLng(0, 0),
-                                        pos: LatLng(90, 90),
-                                        end: SizedBox(
-                                          width: double.infinity,
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: const Text('종료'),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                        },
-                        child: Text(
-                          '안전 나침반 체험하기',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineLarge!
-                              .apply(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                      ),
-                      SizedBox(height: SizeTheme.h_sm),
-                      Image.network(
-                        'https://github.com/WclLab/safelight-storage/blob/master/5.png?raw=true',
-                        fit: BoxFit.fitHeight,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) {
-                            return child;
-                          }
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
                       ),
                     ],
                   ),

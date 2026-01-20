@@ -8,7 +8,6 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
   final ConnectCrosswalk sendAcousticSignal;
   final ConnectCrosswalk sendVoiceInductor;
   final ConnectCrosswalk sendVoiceGuide;
-  final GetPosition getCurrentPosition;
   final ControlFlash controlFlashOnWithWeather;
 
   CrosswalkBloc({
@@ -17,7 +16,6 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
     required this.sendAcousticSignal,
     required this.sendVoiceInductor,
     required this.sendVoiceGuide,
-    required this.getCurrentPosition,
     required this.controlFlashOnWithWeather,
   }) : super(SearchOff(results: const [])) {
     on<SearchFiniteCrosswalkEvent>(_searchFiniteCrosswalkEvent);
@@ -91,29 +89,10 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
         await controlFlashOnWithWeather(NoParams());
       }
 
-      // 명령 전송
       await sendAcousticSignal(event.crosswalk);
 
-      // 명령 전송 후 상태 유지 (화면 전환 방지)
-      if (event.crosswalk.pos != null) {
-        final results = await getCurrentPosition(NoParams());
-        results.fold(
-          (failure) {
-            emit(ConnectOff(enableCompass: false));
-          },
-          (latLng) async {
-            tts.speakCommandSent();
-            bool enableCompass = true;
-            if (Platform.isAndroid) {
-              enableCompass = false;
-            }
-            emit(ConnectOff(enableCompass: enableCompass, latLng: latLng));
-          },
-        );
-      } else {
-        tts.speakCommandSent();
-        emit(ConnectOff(enableCompass: false));
-      }
+      tts.speakCommandSent();
+      emit(ConnectOff());
     } catch (e) {
       tts.speakConnectionFailed();
       emit(CrosswalkError(message: 'connect failure'));
@@ -130,25 +109,11 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
       }
-      if (event.crosswalk.pos != null) {
-        final results = await getCurrentPosition(NoParams());
-        results.fold(
-          (failure) {
-            emit(ConnectOff(enableCompass: false));
-          },
-          (latLng) async {
-            tts.speakWalkTowardsNoVibration();
-            bool enableCompass = true;
-            if (Platform.isAndroid) {
-              enableCompass = false;
-            }
-            emit(ConnectOff(enableCompass: enableCompass, latLng: latLng));
-          },
-        );
-      } else {
-        emit(ConnectOff(enableCompass: false));
-      }
+
       await sendVoiceInductor(event.crosswalk);
+
+      tts.speakCommandSent();
+      emit(ConnectOff());
     } catch (e) {
       emit(CrosswalkError(message: 'connect failure'));
     }
@@ -164,25 +129,11 @@ class CrosswalkBloc extends Bloc<CrosswalkEvent, CrosswalkState> {
       if (!Platform.isAndroid) {
         await controlFlashOnWithWeather(NoParams());
       }
-      if (event.crosswalk.pos != null) {
-        final results = await getCurrentPosition(NoParams());
-        results.fold(
-          (failure) {
-            emit(ConnectOff(enableCompass: false));
-          },
-          (latLng) async {
-            tts.speakSignalDeviceLocationInfo();
-            bool enableCompass = true;
-            if (Platform.isAndroid) {
-              enableCompass = false;
-            }
-            emit(ConnectOff(enableCompass: enableCompass, latLng: latLng));
-          },
-        );
-      } else {
-        emit(ConnectOff(enableCompass: false));
-      }
+
       await sendVoiceGuide(event.crosswalk);
+
+      tts.speakCommandSent();
+      emit(ConnectOff());
     } catch (e) {
       emit(CrosswalkError(message: 'connect failure'));
     }

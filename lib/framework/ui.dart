@@ -21,7 +21,6 @@ import 'package:flutter/services.dart';
 // =====================================================================
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -92,6 +91,5 @@ part '../presentation/views/entrance_views/entrance_registration_panel_view.dart
 // Part Files - Widgets
 // =====================================================================
 part '../presentation/widgets/board.dart';
-part '../presentation/widgets/compass.dart';
 part '../presentation/widgets/flat_card.dart';
 part '../presentation/widgets/single_child_rounded_card.dart';

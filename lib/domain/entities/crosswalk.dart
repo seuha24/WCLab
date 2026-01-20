@@ -11,8 +11,6 @@ part of '../../framework/object.dart';
 /// |[name]||횡단보도의 이름(ex. 가톨릭대 앞)|
 /// |[post]||해당 횡단보도의 스마트 압버튼(비콘 포스트) 정보|
 /// |[type]||횡단보도의 종류(ex. 교차로)|
-/// |[dir]||사용자의 위치에 따른 횡단보도의 방향(ex. 역곡역 방면)|
-/// |[pos]||사용자의 위치에 따른 반대편 좌표(위도, 경도)|
 class Crosswalk extends Equatable {
   /// 횡단보도의 이름을 나타내는 값이다.
   ///
@@ -56,27 +54,6 @@ class Crosswalk extends Equatable {
   /// ```
   final ECrosswalk type;
 
-  /// 사용자의 위치에 따른 횡단보도의 방향을 나타내는 값이다.
-  ///
-  /// [dir]은 DB(Firestore)에 요청하여 받아올 수 있다.
-  ///
-  /// 횡단보도의 방향이란, 사용자의 위치를 기반으로 나아가는 방향을 의미한다.
-  ///
-  /// (이미지 추가 예정)
-  ///
-  /// 만약 해당 횡단보도의 정보를 DB(Firestore)에서 찾을 수 없다면, `null`값을 할당한다.
-  final String? dir;
-
-  /// 사용자의 위치에 따른 반대편 좌표를 나타내는 값이다.
-  ///
-  /// [pos]는 DB(Firestore)에 요청하여 받아올 수 있다.
-  /// 반대편 좌표란, 사용자의 위치를 기반으로 현재 횡단보도의 맡은 편 시작 지점을 의미한다.
-  ///
-  /// (이미지 추가 예정)
-  ///
-  /// 만약 해당 횡단보도의 정보를 DB(Firestore)에서 찾을 수 없다면, `null`값을 할당한다.
-  final LatLng? pos;
-
   /// Default constructor로서 [post] 값을 반드시 받아야 한다.
   ///
   /// 아래와 같이 사용할 수 있다.
@@ -87,8 +64,6 @@ class Crosswalk extends Equatable {
   ///   name : DB의 name 값,
   ///   post : BluetoothDevice(...),
   ///   type : DB의 type 값,
-  ///   dir : DB의 dir 값,
-  ///   pos : DB의 pos 값
   /// );
   ///
   /// // DB(Firestore)에 해당 횡단보도 데이터가 없는 경우
@@ -98,8 +73,6 @@ class Crosswalk extends Equatable {
     this.name = '횡단보도',
     required this.post,
     this.type = ECrosswalk.UNKNOWN,
-    this.dir,
-    this.pos,
   });
 
   @override
@@ -107,6 +80,6 @@ class Crosswalk extends Equatable {
 
   @override
   String toString() {
-    return '{name : $name, post : $post, type : $type, dir : $dir, pos : $pos}';
+    return '{name : $name, post : $post, type : $type}';
   }
 }

@@ -313,31 +313,22 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                   ),
                 ),
 
-          // 횡단보도 타입과 방향 표시
+          // 횡단보도 타입 표시
           title: results[index].type == ECrosswalk.UNKNOWN
               ? null
-              : RichText(
-                  text: TextSpan(
-                    text: results[index].type == ECrosswalk.SINGLE_ROAD
-                        ? '단일 신호등 지역'
-                        : results[index].type == ECrosswalk.INTERSECTION
-                            ? '교차로 지역'
-                            : '점멸 신호등 지역',
-                    style: Theme.of(context).textTheme.bodyMedium!.apply(
-                          color: results[index].type == ECrosswalk.SINGLE_ROAD
-                              ? ColorTheme.highlight3
-                              : results[index].type == ECrosswalk.INTERSECTION
-                                  ? ColorTheme.highlight2
-                                  : ColorTheme.highlight1,
-                        ),
-                    children: [
-                      const TextSpan(text: ' '),
-                      TextSpan(
-                        text: results[index].dir ?? '',
-                        style: Theme.of(context).textTheme.bodySmall,
+              : Text(
+                  results[index].type == ECrosswalk.SINGLE_ROAD
+                      ? '단일 신호등 지역'
+                      : results[index].type == ECrosswalk.INTERSECTION
+                          ? '교차로 지역'
+                          : '점멸 신호등 지역',
+                  style: Theme.of(context).textTheme.bodyMedium!.apply(
+                        color: results[index].type == ECrosswalk.SINGLE_ROAD
+                            ? ColorTheme.highlight3
+                            : results[index].type == ECrosswalk.INTERSECTION
+                                ? ColorTheme.highlight2
+                                : ColorTheme.highlight1,
                       ),
-                    ],
-                  ),
                 ),
 
           // 횡단보도 이름 표시
@@ -473,8 +464,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
     );
   }
 
-  /// 연결 모드 선택 후 처리 화면을 렌더링하는 메서드
-  /// HomeView의 _renderAfterModeSelected와 동일한 로직
+  /// 연결 성공 후 명령 버튼 UI를 렌더링하는 메서드
   /// [context]: BuildContext
   /// [crosswalk]: 연결된 횡단보도 정보
   /// [index]: 횡단보도 인덱스 (사용되지 않지만 HomeView 호환성을 위해 유지)
@@ -527,45 +517,100 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
               ],
             );
           } else if (state is ConnectOff) {
-            if (state.enableCompass && state.latLng != null) {
-              return Compass(
-                pos: crosswalk.pos!,
-                latLng: state.latLng!,
-                end: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('종료'),
-                  ),
-                ),
-              );
-            }
+            // 연결 성공 메시지 + 3가지 명령 버튼 UI
             return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                // 연결 성공 메시지
                 SingleChildRoundedCard(
                   backgroundColor: Theme.of(context).colorScheme.secondary,
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: SizeTheme.h_lg),
-                        child: Icon(
+                  child: Padding(
+                    padding: EdgeInsets.all(SizeTheme.w_md),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
                           Icons.check_circle_outline_outlined,
-                          size: 80.w,
+                          size: 24.w,
                           color: ColorTheme.highlight2,
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: SizeTheme.h_lg),
-                        child:
-                            const Center(child: Text('음향신호기의 안내에 따라 보행하세요.')),
-                      ),
-                    ],
+                        SizedBox(width: 8.w),
+                        Text(
+                          '음향신호기에 연결되었습니다',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+                SizedBox(height: SizeTheme.h_md),
+
+                // 위치 안내 버튼 (0x31 0x00 0x01)
+                Padding(
+                  padding: EdgeInsets.only(bottom: SizeTheme.h_md),
+                  child: FlatCard(
+                    title: '위치 안내',
+                    titleOnly: true,
+                    leading: const Icon(
+                      Icons.volume_up,
+                      color: ColorTheme.highlight3,
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onTap: () {
+                      context
+                          .read<CrosswalkBloc>()
+                          .add(SendVoiceGuideEvent(crosswalk: crosswalk));
+                    },
+                  ),
+                ),
+
+                // 신호 안내 버튼 (0x31 0x00 0x02)
+                Padding(
+                  padding: EdgeInsets.only(bottom: SizeTheme.h_md),
+                  child: FlatCard(
+                    title: '신호 안내',
+                    titleOnly: true,
+                    leading: const Icon(
+                      Icons.traffic,
+                      color: ColorTheme.highlight1,
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onTap: () {
+                      context
+                          .read<CrosswalkBloc>()
+                          .add(SendAcousticSignalEvent(crosswalk: crosswalk));
+                    },
+                  ),
+                ),
+
+                // 음성 안내 버튼 (0x31 0x00 0x03)
+                Padding(
+                  padding: EdgeInsets.only(bottom: SizeTheme.h_md),
+                  child: FlatCard(
+                    title: '음성 안내',
+                    titleOnly: true,
+                    leading: const Icon(
+                      Icons.directions_walk_rounded,
+                      color: ColorTheme.highlight2,
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onTap: () {
+                      context
+                          .read<CrosswalkBloc>()
+                          .add(SendVoiceInductorEvent(crosswalk: crosswalk));
+                    },
+                  ),
+                ),
+
+                // 종료 버튼
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -574,7 +619,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                     },
                     child: const Text('종료'),
                   ),
-                )
+                ),
               ],
             );
           } else {
