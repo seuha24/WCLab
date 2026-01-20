@@ -78,6 +78,10 @@ class NaverMapViewController extends GetxController {
   ///
   final LocationAnnouncementController locationAnnouncementController =
       DI.get<LocationAnnouncementController>();
+
+  /// 자동 BLE 연결 서비스
+  final AutoBleConnectionService _autoBleConnectionService =
+      DI.get<AutoBleConnectionService>();
   // ============================================================
   // 2. 상태 변수들
   // ============================================================
@@ -511,6 +515,12 @@ class NaverMapViewController extends GetxController {
         currentLongitude.value,
         compassValue.value,
         isGpsAccurate.value,
+      );
+
+      // 자동 BLE 연결 체크 (30m 이내 음향신호기 자동 연결)
+      _autoBleConnectionService.checkAndConnect(
+        currentLatitude.value,
+        currentLongitude.value,
       );
     } catch (e) {
       debugPrint("현위치 수신에러 $e");

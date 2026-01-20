@@ -30,6 +30,8 @@ import 'package:safelight/framework/usecase.dart';
 import 'package:safelight/framework/controller.dart';
 import 'package:safelight/data/services/auth_service.dart';
 import 'package:safelight/core/utils/weighted_average_filter.dart';
+import 'package:safelight/core/utils/auto_connect_cooldown_manager.dart';
+import 'package:safelight/data/services/auto_ble_connection_service.dart';
 
 final DI = GetIt.instance;
 
@@ -409,4 +411,18 @@ Future<void> init() async {
   DI.registerLazySingleton<FlutterReactiveBle>(() => FlutterReactiveBle());
 
   DI.registerLazySingleton<NavigationApiService>(() => NavigationApiService());
+
+  // 자동 BLE 연결
+  DI.registerLazySingleton<AutoConnectCooldownManager>(
+    () => AutoConnectCooldownManager(),
+  );
+  DI.registerLazySingleton<AutoBleConnectionService>(
+    () => AutoBleConnectionService(
+      getNearbySignalDevices: DI(),
+      searchCrosswalk: DI(instanceName: USECASE_SEARCH_CROSSWALK_FINITE),
+      sendAcousticSignal: DI(instanceName: USECASE_SEND_ACOUSTIC_SIGNAL),
+      ttsService: DI(),
+      cooldownManager: DI(),
+    ),
+  );
 }

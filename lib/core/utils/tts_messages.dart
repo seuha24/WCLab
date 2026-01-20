@@ -124,6 +124,15 @@ abstract class TtsMessages {
   /// 음향신호기 위치 안내
   static const String signalDeviceLocationInfo = '음향신호기 설치 위치 정보를 안내합니다.';
 
+  /// 자동 연결 시작 안내
+  static const String autoConnectStarted = '주변 음향신호기에 자동으로 연결합니다';
+
+  /// 자동 연결 성공 안내
+  static const String autoConnectSuccess = '음향신호기에 연결되었습니다. 신호안내를 요청합니다';
+
+  /// 자동 연결 실패 안내
+  static const String autoConnectFailed = '음향신호기 연결에 실패했습니다';
+
   // ============================================================
   // 시스템 상태 안내 멘트
   // ============================================================

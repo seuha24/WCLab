@@ -562,6 +562,36 @@ class TtsService {
     speak(TtsMessages.signalDeviceLocationInfo);
   }
 
+  /// 자동 연결 시작 안내
+  void speakAutoConnectStarted() {
+    speakWithChannel(
+      TtsMessages.autoConnectStarted,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'auto_connect_start',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 자동 연결 성공 안내
+  void speakAutoConnectSuccess() {
+    speakWithChannel(
+      TtsMessages.autoConnectSuccess,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'auto_connect_success',
+      cooldown: const Duration(seconds: 5),
+    );
+  }
+
+  /// 자동 연결 실패 안내
+  void speakAutoConnectFailed() {
+    speakWithChannel(
+      TtsMessages.autoConnectFailed,
+      channel: ETtsChannel.SYSTEM_ANNOUNCE,
+      cooldownKey: 'auto_connect_fail',
+      cooldown: const Duration(seconds: 10),
+    );
+  }
+
   /// 블루투스 꺼짐 안내
   void speakBluetoothOff() {
     speak(TtsMessages.bluetoothOff);
