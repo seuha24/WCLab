@@ -730,7 +730,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                   onTap: () {
                     context
                         .read<CrosswalkBloc>()
-                        .add(SendVoiceGuideEvent(crosswalk: crosswalk));
+                        .add(SendVoiceInductorEvent(crosswalk: crosswalk));
                   },
                 ),
               ),
@@ -774,7 +774,7 @@ class _CrosswalkPanelViewState extends State<CrosswalkPanelView> {
                   onTap: () {
                     context
                         .read<CrosswalkBloc>()
-                        .add(SendVoiceInductorEvent(crosswalk: crosswalk));
+                        .add(SendVoiceGuideEvent(crosswalk: crosswalk));
                   },
                 ),
               ),
