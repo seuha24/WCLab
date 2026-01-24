@@ -94,7 +94,7 @@ class AutoBleConnectionService {
 
       debugPrint('📍 자동 연결 시도: ${targetCrosswalk.name}');
 
-      // 6. 자동 연결 및 신호안내 전송
+      // 6. 자동 연결 및 위치안내 전송
       await _sendAcousticSignal(targetCrosswalk);
 
       _ttsService.speakAutoConnectSuccess();

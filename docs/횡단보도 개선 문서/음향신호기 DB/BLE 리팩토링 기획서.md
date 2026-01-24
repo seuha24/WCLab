@@ -1,8 +1,8 @@
 # BLE 리팩토링 기획서
 
 > **작성일**: 2026-01-15
-> **버전**: 1.2 (연결 후 명령 버튼 UI 추가)
-> **상태**: 기획 완료, 구현 대기
+> **버전**: 1.3 (Phase 3 구현 완료, 버그 수정 필요)
+> **상태**: Phase 3 구현 완료 (버그 수정 대기)
 
 ---
 
@@ -927,17 +927,481 @@ emit(ConnectOff());
 - [x] `flutter build apk` 빌드 테스트 ✅
 
 #### Phase 3: 자동 BLE 연동
-- [ ] `lib/core/utils/auto_connect_cooldown_manager.dart` - 신규 생성
-- [ ] `lib/data/services/auto_ble_connection_service.dart` - 신규 생성
-- [ ] `lib/core/utils/tts_messages.dart` - 자동 연결 TTS 문자열 추가
-- [ ] `lib/data/services/tts_service.dart` - 자동 연결 TTS 메서드 추가
-- [ ] `lib/injection.dart` - DI 등록 추가
-- [ ] `lib/presentation/controllers/map_view_controller.dart`
-  - [ ] `_autoBleService` 멤버 추가
-  - [ ] `onInit()`에서 초기화
-  - [ ] `_getLocation()`에서 `checkAndConnect()` 호출
+- [x] `lib/core/utils/auto_connect_cooldown_manager.dart` - 신규 생성
+- [x] `lib/data/services/auto_ble_connection_service.dart` - 신규 생성
+- [x] `lib/core/utils/tts_messages.dart` - 자동 연결 TTS 문자열 추가
+- [x] `lib/data/services/tts_service.dart` - 자동 연결 TTS 메서드 추가
+- [x] `lib/injection.dart` - DI 등록 추가
+- [x] `lib/framework/controller.dart` - AutoBleConnectionService import 추가
+- [x] `lib/presentation/controllers/map_view_controller.dart`
+  - [x] `_autoBleConnectionService` 멤버 추가
+  - [x] `_getLocation()`에서 `checkAndConnect()` 호출
+- [x] `flutter build apk` 빌드 테스트 ✅
+- [x] 실기기 테스트 (GPS + BLE) ✅
+- [ ] **🐛 버그 수정 필요** (아래 Phase 3.1 참조)
+
+#### Phase 3.1: 자동 BLE 연동 버그 수정 (대기 중)
+
+> **테스트 일자**: 2026-01-21
+> **테스트 환경**: 집에서 GPS 위치 수동 변경 테스트
+> **예정 작업일**: 2026-01-22
+
+---
+
+##### 🐛 버그 1: 쿨다운이 GPS ID 기반으로 동작 (사거리 문제)
+
+**문제 상황: 사거리에서 같은 기기에 8번 연결**
+
+```
+사거리 = 4방향 × 2개 = 최대 8개 음향신호기 (A, B, C, D, E, F, G, H)
+```
+
+**현재 동작 (버그):**
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. 사거리 30m 진입                                                       │
+│    → GPS 조회: 8개 SignalDevice 발견 (A, B, C, D, E, F, G, H)            │
+│                                                                         │
+│ 2. 쿨다운 아닌 기기 찾기 → A 선택                                         │
+│    → BLE 스캔 → 가장 강한 신호 기기 X에 연결                              │
+│    → 쿨다운 등록: A (GPS ID) ❌                                          │
+│    → TTS: "음향신호기에 연결되었습니다"                                   │
+│                                                                         │
+│ 3. 다음 tick (100ms 후)                                                  │
+│    → 쿨다운 아닌 기기 찾기 → B 선택 (A는 쿨다운)                          │
+│    → BLE 스캔 → 또 기기 X에 연결 (가장 가까우니까)                        │
+│    → 쿨다운 등록: B (GPS ID) ❌                                          │
+│    → TTS: "음향신호기에 연결되었습니다" (2번째)                           │
+│                                                                         │
+│ 4. ... 8번 반복 ...                                                      │
+│    → 결과: 같은 BLE 기기에 8번 연결, TTS 8번 반복 🔴                      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**테스트 로그 (실제):**
+```
+📍 자동 연결 대상 발견: 24-0000008063  ← GPS 위치의 SignalDevice A
+📍 자동 연결 시도: AHG001+BBA050832468+  ← 실제 BLE 기기 X
+✅ 자동 연결 성공
+
+📍 자동 연결 대상 발견: 24-0000009841  ← GPS 위치의 SignalDevice B
+📍 자동 연결 시도: AHG001+BBA050832468+  ← 또 같은 기기 X!
+✅ 자동 연결 성공
+
+📍 자동 연결 대상 발견: 24-0000013834  ← GPS 위치의 SignalDevice C
+📍 자동 연결 시도: AHG001+BBA050832468+  ← 또 같은 기기 X!
+```
+
+**원인 코드:**
+```dart
+// auto_ble_connection_service.dart (현재)
+// 7. 쿨다운 등록
+_cooldownManager.addCooldown(targetDevice.managementId);  // ❌ GPS 기반 ID
+```
+
+**해결 방안:**
+```dart
+// auto_ble_connection_service.dart (수정)
+// 7. 쿨다운 등록 - BLE 기기 MAC 주소 사용
+_cooldownManager.addCooldown(targetCrosswalk.post.id);  // ✅ BLE MAC 주소
+```
+
+**수정 후 동작:**
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. 사거리 30m 진입                                                       │
+│    → GPS 조회: 8개 SignalDevice 발견                                     │
+│                                                                         │
+│ 2. BLE 스캔 → 기기 X 연결                                                │
+│    → 쿨다운 등록: BB:A0:50:83:24:68 (BLE MAC 주소) ✅                    │
+│    → TTS: "음향신호기에 연결되었습니다"                                   │
+│                                                                         │
+│ 3. 다음 tick                                                             │
+│    → BLE 스캔 → 기기 X 발견 → 이미 쿨다운 (MAC 주소 일치) → 스킵 ✅       │
+│    → 재연결 안됨                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+##### 🐛 버그 2: BLE 스캔 무한 루프 (비IOT 음향신호기 문제)
+
+**문제 상황: 비IOT 음향신호기 근처에서 무한 스캔**
+
+```
+음향신호기 CSV = IOT (BLE 지원) + 비IOT (BLE 없음, 구형)
+```
+
+**현재 동작 (버그):**
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. 비IOT 음향신호기 30m 진입                                              │
+│    → GPS 조회: SignalDevice 발견 (비IOT, BLE 없음)                        │
+│                                                                         │
+│ 2. BLE 스캔 → 결과 없음 (BLE 기기가 없으니까)                             │
+│    → 쿨다운 등록 안됨 (연결 실패)                                         │
+│    → TTS: "주변 음향신호기에 자동으로 연결합니다"                          │
+│                                                                         │
+│ 3. 100ms 후 다시 checkAndConnect() 호출                                  │
+│    → GPS 조회: 같은 SignalDevice 발견                                    │
+│    → BLE 스캔 → 또 결과 없음                                              │
+│    → TTS: "주변 음향신호기에 자동으로 연결합니다" (반복)                   │
+│                                                                         │
+│ 4. 무한 루프! 🔴                                                          │
+│    → Android 스캔 쓰로틀링 에러 발생                                      │
+│    → 배터리 소모                                                         │
+│    → TTS 무한 반복                                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**테스트 로그 (실제):**
+```
+📍 자동 연결 대상 발견: 24-0000013834
+📍 BLE 스캔 결과 없음
+📍 자동 연결 대상 발견: 24-0000013834
+! BLE 스캔 에러: scan throttle (code 2147483646)
+📍 BLE 스캔 결과 없음
+📍 자동 연결 대상 발견: 24-0000013834
+! BLE 스캔 에러: scan throttle (code 2147483646)
+... (무한 반복)
+```
+
+**원인:**
+- `_getLocation()`이 100ms마다 호출
+- 매번 `checkAndConnect()` 호출 → BLE 스캔 시도
+- 스캔 실패해도 쿨다운 등록 안됨 → 무한 재시도
+
+**해결 방안: 스캔 쓰로틀링 추가**
+```dart
+// auto_ble_connection_service.dart (수정)
+class AutoBleConnectionService {
+  // ... 기존 코드 ...
+
+  /// 마지막 스캔 시도 시간
+  DateTime? _lastScanAttempt;
+
+  /// 스캔 최소 간격 (10초)
+  static const Duration _scanInterval = Duration(seconds: 10);
+
+  Future<void> checkAndConnect(double latitude, double longitude) async {
+    if (!isEnabled) return;
+    if (_isConnecting) return;
+
+    // ⭐ 스캔 쓰로틀링: 마지막 스캔 후 10초 이내면 스킵
+    if (_lastScanAttempt != null &&
+        DateTime.now().difference(_lastScanAttempt!) < _scanInterval) {
+      return;
+    }
+
+    try {
+      _isConnecting = true;
+      _lastScanAttempt = DateTime.now();  // ⭐ 스캔 시도 시간 기록
+
+      // ... 기존 로직 ...
+    } finally {
+      _isConnecting = false;
+    }
+  }
+}
+```
+
+**수정 후 동작:**
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. 비IOT 음향신호기 30m 진입                                              │
+│    → GPS 조회: SignalDevice 발견                                         │
+│    → BLE 스캔 → 결과 없음                                                 │
+│    → 스캔 시도 시간 기록                                                  │
+│                                                                         │
+│ 2. 100ms ~ 10초 동안                                                     │
+│    → checkAndConnect() 호출 → 스캔 쓰로틀링으로 스킵 ✅                   │
+│                                                                         │
+│ 3. 10초 후                                                               │
+│    → 다시 BLE 스캔 시도 (적절한 간격)                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+##### 수정 상세 계획
+
+**핵심 문제: CSV에 MAC 주소 없음**
+
+| 데이터 | MAC 주소 | GPS 좌표 |
+|--------|----------|----------|
+| CSV (SignalDevice) | ❌ 없음 | ✅ 있음 |
+| BLE 스캔 (Crosswalk) | ✅ 있음 | ❌ 없음 |
+
+→ BLE MAC 주소와 SignalDevice를 매칭할 방법이 없음
+→ **GPS 좌표 기반 쿨다운**으로 해결
+
+**BLE 기기 선택 방식 (참고)**
+
+```dart
+// 현재 코드 - RSSI(신호 강도) 기준 정렬
+final sortedDevices = List<Crosswalk>.from(scannedDevices)
+  ..sort((a, b) => b.post.rssi.compareTo(a.post.rssi));
+final targetCrosswalk = sortedDevices.first;  // 가장 강한 신호 = 가장 가까운 기기
+```
+
+| RSSI 값 | 의미 |
+|---------|------|
+| -30 dBm | 매우 강함 (아주 가까움) |
+| -60 dBm | 보통 |
+| -90 dBm | 약함 (멀리 있음) |
+
+→ 8개 기기 중 **랜덤이 아니라 가장 가까운 기기** 선택
+
+---
+
+**1. AutoConnectCooldownManager 전면 수정 (GPS 좌표 기반)**
+
+**파일**: `lib/core/utils/auto_connect_cooldown_manager.dart`
+
+```dart
+import 'package:latlong2/latlong.dart';
+
+/// 자동 연결 쿨다운 관리 (GPS 좌표 기반)
+///
+/// - 연결 성공한 위치를 저장
+/// - 같은 위치(50m 이내)에서 재연결 방지
+/// - 위치 이탈(100m 이상) 시 쿨다운 해제
+class AutoConnectCooldownManager {
+  final List<LatLng> _connectedLocations = [];
+
+  /// 쿨다운 반경 (이 거리 이내면 재연결 안함)
+  static const double _cooldownRadius = 50.0; // 50m
+
+  /// 쿨다운 해제 거리 (이 거리 이상 벗어나면 쿨다운 해제)
+  static const double _releaseRadius = 100.0; // 100m
+
+  /// 연결 성공한 위치 등록
+  void addCooldown(double latitude, double longitude) {
+    _connectedLocations.add(LatLng(latitude, longitude));
+  }
+
+  /// 현재 위치가 쿨다운 범위 내인지 확인
+  ///
+  /// 50m 이내에서 이미 연결한 적 있으면 true
+  bool isInCooldown(double latitude, double longitude) {
+    for (final location in _connectedLocations) {
+      final distance = _calculateDistanceMeters(
+        latitude, longitude,
+        location.latitude, location.longitude,
+      );
+      if (distance < _cooldownRadius) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// 현재 위치에서 멀리 벗어난 쿨다운 해제
+  ///
+  /// 100m 이상 벗어난 위치의 쿨다운 제거
+  void updateCooldowns(double latitude, double longitude) {
+    _connectedLocations.removeWhere((location) {
+      final distance = _calculateDistanceMeters(
+        latitude, longitude,
+        location.latitude, location.longitude,
+      );
+      return distance > _releaseRadius;
+    });
+  }
+
+  /// 전체 초기화
+  void clearAll() {
+    _connectedLocations.clear();
+  }
+
+  /// 두 좌표 사이 거리 계산 (미터)
+  double _calculateDistanceMeters(
+    double lat1, double lon1,
+    double lat2, double lon2,
+  ) {
+    const Distance distance = Distance();
+    return distance.as(
+      LengthUnit.Meter,
+      LatLng(lat1, lon1),
+      LatLng(lat2, lon2),
+    );
+  }
+}
+```
+
+**동작 시나리오:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. 사거리 진입 (위치: 37.497, 126.906)                                    │
+│    → BLE 스캔 → 가장 가까운 기기 연결 (RSSI 기준)                         │
+│    → 쿨다운 등록: (37.497, 126.906)                                      │
+│    → TTS: "음향신호기에 연결되었습니다"                                   │
+│                                                                         │
+│ 2. 같은 사거리 내 이동 (30m 이동)                                         │
+│    → isInCooldown(37.4972, 126.9063) → 50m 이내 → true                  │
+│    → 재연결 안함 ✅                                                      │
+│                                                                         │
+│ 3. 사거리 벗어남 (150m 이동)                                              │
+│    → updateCooldowns() → 100m 이상 벗어남 → 쿨다운 해제                  │
+│                                                                         │
+│ 4. 다른 사거리 진입                                                      │
+│    → isInCooldown() → false → 새로 연결 ✅                               │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+**2. AutoBleConnectionService 수정**
+
+**파일**: `lib/data/services/auto_ble_connection_service.dart`
+
+```dart
+import 'package:flutter/foundation.dart';
+import 'package:safelight/core/utils/auto_connect_cooldown_manager.dart';
+import 'package:safelight/data/services/tts_service.dart';
+import 'package:safelight/framework/core.dart';
+import 'package:safelight/framework/object.dart';
+import 'package:safelight/framework/usecase.dart';
+
+/// 자동 BLE 연결 서비스
+class AutoBleConnectionService {
+  final GetNearbySignalDevices _getNearbySignalDevices;
+  final SearchCrosswalk _searchCrosswalk;
+  final ConnectCrosswalk _sendAcousticSignal;
+  final TtsService _ttsService;
+  final AutoConnectCooldownManager _cooldownManager;
+
+  /// 자동 연결 활성화 여부
+  bool isEnabled = true;
+
+  /// 현재 연결 중인지 여부 (중복 연결 방지)
+  bool _isConnecting = false;
+
+  /// 마지막 스캔 시도 시간 (쓰로틀링용)
+  DateTime? _lastScanAttempt;
+
+  /// 트리거 거리 (미터)
+  static const double triggerDistance = 30.0;
+
+  /// 스캔 최소 간격 (10초)
+  static const Duration _scanInterval = Duration(seconds: 10);
+
+  AutoBleConnectionService({
+    required GetNearbySignalDevices getNearbySignalDevices,
+    required SearchCrosswalk searchCrosswalk,
+    required ConnectCrosswalk sendAcousticSignal,
+    required TtsService ttsService,
+    required AutoConnectCooldownManager cooldownManager,
+  })  : _getNearbySignalDevices = getNearbySignalDevices,
+        _searchCrosswalk = searchCrosswalk,
+        _sendAcousticSignal = sendAcousticSignal,
+        _ttsService = ttsService,
+        _cooldownManager = cooldownManager;
+
+  /// GPS 위치 업데이트 시 호출
+  Future<void> checkAndConnect(double latitude, double longitude) async {
+    if (!isEnabled) return;
+    if (_isConnecting) return;
+
+    // ⭐ [버그2 수정] 스캔 쓰로틀링: 10초 이내 재시도 방지
+    if (_lastScanAttempt != null &&
+        DateTime.now().difference(_lastScanAttempt!) < _scanInterval) {
+      return;
+    }
+
+    // ⭐ [버그1 수정] GPS 좌표 기반 쿨다운 확인
+    if (_cooldownManager.isInCooldown(latitude, longitude)) {
+      return;  // 50m 이내에서 이미 연결함
+    }
+
+    try {
+      _isConnecting = true;
+      _lastScanAttempt = DateTime.now();
+
+      // 1. 쿨다운 업데이트 (100m 이상 벗어난 위치 해제)
+      _cooldownManager.updateCooldowns(latitude, longitude);
+
+      // 2. 30m 이내 SignalDevice 조회
+      final result = await _getNearbySignalDevices(
+        NearbySignalDevicesParams(
+          latitude: latitude,
+          longitude: longitude,
+          radiusInMeters: triggerDistance,
+        ),
+      );
+
+      final nearbyDevices = result.fold(
+        (failure) => <SignalDevice>[],
+        (devices) => devices,
+      );
+
+      if (nearbyDevices.isEmpty) return;
+
+      debugPrint('📍 주변 음향신호기 ${nearbyDevices.length}개 발견');
+
+      // 3. BLE 스캔
+      _ttsService.speakAutoConnectStarted();
+
+      final scanResult = await _searchCrosswalk(NoParams());
+      final List<Crosswalk> scannedDevices = scanResult.fold(
+        (failure) => <Crosswalk>[],
+        (devices) => devices ?? <Crosswalk>[],
+      );
+
+      if (scannedDevices.isEmpty) {
+        debugPrint('📍 BLE 스캔 결과 없음');
+        return;
+      }
+
+      // 4. 가장 강한 신호(RSSI)의 기기 선택 = 가장 가까운 기기
+      final sortedDevices = List<Crosswalk>.from(scannedDevices)
+        ..sort((a, b) => b.post.rssi.compareTo(a.post.rssi));
+      final targetCrosswalk = sortedDevices.first;
+
+      debugPrint('📍 자동 연결 시도: ${targetCrosswalk.name} (RSSI: ${targetCrosswalk.post.rssi})');
+
+      // 5. 자동 연결 및 신호안내 전송
+      await _sendAcousticSignal(targetCrosswalk);
+
+      _ttsService.speakAutoConnectSuccess();
+
+      // ⭐ [버그1 수정] GPS 좌표로 쿨다운 등록
+      _cooldownManager.addCooldown(latitude, longitude);
+
+      debugPrint('✅ 자동 연결 성공 (쿨다운 등록: $latitude, $longitude)');
+    } catch (e) {
+      debugPrint('❌ 자동 연결 실패: $e');
+      _ttsService.speakAutoConnectFailed();
+    } finally {
+      _isConnecting = false;
+    }
+  }
+}
+```
+
+---
+
+##### 수정 체크리스트
+
+- [ ] `lib/core/utils/auto_connect_cooldown_manager.dart` - 전면 수정
+  - [ ] `Set<String>` → `List<LatLng>` 변경
+  - [ ] `addCooldown(lat, lng)` - 좌표 저장
+  - [ ] `isInCooldown(lat, lng)` - 50m 이내 확인
+  - [ ] `updateCooldowns(lat, lng)` - 100m 이상 벗어난 쿨다운 해제
+  - [ ] `_calculateDistanceMeters()` - 거리 계산 유틸
+- [ ] `lib/data/services/auto_ble_connection_service.dart` - 수정
+  - [ ] `_lastScanAttempt` 필드 추가
+  - [ ] `_scanInterval` 상수 추가 (10초)
+  - [ ] `checkAndConnect()` 시작 부분에 쓰로틀링 로직 추가
+  - [ ] `checkAndConnect()` 시작 부분에 GPS 좌표 기반 쿨다운 확인 추가
+  - [ ] 쿨다운 등록을 GPS 좌표로 변경
+  - [ ] `updateCooldowns()` 호출 위치 변경
 - [ ] `flutter build apk` 빌드 테스트
-- [ ] 실기기 테스트 (GPS + BLE)
+- [ ] 실기기 테스트
+  - [ ] 사거리 테스트: 같은 위치에서 1번만 연결되는지 확인
+  - [ ] 이동 후 테스트: 100m 이상 벗어난 후 다시 연결되는지 확인
+  - [ ] 비IOT 음향신호기 테스트: 10초 간격으로만 스캔되는지 확인
 
 ---
 
@@ -992,5 +1456,5 @@ emit(ConnectOff());
 ---
 
 **작성자**: SafeLight 개발팀
-**최종 수정**: 2026-01-20
-**버전**: 1.2 (연결 후 명령 버튼 UI 추가)
+**최종 수정**: 2026-01-21
+**버전**: 1.3 (Phase 3 구현 완료, 버그 수정 필요)

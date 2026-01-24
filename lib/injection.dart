@@ -420,7 +420,7 @@ Future<void> init() async {
     () => AutoBleConnectionService(
       getNearbySignalDevices: DI(),
       searchCrosswalk: DI(instanceName: USECASE_SEARCH_CROSSWALK_FINITE),
-      sendAcousticSignal: DI(instanceName: USECASE_SEND_ACOUSTIC_SIGNAL),
+      sendAcousticSignal: DI(instanceName: USECASE_SEND_VOICE_INDUCTOR),
       ttsService: DI(),
       cooldownManager: DI(),
     ),
