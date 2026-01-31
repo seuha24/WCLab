@@ -10,7 +10,7 @@ const _kSignalDevicePoiDebug = true;
 
 /// 음향신호기-교차로 POI 서비스
 ///
-/// 서울시 공공데이터 음향신호기와 교차로를 매칭하여
+/// C-ITS API 음향신호기와 교차로를 매칭하여
 /// POI 안내에 활용할 수 있는 PlaceResult로 변환합니다.
 ///
 /// **핵심 로직:**
@@ -19,8 +19,8 @@ const _kSignalDevicePoiDebug = true;
 /// 3. 교차로 없을 시: "횡단보도"
 /// 4. 같은 위치(10m 반경) 음향신호기는 가장 가까운 것만 반환
 class SignalDevicePoiService {
-  final SignalDeviceRepository signalDeviceRepository;
-  final IntersectionRepository intersectionRepository;
+  final CitsCrosswalkRepository citsCrosswalkRepository;
+  final CitsJunctionRepository citsJunctionRepository;
 
   /// 음향신호기-교차로 매칭 반경 (미터)
   static const double matchingRadiusMeters = 30.0;
@@ -29,17 +29,17 @@ class SignalDevicePoiService {
   static const double groupingRadiusMeters = 10.0;
 
   /// 캐시된 모든 교차로 (앱 시작 시 로드)
-  List<Intersection> _cachedIntersections = [];
+  List<CitsJunction> _cachedIntersections = [];
 
   /// 캐시된 모든 음향신호기 (앱 시작 시 로드)
-  List<SignalDevice> _cachedSignalDevices = [];
+  List<CitsCrosswalk> _cachedSignalDevices = [];
 
   /// 초기화 여부
   bool _isInitialized = false;
 
   SignalDevicePoiService({
-    required this.signalDeviceRepository,
-    required this.intersectionRepository,
+    required this.citsCrosswalkRepository,
+    required this.citsJunctionRepository,
   });
 
   /// 데이터 초기화 (앱 시작 시 호출)
@@ -50,14 +50,14 @@ class SignalDevicePoiService {
 
     // 병렬로 데이터 로드
     final results = await Future.wait([
-      signalDeviceRepository.loadAllSignalDevices(),
-      intersectionRepository.loadAllIntersections(),
+      citsCrosswalkRepository.loadAllCrosswalks(),
+      citsJunctionRepository.loadAllJunctions(),
     ]);
 
     results[0].fold(
       (failure) => _log('음향신호기 로드 실패: $failure'),
       (devices) {
-        _cachedSignalDevices = devices as List<SignalDevice>;
+        _cachedSignalDevices = devices as List<CitsCrosswalk>;
         _log('음향신호기 ${_cachedSignalDevices.length}개 로드 완료');
       },
     );
@@ -65,7 +65,7 @@ class SignalDevicePoiService {
     results[1].fold(
       (failure) => _log('교차로 로드 실패: $failure'),
       (intersections) {
-        _cachedIntersections = intersections as List<Intersection>;
+        _cachedIntersections = intersections as List<CitsJunction>;
         _log('교차로 ${_cachedIntersections.length}개 로드 완료');
       },
     );
@@ -119,8 +119,8 @@ class SignalDevicePoiService {
         device.longitude,
       );
 
-      final name = matchedIntersection != null
-          ? TtsMessages.crosswalkWithIntersection(matchedIntersection.name)
+      final name = (matchedIntersection != null && matchedIntersection.name != null)
+          ? TtsMessages.crosswalkWithIntersection(matchedIntersection.name!)
           : TtsMessages.crosswalkOnly;
 
       results.add(PlaceResult(
@@ -140,8 +140,8 @@ class SignalDevicePoiService {
   }
 
   /// 반경 내 음향신호기 필터링
-  List<SignalDevice> _filterByRadius(
-    List<SignalDevice> devices,
+  List<CitsCrosswalk> _filterByRadius(
+    List<CitsCrosswalk> devices,
     double centerLat,
     double centerLng,
     double radiusMeters,
@@ -158,15 +158,15 @@ class SignalDevicePoiService {
   }
 
   /// 중복 음향신호기 제거 (그룹화 반경 내 가장 가까운 것만 선택)
-  List<SignalDevice> _removeDuplicates(
-    List<SignalDevice> devices,
+  List<CitsCrosswalk> _removeDuplicates(
+    List<CitsCrosswalk> devices,
     double userLat,
     double userLng,
   ) {
     if (devices.isEmpty) return [];
 
     // 거리순 정렬
-    final sorted = List<SignalDevice>.from(devices);
+    final sorted = List<CitsCrosswalk>.from(devices);
     sorted.sort((a, b) {
       final distA = Calculators.calculateDistance(
         userLat,
@@ -184,7 +184,7 @@ class SignalDevicePoiService {
     });
 
     // 그룹화 반경 내 중복 제거
-    final unique = <SignalDevice>[];
+    final unique = <CitsCrosswalk>[];
     final usedIndices = <int>{};
 
     for (int i = 0; i < sorted.length; i++) {
@@ -216,10 +216,10 @@ class SignalDevicePoiService {
   /// 음향신호기 위치에서 가장 가까운 교차로 찾기
   ///
   /// 매칭 반경(30m) 내 교차로가 없으면 null 반환
-  Intersection? _findNearestIntersection(double deviceLat, double deviceLng) {
+  CitsJunction? _findNearestIntersection(double deviceLat, double deviceLng) {
     if (_cachedIntersections.isEmpty) return null;
 
-    Intersection? nearest;
+    CitsJunction? nearest;
     double minDistance = double.infinity;
 
     for (final intersection in _cachedIntersections) {

@@ -74,7 +74,7 @@ class CitsJunctionRepositoryImpl implements CitsJunctionRepository {
   @override
   Future<Either<Failure, List<CitsJunction>>> loadAllJunctions() async {
     try {
-      final junctions = await localDataSource.loadAll();
+      final junctions = await localDataSource.loadAllJunctions();
       return Right(junctions);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message ?? '캐시 오류'));

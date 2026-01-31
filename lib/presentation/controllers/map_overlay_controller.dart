@@ -297,9 +297,9 @@ class MapOverlayController {
 
     try {
       // UseCase로 주변 음향신호기 조회
-      final getNearbySignalDevices = DI<GetNearbySignalDevices>();
+      final getNearbySignalDevices = DI<GetNearbyCitsCrosswalks>();
       final result = await getNearbySignalDevices(
-        NearbySignalDevicesParams(
+        NearbyCitsCrosswalksParams(
           latitude: latitude,
           longitude: longitude,
           radiusInMeters: radiusInMeters,
@@ -324,15 +324,15 @@ class MapOverlayController {
 
   /// 지도에 음향신호기 마커 업데이트
   Future<void> _updateSignalDeviceMarkersOnMap(
-    List<SignalDevice> devices,
+    List<CitsCrosswalk> devices,
   ) async {
     if (mapController == null) return;
 
     final context = navigatorKey.currentContext;
     if (context == null) return;
 
-    // 현재 표시할 마커 ID 집합
-    final currentIds = devices.map((d) => d.managementId).toSet();
+    // 현재 표시할 마커 ID 집합 (고유 ID가 없으면 좌표로 생성)
+    final currentIds = devices.map((d) => d.cwMgmtKey ?? '${d.latitude}_${d.longitude}').toSet();
 
     // 1. 더 이상 표시하지 않을 마커 제거
     final toRemove = <String>[];
@@ -353,16 +353,17 @@ class MapOverlayController {
     // 2. 새로운 마커 추가
     final newMarkers = <NAddableOverlay>{};
     for (final device in devices) {
-      if (!_signalDeviceMarkers.containsKey(device.managementId)) {
+      final deviceId = device.cwMgmtKey ?? '${device.latitude}_${device.longitude}';
+      if (!_signalDeviceMarkers.containsKey(deviceId)) {
         // 방향별 아이콘 가져오기 (캐시에 없으면 생성)
         final icon = await _getOrCreateDirectionIcon(context, device.direction);
 
         final marker = NMarker(
-          id: 'crosswalk_${device.managementId}',
+          id: 'crosswalk_$deviceId',
           position: NLatLng(device.latitude, device.longitude),
           icon: icon,
         );
-        _signalDeviceMarkers[device.managementId] = marker;
+        _signalDeviceMarkers[deviceId] = marker;
         newMarkers.add(marker);
       }
     }
@@ -519,9 +520,9 @@ class MapOverlayController {
 
     try {
       // UseCase로 주변 교차로 조회
-      final getNearbyIntersections = DI<GetNearbyIntersections>();
+      final getNearbyIntersections = DI<GetNearbyCitsJunctions>();
       final result = await getNearbyIntersections(
-        NearbyIntersectionsParams(
+        NearbyCitsJunctionsParams(
           latitude: latitude,
           longitude: longitude,
           radiusInMeters: radiusInMeters,
@@ -546,15 +547,15 @@ class MapOverlayController {
 
   /// 지도에 교차로 마커 업데이트
   Future<void> _updateIntersectionMarkersOnMap(
-    List<Intersection> intersections,
+    List<CitsJunction> intersections,
   ) async {
     if (mapController == null) return;
 
     final context = navigatorKey.currentContext;
     if (context == null) return;
 
-    // 현재 표시할 마커 ID 집합
-    final currentIds = intersections.map((i) => i.intersectionId).toSet();
+    // 현재 표시할 마커 ID 집합 (고유 ID가 없으면 좌표로 생성)
+    final currentIds = intersections.map((i) => i.intersectionId ?? '${i.latitude}_${i.longitude}').toSet();
 
     // 1. 더 이상 표시하지 않을 마커 제거
     final toRemove = <String>[];
@@ -578,13 +579,14 @@ class MapOverlayController {
     // 3. 새로운 마커 추가
     final newMarkers = <NAddableOverlay>{};
     for (final intersection in intersections) {
-      if (!_intersectionMarkers.containsKey(intersection.intersectionId)) {
+      final intersectionId = intersection.intersectionId ?? '${intersection.latitude}_${intersection.longitude}';
+      if (!_intersectionMarkers.containsKey(intersectionId)) {
         final marker = NMarker(
-          id: 'intersection_${intersection.intersectionId}',
+          id: 'intersection_$intersectionId',
           position: NLatLng(intersection.latitude, intersection.longitude),
           icon: _intersectionIcon!,
         );
-        _intersectionMarkers[intersection.intersectionId] = marker;
+        _intersectionMarkers[intersectionId] = marker;
         newMarkers.add(marker);
       }
     }

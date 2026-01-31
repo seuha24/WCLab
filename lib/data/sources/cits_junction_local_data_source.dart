@@ -5,7 +5,7 @@ part of '../../framework/data_source.dart';
 /// CSV 파일 저장/로드 및 메모리 캐싱
 abstract class CitsJunctionLocalDataSource {
   /// 모든 교차로 데이터 로드
-  Future<List<CitsJunctionModel>> loadAll();
+  Future<List<CitsJunctionModel>> loadAllJunctions();
 
   /// 반경 내 교차로 필터링
   Future<List<CitsJunctionModel>> getWithinRadius({
@@ -34,7 +34,7 @@ class CitsJunctionLocalDataSourceImpl implements CitsJunctionLocalDataSource {
   List<CitsJunctionModel>? _cache;
 
   @override
-  Future<List<CitsJunctionModel>> loadAll() async {
+  Future<List<CitsJunctionModel>> loadAllJunctions() async {
     if (_cache != null) return _cache!;
 
     try {
@@ -44,7 +44,8 @@ class CitsJunctionLocalDataSourceImpl implements CitsJunctionLocalDataSource {
         final file = File('${directory.path}/$_csvFileName');
         csvString = await file.readAsString();
       } else {
-        csvString = await rootBundle.loadString('lib/assets/data/seoul_junction.csv');
+        csvString =
+            await rootBundle.loadString('lib/assets/data/seoul_junction.csv');
       }
 
       final junctions = _parseCsv(csvString);
@@ -61,7 +62,7 @@ class CitsJunctionLocalDataSourceImpl implements CitsJunctionLocalDataSource {
     required double longitude,
     required double radiusInMeters,
   }) async {
-    final all = await loadAll();
+    final all = await loadAllJunctions();
     return all.where((j) {
       return _isWithinRadius(
         lat1: latitude,

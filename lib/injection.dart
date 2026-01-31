@@ -84,8 +84,8 @@ Future<void> init() async {
   // 음향신호기-교차로 POI 서비스
   DI.registerLazySingleton<SignalDevicePoiService>(
     () => SignalDevicePoiService(
-      signalDeviceRepository: DI(),
-      intersectionRepository: DI(),
+      citsCrosswalkRepository: DI(),
+      citsJunctionRepository: DI(),
     ),
   );
 
