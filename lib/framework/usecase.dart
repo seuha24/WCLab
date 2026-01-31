@@ -16,3 +16,6 @@ part '../domain/usecases/service_usecase.dart';
 part '../domain/usecases/send_startpoint_params.dart';
 part '../domain/usecases/signal_device_usecase.dart';
 part '../domain/usecases/intersection_usecase.dart';
+part '../domain/usecases/cits_version_usecase.dart';
+part '../domain/usecases/cits_junction_usecase.dart';
+part '../domain/usecases/cits_crosswalk_usecase.dart';

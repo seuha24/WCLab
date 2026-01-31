@@ -149,6 +149,36 @@ class NaverMapView extends GetView<NaverMapViewController> {
                   child: Icon(Icons.campaign, color: Colors.white),
                   tooltip: '주변 건물 자동 알림',
                 )),
+
+                // C-ITS 교차로 토글 FAB
+                SizedBox(height: 16),
+                Obx(() => FloatingActionButton(
+                  heroTag: 'citsJunctions',
+                  onPressed: () {
+                    controller.toggleCitsJunctions();
+                    HapticFeedback.mediumImpact();
+                  },
+                  backgroundColor: controller.showCitsJunctions.value
+                      ? Colors.blue
+                      : Colors.grey,
+                  child: Icon(Icons.traffic, color: Colors.white),
+                  tooltip: 'C-ITS 교차로',
+                )),
+
+                // C-ITS 음향신호기 토글 FAB
+                SizedBox(height: 16),
+                Obx(() => FloatingActionButton(
+                  heroTag: 'citsCrosswalks',
+                  onPressed: () {
+                    controller.toggleCitsCrosswalks();
+                    HapticFeedback.mediumImpact();
+                  },
+                  backgroundColor: controller.showCitsCrosswalks.value
+                      ? Colors.teal
+                      : Colors.grey,
+                  child: Icon(Icons.accessible, color: Colors.white),
+                  tooltip: 'C-ITS 음향신호기',
+                )),
               ],
             ),
           ),

@@ -224,6 +224,45 @@ Future<void> init() async {
     () => LoadAllIntersections(repository: DI()),
   );
 
+  // C-ITS Version UseCase
+  DI.registerLazySingleton<GetCitsVersions>(
+    () => GetCitsVersions(repository: DI()),
+  );
+
+  // C-ITS Junction UseCase
+  DI.registerLazySingleton<SyncCitsJunctions>(
+    () => SyncCitsJunctions(repository: DI()),
+  );
+
+  DI.registerLazySingleton<GetNearbyCitsJunctions>(
+    () => GetNearbyCitsJunctions(repository: DI()),
+  );
+
+  DI.registerLazySingleton<GetLocalCitsJunctionsVersion>(
+    () => GetLocalCitsJunctionsVersion(repository: DI()),
+  );
+
+  DI.registerLazySingleton<LoadAllCitsJunctions>(
+    () => LoadAllCitsJunctions(repository: DI()),
+  );
+
+  // C-ITS Crosswalk UseCase
+  DI.registerLazySingleton<SyncCitsCrosswalks>(
+    () => SyncCitsCrosswalks(repository: DI()),
+  );
+
+  DI.registerLazySingleton<GetNearbyCitsCrosswalks>(
+    () => GetNearbyCitsCrosswalks(repository: DI()),
+  );
+
+  DI.registerLazySingleton<GetLocalCitsCrosswalksVersion>(
+    () => GetLocalCitsCrosswalksVersion(repository: DI()),
+  );
+
+  DI.registerLazySingleton<LoadAllCitsCrosswalks>(
+    () => LoadAllCitsCrosswalks(repository: DI()),
+  );
+
   // repository injection area
   DI.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authDataSource: DI()),
@@ -263,6 +302,27 @@ Future<void> init() async {
   // Intersection (공공데이터 교차로) Repository
   DI.registerLazySingleton<IntersectionRepository>(
     () => IntersectionRepositoryImpl(localDataSource: DI()),
+  );
+
+  // C-ITS Version Repository
+  DI.registerLazySingleton<CitsVersionRepository>(
+    () => CitsVersionRepositoryImpl(remoteDataSource: DI()),
+  );
+
+  // C-ITS Junction Repository
+  DI.registerLazySingleton<CitsJunctionRepository>(
+    () => CitsJunctionRepositoryImpl(
+      remoteDataSource: DI(),
+      localDataSource: DI(),
+    ),
+  );
+
+  // C-ITS Crosswalk Repository
+  DI.registerLazySingleton<CitsCrosswalkRepository>(
+    () => CitsCrosswalkRepositoryImpl(
+      remoteDataSource: DI(),
+      localDataSource: DI(),
+    ),
   );
 
   DI.registerLazySingleton<SensorStreams>(() => SensorStreamsImpl());
@@ -375,6 +435,29 @@ Future<void> init() async {
   // Intersection (공공데이터 교차로) DataSource
   DI.registerLazySingleton<IntersectionLocalDataSource>(
     () => IntersectionLocalDataSourceImpl(),
+  );
+
+  // C-ITS Version DataSource
+  DI.registerLazySingleton<CitsVersionRemoteDataSource>(
+    () => CitsVersionRemoteDataSourceImpl(dio: DI()),
+  );
+
+  // C-ITS Junction DataSource
+  DI.registerLazySingleton<CitsJunctionRemoteDataSource>(
+    () => CitsJunctionRemoteDataSourceImpl(dio: DI()),
+  );
+
+  DI.registerLazySingleton<CitsJunctionLocalDataSource>(
+    () => CitsJunctionLocalDataSourceImpl(),
+  );
+
+  // C-ITS Crosswalk DataSource
+  DI.registerLazySingleton<CitsCrosswalkRemoteDataSource>(
+    () => CitsCrosswalkRemoteDataSourceImpl(dio: DI()),
+  );
+
+  DI.registerLazySingleton<CitsCrosswalkLocalDataSource>(
+    () => CitsCrosswalkLocalDataSourceImpl(),
   );
 
   // 카카오 로컬 API 서비스 (장소 검색, 역지오코딩)

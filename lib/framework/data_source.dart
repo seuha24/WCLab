@@ -2,8 +2,10 @@ library;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show HttpResponse, Platform;
+import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -41,3 +43,9 @@ part '../data/sources/ambientlightlevel.data_source.dart';
 part '../data/sources/signal_device_local_data_source.dart';
 
 part '../data/sources/intersection_local_data_source.dart';
+
+part '../data/sources/cits_version_remote_data_source.dart';
+part '../data/sources/cits_junction_remote_data_source.dart';
+part '../data/sources/cits_junction_local_data_source.dart';
+part '../data/sources/cits_crosswalk_remote_data_source.dart';
+part '../data/sources/cits_crosswalk_local_data_source.dart';

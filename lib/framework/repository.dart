@@ -42,3 +42,12 @@ part '../data/repositories/signal_device_repository_impl.dart';
 
 part '../domain/repositories/intersection_repository.dart';
 part '../data/repositories/intersection_repository_impl.dart';
+
+part '../domain/repositories/cits_version_repository.dart';
+part '../data/repositories/cits_version_repository_impl.dart';
+
+part '../domain/repositories/cits_junction_repository.dart';
+part '../data/repositories/cits_junction_repository_impl.dart';
+
+part '../domain/repositories/cits_crosswalk_repository.dart';
+part '../data/repositories/cits_crosswalk_repository_impl.dart';

@@ -62,4 +62,28 @@ class ApiEndpoints {
   // 경로 즐겨찾기 수정 1-8
   static const String updateFavoriteRoute =
       '$API_BASE_URL/api/favorites/routes/alter';
+
+  /// C-ITS 관련 엔드포인트
+  // C-ITS 교차로 정보 조회 2-1
+  static String getCitsJunctionNearest(double longitude, double latitude) {
+    return '$API_BASE_URL/api/location/junctions/nearest'
+        '?lon=$longitude&lat=$latitude';
+  }
+
+  // C-ITS 교차로 정보 다운로드 2-2
+  static const String downloadCitsJunctions =
+      '$API_BASE_URL/api/location/junctions/download';
+
+  // C-ITS 동기화 2-3
+  static const String syncCitsVersion = '$API_BASE_URL/api/location/sync';
+
+  // C-ITS 음향신호기 정보 조회 2-4
+  static String getCitsCrosswalkNearest(double longitude, double latitude) {
+    return '$API_BASE_URL/api/location/crosswalk/nearest'
+        '?lon=$longitude&lat=$latitude';
+  }
+
+  // C-ITS 음향신호기 정보 다운로드 2-5
+  static const String downloadCitsCrosswalk =
+      '$API_BASE_URL/api/location/crosswalk/download';
 }
