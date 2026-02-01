@@ -37,7 +37,7 @@ import 'package:safelight/core/utils/weighted_average_filter.dart';
 import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/domain/repositories/kakao_repository.dart';
 import 'package:safelight/domain/repositories/local_poi_repository.dart';
-import 'package:safelight/data/services/signal_device_poi_service.dart';
+import 'package:safelight/data/services/crosswalk_poi_service.dart';
 import 'package:safelight/core/utils/tts_messages.dart';
 import 'package:safelight/main.dart';
 import 'package:sensors_plus/sensors_plus.dart';

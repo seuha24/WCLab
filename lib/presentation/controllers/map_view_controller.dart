@@ -248,22 +248,6 @@ class NaverMapViewController extends GetxController {
   // C-ITS 관련 변수들
   // ============================================================
 
-  /// C-ITS 교차로 표시 여부
-  RxBool showCitsJunctions = false.obs;
-
-  /// C-ITS 음향신호기 표시 여부
-  RxBool showCitsCrosswalks = false.obs;
-
-  /// C-ITS UseCase 인스턴스
-  final GetNearbyCitsJunctions _getNearbyCitsJunctions =
-      DI.get<GetNearbyCitsJunctions>();
-  final GetNearbyCitsCrosswalks _getNearbyCitsCrosswalks =
-      DI.get<GetNearbyCitsCrosswalks>();
-
-  /// C-ITS 마커 ID 목록
-  final List<String> _citsJunctionMarkerIds = [];
-  final List<String> _citsCrosswalkMarkerIds = [];
-
   /// 출발지 이탈 시작 시간
   DateTime? _startPointDeviationTime;
 
@@ -1027,9 +1011,13 @@ class NaverMapViewController extends GetxController {
     final List<BranchInfo> branchInfo = routeController.branchinfo;
     if (branchInfo.isEmpty) return;
     if (indexController.currentIndex < 0 ||
-        indexController.currentIndex >= branchInfo.length) return;
+        indexController.currentIndex >= branchInfo.length) {
+      return;
+    }
     if (indexController.targetIndex < 0 ||
-        indexController.targetIndex >= branchInfo.length) return;
+        indexController.targetIndex >= branchInfo.length) {
+      return;
+    }
 
     // 복귀 방향 안내
     clock = guidanceCalculator.getGuidanceDirection(
@@ -1370,7 +1358,7 @@ class NaverMapViewController extends GetxController {
     );
 
     // 교차로 마커 업데이트 (비동기, 50m 이상 이동 시에만 갱신)
-    overlayController.updateIntersectionMarkers(
+    overlayController.updateJunctionMarkers(
       latitude: latitude,
       longitude: longitude,
     );
@@ -1557,184 +1545,4 @@ class NaverMapViewController extends GetxController {
     }
   }
 
-  // ============================================================
-  // C-ITS 관련 메서드들
-  // ============================================================
-
-  /// C-ITS 교차로 토글
-//   Future<void> toggleCitsJunctions() async {
-//     showCitsJunctions.value = !showCitsJunctions.value;
-
-//     if (showCitsJunctions.value) {
-//       // 교차로 표시 ON
-//       showCitsCrosswalks.value = false; // 음향신호기는 OFF
-//       await updateCitsJunctionMarkers();
-//       tts.speakWithChannel(
-//         '교차로 표시를 켰습니다.',
-//         channel: ETtsChannel.FEEDBACK,
-//         cooldownKey: 'cits_junctions_toggle',
-//         cooldown: Duration(seconds: 0),
-//       );
-//     } else {
-//       // 교차로 표시 OFF
-//       await clearCitsJunctionMarkers();
-//       tts.speakWithChannel(
-//         '교차로 표시를 껐습니다.',
-//         channel: ETtsChannel.FEEDBACK,
-//         cooldownKey: 'cits_junctions_toggle',
-//         cooldown: Duration(seconds: 0),
-//       );
-//     }
-//   }
-
-//   /// C-ITS 음향신호기 토글
-//   Future<void> toggleCitsCrosswalks() async {
-//     showCitsCrosswalks.value = !showCitsCrosswalks.value;
-
-//     if (showCitsCrosswalks.value) {
-//       // 음향신호기 표시 ON
-//       showCitsJunctions.value = false; // 교차로는 OFF
-//       await updateCitsCrosswalkMarkers();
-//       tts.speakWithChannel(
-//         '음향신호기 표시를 켰습니다.',
-//         channel: ETtsChannel.FEEDBACK,
-//         cooldownKey: 'cits_crosswalks_toggle',
-//         cooldown: Duration(seconds: 0),
-//       );
-//     } else {
-//       // 음향신호기 표시 OFF
-//       await clearCitsCrosswalkMarkers();
-//       tts.speakWithChannel(
-//         '음향신호기 표시를 껐습니다.',
-//         channel: ETtsChannel.FEEDBACK,
-//         cooldownKey: 'cits_crosswalks_toggle',
-//         cooldown: Duration(seconds: 0),
-//       );
-//     }
-//   }
-
-//   /// 현재 위치 기준 1km 반경 교차로 마커 업데이트
-//   Future<void> updateCitsJunctionMarkers() async {
-//     if (mapController == null) return;
-
-//     try {
-//       final result = await _getNearbyCitsJunctions(
-//         NearbyCitsJunctionsParams(
-//           latitude: currentLatitude.value,
-//           longitude: currentLongitude.value,
-//           radiusInMeters: 1000,
-//         ),
-//       );
-
-//       await result.fold(
-//         (failure) {
-//           debugPrint('교차로 조회 실패: ${failure.message}');
-//         },
-//         (junctions) async {
-//           debugPrint('교차로 ${junctions.length}개 조회');
-
-//           // 기존 마커 제거
-//           await clearCitsJunctionMarkers();
-
-//           // 새 마커 추가
-//           for (final junction in junctions) {
-//             final markerId =
-//                 'cits_junction_${junction.name}_${junction.latitude}_${junction.longitude}';
-//             final marker = NMarker(
-//               id: markerId,
-//               position: NLatLng(junction.latitude, junction.longitude),
-//             );
-
-//             // 교차로 아이콘 설정 (파란색 마커)
-//             marker.setIconTintColor(Colors.blue);
-//             marker.setSize(const Size(24, 36));
-
-//             // 마커 정보 설정
-//             marker.setCaption(NOverlayCaption(text: junction.name ?? '교차로'));
-
-//             await mapController!.addOverlay(marker);
-//             _citsJunctionMarkerIds.add(markerId);
-//           }
-//         },
-//       );
-//     } catch (e) {
-//       debugPrint('교차로 마커 업데이트 중 오류: $e');
-//     }
-//   }
-
-//   /// 현재 위치 기준 1km 반경 음향신호기 마커 업데이트
-//   Future<void> updateCitsCrosswalkMarkers() async {
-//     if (mapController == null) return;
-
-//     try {
-//       final result = await _getNearbyCitsCrosswalks(
-//         NearbyCitsCrosswalksParams(
-//           latitude: currentLatitude.value,
-//           longitude: currentLongitude.value,
-//           radiusInMeters: 1000,
-//         ),
-//       );
-
-//       await result.fold(
-//         (failure) {
-//           debugPrint('음향신호기 조회 실패: ${failure.message}');
-//         },
-//         (crosswalks) async {
-//           debugPrint('음향신호기 ${crosswalks.length}개 조회');
-
-//           // 기존 마커 제거
-//           await clearCitsCrosswalkMarkers();
-
-//           // 새 마커 추가
-//           for (final crosswalk in crosswalks) {
-//             final markerId =
-//                 'cits_crosswalk_${crosswalk.latitude}_${crosswalk.longitude}';
-//             final marker = NMarker(
-//               id: markerId,
-//               position: NLatLng(crosswalk.latitude, crosswalk.longitude),
-//             );
-
-//             // 음향신호기 아이콘 설정 (녹색 마커)
-//             marker.setIconTintColor(Colors.teal);
-//             marker.setSize(const Size(24, 36));
-
-//             await mapController!.addOverlay(marker);
-//             _citsCrosswalkMarkerIds.add(markerId);
-//           }
-//         },
-//       );
-//     } catch (e) {
-//       debugPrint('음향신호기 마커 업데이트 중 오류: $e');
-//     }
-//   }
-
-//   /// 교차로 마커 제거
-//   Future<void> clearCitsJunctionMarkers() async {
-//     if (mapController == null) return;
-
-//     try {
-//       for (final markerId in _citsJunctionMarkerIds) {
-//         await mapController!.deleteOverlay(
-//             NOverlayInfo(id: markerId, type: NOverlayType.marker));
-//       }
-//       _citsJunctionMarkerIds.clear();
-//     } catch (e) {
-//       debugPrint('교차로 마커 제거 중 오류: $e');
-//     }
-//   }
-
-//   /// 음향신호기 마커 제거
-//   Future<void> clearCitsCrosswalkMarkers() async {
-//     if (mapController == null) return;
-
-//     try {
-//       for (final markerId in _citsCrosswalkMarkerIds) {
-//         await mapController!.deleteOverlay(
-//             NOverlayInfo(id: markerId, type: NOverlayType.marker));
-//       }
-//       _citsCrosswalkMarkerIds.clear();
-//     } catch (e) {
-//       debugPrint('음향신호기 마커 제거 중 오류: $e');
-//     }
-//   }
 }

@@ -57,13 +57,6 @@ class CitsJunctionModel extends CitsJunction {
     );
   }
 
-  /// 빈 값, '-' 처리
-  static String? _parseNullableString(String value) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty || trimmed == '-') return null;
-    return trimmed;
-  }
-
   Map<String, dynamic> toJson() {
     return {
       'intersectionId': intersectionId,

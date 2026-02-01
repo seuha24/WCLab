@@ -20,7 +20,7 @@ import 'package:safelight/data/services/kakao_local_api_service.dart';
 import 'package:safelight/domain/repositories/kakao_repository.dart';
 import 'package:safelight/domain/repositories/local_poi_repository.dart';
 import 'package:safelight/data/repositories/local_poi_repository_impl.dart';
-import 'package:safelight/data/services/signal_device_poi_service.dart';
+import 'package:safelight/data/services/crosswalk_poi_service.dart';
 import 'package:safelight/data/services/tts_service.dart';
 import 'package:safelight/firebase_options.dart';
 import 'package:safelight/framework/core.dart';
@@ -82,8 +82,8 @@ Future<void> init() async {
   );
 
   // 음향신호기-교차로 POI 서비스
-  DI.registerLazySingleton<SignalDevicePoiService>(
-    () => SignalDevicePoiService(
+  DI.registerLazySingleton<CrosswalkPoiService>(
+    () => CrosswalkPoiService(
       citsCrosswalkRepository: DI(),
       citsJunctionRepository: DI(),
     ),
@@ -95,7 +95,7 @@ Future<void> init() async {
       navigatorRepository: DI(),        // 출입구 조회 API 재사용
       kakaoRepository: DI(),            // 카카오 로컬 API Repository
       localPoiRepository: DI(),         // 로컬 POI Repository (횡단보도, 버스정류장 등)
-      signalDevicePoiService: DI(),     // 음향신호기-교차로 POI 서비스
+      crosswalkPoiService: DI(),        // 음향신호기-교차로 POI 서비스
       ttsService: DI(),
     ),
   );
@@ -206,23 +206,6 @@ Future<void> init() async {
     () => GetBuildingEntrancesUseCase(repository: DI()),
   );
 
-  // SignalDevice (공공데이터 횡단보도) UseCase
-  DI.registerLazySingleton<GetNearbySignalDevices>(
-    () => GetNearbySignalDevices(repository: DI()),
-  );
-
-  DI.registerLazySingleton<LoadAllSignalDevices>(
-    () => LoadAllSignalDevices(repository: DI()),
-  );
-
-  // Intersection (공공데이터 교차로) UseCase
-  DI.registerLazySingleton<GetNearbyIntersections>(
-    () => GetNearbyIntersections(repository: DI()),
-  );
-
-  DI.registerLazySingleton<LoadAllIntersections>(
-    () => LoadAllIntersections(repository: DI()),
-  );
 
   // C-ITS Version UseCase
   DI.registerLazySingleton<GetCitsVersions>(
@@ -294,15 +277,6 @@ Future<void> init() async {
     () => NavigatorRepositoryImpl(navDataSource: DI()),
   );
 
-  // SignalDevice (공공데이터 횡단보도) Repository
-  DI.registerLazySingleton<SignalDeviceRepository>(
-    () => SignalDeviceRepositoryImpl(localDataSource: DI()),
-  );
-
-  // Intersection (공공데이터 교차로) Repository
-  DI.registerLazySingleton<IntersectionRepository>(
-    () => IntersectionRepositoryImpl(localDataSource: DI()),
-  );
 
   // C-ITS Version Repository
   DI.registerLazySingleton<CitsVersionRepository>(
@@ -427,15 +401,6 @@ Future<void> init() async {
     () => AmbientLightLevelDataSourceImpl(),
   );
 
-  // SignalDevice (공공데이터 횡단보도) DataSource
-  DI.registerLazySingleton<SignalDeviceLocalDataSource>(
-    () => SignalDeviceLocalDataSourceImpl(),
-  );
-
-  // Intersection (공공데이터 교차로) DataSource
-  DI.registerLazySingleton<IntersectionLocalDataSource>(
-    () => IntersectionLocalDataSourceImpl(),
-  );
 
   // C-ITS Version DataSource
   DI.registerLazySingleton<CitsVersionRemoteDataSource>(

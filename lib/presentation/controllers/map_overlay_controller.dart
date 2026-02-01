@@ -22,7 +22,7 @@ class MapOverlayController {
   NMarker? get currentLocationMarker => _currentLocationMarker;
 
   /// 횡단보도(음향신호기) 마커 캐시
-  final Map<String, NMarker> _signalDeviceMarkers = {};
+  final Map<String, NMarker> _crosswalkMarkers = {};
 
   /// 횡단보도 마커 아이콘 캐시 (방향별)
   /// key: 방향(도), value: 해당 방향의 아이콘
@@ -34,14 +34,14 @@ class MapOverlayController {
   double? _lastCrosswalkLng;
 
   /// 교차로 마커 캐시
-  final Map<String, NMarker> _intersectionMarkers = {};
+  final Map<String, NMarker> _junctionMarkers = {};
 
   /// 교차로 마커 아이콘 캐시
-  NOverlayImage? _intersectionIcon;
+  NOverlayImage? _junctionIcon;
 
   /// 마지막으로 교차로 마커를 업데이트한 위치
-  double? _lastIntersectionLat;
-  double? _lastIntersectionLng;
+  double? _lastJunctionLat;
+  double? _lastJunctionLng;
 
   /// addPathOverlays: 경로 오버레이를 지도에 추가
   void addPathOverlays(List<LatLng> paths) {
@@ -265,8 +265,8 @@ class MapOverlayController {
     if (mapController == null) return;
     mapController!.clearOverlays();
     _currentLocationMarker = null; // 현재 위치 마커 초기화
-    _signalDeviceMarkers.clear(); // 횡단보도 마커 초기화
-    _intersectionMarkers.clear(); // 교차로 마커 초기화
+    _crosswalkMarkers.clear(); // 횡단보도 마커 초기화
+    _junctionMarkers.clear(); // 교차로 마커 초기화
     debugPrint("모든 오버레이가 제거되었습니다.");
   }
 
@@ -297,8 +297,8 @@ class MapOverlayController {
 
     try {
       // UseCase로 주변 음향신호기 조회
-      final getNearbySignalDevices = DI<GetNearbyCitsCrosswalks>();
-      final result = await getNearbySignalDevices(
+      final getNearbyCrosswalks = DI<GetNearbyCitsCrosswalks>();
+      final result = await getNearbyCrosswalks(
         NearbyCitsCrosswalksParams(
           latitude: latitude,
           longitude: longitude,
@@ -310,11 +310,11 @@ class MapOverlayController {
         (failure) {
           debugPrint('횡단보도 마커 조회 실패: ${failure.message}');
         },
-        (devices) async {
-          await _updateSignalDeviceMarkersOnMap(devices);
+        (crosswalks) async {
+          await _updateCrosswalkMarkersOnMap(crosswalks);
           _lastCrosswalkLat = latitude;
           _lastCrosswalkLng = longitude;
-          debugPrint('횡단보도 마커 업데이트: ${devices.length}개');
+          debugPrint('횡단보도 마커 업데이트: ${crosswalks.length}개');
         },
       );
     } catch (e) {
@@ -323,8 +323,8 @@ class MapOverlayController {
   }
 
   /// 지도에 음향신호기 마커 업데이트
-  Future<void> _updateSignalDeviceMarkersOnMap(
-    List<CitsCrosswalk> devices,
+  Future<void> _updateCrosswalkMarkersOnMap(
+    List<CitsCrosswalk> crosswalks,
   ) async {
     if (mapController == null) return;
 
@@ -332,17 +332,17 @@ class MapOverlayController {
     if (context == null) return;
 
     // 현재 표시할 마커 ID 집합 (고유 ID가 없으면 좌표로 생성)
-    final currentIds = devices.map((d) => d.cwMgmtKey ?? '${d.latitude}_${d.longitude}').toSet();
+    final currentIds = crosswalks.map((c) => c.cwMgmtKey ?? '${c.latitude}_${c.longitude}').toSet();
 
     // 1. 더 이상 표시하지 않을 마커 제거
     final toRemove = <String>[];
-    for (final id in _signalDeviceMarkers.keys) {
+    for (final id in _crosswalkMarkers.keys) {
       if (!currentIds.contains(id)) {
         toRemove.add(id);
       }
     }
     for (final id in toRemove) {
-      final marker = _signalDeviceMarkers.remove(id);
+      final marker = _crosswalkMarkers.remove(id);
       if (marker != null) {
         mapController!.deleteOverlay(
           NOverlayInfo(type: NOverlayType.marker, id: 'crosswalk_$id'),
@@ -352,18 +352,18 @@ class MapOverlayController {
 
     // 2. 새로운 마커 추가
     final newMarkers = <NAddableOverlay>{};
-    for (final device in devices) {
-      final deviceId = device.cwMgmtKey ?? '${device.latitude}_${device.longitude}';
-      if (!_signalDeviceMarkers.containsKey(deviceId)) {
+    for (final crosswalk in crosswalks) {
+      final crosswalkId = crosswalk.cwMgmtKey ?? '${crosswalk.latitude}_${crosswalk.longitude}';
+      if (!_crosswalkMarkers.containsKey(crosswalkId)) {
         // 방향별 아이콘 가져오기 (캐시에 없으면 생성)
-        final icon = await _getOrCreateDirectionIcon(context, device.direction);
+        final icon = await _getOrCreateDirectionIcon(context, crosswalk.direction);
 
         final marker = NMarker(
-          id: 'crosswalk_$deviceId',
-          position: NLatLng(device.latitude, device.longitude),
+          id: 'crosswalk_$crosswalkId',
+          position: NLatLng(crosswalk.latitude, crosswalk.longitude),
           icon: icon,
         );
-        _signalDeviceMarkers[deviceId] = marker;
+        _crosswalkMarkers[crosswalkId] = marker;
         newMarkers.add(marker);
       }
     }
@@ -483,12 +483,12 @@ class MapOverlayController {
   Future<void> clearCrosswalkMarkers() async {
     if (mapController == null) return;
 
-    for (final entry in _signalDeviceMarkers.entries) {
+    for (final entry in _crosswalkMarkers.entries) {
       mapController!.deleteOverlay(
         NOverlayInfo(type: NOverlayType.marker, id: 'crosswalk_${entry.key}'),
       );
     }
-    _signalDeviceMarkers.clear();
+    _crosswalkMarkers.clear();
     _lastCrosswalkLat = null;
     _lastCrosswalkLng = null;
     debugPrint('횡단보도 마커가 모두 제거되었습니다.');
@@ -500,7 +500,7 @@ class MapOverlayController {
   ///
   /// 현재 위치 기준 반경 내 교차로를 조회하여 지도에 마커로 표시한다.
   /// 위치가 50m 이상 변경된 경우에만 업데이트하여 성능 최적화.
-  Future<void> updateIntersectionMarkers({
+  Future<void> updateJunctionMarkers({
     required double latitude,
     required double longitude,
     double radiusInMeters = 1000, // 100km - 서울 전체 교차로 표시용
@@ -508,10 +508,10 @@ class MapOverlayController {
     if (mapController == null) return;
 
     // 위치 변경이 50m 미만이면 업데이트 스킵 (성능 최적화)
-    if (_lastIntersectionLat != null && _lastIntersectionLng != null) {
+    if (_lastJunctionLat != null && _lastJunctionLng != null) {
       final distance = _calculateDistance(
-        _lastIntersectionLat!,
-        _lastIntersectionLng!,
+        _lastJunctionLat!,
+        _lastJunctionLng!,
         latitude,
         longitude,
       );
@@ -520,8 +520,8 @@ class MapOverlayController {
 
     try {
       // UseCase로 주변 교차로 조회
-      final getNearbyIntersections = DI<GetNearbyCitsJunctions>();
-      final result = await getNearbyIntersections(
+      final getNearbyJunctions = DI<GetNearbyCitsJunctions>();
+      final result = await getNearbyJunctions(
         NearbyCitsJunctionsParams(
           latitude: latitude,
           longitude: longitude,
@@ -533,11 +533,11 @@ class MapOverlayController {
         (failure) {
           debugPrint('교차로 마커 조회 실패: ${failure.message}');
         },
-        (intersections) async {
-          await _updateIntersectionMarkersOnMap(intersections);
-          _lastIntersectionLat = latitude;
-          _lastIntersectionLng = longitude;
-          debugPrint('교차로 마커 업데이트: ${intersections.length}개');
+        (junctions) async {
+          await _updateJunctionMarkersOnMap(junctions);
+          _lastJunctionLat = latitude;
+          _lastJunctionLng = longitude;
+          debugPrint('교차로 마커 업데이트: ${junctions.length}개');
         },
       );
     } catch (e) {
@@ -546,8 +546,8 @@ class MapOverlayController {
   }
 
   /// 지도에 교차로 마커 업데이트
-  Future<void> _updateIntersectionMarkersOnMap(
-    List<CitsJunction> intersections,
+  Future<void> _updateJunctionMarkersOnMap(
+    List<CitsJunction> junctions,
   ) async {
     if (mapController == null) return;
 
@@ -555,38 +555,38 @@ class MapOverlayController {
     if (context == null) return;
 
     // 현재 표시할 마커 ID 집합 (고유 ID가 없으면 좌표로 생성)
-    final currentIds = intersections.map((i) => i.intersectionId ?? '${i.latitude}_${i.longitude}').toSet();
+    final currentIds = junctions.map((j) => j.intersectionId ?? '${j.latitude}_${j.longitude}').toSet();
 
     // 1. 더 이상 표시하지 않을 마커 제거
     final toRemove = <String>[];
-    for (final id in _intersectionMarkers.keys) {
+    for (final id in _junctionMarkers.keys) {
       if (!currentIds.contains(id)) {
         toRemove.add(id);
       }
     }
     for (final id in toRemove) {
-      final marker = _intersectionMarkers.remove(id);
+      final marker = _junctionMarkers.remove(id);
       if (marker != null) {
         mapController!.deleteOverlay(
-          NOverlayInfo(type: NOverlayType.marker, id: 'intersection_$id'),
+          NOverlayInfo(type: NOverlayType.marker, id: 'junction_$id'),
         );
       }
     }
 
     // 2. 아이콘 준비 (캐시에 없으면 생성)
-    _intersectionIcon ??= await _createIntersectionIcon(context);
+    _junctionIcon ??= await _createJunctionIcon(context);
 
     // 3. 새로운 마커 추가
     final newMarkers = <NAddableOverlay>{};
-    for (final intersection in intersections) {
-      final intersectionId = intersection.intersectionId ?? '${intersection.latitude}_${intersection.longitude}';
-      if (!_intersectionMarkers.containsKey(intersectionId)) {
+    for (final junction in junctions) {
+      final junctionId = junction.intersectionId ?? '${junction.latitude}_${junction.longitude}';
+      if (!_junctionMarkers.containsKey(junctionId)) {
         final marker = NMarker(
-          id: 'intersection_$intersectionId',
-          position: NLatLng(intersection.latitude, intersection.longitude),
-          icon: _intersectionIcon!,
+          id: 'junction_$junctionId',
+          position: NLatLng(junction.latitude, junction.longitude),
+          icon: _junctionIcon!,
         );
-        _intersectionMarkers[intersectionId] = marker;
+        _junctionMarkers[junctionId] = marker;
         newMarkers.add(marker);
       }
     }
@@ -599,7 +599,7 @@ class MapOverlayController {
   /// 교차로 마커 아이콘 생성
   ///
   /// 파란색 둥근 사각형 + 교차로 심볼 (+)
-  Future<NOverlayImage> _createIntersectionIcon(BuildContext context) async {
+  Future<NOverlayImage> _createJunctionIcon(BuildContext context) async {
     const double iconSize = 24.0;
 
     return NOverlayImage.fromWidget(
@@ -641,17 +641,17 @@ class MapOverlayController {
   }
 
   /// 교차로 마커만 제거
-  Future<void> clearIntersectionMarkers() async {
+  Future<void> clearJunctionMarkers() async {
     if (mapController == null) return;
 
-    for (final entry in _intersectionMarkers.entries) {
+    for (final entry in _junctionMarkers.entries) {
       mapController!.deleteOverlay(
-        NOverlayInfo(type: NOverlayType.marker, id: 'intersection_${entry.key}'),
+        NOverlayInfo(type: NOverlayType.marker, id: 'junction_${entry.key}'),
       );
     }
-    _intersectionMarkers.clear();
-    _lastIntersectionLat = null;
-    _lastIntersectionLng = null;
+    _junctionMarkers.clear();
+    _lastJunctionLat = null;
+    _lastJunctionLng = null;
     debugPrint('교차로 마커가 모두 제거되었습니다.');
   }
 }
