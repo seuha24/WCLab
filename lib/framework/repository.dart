@@ -37,8 +37,12 @@ part '../data/repositories/sensor_controller_repository_impl.dart';
 part '../data/repositories/sensor_streams_repository_impl.dart';
 part '../data/repositories/pdr_calculator_repository_impl.dart';
 
-part '../domain/repositories/signal_device_repository.dart';
-part '../data/repositories/signal_device_repository_impl.dart';
 
-part '../domain/repositories/intersection_repository.dart';
-part '../data/repositories/intersection_repository_impl.dart';
+part '../domain/repositories/cits_version_repository.dart';
+part '../data/repositories/cits_version_repository_impl.dart';
+
+part '../domain/repositories/cits_junction_repository.dart';
+part '../data/repositories/cits_junction_repository_impl.dart';
+
+part '../domain/repositories/cits_crosswalk_repository.dart';
+part '../data/repositories/cits_crosswalk_repository_impl.dart';

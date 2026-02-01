@@ -9,7 +9,7 @@ import 'package:safelight/framework/usecase.dart';
 ///
 /// GPS 위치 업데이트 시 호출되어 주변 음향신호기에 자동 연결
 class AutoBleConnectionService {
-  final GetNearbySignalDevices _getNearbySignalDevices;
+  final GetNearbyCitsCrosswalks _getNearbyCrosswalks;
   final SearchCrosswalk _searchCrosswalk;
   final ConnectCrosswalk _sendAcousticSignal;
   final TtsService _ttsService;
@@ -25,12 +25,12 @@ class AutoBleConnectionService {
   static const double triggerDistance = 30.0;
 
   AutoBleConnectionService({
-    required GetNearbySignalDevices getNearbySignalDevices,
+    required GetNearbyCitsCrosswalks getNearbyCrosswalks,
     required SearchCrosswalk searchCrosswalk,
     required ConnectCrosswalk sendAcousticSignal,
     required TtsService ttsService,
     required AutoConnectCooldownManager cooldownManager,
-  })  : _getNearbySignalDevices = getNearbySignalDevices,
+  })  : _getNearbyCrosswalks = getNearbyCrosswalks,
         _searchCrosswalk = searchCrosswalk,
         _sendAcousticSignal = sendAcousticSignal,
         _ttsService = ttsService,
@@ -46,32 +46,35 @@ class AutoBleConnectionService {
     try {
       _isConnecting = true;
 
-      // 1. 30m 이내 SignalDevice 조회
-      final result = await _getNearbySignalDevices(
-        NearbySignalDevicesParams(
+      // 1. 30m 이내 음향신호기 조회
+      final result = await _getNearbyCrosswalks(
+        NearbyCitsCrosswalksParams(
           latitude: latitude,
           longitude: longitude,
           radiusInMeters: triggerDistance,
         ),
       );
 
-      final nearbyDevices = result.fold(
-        (failure) => <SignalDevice>[],
-        (devices) => devices,
+      final nearbyCrosswalks = result.fold(
+        (failure) => <CitsCrosswalk>[],
+        (crosswalks) => crosswalks,
       );
 
       // 2. 범위 이탈한 기기들 쿨다운 해제
-      _cooldownManager.updateCooldowns(nearbyDevices);
+      _cooldownManager.updateCooldowns(nearbyCrosswalks);
 
-      // 3. 연결 가능한 기기 찾기 (쿨다운 아닌 것)
-      final targetDevice = _firstWhereOrNull(
-        nearbyDevices,
-        (device) => !_cooldownManager.isInCooldown(device.managementId),
+      // 3. 연결 가능한 기기 찾기 (쿨다운 아닌 것, ID가 있는 것)
+      final targetCrosswalk = _firstWhereOrNull(
+        nearbyCrosswalks,
+        (crosswalk) {
+          final id = crosswalk.cwMgmtKey;
+          return id != null && !_cooldownManager.isInCooldown(id);
+        },
       );
 
-      if (targetDevice == null) return;
+      if (targetCrosswalk == null) return;
 
-      debugPrint('📍 자동 연결 대상 발견: ${targetDevice.managementId}');
+      debugPrint('📍 자동 연결 대상 발견: ${targetCrosswalk.cwMgmtKey}');
 
       // 4. BLE 스캔 (1회)
       _ttsService.speakAutoConnectStarted();
@@ -90,17 +93,19 @@ class AutoBleConnectionService {
       // 5. 가장 강한 신호의 기기 선택
       final sortedDevices = List<Crosswalk>.from(scannedDevices)
         ..sort((a, b) => b.post.rssi.compareTo(a.post.rssi));
-      final targetCrosswalk = sortedDevices.first;
+      final targetBleDevice = sortedDevices.first;
 
-      debugPrint('📍 자동 연결 시도: ${targetCrosswalk.name}');
+      debugPrint('📍 자동 연결 시도: ${targetBleDevice.name}');
 
       // 6. 자동 연결 및 위치안내 전송
-      await _sendAcousticSignal(targetCrosswalk);
+      await _sendAcousticSignal(targetBleDevice);
 
       _ttsService.speakAutoConnectSuccess();
 
-      // 7. 쿨다운 등록
-      _cooldownManager.addCooldown(targetDevice.managementId);
+      // 7. 쿨다운 등록 (C-ITS API 기준)
+      if (targetCrosswalk.cwMgmtKey != null) {
+        _cooldownManager.addCooldown(targetCrosswalk.cwMgmtKey!);
+      }
 
       debugPrint('✅ 자동 연결 성공');
     } catch (e) {

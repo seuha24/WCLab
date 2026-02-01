@@ -6,11 +6,11 @@ import 'package:safelight/framework/core.dart';
 import 'package:safelight/framework/object.dart';
 import 'package:safelight/framework/repository.dart';
 
-const _kSignalDevicePoiDebug = true;
+const _kCrosswalkPoiDebug = true;
 
 /// 음향신호기-교차로 POI 서비스
 ///
-/// 서울시 공공데이터 음향신호기와 교차로를 매칭하여
+/// C-ITS API 음향신호기와 교차로를 매칭하여
 /// POI 안내에 활용할 수 있는 PlaceResult로 변환합니다.
 ///
 /// **핵심 로직:**
@@ -18,9 +18,9 @@ const _kSignalDevicePoiDebug = true;
 /// 2. 교차로 발견 시: "{교차로명} 횡단보도"
 /// 3. 교차로 없을 시: "횡단보도"
 /// 4. 같은 위치(10m 반경) 음향신호기는 가장 가까운 것만 반환
-class SignalDevicePoiService {
-  final SignalDeviceRepository signalDeviceRepository;
-  final IntersectionRepository intersectionRepository;
+class CrosswalkPoiService {
+  final CitsCrosswalkRepository citsCrosswalkRepository;
+  final CitsJunctionRepository citsJunctionRepository;
 
   /// 음향신호기-교차로 매칭 반경 (미터)
   static const double matchingRadiusMeters = 30.0;
@@ -29,17 +29,17 @@ class SignalDevicePoiService {
   static const double groupingRadiusMeters = 10.0;
 
   /// 캐시된 모든 교차로 (앱 시작 시 로드)
-  List<Intersection> _cachedIntersections = [];
+  List<CitsJunction> _cachedJunctions = [];
 
   /// 캐시된 모든 음향신호기 (앱 시작 시 로드)
-  List<SignalDevice> _cachedSignalDevices = [];
+  List<CitsCrosswalk> _cachedCrosswalks = [];
 
   /// 초기화 여부
   bool _isInitialized = false;
 
-  SignalDevicePoiService({
-    required this.signalDeviceRepository,
-    required this.intersectionRepository,
+  CrosswalkPoiService({
+    required this.citsCrosswalkRepository,
+    required this.citsJunctionRepository,
   });
 
   /// 데이터 초기화 (앱 시작 시 호출)
@@ -50,23 +50,23 @@ class SignalDevicePoiService {
 
     // 병렬로 데이터 로드
     final results = await Future.wait([
-      signalDeviceRepository.loadAllSignalDevices(),
-      intersectionRepository.loadAllIntersections(),
+      citsCrosswalkRepository.loadAllCrosswalks(),
+      citsJunctionRepository.loadAllJunctions(),
     ]);
 
     results[0].fold(
       (failure) => _log('음향신호기 로드 실패: $failure'),
-      (devices) {
-        _cachedSignalDevices = devices as List<SignalDevice>;
-        _log('음향신호기 ${_cachedSignalDevices.length}개 로드 완료');
+      (crosswalks) {
+        _cachedCrosswalks = crosswalks as List<CitsCrosswalk>;
+        _log('음향신호기 ${_cachedCrosswalks.length}개 로드 완료');
       },
     );
 
     results[1].fold(
       (failure) => _log('교차로 로드 실패: $failure'),
-      (intersections) {
-        _cachedIntersections = intersections as List<Intersection>;
-        _log('교차로 ${_cachedIntersections.length}개 로드 완료');
+      (junctions) {
+        _cachedJunctions = junctions as List<CitsJunction>;
+        _log('교차로 ${_cachedJunctions.length}개 로드 완료');
       },
     );
 
@@ -79,48 +79,48 @@ class SignalDevicePoiService {
   /// [radiusMeters]: 검색 반경 (미터)
   ///
   /// 반환: PlaceResult 목록 (교차로 매칭 + 중복 제거 완료)
-  List<PlaceResult> searchNearbySignalDevicePois({
+  List<PlaceResult> searchNearbyCrosswalkPois({
     required double latitude,
     required double longitude,
     required int radiusMeters,
   }) {
-    if (!_isInitialized || _cachedSignalDevices.isEmpty) {
+    if (!_isInitialized || _cachedCrosswalks.isEmpty) {
       _log('데이터 미초기화 상태');
       return [];
     }
 
     // 1. 반경 내 음향신호기 필터링
-    final nearbyDevices = _filterByRadius(
-      _cachedSignalDevices,
+    final nearbyCrosswalks = _filterByRadius(
+      _cachedCrosswalks,
       latitude,
       longitude,
       radiusMeters.toDouble(),
     );
 
-    if (nearbyDevices.isEmpty) return [];
+    if (nearbyCrosswalks.isEmpty) return [];
 
-    _log('반경 ${radiusMeters}m 내 음향신호기 ${nearbyDevices.length}개 발견');
+    _log('반경 ${radiusMeters}m 내 음향신호기 ${nearbyCrosswalks.length}개 발견');
 
     // 2. 중복 제거 (가장 가까운 것만 선택)
-    final uniqueDevices = _removeDuplicates(
-      nearbyDevices,
+    final uniqueCrosswalks = _removeDuplicates(
+      nearbyCrosswalks,
       latitude,
       longitude,
     );
 
-    _log('중복 제거 후 ${uniqueDevices.length}개');
+    _log('중복 제거 후 ${uniqueCrosswalks.length}개');
 
     // 3. 교차로 매칭 및 PlaceResult 변환
     final results = <PlaceResult>[];
 
-    for (final device in uniqueDevices) {
-      final matchedIntersection = _findNearestIntersection(
-        device.latitude,
-        device.longitude,
+    for (final crosswalk in uniqueCrosswalks) {
+      final matchedJunction = _findNearestJunction(
+        crosswalk.latitude,
+        crosswalk.longitude,
       );
 
-      final name = matchedIntersection != null
-          ? TtsMessages.crosswalkWithIntersection(matchedIntersection.name)
+      final name = (matchedJunction != null && matchedJunction.name != null)
+          ? TtsMessages.crosswalkWithIntersection(matchedJunction.name!)
           : TtsMessages.crosswalkOnly;
 
       results.add(PlaceResult(
@@ -128,8 +128,8 @@ class SignalDevicePoiService {
         address: '',
         geometry: LatLngGeometry(
           location: GeoLocation(
-            lat: device.latitude,
-            lng: device.longitude,
+            lat: crosswalk.latitude,
+            lng: crosswalk.longitude,
           ),
         ),
         category: KakaoCategoryCode.CSW,
@@ -140,33 +140,33 @@ class SignalDevicePoiService {
   }
 
   /// 반경 내 음향신호기 필터링
-  List<SignalDevice> _filterByRadius(
-    List<SignalDevice> devices,
+  List<CitsCrosswalk> _filterByRadius(
+    List<CitsCrosswalk> crosswalks,
     double centerLat,
     double centerLng,
     double radiusMeters,
   ) {
-    return devices.where((device) {
+    return crosswalks.where((crosswalk) {
       final distanceKm = Calculators.calculateDistance(
         centerLat,
         centerLng,
-        device.latitude,
-        device.longitude,
+        crosswalk.latitude,
+        crosswalk.longitude,
       );
       return distanceKm * 1000 <= radiusMeters;
     }).toList();
   }
 
   /// 중복 음향신호기 제거 (그룹화 반경 내 가장 가까운 것만 선택)
-  List<SignalDevice> _removeDuplicates(
-    List<SignalDevice> devices,
+  List<CitsCrosswalk> _removeDuplicates(
+    List<CitsCrosswalk> crosswalks,
     double userLat,
     double userLng,
   ) {
-    if (devices.isEmpty) return [];
+    if (crosswalks.isEmpty) return [];
 
     // 거리순 정렬
-    final sorted = List<SignalDevice>.from(devices);
+    final sorted = List<CitsCrosswalk>.from(crosswalks);
     sorted.sort((a, b) {
       final distA = Calculators.calculateDistance(
         userLat,
@@ -184,7 +184,7 @@ class SignalDevicePoiService {
     });
 
     // 그룹화 반경 내 중복 제거
-    final unique = <SignalDevice>[];
+    final unique = <CitsCrosswalk>[];
     final usedIndices = <int>{};
 
     for (int i = 0; i < sorted.length; i++) {
@@ -216,24 +216,24 @@ class SignalDevicePoiService {
   /// 음향신호기 위치에서 가장 가까운 교차로 찾기
   ///
   /// 매칭 반경(30m) 내 교차로가 없으면 null 반환
-  Intersection? _findNearestIntersection(double deviceLat, double deviceLng) {
-    if (_cachedIntersections.isEmpty) return null;
+  CitsJunction? _findNearestJunction(double crosswalkLat, double crosswalkLng) {
+    if (_cachedJunctions.isEmpty) return null;
 
-    Intersection? nearest;
+    CitsJunction? nearest;
     double minDistance = double.infinity;
 
-    for (final intersection in _cachedIntersections) {
+    for (final junction in _cachedJunctions) {
       final distanceKm = Calculators.calculateDistance(
-        deviceLat,
-        deviceLng,
-        intersection.latitude,
-        intersection.longitude,
+        crosswalkLat,
+        crosswalkLng,
+        junction.latitude,
+        junction.longitude,
       );
       final distanceMeters = distanceKm * 1000;
 
       if (distanceMeters <= matchingRadiusMeters && distanceMeters < minDistance) {
         minDistance = distanceMeters;
-        nearest = intersection;
+        nearest = junction;
       }
     }
 
@@ -245,8 +245,8 @@ class SignalDevicePoiService {
   }
 
   void _log(String message) {
-    if (_kSignalDevicePoiDebug) {
-      debugPrint('[SignalDevicePoiService] $message');
+    if (_kCrosswalkPoiDebug) {
+      debugPrint('[CrosswalkPoiService] $message');
     }
   }
 }

@@ -44,7 +44,7 @@ class LocationAnnouncementController {
   /// 로컬 POI Repository (횡단보도, 버스정류장 등)
   final LocalPoiRepository localPoiRepository;
   /// 음향신호기-교차로 POI 서비스
-  final SignalDevicePoiService signalDevicePoiService;
+  final CrosswalkPoiService crosswalkPoiService;
 
   /// TTS 서비스
   final TtsService ttsService;
@@ -88,7 +88,7 @@ class LocationAnnouncementController {
     // 병렬로 초기화
     await Future.wait([
       localPoiRepository.loadAllPois(),
-      signalDevicePoiService.initialize(),
+      crosswalkPoiService.initialize(),
     ]);
 
     _isLocalPoiInitialized = true;
@@ -99,7 +99,7 @@ class LocationAnnouncementController {
     required this.navigatorRepository,
     required this.kakaoRepository,
     required this.localPoiRepository,
-    required this.signalDevicePoiService,
+    required this.crosswalkPoiService,
     required this.ttsService,
   });
   
@@ -210,13 +210,13 @@ class LocationAnnouncementController {
     _log('[LocationAnnouncement] 🚦 로컬 POI ${nearbyLocalPois.length}개 추가 (전방 40m 기준 50m 이내)');
 
     // 5. 음향신호기 POI 추가 (서울시 공공데이터 - 교차로 매칭)
-    final nearbySignalDevicePois = signalDevicePoiService.searchNearbySignalDevicePois(
+    final nearbyCrosswalkPois = crosswalkPoiService.searchNearbyCrosswalkPois(
       latitude: extensionLat,
       longitude: extensionLng,
       radiusMeters: 50,
     );
-    allPlaces.addAll(nearbySignalDevicePois);
-    _log('[LocationAnnouncement] 🚸 음향신호기 POI ${nearbySignalDevicePois.length}개 추가 (전방 40m 기준 50m 이내)');
+    allPlaces.addAll(nearbyCrosswalkPois);
+    _log('[LocationAnnouncement] 🚸 음향신호기 POI ${nearbyCrosswalkPois.length}개 추가 (전방 40m 기준 50m 이내)');
 
     // 6. 합쳐진 리스트에서 가까운 순으로 정렬
     if (allPlaces.isEmpty) {

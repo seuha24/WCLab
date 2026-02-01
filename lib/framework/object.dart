@@ -19,8 +19,11 @@ part '../data/models/ambientlightlevel_model.dart';
 part '../domain/entities/building_response.dart';
 part '../data/models/building_response_model.dart';
 
-part '../domain/entities/signal_device.dart';
-part '../data/models/signal_device_model.dart';
+part '../domain/entities/cits_junction.dart';
+part '../data/models/cits_junction_model.dart';
 
-part '../domain/entities/intersection.dart';
-part '../data/models/intersection_model.dart';
+part '../domain/entities/cits_crosswalk.dart';
+part '../data/models/cits_crosswalk_model.dart';
+
+part '../domain/entities/cits_version.dart';
+part '../data/models/cits_version_model.dart';

@@ -3,7 +3,6 @@ part of '../../framework/ui.dart';
 class NaverMapView extends GetView<NaverMapViewController> {
   const NaverMapView({super.key});
 
-  
   @override
   Widget build(BuildContext context) {
     final tts = DI.get<TtsService>();
@@ -60,31 +59,27 @@ class NaverMapView extends GetView<NaverMapViewController> {
                       await controller.mapController!.getCameraPosition();
                   final latLng = pos.target;
 
-                          // 출입구 등록 패널의 bloc에 직접 AddressUpdated 이벤트 전송
-                          try {
-                            final entranceBloc =
-                                Get.find<EntranceRegistrationBloc>();
-                            if (!entranceBloc.isClosed) {
-                              entranceBloc.add(AddressUpdated(latLng));
-                            }
-                          } catch (e) {
-                            // bloc을 찾을 수 없는 경우 무시 (아직 초기화되지 않았을 수 있음)
-                            debugPrint(
-                                'EntranceRegistrationBloc not found: $e');
-                          }
-                        }
-                      }
+                  // 출입구 등록 패널의 bloc에 직접 AddressUpdated 이벤트 전송
+                  try {
+                    final entranceBloc = Get.find<EntranceRegistrationBloc>();
+                    if (!entranceBloc.isClosed) {
+                      entranceBloc.add(AddressUpdated(latLng));
+                    }
+                  } catch (e) {
+                    // bloc을 찾을 수 없는 경우 무시 (아직 초기화되지 않았을 수 있음)
+                    debugPrint('EntranceRegistrationBloc not found: $e');
+                  }
+                }
+              }
 
-                      // 출입구 등록 패널이 활성화되어도 현위치 마커는 계속 업데이트되어야 함
-                      // 센서 데이터가 계속 업데이트되므로 현위치 마커도 자동으로 업데이트됨
-                    },
-                    onMapTapped: (NPoint point, NLatLng latLng) {
-                      int meters =
-                          (controller.remainDistance.value * 1000).round();
-                      tts.speakRemainingDistance(meters);
-                    },
-                  ),
-       
+              // 출입구 등록 패널이 활성화되어도 현위치 마커는 계속 업데이트되어야 함
+              // 센서 데이터가 계속 업데이트되므로 현위치 마커도 자동으로 업데이트됨
+            },
+            onMapTapped: (NPoint point, NLatLng latLng) {
+              int meters = (controller.remainDistance.value * 1000).round();
+              tts.speakRemainingDistance(meters);
+            },
+          ),
 
           /// 화면 중앙 고정 마커
 
@@ -138,17 +133,20 @@ class NaverMapView extends GetView<NaverMapViewController> {
                 // 주변 건물 자동 알림 FAB
                 SizedBox(height: 16),
                 Obx(() => FloatingActionButton(
-                  heroTag: 'locationAnnouncement',
-                  onPressed: () {
-                    controller.toggleAutoPoiAnnounce();
-                    HapticFeedback.mediumImpact();
-                  },
-                  backgroundColor: controller.isAutoPoiAnnounceEnabled.value
-                      ? Colors.green
-                      : Colors.grey,
-                  child: Icon(Icons.campaign, color: Colors.white),
-                  tooltip: '주변 건물 자동 알림',
-                )),
+                      heroTag: 'locationAnnouncement',
+                      onPressed: () {
+                        controller.toggleAutoPoiAnnounce();
+                        HapticFeedback.mediumImpact();
+                      },
+                      backgroundColor: controller.isAutoPoiAnnounceEnabled.value
+                          ? Colors.green
+                          : Colors.grey,
+                      child: Icon(Icons.campaign, color: Colors.white),
+                      tooltip: '주변 건물 자동 알림',
+                    )),
+
+                // // C-ITS 교차로 토글 FAB
+                // SizedBox(height: 16),
               ],
             ),
           ),
@@ -457,7 +455,8 @@ class NaverMapView extends GetView<NaverMapViewController> {
           onTap: () => _showLocationSearch(context),
           child: Row(
             children: [
-              Icon(Icons.search, color: Colors.grey[600], size: 20, semanticLabel: '검색'),
+              Icon(Icons.search,
+                  color: Colors.grey[600], size: 20, semanticLabel: '검색'),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -605,7 +604,7 @@ class _LocationSearchSheetState extends State<_LocationSearchSheet> {
       });
     }
   }
-  
+
   //여기에있으면 안됨
   Future<List<PlaceResult>> _placeSearch(String query) async {
     final result = await kakaoRepository.searchPlaces(query);
