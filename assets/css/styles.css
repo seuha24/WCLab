@@ -576,15 +576,39 @@ body {
 .pi-info h3 {
     font-size: 22px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--text-dark);
 }
 
-.pi-info .person-role {
+.pi-affiliation {
     font-size: 14px;
     color: var(--text-mid);
-    margin-bottom: 8px;
-    line-height: 1.7;
+    margin-bottom: 14px;
+}
+
+.pi-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.pi-detail-row {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.pi-label {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 64px;
+}
+
+.pi-detail-row span:last-child {
+    color: var(--text-mid);
 }
 
 .pi-info .person-email {
