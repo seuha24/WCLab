@@ -272,17 +272,55 @@ body {
     height: auto;
 }
 
-/* Hero Awards */
+/* Hero Awards Section Title */
+.hero-awards-section {
+    margin-top: 56px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    text-align: left;
+}
+
+.hero-awards-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+}
+
+/* Hero Awards - Horizontal Scroll */
+.hero-awards-scroll {
+    margin-top: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.hero-awards-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.hero-awards-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hero-awards-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
 .hero-awards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
-    margin: 48px auto 0;
-    padding-top: 0;
+    display: flex;
+    gap: 24px;
+    padding-bottom: 12px;
+    width: max-content;
 }
 
 .hero-award-item {
     text-align: center;
+    flex-shrink: 0;
+    width: 280px;
 }
 
 .hero-award-item img {
@@ -619,15 +657,29 @@ body {
 
 /* ===== Join Us ===== */
 .recruit-banner {
-    background: var(--primary);
+    background: linear-gradient(135deg, #4C1D95 0%, #6C3AED 50%, #8B5CF6 100%);
     border-radius: var(--radius);
-    padding: 48px;
+    padding: 56px 48px;
     color: white;
-    margin-bottom: 40px;
+    margin-top: 20px;
+    margin-bottom: 48px;
+    text-align: center;
+}
+
+.recruit-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
 }
 
 .recruit-banner h2 {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
     margin-bottom: 10px;
 }
@@ -638,96 +690,250 @@ body {
 }
 
 .recruit-section {
-    margin-bottom: 36px;
+    margin-bottom: 48px;
 }
 
 .recruit-section h3 {
     font-size: 20px;
     font-weight: 700;
     color: var(--text-dark);
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--text-dark);
 }
 
-.field-cards {
+/* 왜 우리 연구실인가 - 수치 */
+.recruit-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
 }
 
-.field-card {
+.recruit-stat {
+    text-align: center;
+    padding: 28px 16px;
+    background: var(--primary-bg);
+    border-radius: var(--radius-sm);
+}
+
+.recruit-stat-num {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.recruit-stat-label {
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+}
+
+/* 모집 정보 테이블 */
+.recruit-info-table {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.recruit-info-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+
+.recruit-info-row:last-child {
+    border-bottom: none;
+}
+
+.recruit-info-label {
+    width: 120px;
+    flex-shrink: 0;
+    padding: 18px 20px;
+    background: var(--primary-bg);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+}
+
+.recruit-info-value {
+    flex: 1;
+    padding: 18px 24px;
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    background: var(--bg-white);
+}
+
+/* 혜택 카드 */
+.benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.benefit-card {
     background: var(--bg-white);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 24px;
+    padding: 28px 24px;
+    text-align: center;
     transition: var(--transition);
 }
 
-.field-card:hover {
+.benefit-card:hover {
     border-color: var(--primary-light);
+    box-shadow: 0 4px 16px rgba(108,58,237,0.08);
 }
 
-.field-card h4 {
+.benefit-icon-box {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.benefit-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.benefit-card p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+/* 지원 절차 */
+.process-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    justify-content: center;
+}
+
+.process-step {
+    flex: 1;
+    text-align: center;
+    padding: 0 12px;
+}
+
+.process-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 16px;
+    font-weight: 800;
+    margin: 0 auto 14px;
+}
+
+.process-step h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.process-step p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+.process-arrow {
+    width: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 12px;
+}
+
+.process-arrow::after {
+    content: '';
+    width: 40px;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+}
+
+/* FAQ */
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.faq-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+}
+
+.faq-q {
+    font-size: 15px;
     font-weight: 700;
     color: var(--text-dark);
     margin-bottom: 8px;
 }
 
-.field-card p {
+.faq-q::before {
+    content: 'Q. ';
+    color: var(--primary);
+}
+
+.faq-a {
     font-size: 14px;
     color: var(--text-mid);
-    line-height: 1.6;
+    line-height: 1.7;
+    padding-left: 24px;
 }
 
-.requirements {
-    background: var(--bg-white);
-    border: 1px solid var(--border);
+.faq-a::before {
+    content: 'A. ';
+    color: var(--primary-light);
+    font-weight: 600;
+    margin-left: -24px;
+}
+
+/* 지원 CTA */
+.recruit-cta {
+    text-align: center;
+    padding: 48px;
+    background: var(--primary-bg);
     border-radius: var(--radius);
-    padding: 32px;
 }
 
-.req-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-}
-
-.req-column h4 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--primary);
-}
-
-.req-column ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.req-column li {
-    font-size: 15px;
+.recruit-cta p {
+    font-size: 14px;
     color: var(--text-mid);
-    padding-left: 20px;
-    position: relative;
-    line-height: 1.6;
+    margin-bottom: 12px;
+    font-weight: 500;
 }
 
-.req-column li::before {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 9px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--primary-light);
+.cta-button {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    padding: 14px 36px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.cta-button:hover {
+    background: var(--primary-dark);
 }
 
 /* ===== Contact ===== */
@@ -873,10 +1079,12 @@ body {
         text-align: left;
     }
 
-    .hero-awards {
-        grid-template-columns: 1fr;
-        gap: 24px;
+    .hero-awards-scroll {
         margin-top: 32px;
+    }
+
+    .hero-award-item {
+        width: 220px;
     }
 
     .section-header h2 {
@@ -915,8 +1123,41 @@ body {
         padding: 32px 24px;
     }
 
-    .field-cards {
-        grid-template-columns: 1fr;
+    .recruit-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .recruit-info-row {
+        flex-direction: column;
+    }
+
+    .recruit-info-label {
+        width: 100%;
+    }
+
+    .benefit-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .process-steps {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .process-arrow {
+        display: none;
+    }
+
+    .process-step {
+        flex: 0 0 calc(50% - 8px);
+    }
+
+    .recruit-banner {
+        padding: 36px 24px;
+    }
+
+    .recruit-banner h2 {
+        font-size: 24px;
     }
 
     .contact-grid {
