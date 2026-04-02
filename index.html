@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WirelessCommunicationLab — 가톨릭대학교</title>
+    <meta name="description" content="가톨릭대학교 WirelessCommunicationLab (SnY corp) — Physical AI, 로봇공학, IoT, 임베디드 시스템 연구실">
+    <meta property="og:title" content="WirelessCommunicationLab — 가톨릭대학교">
+    <meta property="og:description" content="Physical AI 기반 로봇공학 및 무선통신 연구실. 학부연구생 모집 중.">
+
+    <link rel="icon" type="image/png" href="assets/images/new_logo.jpeg">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header-container">
+        <div class="logo-section" onclick="showPage('home')">
+            <img src="assets/images/new_logo.jpeg" alt="WCL Logo" class="logo-icon-img">
+            <div class="logo-text-group">
+                <span class="logo-lab-name">WirelessCommunicationLab</span>
+                <span class="logo-affiliation">가톨릭대학교 정보통신전자공학부 · S&Y Corp</span>
+            </div>
+        </div>
+        <div class="nav-container">
+            <nav>
+                <ul>
+                    <li class="menu-item active" data-page="home">홈</li>
+                    <li class="menu-item" data-page="research">연구</li>
+                    <li class="menu-item" data-page="people">구성원</li>
+                    <li class="menu-item" data-page="achievements">성과</li>
+                    <li class="menu-item" data-page="recruit">연구생 모집</li>
+                    <li class="menu-item" data-page="contact">연락처</li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+
+        <!-- ==================== HOME ==================== -->
+        <div id="home-content" class="page-content">
+            <div class="hero">
+                <span class="hero-badge">MaaS Platform · Indoor Navigation · Physical AI</span>
+                <h1>시각장애인의 독립적 이동을 위한<br><span class="accent">MaaS 플랫폼</span>을 연구합니다</h1>
+                <p class="hero-desc">
+                    WirelessCommunicationLab은 디바이스(Robo-Cane)·앱(SafeLight)·클라우드를 통합하여
+                    실내외 어디서든 끊김 없는 시각장애인 안심보행 내비게이션을 제공하는 MaaS 플랫폼을 연구합니다.
+                    과학기술정보통신부장관상·고용노동부장관상 대상 수상으로 기술적 우수성과 사회적 가치를 인정받았습니다.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">논문</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">30+</div>
+                        <div class="stat-label">특허</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">20+</div>
+                        <div class="stat-label">정부 R&D</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">장관상 대상</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== RESEARCH ==================== -->
+        <div id="research-content" class="page-content" style="display:none;">
+            <div class="section-header">
+                <h2>연구 과제</h2>
+                <p>시각장애인 안심보행 보조로봇을 위한 실내 내비게이션 플랫폼</p>
+            </div>
+
+            <!-- 연구 개요 -->
+            <div class="research-overview">
+                <h3>SafeLight MaaS Platform</h3>
+                <p>
+                    본 연구실은 실내 악조건 채널 환경(페이딩, GPS 음영지역)에서 시각장애인(BVI)에게
+                    안심 내비게이션 서비스를 제공하는 <strong>PDR+AI 기반 보조로봇 플랫폼</strong>을 개발합니다.
+                    센서 데이터와 음성/햅틱 UX, 실내외 길안내 서비스를 통합하여 끊김 없는 이동 경험을 제공하는
+                    시각장애인 특화형 MaaS(Mobility as a Service) 플랫폼이 최종 목표입니다.
+                </p>
+                <div class="platform-pillars">
+                    <div class="pillar">
+                        <div class="pillar-number">01</div>
+                        <h4>정보 통합</h4>
+                        <p>Vision + IMU + IoT + GPS + QR을 하나의 시스템으로</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-number">02</div>
+                        <h4>수단 통합</h4>
+                        <p>VoiceOver + Haptic + Sensor + 보조기기를 하나의 시스템으로</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-number">03</div>
+                        <h4>서비스 통합</h4>
+                        <p>실외 + 실내 길안내를 하나의 시스템으로</p>
+                    </div>
+                </div>
+                <img src="assets/images/dtech/slide-04.png" alt="SafeLight 솔루션 개요 — Device, APP, MaaS" class="slide-image">
+            </div>
+
+            <!-- SW / HW -->
+            <div class="card-grid card-grid--2col">
+                <div class="card">
+                    <div class="card-icon purple">&#x1F4F1;</div>
+                    <h3>Software — SafeLight APP &amp; MaaS Cloud</h3>
+                    <p>
+                        GPS-IMU 하이브리드 측위와 보행자 추측 항법(PDR)을 결합하여 음영지역에서도 연속적인 위치 추적이 가능한 크로스플랫폼 내비게이션 앱을 개발합니다.
+                        가상마커(VM) 기반 마르코프 모델링과 QR 코드를 활용한 실내 위치 보정, DRL 에이전트를 이용한 최적 경로 계획,
+                        공공데이터 기반 건물 출입구 DB 연계, BLE IoT 음향신호기 자동 연결 등의 핵심 기술을 통합합니다.
+                        수집된 보행 데이터를 도시 교통망과 연계하는 MaaS 클라우드 플랫폼으로 확장하여,
+                        출발지부터 목적지까지 끊김 없는 멀티모달 이동 경험을 제공합니다.
+                    </p>
+                    <div class="tags">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">IMU PDR</span>
+                        <span class="tag">Virtual Marker</span>
+                        <span class="tag">DRL</span>
+                        <span class="tag">BLE</span>
+                        <span class="tag">MaaS Cloud</span>
+                    </div>
+                    <img src="assets/images/dtech/slide-08.png" alt="SafeLight APP 3가지 문제 해결" class="slide-image">
+                </div>
+                <div class="card">
+                    <div class="card-icon purple">&#x1F9AF;</div>
+                    <h3>Hardware — Robo-Cane (보조로봇)</h3>
+                    <p>
+                        시분할 중첩 빔 기반 다중 초음파 센서를 탑재한 안심보행 보조로봇을 설계·제작합니다.
+                        전방 장애물을 실시간 탐지하여 거리별 3단계 햅틱 피드백으로 사용자에게 경고하며,
+                        BLE 5.0 통신으로 앱과 50ms 주기 데이터를 교환하여 다중모달 센서 융합 내비게이션을 수행합니다.
+                        경량화 Visual SLAM 카메라를 통해 장애물 판단·회피 및 경로 보정에 필요한 비전 데이터를 수집하고,
+                        스마트폰 앱과의 IoT 센서 데이터 융합으로 방향 벡터 보정 및 누적 오차를 저감합니다.
+                    </p>
+                    <div class="tags">
+                        <span class="tag">Ultrasonic Beam</span>
+                        <span class="tag">Haptic Feedback</span>
+                        <span class="tag">BLE 5.0</span>
+                        <span class="tag">Visual SLAM</span>
+                        <span class="tag">Sensor Fusion</span>
+                    </div>
+                    <img src="assets/images/dtech/slide-06.png" alt="Robo-Cane 로보케인 지팡이 상세" class="slide-image">
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PEOPLE ==================== -->
+        <div id="people-content" class="page-content" style="display:none;">
+            <div class="section-header">
+                <h2>구성원</h2>
+                <p>WirelessCommunicationLab을 이끄는 연구진</p>
+            </div>
+
+            <!-- PI -->
+            <div class="people-group">
+                <div class="people-group-title">지도교수 (PI)</div>
+                <div class="people-grid">
+                    <div class="person-card pi-card">
+                        <div class="pi-info">
+                            <h3>최상호 교수</h3>
+                            <div class="person-role">가톨릭대학교 정보통신전자공학부 명예교수 · 에스앤와이코퍼레이션(주) 대표<br>연구분야 - 무선통신 및 IoT 기반 통신응용<br>연구키워드 - 고효율/고정밀 무선통신기술; IoT 응용 인공지능 신호처리; 나노네트워크를 위한 바이오-모방 분자통신; 5G 이동통신 이론;</div>
+                            <div class="person-email">schoe@catholic.ac.kr</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team SAFELIGHT -->
+            <div class="people-group">
+                <div class="people-group-title">Team SAFELIGHT</div>
+                <div class="people-grid">
+                    <div class="person-card">
+                        <div class="person-name">김호중</div>
+                        <div class="person-role">Frontend · Flutter/Arduino · 프로젝트 리드</div>
+                    </div>
+                    <div class="person-card">
+                        <div class="person-name">김도균</div>
+                        <div class="person-role">Backend · NodeJS · Linux 서버</div>
+                    </div>
+                    <div class="person-card">
+                        <div class="person-name">오연주</div>
+                        <div class="person-role">Frontend · Flutter · 센서 데이터 처리</div>
+                    </div>
+                    <div class="person-card">
+                        <div class="person-name">임승훈</div>
+                        <div class="person-role">UI/UX 설계 · Figma · 접근성 인터페이스</div>
+                    </div>
+                    <div class="person-card">
+                        <div class="person-name">이종민</div>
+                        <div class="person-role">연구원</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Robo Cane -->
+            <div class="people-group">
+                <div class="people-group-title">Team Robo Cane</div>
+                <div class="people-grid">
+                    <div class="person-card">
+                        <div class="person-name">김정현</div>
+                        <div class="person-role">연구원</div>
+                    </div>
+                    <div class="person-card">
+                        <div class="person-name">전현진</div>
+                        <div class="person-role">연구원</div>
+                    </div>
+                    <div class="person-card">
+                        <div class="person-name">원치훈</div>
+                        <div class="person-role">연구원</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ACHIEVEMENTS ==================== -->
+        <div id="achievements-content" class="page-content" style="display:none;">
+            <div class="section-header">
+                <h2>연구 성과</h2>
+                <p>WCL 주요 성과 및 수상 내역</p>
+            </div>
+
+            <!-- 수상 내역 -->
+            <div class="achievement-category">
+                <div class="achievement-category-title">&#x1F3C5; 수상 내역</div>
+                <div class="achievement-list">
+                    <div class="achievement-item">
+                        <span class="achievement-year">2023</span>
+                        <div class="achievement-content">
+                            <h4>배리어프리 앱 개발 콘테스트 — 대상 (과학기술정보통신부장관상)</h4>
+                            <p>현대오토에버 &amp; 사랑의열매 주관 · 시각장애인용 횡단보도 건너기 도우미 APP</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2024</span>
+                        <div class="achievement-content">
+                            <h4>하나 소셜벤처 유니버시티 — 대상 (고용노동부장관상)</h4>
+                            <p>하나금융그룹 주관 · 대학생 창업 경진대회</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주요 성과 -->
+            <div class="achievement-category">
+                <div class="achievement-category-title">&#x1F3C6; 주요 성과</div>
+                <div class="achievement-list">
+                    <div class="achievement-item">
+                        <span class="achievement-year">2024</span>
+                        <div class="achievement-content">
+                            <h4>에스앤와이코퍼레이션(주) 설립 — 교원창업</h4>
+                            <p>Physical AI 연구 성과 기반 기술 사업화 법인 · 경기도 부천시 가톨릭대학교 성심교정</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2025</span>
+                        <div class="achievement-content">
+                            <h4>창업성장기술개발사업 디딤돌 선정</h4>
+                            <p>중소기업 기술개발(R&D) 지원사업 · 시각장애인 안심보행 보조로봇을 위한 실내 내비게이션 플랫폼</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2025</span>
+                        <div class="achievement-content">
+                            <h4>경기도 기술개발사업 수행</h4>
+                            <p>SafeLight 핵심 기술 개발</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주요 논문 -->
+            <div class="achievement-category">
+                <div class="achievement-category-title">&#x1F4D1; 주요 논문</div>
+                <div class="achievement-list">
+                    <div class="achievement-item">
+                        <span class="achievement-year">2025</span>
+                        <div class="achievement-content">
+                            <h4>IMU 센서를 활용한 보행자 추측 항법 기반 위치탐지 및 방향안내 알고리즘 개발</h4>
+                            <p>김호중, 오연주, 김도균, 임승훈, 최상호 한국정보처리학회 2025.11</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2024</span>
+                        <div class="achievement-content">
+                            <h4>GMBC-based indoor localization using magnetometer data</h4>
+                            <p>R. Punmiya, S. Choe · IEEE Proceedings, ICEIC 2024</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2023</span>
+                        <div class="achievement-content">
+                            <h4>시분할 중첩 빔 기반 다중 초음파 센서를 이용한 스마트 지팡이</h4>
+                            <p>차승연, 천다은, 관수빈, 김현서, 최상호(교신) · 한국통신학회논문지, 49권 9호</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2022</span>
+                        <div class="achievement-content">
+                            <h4>XGBLoc: XGBoost-Based Indoor Localization in Multi-Building Multi-Floor Environments</h4>
+                            <p>N. Singh, S. Choe(교신), N. Kaur · Sensors (SCIE), vol. 22, no. 17</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2021</span>
+                        <div class="achievement-content">
+                            <h4>Machine Learning Based Indoor Localization Using Wi-Fi RSSI Fingerprints: An Overview</h4>
+                            <p>N. Singh, S. Choe(교신), R. Punmiya · IEEE Access (SCIE), vol. 9</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2019</span>
+                        <div class="achievement-content">
+                            <h4>Energy Theft Detection Using Gradient Boosting Theft Detector with Feature Engineering-Based Preprocessing</h4>
+                            <p>R. Punmiya, S. Choe(교신) · IEEE Transactions on Smart Grid (SCIE), vol. 10, no. 2</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== RECRUIT ==================== -->
+        <div id="recruit-content" class="page-content" style="display:none;">
+            <div class="recruit-banner">
+                <h2>Physical AI 프로젝트 참여자 모집</h2>
+                <p>WirelessCommunicationLab에서 함께 연구할 학부연구생을 모집합니다</p>
+            </div>
+
+            <!-- 모집 분야 -->
+            <div class="recruit-section">
+                <h3>&#x1F50D; 모집 분야</h3>
+                <div class="field-cards">
+                    <div class="field-card">
+                        <h4>Physical AI</h4>
+                        <p>로봇 + IoT + 임베디드 응용 분야의 AI 시스템 연구</p>
+                    </div>
+                    <div class="field-card">
+                        <h4>앱 설계</h4>
+                        <p>Android / iOS 서비스 플랫폼 설계 및 개발</p>
+                    </div>
+                    <div class="field-card">
+                        <h4>보조로봇</h4>
+                        <p>AI 기반 시각장애인용 보조로봇 하드웨어·소프트웨어</p>
+                    </div>
+                    <div class="field-card">
+                        <h4>임베디드 / FE·BE</h4>
+                        <p>임베디드 시스템 설계 및 프론트엔드·백엔드 개발</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 지원 자격 -->
+            <div class="recruit-section">
+                <h3>&#x1F4CB; 지원 자격</h3>
+                <div class="requirements">
+                    <div class="req-columns">
+                        <div class="req-column">
+                            <h4>필수 조건</h4>
+                            <ul>
+                                <li>가톨릭대학교 AI전자정보융합대학 소속 학과 전공</li>
+                                <li>1~3학년 학부생</li>
+                                <li>남학생의 경우 군복무 후 선호</li>
+                                <li>대학원 진학 의향 우대</li>
+                            </ul>
+                        </div>
+                        <div class="req-column">
+                            <h4>우대 사항</h4>
+                            <ul>
+                                <li>리눅스 사용 경험</li>
+                                <li>앱 개발 경험 (Kotlin, Java, Flutter, Swift)</li>
+                                <li>아두이노 / 라즈베리파이 설계 경험</li>
+                                <li>Python, C/C++ 프로그래밍 능력</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CONTACT ==================== -->
+        <div id="contact-content" class="page-content" style="display:none;">
+            <div class="section-header">
+                <h2>연락처</h2>
+                <p>연구실 방문 및 문의</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <h4>지도교수</h4>
+                    <p><strong>최상호 교수</strong></p>
+                    <p><a href="mailto:sangho.choe@gmail.com">sangho.choe@gmail.com</a></p>
+                </div>
+                <div class="contact-card">
+                    <h4>연구실 문의</h4>
+                    <p><strong>담당자</strong></p>
+                    <p><a href="mailto:snyfromwcl25@gmail.com">snyfromwcl25@gmail.com</a></p>
+                </div>
+                <div class="contact-card">
+                    <h4>소속 / 위치</h4>
+                    <p>가톨릭대학교 · S&Y Corporation</p>
+                    <p>정보통신전자공학부</p>
+                    <p>경기도 부천시 원미구 역곡로13번길 17, 211호</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        &copy; 2026 WirelessCommunicationLab · S&Y corp · 가톨릭대학교 정보통신전자공학부
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
