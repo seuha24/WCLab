@@ -40,30 +40,50 @@
 
         <!-- ==================== HOME ==================== -->
         <div id="home-content" class="page-content">
-            <div class="hero">
-                <span class="hero-badge">MaaS Platform · Indoor Navigation · Physical AI</span>
-                <h1>시각장애인의 독립적 이동을 위한<br><span class="accent">MaaS 플랫폼</span>을 연구합니다</h1>
-                <p class="hero-desc">
-                    WirelessCommunicationLab은 디바이스(Robo-Cane)·앱(SafeLight)·클라우드를 통합하여
-                    실내외 어디서든 끊김 없는 시각장애인 안심보행 내비게이션을 제공하는 MaaS 플랫폼을 연구합니다.
-                    과학기술정보통신부장관상·고용노동부장관상 대상 수상으로 기술적 우수성과 사회적 가치를 인정받았습니다.
-                </p>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">100+</div>
-                        <div class="stat-label">논문</div>
+            <div class="hero-full">
+                <div class="hero-figure">
+                    <img src="assets/images/hero-maas.png" alt="SafeLight MaaS Platform 아이소메트릭 일러스트">
+                </div>
+                <div class="hero-top">
+                    <span class="hero-badge">SafeLight MaaS Platform</span>
+                    <h1>IoT · AI · 센서 융합 기술로<br><span class="accent">교통약자의 이동을 혁신</span>합니다</h1>
+                    <p class="hero-desc">
+                        GPS-IMU 하이브리드 측위, BLE IoT 통신, DRL 경로 최적화 기술을 융합하여<br>
+                        GPS 음영지역에서도 끊김 없는 시각장애인 실내외 내비게이션을 구현합니다.
+                    </p>
+                </div>
+
+                <!-- 핵심 가치 섹션 -->
+                <div class="hero-value">
+                    <div class="hero-value-text">
+                        <h2>세상을 밝고 안전하게 비추는 빛,<br><span class="accent">SafeLight</span></h2>
+                        <p>
+                            WCL은 무선통신, 인공지능, 센서 융합 기술을 바탕으로
+                            시각장애인이 실내외 어디서든 안전하고 독립적으로 이동할 수 있는 세상을 만들어갑니다.
+                        </p>
+                        <ul class="value-list">
+                            <li><strong>PDR + AI 측위</strong> — IMU 센서와 가상마커 기반 실내 위치 추정으로 GPS 음영지역을 극복합니다</li>
+                            <li><strong>BLE IoT 연동</strong> — 횡단보도 음향신호기와 자동 연결하여 안전한 보행을 지원합니다</li>
+                            <li><strong>Device + APP 융합 내비게이션</strong> — 보조로봇과 스마트폰의 센서 데이터를 융합하여 최적 경로를 제공합니다</li>
+                        </ul>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">30+</div>
-                        <div class="stat-label">특허</div>
+                    <div class="hero-value-img">
+                        <img src="assets/images/illust-bvi.png" alt="SafeLight 보행 일러스트레이션">
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">20+</div>
-                        <div class="stat-label">정부 R&D</div>
+                </div>
+
+                <div class="hero-awards">
+                    <div class="hero-award-item">
+                        <img src="assets/images/safelight_old.png" alt="SafeLight APP UI — 배리어프리 앱">
+                        <p>SafeLight APP<br><strong>AppStore 출시</strong></p>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number">2</div>
-                        <div class="stat-label">장관상 대상</div>
+                    <div class="hero-award-item">
+                        <img src="assets/images/배리어프리 사진.jpeg" alt="배리어프리 앱 개발 콘테스트 대상 (2023)">
+                        <p>배리어프리 앱 개발 콘테스트<br><strong>과학기술정보통신부장관상 대상</strong></p>
+                    </div>
+                    <div class="hero-award-item">
+                        <img src="assets/images/소셜벤처 사진.jpeg" alt="하나 소셜벤처 유니버시티 대상 (2024)">
+                        <p>하나 소셜벤처 유니버시티<br><strong>고용노동부장관상 대상</strong></p>
                     </div>
                 </div>
             </div>
@@ -102,13 +122,13 @@
                         <p>실외 + 실내 길안내를 하나의 시스템으로</p>
                     </div>
                 </div>
-                <img src="assets/images/dtech/slide-04.png" alt="SafeLight 솔루션 개요 — Device, APP, MaaS" class="slide-image">
+                <img src="assets/images/solution.png" alt="SafeLight 솔루션 개요 — Device, APP, MaaS" class="slide-image">
             </div>
 
             <!-- SW / HW -->
             <div class="card-grid card-grid--2col">
                 <div class="card">
-                    <div class="card-icon purple">&#x1F4F1;</div>
+                    <img src="assets/images/icon-safelight.png" alt="SafeLight" class="card-icon-img">
                     <h3>Software — SafeLight APP &amp; MaaS Cloud</h3>
                     <p>
                         GPS-IMU 하이브리드 측위와 보행자 추측 항법(PDR)을 결합하여 음영지역에서도 연속적인 위치 추적이 가능한 크로스플랫폼 내비게이션 앱을 개발합니다.
@@ -125,10 +145,10 @@
                         <span class="tag">BLE</span>
                         <span class="tag">MaaS Cloud</span>
                     </div>
-                    <img src="assets/images/dtech/slide-08.png" alt="SafeLight APP 3가지 문제 해결" class="slide-image">
+                    <img src="assets/images/safelight_UI.png" alt="SafeLight APP 3가지 문제 해결" class="slide-image">
                 </div>
                 <div class="card">
-                    <div class="card-icon purple">&#x1F9AF;</div>
+                    <img src="assets/images/illust-cane.png" alt="Robo-Cane" class="card-icon-img">
                     <h3>Hardware — Robo-Cane (보조로봇)</h3>
                     <p>
                         시분할 중첩 빔 기반 다중 초음파 센서를 탑재한 안심보행 보조로봇을 설계·제작합니다.
@@ -144,7 +164,7 @@
                         <span class="tag">Visual SLAM</span>
                         <span class="tag">Sensor Fusion</span>
                     </div>
-                    <img src="assets/images/dtech/slide-06.png" alt="Robo-Cane 로보케인 지팡이 상세" class="slide-image">
+                    <img src="assets/images/robocane_UI.png" alt="Robo-Cane 로보케인 지팡이 상세" class="slide-image">
                 </div>
             </div>
         </div>
@@ -163,7 +183,7 @@
                     <div class="person-card pi-card">
                         <div class="pi-info">
                             <h3>최상호 교수</h3>
-                            <div class="person-role">가톨릭대학교 정보통신전자공학부 명예교수 · 에스앤와이코퍼레이션(주) 대표<br>연구분야 - 무선통신 및 IoT 기반 통신응용<br>연구키워드 - 고효율/고정밀 무선통신기술; IoT 응용 인공지능 신호처리; 나노네트워크를 위한 바이오-모방 분자통신; 5G 이동통신 이론;</div>
+                            <div class="person-role">가톨릭대학교 정보통신전자공학부 명예교수 · 에스앤와이코퍼레이션(주) 대표<br>연구분야 - 무선통신 및 IoT 기반 통신응용<br>연구키워드 - 고효율/고정밀 무선통신기술 · IoT 응용 인공지능 신호처리 · 나노네트워크를 위한 바이오-모방 분자통신 · 5G 이동통신 이론</div>
                             <div class="person-email">schoe@catholic.ac.kr</div>
                         </div>
                     </div>
@@ -176,23 +196,23 @@
                 <div class="people-grid">
                     <div class="person-card">
                         <div class="person-name">김호중</div>
-                        <div class="person-role">Frontend · Flutter/Arduino · 프로젝트 리드</div>
+                        <div class="person-role">정보통신전자공학부 19</div>
                     </div>
                     <div class="person-card">
                         <div class="person-name">김도균</div>
-                        <div class="person-role">Backend · NodeJS · Linux 서버</div>
+                        <div class="person-role">정보통신전자공학부 23</div>
                     </div>
                     <div class="person-card">
                         <div class="person-name">오연주</div>
-                        <div class="person-role">Frontend · Flutter · 센서 데이터 처리</div>
+                        <div class="person-role">정보통신전자공학부 23</div>
                     </div>
                     <div class="person-card">
                         <div class="person-name">임승훈</div>
-                        <div class="person-role">UI/UX 설계 · Figma · 접근성 인터페이스</div>
+                        <div class="person-role">아주대학교 기계공학과 24</div>
                     </div>
                     <div class="person-card">
                         <div class="person-name">이종민</div>
-                        <div class="person-role">연구원</div>
+                        <div class="person-role">컴퓨터정보공학부 18</div>
                     </div>
                 </div>
             </div>
@@ -203,15 +223,15 @@
                 <div class="people-grid">
                     <div class="person-card">
                         <div class="person-name">김정현</div>
-                        <div class="person-role">연구원</div>
+                        <div class="person-role">정보통신전자공학부 21</div>
                     </div>
                     <div class="person-card">
                         <div class="person-name">전현진</div>
-                        <div class="person-role">연구원</div>
+                        <div class="person-role">정보통신전자공학부 23</div>
                     </div>
                     <div class="person-card">
                         <div class="person-name">원치훈</div>
-                        <div class="person-role">연구원</div>
+                        <div class="person-role">정보통신전자공학부 21</div>
                     </div>
                 </div>
             </div>
@@ -229,17 +249,17 @@
                 <div class="achievement-category-title">&#x1F3C5; 수상 내역</div>
                 <div class="achievement-list">
                     <div class="achievement-item">
-                        <span class="achievement-year">2023</span>
-                        <div class="achievement-content">
-                            <h4>배리어프리 앱 개발 콘테스트 — 대상 (과학기술정보통신부장관상)</h4>
-                            <p>현대오토에버 &amp; 사랑의열매 주관 · 시각장애인용 횡단보도 건너기 도우미 APP</p>
-                        </div>
-                    </div>
-                    <div class="achievement-item">
                         <span class="achievement-year">2024</span>
                         <div class="achievement-content">
                             <h4>하나 소셜벤처 유니버시티 — 대상 (고용노동부장관상)</h4>
                             <p>하나금융그룹 주관 · 대학생 창업 경진대회</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2023</span>
+                        <div class="achievement-content">
+                            <h4>배리어프리 앱 개발 콘테스트 — 대상 (과학기술정보통신부장관상)</h4>
+                            <p>현대오토에버 &amp; 사랑의열매 주관 · 시각장애인용 횡단보도 건너기 도우미 APP</p>
                         </div>
                     </div>
                 </div>
@@ -249,13 +269,6 @@
             <div class="achievement-category">
                 <div class="achievement-category-title">&#x1F3C6; 주요 성과</div>
                 <div class="achievement-list">
-                    <div class="achievement-item">
-                        <span class="achievement-year">2024</span>
-                        <div class="achievement-content">
-                            <h4>에스앤와이코퍼레이션(주) 설립 — 교원창업</h4>
-                            <p>Physical AI 연구 성과 기반 기술 사업화 법인 · 경기도 부천시 가톨릭대학교 성심교정</p>
-                        </div>
-                    </div>
                     <div class="achievement-item">
                         <span class="achievement-year">2025</span>
                         <div class="achievement-content">
@@ -268,6 +281,13 @@
                         <div class="achievement-content">
                             <h4>경기도 기술개발사업 수행</h4>
                             <p>SafeLight 핵심 기술 개발</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <span class="achievement-year">2024</span>
+                        <div class="achievement-content">
+                            <h4>에스앤와이코퍼레이션(주) 설립 — 교원창업</h4>
+                            <p>Physical AI 연구 성과 기반 기술 사업화 법인 · 경기도 부천시 가톨릭대학교 성심교정</p>
                         </div>
                     </div>
                 </div>
@@ -327,7 +347,7 @@
         <div id="recruit-content" class="page-content" style="display:none;">
             <div class="recruit-banner">
                 <h2>Physical AI 프로젝트 참여자 모집</h2>
-                <p>WirelessCommunicationLab에서 함께 연구할 학부연구생을 모집합니다</p>
+                <p>WCL에서 함께 연구할 학부연구생을 모집합니다</p>
             </div>
 
             <!-- 모집 분야 -->
@@ -364,7 +384,6 @@
                                 <li>가톨릭대학교 AI전자정보융합대학 소속 학과 전공</li>
                                 <li>1~3학년 학부생</li>
                                 <li>남학생의 경우 군복무 후 선호</li>
-                                <li>대학원 진학 의향 우대</li>
                             </ul>
                         </div>
                         <div class="req-column">
@@ -401,7 +420,6 @@
                 <div class="contact-card">
                     <h4>소속 / 위치</h4>
                     <p>가톨릭대학교 · S&Y Corporation</p>
-                    <p>정보통신전자공학부</p>
                     <p>경기도 부천시 원미구 역곡로13번길 17, 211호</p>
                 </div>
             </div>
@@ -411,7 +429,14 @@
 
     <!-- Footer -->
     <div class="footer">
-        &copy; 2026 WirelessCommunicationLab · S&Y corp · 가톨릭대학교 정보통신전자공학부
+        <div class="footer-inner">
+            <span class="footer-copy">&copy; 2026 WirelessCommunicationLab · S&Y Corp · 가톨릭대학교</span>
+            <div class="footer-sns">
+                <a href="https://www.youtube.com/watch?v=co3H1oMRq68" target="_blank" rel="noopener" aria-label="YouTube" class="sns-link">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+            </div>
+        </div>
     </div>
 
     <script src="assets/js/main.js"></script>
