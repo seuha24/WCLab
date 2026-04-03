@@ -142,106 +142,108 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Hero Section ===== */
-.hero-full {
-    text-align: center;
-    padding: 0;
-}
-
-.hero-top {
-    max-width: 720px;
-    margin: 48px auto 0;
-}
-
-.hero-badge {
-    display: inline-block;
-    background: var(--primary-bg);
-    color: var(--primary);
-    font-size: 13px;
-    font-weight: 700;
-    padding: 8px 20px;
-    border-radius: 20px;
-    margin-bottom: 24px;
-    letter-spacing: 0.5px;
-}
-
-.hero-full h1 {
-    font-size: 42px;
-    font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1.35;
-    letter-spacing: -1px;
-    margin-bottom: 18px;
-}
-
-.hero-full h1 .accent {
-    color: var(--primary);
-}
-
-.hero-desc {
-    font-size: 17px;
-    color: var(--text-mid);
-    line-height: 1.8;
-}
-
-.hero-figure {
+/* ===== Home — Academic Lab Style ===== */
+.hero-banner {
     margin: 0 -60px;
-    background: #F7FBFF;
+    background: var(--bg-body);
 }
 
-.hero-figure img {
+.hero-banner img {
     width: 100%;
-    max-width: 900px;
+    max-width: 960px;
     margin: 0 auto;
     display: block;
 }
 
-/* Hero Value */
-.hero-value {
-    display: flex;
-    align-items: center;
-    gap: 56px;
-    margin-top: 56px;
-    padding-top: 56px;
-    border-top: 1px solid var(--border);
-    text-align: left;
+.lab-welcome {
+    text-align: center;
+    padding: 48px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
 }
 
-.hero-value-text {
+.lab-welcome h1 {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+.lab-welcome h1 .accent {
+    color: var(--primary);
+    font-weight: 550;
+}
+
+.lab-welcome h2 {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.lab-about {
+    max-width: 800px;
+    margin: 0 auto 36px;
+}
+
+.lab-about p {
+    font-size: 16px;
+    color: var(--text-dark);
+    line-height: 1.9;
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.lab-about-en {
+    font-size: 15px !important;
+    color: var(--text-light) !important;
+    font-style: italic;
+}
+
+/* Lab Value */
+.lab-value {
+    display: flex;
+    align-items: flex-start;
+    gap: 48px;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+}
+
+.lab-value-text {
     flex: 1;
 }
 
-.hero-value-text h2 {
-    font-size: 28px;
-    font-weight: 800;
+.lab-value-text h3 {
+    font-size: 24px;
+    font-weight: 750;
     color: var(--text-dark);
-    line-height: 1.4;
-    letter-spacing: -0.5px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
-.hero-value-text h2 .accent {
+.lab-value-text h3 .accent {
     color: var(--primary);
 }
 
-.hero-value-text > p {
+.lab-value-text > p {
     font-size: 15px;
-    color: var(--text-mid);
+    color: var(--text-dark);
     line-height: 1.8;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .value-list {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
 }
 
 .value-list li {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-mid);
-    line-height: 1.6;
+    line-height: 1.7;
     padding-left: 16px;
     position: relative;
 }
@@ -262,34 +264,56 @@ body {
     font-weight: 700;
 }
 
-.hero-value-img {
+.lab-value-img {
     flex-shrink: 0;
-    width: 260px;
+    width: 200px;
 }
 
-.hero-value-img img {
+.lab-value-img img {
     width: 100%;
     height: auto;
 }
 
-/* Hero Awards Section Title */
-.hero-awards-section {
-    margin-top: 56px;
-    padding-top: 48px;
-    border-top: 1px solid var(--border);
-    text-align: left;
+@media (max-width: 768px) {
+    .lab-value {
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .lab-value-img {
+        width: 160px;
+        order: -1;
+    }
 }
 
-.hero-awards-section h3 {
-    font-size: 20px;
+.lab-recruit-notice {
+    max-width: 800px;
+    margin: 0 auto 48px;
+    padding: 20px 24px;
+    background: var(--primary-bg);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.lab-recruit-notice p {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+.lab-recruit-notice a {
+    color: var(--primary);
     font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 20px;
+    text-decoration: none;
 }
 
-/* Hero Awards - Horizontal Scroll */
+.lab-recruit-notice a:hover {
+    text-decoration: underline;
+}
+
+/* Awards Scroll */
 .hero-awards-scroll {
-    margin-top: 0;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -325,21 +349,46 @@ body {
 
 .hero-award-item img {
     width: 100%;
-    border-radius: var(--radius);
-    margin-bottom: 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
     aspect-ratio: 4/3;
     object-fit: cover;
 }
 
 .hero-award-item p {
-    font-size: 14px;
-    color: var(--text-mid);
+    font-size: 13px;
+    color: var(--text-light);
     line-height: 1.5;
 }
 
 .hero-award-item strong {
     color: var(--primary);
     font-weight: 700;
+}
+
+/* Gallery */
+.lab-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.lab-gallery-item {
+    text-align: center;
+}
+
+.lab-gallery-item img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.lab-gallery-item span {
+    font-size: 12px;
+    color: var(--text-light);
 }
 
 /* ===== Section Common ===== */
@@ -1071,44 +1120,24 @@ body {
         padding: 0 20px;
     }
 
-    .hero-full {
-        padding: 0;
-    }
-
-    .hero-full h1 {
-        font-size: 26px;
-        letter-spacing: -0.5px;
-    }
-
-    .hero-desc {
-        font-size: 15px;
-    }
-
-    .hero-figure {
+    .hero-banner {
         margin: 0 -20px;
     }
 
-    .hero-value {
-        flex-direction: column;
-        gap: 32px;
-        text-align: center;
+    .lab-welcome h1 {
+        font-size: 22px;
     }
 
-    .hero-value-img {
-        width: 180px;
-        order: -1;
+    .lab-welcome h2 {
+        font-size: 14px;
     }
 
-    .value-list {
-        text-align: left;
+    .lab-welcome {
+        padding: 32px 0 20px;
     }
 
-    .hero-awards-scroll {
-        margin-top: 32px;
-    }
-
-    .hero-award-item {
-        width: 220px;
+    .lab-gallery {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .section-header h2 {
