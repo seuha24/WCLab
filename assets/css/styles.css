@@ -144,13 +144,14 @@ body {
 
 /* ===== Home — Academic Lab Style ===== */
 .hero-banner {
-    margin: 0 -60px;
+    margin: 0;
     background: var(--bg-body);
+    text-align: center;
 }
 
 .hero-banner img {
     width: 100%;
-    max-width: 960px;
+    max-width: 680px;
     margin: 0 auto;
     display: block;
 }
@@ -987,10 +988,10 @@ body {
 }
 
 .recruit-cta p {
-    font-size: 14px;
-    color: var(--text-mid);
+    font-size: 18px;
+    color: var(--text-dark);
     margin-bottom: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .cta-button {
