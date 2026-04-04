@@ -1,26 +1,45 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const menuItems = document.querySelectorAll('.menu-item');
-    const pageContents = document.querySelectorAll('.page-content');
+const PAGES = ['home', 'research', 'member', 'achievements', 'recruit', 'contact'];
+const DEFAULT_PAGE = 'home';
 
-    function showPage(pageId) {
-        menuItems.forEach(item => {
-            item.classList.toggle('active', item.dataset.page === pageId);
-        });
-        pageContents.forEach(content => {
-            content.style.display = 'none';
-        });
-        const target = document.getElementById(pageId + '-content');
-        if (target) {
-            target.style.display = 'block';
-        }
+const contentEl = document.querySelector('.content');
+const menuItems = document.querySelectorAll('.menu-item');
+const pageCache = {};
+
+function getPageId() {
+    const hash = location.hash.slice(1);
+    return PAGES.includes(hash) ? hash : DEFAULT_PAGE;
+}
+
+function updateActiveMenu(pageId) {
+    menuItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.page === pageId);
+    });
+}
+
+async function loadPage(pageId) {
+    updateActiveMenu(pageId);
+
+    if (pageCache[pageId]) {
+        contentEl.innerHTML = pageCache[pageId];
+        return;
     }
 
-    menuItems.forEach(item => {
-        item.addEventListener('click', function () {
-            showPage(this.dataset.page);
-        });
-    });
+    const res = await fetch(`pages/${pageId}.html`);
+    const html = await res.text();
+    pageCache[pageId] = html;
+    contentEl.innerHTML = html;
+}
 
-    // expose globally for logo click
-    window.showPage = showPage;
+function navigate(pageId) {
+    location.hash = pageId;
+}
+
+menuItems.forEach(item => {
+    item.addEventListener('click', () => navigate(item.dataset.page));
 });
+
+window.addEventListener('hashchange', () => loadPage(getPageId()));
+
+document.querySelector('.logo-section').addEventListener('click', () => navigate(DEFAULT_PAGE));
+
+loadPage(getPageId());

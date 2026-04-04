@@ -1,0 +1,629 @@
+/* ===== Home — Academic Lab Style ===== */
+.hero-banner {
+    margin: 0;
+    background: var(--bg-body);
+    text-align: center;
+}
+
+.hero-banner img {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    display: block;
+}
+
+.lab-welcome {
+    text-align: center;
+    padding: 48px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+}
+
+.lab-welcome h1 {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+.lab-welcome h1 .accent {
+    color: var(--primary);
+    font-weight: 550;
+}
+
+.lab-welcome h2 {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.lab-about {
+    max-width: 800px;
+    margin: 0 auto 36px;
+}
+
+.lab-about p {
+    font-size: 16px;
+    color: var(--text-dark);
+    line-height: 1.9;
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+.lab-about-en {
+    font-size: 15px !important;
+    color: var(--text-light) !important;
+    font-style: italic;
+}
+
+/* Lab Value */
+.lab-value {
+    display: flex;
+    align-items: flex-start;
+    gap: 48px;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+}
+
+.lab-value-text {
+    flex: 1;
+}
+
+.lab-value-text h3 {
+    font-size: 24px;
+    font-weight: 750;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+}
+
+.lab-value-text h3 .accent {
+    color: var(--primary);
+}
+
+.lab-value-text > p {
+    font-size: 15px;
+    color: var(--text-dark);
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.value-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.value-list li {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    padding-left: 16px;
+    position: relative;
+}
+
+.value-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+.value-list li strong {
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+.lab-value-img {
+    flex-shrink: 0;
+    width: 200px;
+}
+
+.lab-value-img img {
+    width: 100%;
+    height: auto;
+}
+
+.lab-recruit-notice {
+    max-width: 800px;
+    margin: 0 auto 48px;
+    padding: 20px 24px;
+    background: var(--primary-bg);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.lab-recruit-notice p {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+.lab-recruit-notice a {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.lab-recruit-notice a:hover {
+    text-decoration: underline;
+}
+
+/* Awards Scroll */
+.hero-awards-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.hero-awards-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.hero-awards-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hero-awards-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.hero-awards {
+    display: flex;
+    gap: 24px;
+    padding-bottom: 12px;
+    width: max-content;
+}
+
+.hero-award-item {
+    text-align: center;
+    flex-shrink: 0;
+    width: 280px;
+}
+
+.hero-award-item img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+}
+
+.hero-award-item p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+.hero-award-item strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Gallery */
+.lab-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.lab-gallery-item {
+    text-align: center;
+}
+
+.lab-gallery-item img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.lab-gallery-item span {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+/* ===== Research Overview ===== */
+.research-overview {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    margin-bottom: 32px;
+}
+
+.research-overview h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+}
+
+.research-overview p {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.85;
+    margin-bottom: 12px;
+}
+
+.research-overview p:last-of-type {
+    margin-bottom: 0;
+}
+
+.platform-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border-light);
+}
+
+.pillar {
+    text-align: center;
+    padding: 20px 16px;
+    background: var(--primary-bg);
+    border-radius: var(--radius-sm);
+}
+
+.pillar-number {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+}
+
+.pillar h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.pillar p {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+/* ===== Recruit ===== */
+.recruit-banner {
+    background: linear-gradient(135deg, #4C1D95 0%, #6C3AED 50%, #8B5CF6 100%);
+    border-radius: var(--radius);
+    padding: 56px 48px;
+    color: white;
+    margin-top: 20px;
+    margin-bottom: 48px;
+    text-align: center;
+}
+
+.recruit-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+}
+
+.recruit-banner h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.recruit-banner p {
+    font-size: 16px;
+    opacity: 0.85;
+}
+
+.recruit-section {
+    margin-bottom: 48px;
+}
+
+.recruit-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--text-dark);
+}
+
+/* 수치 */
+.recruit-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.recruit-stat {
+    text-align: center;
+    padding: 28px 16px;
+    background: var(--primary-bg);
+    border-radius: var(--radius-sm);
+}
+
+.recruit-stat-num {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.recruit-stat-label {
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+}
+
+/* 모집 정보 테이블 */
+.recruit-info-table {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.recruit-info-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+
+.recruit-info-row:last-child {
+    border-bottom: none;
+}
+
+.recruit-info-label {
+    width: 120px;
+    flex-shrink: 0;
+    padding: 18px 20px;
+    background: var(--primary-bg);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+}
+
+.recruit-info-value {
+    flex: 1;
+    padding: 18px 24px;
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    background: var(--bg-white);
+}
+
+/* 혜택 카드 */
+.benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.benefit-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 28px 24px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.benefit-card:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 16px rgba(108,58,237,0.08);
+}
+
+.benefit-icon-box {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.benefit-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.benefit-card p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+/* 지원 절차 */
+.process-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    justify-content: center;
+}
+
+.process-step {
+    flex: 1;
+    text-align: center;
+    padding: 0 12px;
+}
+
+.process-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0 auto 14px;
+}
+
+.process-step h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.process-step p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+.process-arrow {
+    width: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 12px;
+}
+
+.process-arrow::after {
+    content: '';
+    width: 40px;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+}
+
+/* 지원 CTA */
+.recruit-cta {
+    text-align: center;
+    padding: 48px;
+    background: var(--primary-bg);
+    border-radius: var(--radius);
+}
+
+.recruit-cta p {
+    font-size: 18px;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.cta-button {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    padding: 14px 36px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.cta-button:hover {
+    background: var(--primary-dark);
+}
+
+/* ===== Responsive — Pages ===== */
+@media (max-width: 768px) {
+    .hero-banner {
+        margin: 0 -20px;
+    }
+
+    .lab-welcome h1 {
+        font-size: 22px;
+    }
+
+    .lab-welcome h2 {
+        font-size: 14px;
+    }
+
+    .lab-welcome {
+        padding: 32px 0 20px;
+    }
+
+    .lab-gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .lab-value {
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .lab-value-img {
+        width: 160px;
+        order: -1;
+    }
+
+    .platform-pillars {
+        grid-template-columns: 1fr;
+    }
+
+    .research-overview {
+        padding: 24px;
+    }
+
+    .req-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .recruit-banner {
+        padding: 36px 24px;
+    }
+
+    .recruit-banner h2 {
+        font-size: 24px;
+    }
+
+    .recruit-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .recruit-info-row {
+        flex-direction: column;
+    }
+
+    .recruit-info-label {
+        width: 100%;
+    }
+
+    .benefit-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .process-steps {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .process-arrow {
+        display: none;
+    }
+
+    .process-step {
+        flex: 0 0 calc(50% - 8px);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 24px;
+    }
+}

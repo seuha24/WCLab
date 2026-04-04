@@ -1,0 +1,77 @@
+<div class="section-header">
+    <h2>Research</h2>
+    <p>시각장애인 안심보행 보조로봇을 위한 실내 내비게이션 플랫폼</p>
+</div>
+
+<!-- 연구 개요 -->
+<div class="research-overview">
+    <h3>SafeLight — 실내외 보행 내비게이션 MaaS 플랫폼</h3>
+    <p>
+        SafeLight는 실외와 실내를 아우르는 시각장애인(BVI) 안심보행 통합 플랫폼입니다.
+        실외에서는 GPS 기반 경로 안내와 BLE 음향신호기 연동으로 횡단보도 보행을 지원하고,
+        GPS 신호가 차단되는 실내에서는 <strong>VM 기반 위치 추적과 YOLO 객체 탐지</strong>로 계단·에스컬레이터·엘리베이터·화장실 등을 안내합니다.
+    </p>
+    <div class="platform-pillars">
+        <div class="pillar">
+            <div class="pillar-number">01</div>
+            <h4>정보 통합</h4>
+            <p>Vision + IMU + IoT + GPS + QR을 하나의 시스템으로</p>
+        </div>
+        <div class="pillar">
+            <div class="pillar-number">02</div>
+            <h4>수단 통합</h4>
+            <p>VoiceOver + Haptic + Sensor + 보조기기를 하나의 시스템으로</p>
+        </div>
+        <div class="pillar">
+            <div class="pillar-number">03</div>
+            <h4>서비스 통합</h4>
+            <p>실외 + 실내 길안내를 하나의 시스템으로</p>
+        </div>
+    </div>
+    <img src="assets/images/solution.png" alt="SafeLight 솔루션 개요 — Device, APP, MaaS" class="slide-image">
+</div>
+
+<!-- SW / HW -->
+<div class="card-grid card-grid--2col">
+    <div class="card">
+        <img src="assets/images/icon-safelight.png" alt="SafeLight" class="card-icon-img">
+        <h3>Software — SafeLight APP &amp; MaaS Cloud</h3>
+        <p>
+            실내 지도 위에서 IMU 센서 기반 보행자 추측 항법(PDR)과 가상마커(VM)를 결합하여 GPS 없이도 사용자의 실내 위치를 연속 추적합니다.
+            건물 출입구 진입 시 QR 코드로 초기 위치를 설정하고, 계단·엘리베이터·화장실 등 실내 PoI에 부착된 QR로 위치를 보정합니다.
+            추적된 위치와 실내 지도 경로를 기반으로 TTS 음성 안내를 제공하며,
+            스마트 지팡이(Robo-Cane)로부터 BLE 실시간 통신으로 수신한 장애물 정보와 YOLO 탐지 결과를 반영하여 경로를 갱신합니다.
+            수집된 보행 데이터를 도시 교통망과 연계하는 MaaS 클라우드 플랫폼으로 확장하여 실외→실내 끊김 없는 이동 경험을 통합 제공합니다.
+        </p>
+        <div class="tags">
+            <span class="tag">Flutter</span>
+            <span class="tag">IMU PDR</span>
+            <span class="tag">Virtual Marker</span>
+            <span class="tag">QR Positioning</span>
+            <span class="tag">TTS 음성안내</span>
+            <span class="tag">BLE</span>
+            <span class="tag">MaaS Cloud</span>
+        </div>
+        <img src="assets/images/safelight_UI.png" alt="SafeLight APP 3가지 문제 해결" class="slide-image">
+    </div>
+    <div class="card">
+        <img src="assets/images/illust-cane.png" alt="Robo-Cane" class="card-icon-img">
+        <h3>Hardware — Robo-Cane (스마트 지팡이)</h3>
+        <p>
+            다중 초음파 센서, IMU, 카메라를 내장한 스마트 지팡이를 설계·제작합니다.
+            초음파 센서가 전방 장애물을 실시간 탐지하면 거리별 3단계 햅틱 진동으로 사용자에게 경고하며,
+            내장 카메라가 촬영한 이미지를 YOLO 추론하여 계단·엘리베이터·장애물 등을 탐지하고 사용자 위치를 갱신합니다.
+            지팡이에 내장된 모든 센서는 햅틱으로 제어되며, BLE 5.0 실시간 통신을 통해 탐지 결과를 앱으로 전송합니다.
+            앱은 이 데이터를 실내 지도와 결합하여 사용자에게 음성으로 안내합니다.
+        </p>
+        <div class="tags">
+            <span class="tag">Ultrasonic Sensor</span>
+            <span class="tag">YOLO Detection</span>
+            <span class="tag">Camera Sensor</span>
+            <span class="tag">Haptic Control</span>
+            <span class="tag">BLE 5.0</span>
+            <span class="tag">IMU</span>
+        </div>
+        <img src="assets/images/robocane_UI.png" alt="Robo-Cane 로보케인 지팡이 상세" class="slide-image">
+    </div>
+</div>
