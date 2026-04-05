@@ -300,9 +300,60 @@
     margin-bottom: 0;
 }
 
+/* ===== Recruit Tabs ===== */
+.recruit-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 0;
+    margin-top: 20px;
+}
+
+.recruit-tab {
+    flex: 1;
+    padding: 16px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-light);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.recruit-tab:hover {
+    color: var(--text-dark);
+    background: var(--primary-bg);
+}
+
+.recruit-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.recruit-tab-content {
+    display: none;
+}
+
+.recruit-tab-content.active {
+    display: block;
+}
+
 /* ===== Recruit ===== */
 .recruit-banner {
     background: linear-gradient(135deg, #4C1D95 0%, #6C3AED 50%, #8B5CF6 100%);
+    border-radius: var(--radius);
+    padding: 56px 48px;
+    color: white;
+    margin-top: 20px;
+    margin-bottom: 48px;
+    text-align: center;
+}
+
+.recruit-banner--accounting {
+    background: linear-gradient(135deg, #065F46 0%, #059669 50%, #34D399 100%);
     border-radius: var(--radius);
     padding: 56px 48px;
     color: white;
@@ -537,6 +588,12 @@
 
 .cta-button:hover {
     background: var(--primary-dark);
+}
+
+.recruit-cta-sub {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-light);
 }
 
 /* ===== Responsive — Pages ===== */

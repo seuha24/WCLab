@@ -21,13 +21,25 @@ async function loadPage(pageId) {
 
     if (pageCache[pageId]) {
         contentEl.innerHTML = pageCache[pageId];
-        return;
+    } else {
+        const res = await fetch(`pages/${pageId}.html`);
+        const html = await res.text();
+        pageCache[pageId] = html;
+        contentEl.innerHTML = html;
     }
 
-    const res = await fetch(`pages/${pageId}.html`);
-    const html = await res.text();
-    pageCache[pageId] = html;
-    contentEl.innerHTML = html;
+    initPageScripts();
+}
+
+function initPageScripts() {
+    contentEl.querySelectorAll('.recruit-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            contentEl.querySelectorAll('.recruit-tab').forEach(t => t.classList.remove('active'));
+            contentEl.querySelectorAll('.recruit-tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+    });
 }
 
 function navigate(pageId) {
