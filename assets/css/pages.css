@@ -362,6 +362,22 @@
     text-align: center;
 }
 
+.recruit-banner--closed {
+    background: linear-gradient(135deg, #374151 0%, #6B7280 50%, #9CA3AF 100%);
+}
+
+.recruit-badge--closed {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.recruit-closed-notice {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-secondary, #6B7280);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
 .recruit-badge {
     display: inline-block;
     background: rgba(255,255,255,0.2);
